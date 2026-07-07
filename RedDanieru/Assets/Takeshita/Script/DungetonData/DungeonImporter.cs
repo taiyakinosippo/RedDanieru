@@ -5,15 +5,12 @@ public class DungeonImporter : MonoBehaviour
 {
     public GameObject cubePrefab;
     public GameObject spherePrefab;
+
     public Transform dungeonRoot;
 
-    public void ImportDungeon(string dungeonName)
+    public void ImportDungeon(
+        string dungeonName)
     {
-        foreach (Transform child in dungeonRoot)
-        {
-            Destroy(child.gameObject);
-        }
-
         string path =
             Application.persistentDataPath +
             "/" +
@@ -22,14 +19,24 @@ public class DungeonImporter : MonoBehaviour
 
         if (!File.Exists(path))
         {
-            Debug.LogError("ファイルが存在しません");
+            Debug.LogError(
+                "ダンジョンが見つかりません"
+            );
             return;
         }
 
-        string json = File.ReadAllText(path);
+        string json =
+            File.ReadAllText(path);
 
         DungeonData data =
-         JsonUtility.FromJson<DungeonData>(json);
+            JsonUtility.FromJson<DungeonData>(
+                json
+            );
+
+        foreach (Transform child in dungeonRoot)
+        {
+            Destroy(child.gameObject);
+        }
 
         foreach (DungeonObjectData obj in data.objects)
         {

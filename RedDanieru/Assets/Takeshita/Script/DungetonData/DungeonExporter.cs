@@ -7,23 +7,28 @@ public class DungeonExporter : MonoBehaviour
 
     public Transform dungeonRoot;
 
-    public void ExportDungeon(string dungeonName,string creatorName)
+    public void ExportDungeon(
+        string dungeonName,
+        string creatorName)
     {
         DungeonData data = new DungeonData();
 
-        data.DungeonID =System.Guid.NewGuid().ToString();
+        data.dungeonID =
+            System.Guid.NewGuid().ToString();
 
-        data.DungeonName = dungeonName;
+        data.dungeonName = dungeonName;
 
-        data.CreatorName = creatorName;
+        data.creatorName = creatorName;
 
-        data.CreateDate = System.DateTime.Now.ToString(
-            "yyyy/MM/dd HH:mm:ss"
+        data.createDate =
+            System.DateTime.Now.ToString(
+                "yyyy/MM/dd HH:mm:ss"
             );
 
         foreach (Transform child in dungeonRoot)
         {
-            DungeonObjectData obj = new DungeonObjectData();
+            DungeonObjectData obj =
+                new DungeonObjectData();
 
             obj.type = child.name;
             obj.position = child.position;
@@ -31,16 +36,8 @@ public class DungeonExporter : MonoBehaviour
             data.objects.Add(obj);
         }
 
-        LastExportedJson = JsonUtility.ToJson(data, true);
-
-        Debug.Log(LastExportedJson);
-
-        // JSON化後にオブジェクト削除
-        foreach (Transform child in dungeonRoot)
-        {
-            Destroy(child.gameObject);
-        }
-
+        LastExportedJson =
+            JsonUtility.ToJson(data, true);
 
         string path =
             Application.persistentDataPath +
@@ -48,9 +45,16 @@ public class DungeonExporter : MonoBehaviour
             dungeonName +
             ".json";
 
-        File.WriteAllText(path, LastExportedJson);
+        File.WriteAllText(
+            path,
+            LastExportedJson
+        );
 
-        Debug.Log("保存完了: " + path);
+        Debug.Log("保存完了 : " + path);
 
+        foreach (Transform child in dungeonRoot)
+        {
+            Destroy(child.gameObject);
+        }
     }
 }

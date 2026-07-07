@@ -1,42 +1,49 @@
 using UnityEngine;
-using TMPro;
 using System.IO;
-using UnityEngine.UI;
 
-public class DungeonListViewer: MonoBehaviour
+public class DungeonListViewer : MonoBehaviour
 {
-    public TMP_Text listText;
+    public Transform content;
+
+    public GameObject dungeonItemPrefab;
 
     public void RefreshList()
     {
-        string[] files = Directory.GetFiles(
-            Application.persistentDataPath,
-            "*.json"
-        );
-
-        string result = "Dungeon List\n\n";
-
-        foreach (string file in files)
+        foreach (Transform child in content)
         {
-            string json = File.ReadAllText(file);
-
-            DungeonData data =
-                JsonUtility.FromJson<DungeonData>(json);
-
-            result +=
-                "====================\n" +
-                "Name : " + data.DungeonName + "\n" +
-                "Creator : " + data.CreatorName + "\n" +
-                "Date : " + data.CreateDate + "\n" +
-                "ID : " + data.DungeonID + "\n" +
-                "====================\n\n";
+            Destroy(child.gameObject);
         }
 
-        listText.text = result;
+        string[] files =
+            Directory.GetFiles(
+                Application.persistentDataPath,
+                "*.json"
+            );
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(
-    listText.rectTransform
-);
+        foreach(string file in files)
+        {
+            string json =
+                File.ReadAllText(file);
+
+            DungeonData data =
+                JsonUtility.FromJson<DungeonData>(
+                    json
+                );
+
+            GameObject item =
+                Instantiate(
+                    dungeonItemPrefab,
+                    content
+                );
+
+            DungeonItemUI ui =
+                item.GetComponent<DungeonItemUI>();
+
+            ui.Setup(
+                data.dungeonName,
+                data.creatorName,
+                data.createDate
+            );
+        }
     }
 }
-
