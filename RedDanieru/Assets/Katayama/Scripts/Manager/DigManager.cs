@@ -68,14 +68,18 @@ public class DigManager : MonoBehaviour
     /// 選択中の壁を掘る
     void Dig()
     {
-        // 壁が選択されていない場合は終了
-        if (currentWall == null)
-            return;
+        Debug.Log("Dig開始");
 
-        // マップの壁を掘る
+        if (currentWall == null)
+        {
+            Debug.Log("壁未選択");
+            return;
+        }
+
+        Debug.Log("掘る壁 : " + currentWall.GridPosition);
+
         mapManager.Dig(currentWall.GridPosition);
 
-        // 掘った後は選択を解除
         currentWall = null;
     }
 }
