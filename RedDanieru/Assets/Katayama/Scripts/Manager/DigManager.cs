@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DigManager : MonoBehaviour
 {
@@ -87,6 +88,7 @@ public class DigManager : MonoBehaviour
 
         Debug.Log("Œ@‚é•Ç : " + currentWall.GridPosition);
 
+        // Œ@‚éˆ—‚ÍMapManager‚ÖˆË—Š
         mapManager.Dig(currentWall.GridPosition);
 
         currentWall = null;
