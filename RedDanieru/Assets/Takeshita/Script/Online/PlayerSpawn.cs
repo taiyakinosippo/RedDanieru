@@ -8,6 +8,11 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public NetworkPrefabRef player1Prefab;
     public NetworkPrefabRef player2Prefab;
 
+    public static int MyRole = 0;
+
+    public GameObject Button_1;
+    public GameObject Button_2;
+
     private int count = 0;
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
@@ -31,12 +36,27 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
         runner.SetPlayerObject(player, obj);
 
-        Debug.Log(
-    $"Spawn {prefab} for {player}"
-);
+//        Debug.Log(
+//    $"Spawn {prefab} for {player}"
+//);
 
     }
 
+    public void SelectPlayer1()
+    {
+        MyRole = 1;
+        Button_1.SetActive(false);
+        Button_2.SetActive(false);
+        Debug.Log("私は Player1");
+    }
+
+    public void SelectPlayer2()
+    {
+        MyRole = 2;
+        Button_2.SetActive(false);
+        Button_1.SetActive(false);
+        Debug.Log("私は Player2");
+    }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }

@@ -152,6 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+  playerRole: 1
 --- !u!114 &349605507268900577
 MonoBehaviour:
   m_ObjectHideFlags: 0

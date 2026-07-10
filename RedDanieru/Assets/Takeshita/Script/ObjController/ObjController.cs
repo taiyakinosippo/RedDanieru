@@ -5,10 +5,15 @@ using UnityEngine.InputSystem;
 public class ObjController : NetworkBehaviour
 {
     public float moveSpeed = 5f;
+    public int playerRole;
 
     public override void FixedUpdateNetwork()
     {
-        if (!HasInputAuthority)
+
+        if (!HasStateAuthority)
+            return;
+
+        if (PlayerSpawner.MyRole != playerRole)
             return;
 
         Vector3 move = Vector3.zero;
@@ -33,9 +38,10 @@ public class ObjController : NetworkBehaviour
 
     public override void Spawned()
 {
-    Debug.Log($"{name}");
-    Debug.Log($"InputAuthority : {Object.InputAuthority}");
-    Debug.Log($"HasInputAuthority : {HasInputAuthority}");
-    Debug.Log($"HasStateAuthority : {HasStateAuthority}");
-}
+        Debug.Log($"MyRole : {PlayerSpawner.MyRole}");
+        //Debug.Log($"{name}");
+        //Debug.Log($"InputAuthority : {Object.InputAuthority}");
+        //Debug.Log($"HasInputAuthority : {HasInputAuthority}");
+        //Debug.Log($"HasStateAuthority : {HasStateAuthority}");
+    }
 }

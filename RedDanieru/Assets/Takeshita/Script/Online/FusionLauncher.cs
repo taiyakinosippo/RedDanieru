@@ -5,8 +5,7 @@ public class FusionLauncher : MonoBehaviour
 {
     async void Start()
     {
-        Debug.Log("FusionLauncher Start");
-
+       
         var runner = gameObject.AddComponent<NetworkRunner>();
 
         runner.ProvideInput = true;
@@ -20,8 +19,5 @@ public class FusionLauncher : MonoBehaviour
             SessionName = "Room"
         });
 
-        Debug.Log($"OK = {result.Ok}");
-        Debug.Log($"Reason = {result.ShutdownReason}");
-        Debug.Log($"Error = {result.ErrorMessage}");
     }
 }
