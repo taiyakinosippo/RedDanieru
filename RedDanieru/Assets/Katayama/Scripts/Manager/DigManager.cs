@@ -11,8 +11,17 @@ public class DigManager : MonoBehaviour
     // 現在選択中の壁
     private WallBlock currentWall;
 
+    // 保存パネル
+    [SerializeField] private GameObject savePanel;
+
     void Update()
     {
+        // 保存パネルが開いている間は掘削処理を行わない
+        if (savePanel.activeSelf)
+        {
+            return;
+        }
+
         // マウスカーソル下の壁を選択
         HighlightWall();
 
