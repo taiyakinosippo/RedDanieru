@@ -1,17 +1,18 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class DungeonUIManager : MonoBehaviour
 {
-    public DungeonUploader uploader;
+    public DungeonExporter exporter;
     public DungeonImporter importer;
 
-    public TMP_InputField dungeonNameInput;
-    public TMP_InputField creatorNameInput;
+    public InputField dungeonNameInput;
+    public InputField creatorNameInput;
 
     public void UploadDungeon()
     {
-        uploader.UploadDungeon(
+        exporter.ExportDungeon(
             dungeonNameInput.text,
             creatorNameInput.text
         );

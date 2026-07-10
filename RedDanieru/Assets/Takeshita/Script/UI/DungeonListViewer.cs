@@ -1,50 +1,35 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.Networking;
+using System.IO;
 
 public class DungeonListViewer : MonoBehaviour
 {
     public Transform content;
+
     public GameObject dungeonItemPrefab;
 
     public void RefreshList()
-    {
-        StartCoroutine(
-            RefreshListCoroutine()
-        );
-    }
-
-    private IEnumerator RefreshListCoroutine()
     {
         foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
 
-        UnityWebRequest request =
-            UnityWebRequest.Get(
-                "http://localhost/RedDaniel/list_dungeon.php"
+        string[] files =
+            Directory.GetFiles(
+                Application.persistentDataPath,
+                "*.json"
             );
 
-        yield return request.SendWebRequest();
-
-        if (request.result !=
-            UnityWebRequest.Result.Success)
+        foreach(string file in files)
         {
-            Debug.LogError(request.error);
-            yield break;
-        }
+            string json =
+                File.ReadAllText(file);
 
-        string json =
-            request.downloadHandler.text;
+            DungeonData data =
+                JsonUtility.FromJson<DungeonData>(
+                    json
+                );
 
-        DungeonListResponse response =
-            JsonUtility.FromJson<DungeonListResponse>(
-                json
-            );
-
-        foreach (var dungeon in response.items)
-        {
             GameObject item =
                 Instantiate(
                     dungeonItemPrefab,
@@ -55,9 +40,9 @@ public class DungeonListViewer : MonoBehaviour
                 item.GetComponent<DungeonItemUI>();
 
             ui.Setup(
-                dungeon.dungeon_name,
-                dungeon.creator_name,
-                dungeon.created_at
+                data.dungeonName,
+                data.creatorName,
+                data.createDate
             );
         }
     }

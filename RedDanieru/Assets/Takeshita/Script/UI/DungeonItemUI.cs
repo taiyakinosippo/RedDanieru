@@ -1,11 +1,11 @@
-using TMPro;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class DungeonItemUI : MonoBehaviour
 {
-    public TMP_Text nameText;
-    public TMP_Text creatorText;
-    public TMP_Text dateText;
+    public Text nameText;
+    public Text creatorText;
+    public Text dateText;
 
     public void Setup(
         string dungeonName,
@@ -13,15 +13,8 @@ public class DungeonItemUI : MonoBehaviour
         string createDate)
     {
         nameText.text = dungeonName;
-
-        if (string.IsNullOrEmpty(creatorName))
-        {
-            creatorText.gameObject.SetActive(false);
-        }
-        else
-        {
-            creatorText.text = "Creator : " + creatorName;
-        }
+        creatorText.text =
+            "作者 : " + creatorName;
 
         dateText.text = createDate;
     }
