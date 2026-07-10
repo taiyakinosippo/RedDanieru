@@ -3,23 +3,14 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] private SaveManager saveManager;
-
     [Header("シーン名")]
     [SerializeField] private string editorSceneName = "EditorScene";
+
     [SerializeField] private string playSceneName = "PlayScene";
 
     /// プレイ開始
     public void StartPlay()
     {
-        // ダンジョンを保存
-        if (saveManager != null)
-        {
-            saveManager.Save();
-        }
-
-        // プレイシーンへ移動
         SceneManager.LoadScene(playSceneName);
     }
 
