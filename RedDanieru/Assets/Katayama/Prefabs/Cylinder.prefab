@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3879934077857908662}
   - component: {fileID: 2456801400361795427}
   - component: {fileID: 1678465741793616923}
+  - component: {fileID: 2117721293684687582}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -110,3 +111,20 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &2117721293684687582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6372522022111549087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17af68128679d0e4497a62a93ba54ef5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hp: 1
+  explosionEffect: {fileID: 100008, guid: 06736895ea0a4ff408d25e6684dce797, type: 3}
+  explosionRadius: 3
+  explosionDamage: 20
+  effectOffset: {x: 0, y: -1, z: 0}
