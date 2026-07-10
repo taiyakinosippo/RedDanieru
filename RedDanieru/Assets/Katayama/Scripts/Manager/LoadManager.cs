@@ -7,49 +7,48 @@ public class LoadManager : MonoBehaviour
     [Header("参照")]
     [SerializeField] private MapManager mapManager;
 
-    // 保存するファイル名
-    [Header("保存ファイル名")]
-    [SerializeField] private string fileName = "Dungeon.json";
-
-    void Start()
-    {
-        // シーン開始時に保存データを読み込む
-        Load();
-    }
-
-    /// ダンジョンを読み込む
-    public void Load()
+    /// <summary>
+    /// 指定したダンジョンを読み込む
+    /// </summary>
+    /// <param name="dungeonName">読み込むダンジョン名</param>
+    public void Load(string dungeonName)
     {
         // 保存ファイルのパスを取得
-        string path = Path.Combine(Application.persistentDataPath, fileName);
+        string path = Path.Combine(
+            Application.persistentDataPath,
+            dungeonName + ".json"
+        );
 
         // 保存ファイルが存在しない場合
         if (!File.Exists(path))
         {
-            Debug.LogError("保存データが見つかりません。");
+            Debug.LogError($"保存データが見つかりません : {dungeonName}");
             return;
         }
 
         // JSONファイルを文字列として読み込む
         string json = File.ReadAllText(path);
 
-        // JSONをDungeonDataへ変換
-        DungeonMapData data = JsonUtility.FromJson<DungeonMapData>(json);
+        // JSONをDungeonMapDataへ変換
+        DungeonMapData data =
+            JsonUtility.FromJson<DungeonMapData>(json);
 
         // MapManagerへ渡してマップを生成
         mapManager.LoadDungeon(data);
 
-        Debug.Log("ダンジョンを読み込みました。");
+        Debug.Log($"ダンジョンを読み込みました : {dungeonName}");
     }
 
-    /// 保存データが存在するか確認
-    /// <returns>存在する場合はtrue</returns>
-    public bool Exists()
+    /// <summary>
+    /// 指定したダンジョンが存在するか確認
+    /// </summary>
+    public bool Exists(string dungeonName)
     {
-        // 保存ファイルのパスを取得
-        string path = Path.Combine(Application.persistentDataPath, fileName);
+        string path = Path.Combine(
+            Application.persistentDataPath,
+            dungeonName + ".json"
+        );
 
-        // ファイルの存在を返す
         return File.Exists(path);
     }
 }
