@@ -75,8 +75,11 @@ namespace StarterAssets
         public LayerMask GroundLayers;
 
         [Header("Cinemachine")]
-        [Tooltip("このGameObjectはCinemachine Virtual Cameraのフォローターゲットとして使用されます")]
-        public GameObject CinemachineCameraTarget;
+        [Tooltip("このGameObjectはカメラで使用されます")]
+
+        public GameObject ThirdPersonPerspective;
+        public GameObject FirstPersonPerspective;
+
 
         [Tooltip("プレイヤーがカメラを上に移動できる最大角度")]
         public float TopClamp = 70.0f;
@@ -115,6 +118,8 @@ namespace StarterAssets
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
         private int _animIDAttack;
+        private int _animIDStickerPaste;
+        private int _animIDStickerPeelOff;
 
 #if ENABLE_INPUT_SYSTEM 
         private PlayerInput _playerInput;
@@ -122,13 +127,14 @@ namespace StarterAssets
         private Animator _animator;　　　　　　　　　　　// アニメーションを制御するためのAnimatorコンポーネント
         private CharacterController _controller;         // プレイヤーの移動を制御するためのCharacterControllerコンポーネント
         private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのStarterAssetsInputsコンポーネント
-        private GameObject _mainCamera;                  // メインカメラのGameObjectを格納する変数
-
+       
         private const float _threshold = 0.01f;          // 入力の大きさを判定するための定数
 
         private bool _hasAnimator;                       // Animatorコンポーネントが存在するかどうかを判定するための変数
 
-     
+        private GameObject currentCamera;　　　　　　　　// 現在のカメラを格納する変数
+        private bool isFirstPerson = false;              // 現在のカメラが一人称視点かどうかを判定する変数
+
         //行動管理
 
         // 現在実行中のアクション
@@ -157,9 +163,9 @@ namespace StarterAssets
         private void Awake()
         {
             // get a reference to our main camera
-            if (_mainCamera == null)
+            if (currentCamera == null)
             {
-                _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+                currentCamera = GameObject.FindGameObjectWithTag("MainCamera");
             }
         }
 
@@ -167,8 +173,10 @@ namespace StarterAssets
         private void Start()
         {
             // 初期化時にカメラの角度を取得
-            _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+            currentCamera = ThirdPersonPerspective.activeSelf
+            ? ThirdPersonPerspective: FirstPersonPerspective;
 
+            _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
             // アニメーションの有無を判定し、Animatorコンポーネントを取得
             _hasAnimator = TryGetComponent(out _animator);
 
@@ -211,10 +219,22 @@ namespace StarterAssets
                 JumpAndGravity();
             }
 
+            if (currentActionType == ActionType.Sticker)
+            {
+                // プレイヤーのスティッカー使用処理
+                StickerPaste();
+            }
+
             if (currentActionType == ActionType.Attack)
             {
                 // プレイヤーの攻撃処理
                 Attack();
+            }
+
+            if (currentActionType == ActionType.CameraChange)
+            {
+                // カメラ変更処理
+                CameraChange();
             }
         }
 
@@ -237,8 +257,14 @@ namespace StarterAssets
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
             _animIDAttack = Animator.StringToHash("Attack");
+            _animIDStickerPaste = Animator.StringToHash("StickerPaste");
+            _animIDStickerPeelOff = Animator.StringToHash("StickerPeelOff");
 
         }
+
+        //-----------------------------------------------------------
+        //入力を取得する関数
+        //-----------------------------------------------------------
         private void CheckInput()
         {
             if (_input.attack && Grounded)
@@ -255,21 +281,42 @@ namespace StarterAssets
             {
                 AddAction(ActionType.Move);
             }
+
+            if (_input.cameraChange)
+            {
+                Debug.Log("CameraChange");
+                AddAction(ActionType.CameraChange);
+            }
+            
+            if(_input.sticker)
+            {
+                AddAction(ActionType.Sticker);
+            }
+
         }
 
-
+        //-----------------------------------------------------------
+        //アクションの優先度を取得する関数
+        //-----------------------------------------------------------
         private int GetPriority(ActionType action)
         {
             switch (action)
             {
+                case ActionType.Sticker:
+                    return 100;
+
                 case ActionType.Attack:
                     return 80;
 
                 case ActionType.Jump:
                     return 70;
+                    
+                case ActionType.CameraChange:
+                    return 30;
 
                 case ActionType.Move:
                     return 10;
+
                 case ActionType.None:
                     return 0;
             }
@@ -299,6 +346,10 @@ namespace StarterAssets
             }
 
             return currentActionType;
+        }
+        private void EndAction()
+        {
+            currentActionType = ActionType.None;
         }
         //-----------------------------------------------------------
         //地面にいるかどうかの判定
@@ -345,7 +396,7 @@ namespace StarterAssets
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
             // 画面を回転させる
-            CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
+            currentCamera.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
                 _cinemachineTargetYaw, 0.0f);
         }
 
@@ -404,7 +455,7 @@ namespace StarterAssets
             {
                 // 入力方向を元にプレイヤーの回転角度を計算する
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                                  _mainCamera.transform.eulerAngles.y;
+                                  currentCamera.transform.eulerAngles.y;
 
                 // プレイヤーの回転角度を補間して更新したのを変数に格納する
                 float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
@@ -429,7 +480,9 @@ namespace StarterAssets
             }
         }
 
+        //-----------------------------------------------------------
         // ジャンプと重力の処理
+        //-----------------------------------------------------------
         private void JumpAndGravity()
         {
             // 地面にいる場合の処理
@@ -498,9 +551,12 @@ namespace StarterAssets
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
+            EndAction();
         }
 
+        //-----------------------------------------------------------
         // 角度を制限する関数
+        //-----------------------------------------------------------
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
             //
@@ -509,7 +565,9 @@ namespace StarterAssets
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
         }
 
+        //-----------------------------------------------------------
         // プレイヤーの攻撃処理
+        //-----------------------------------------------------------
         private void Attack()
         {
             if (_input.attack && _hasAnimator)
@@ -520,12 +578,56 @@ namespace StarterAssets
 
         }
 
+        //-----------------------------------------------------------
         // 攻撃アニメーションが終了したら呼ばれる関数
+        //-----------------------------------------------------------
         public void OnAttackAnimationEnd()
         {
             _animator.ResetTrigger(_animIDAttack);
             Debug.Log("Attack animation end");
-            currentActionType = ActionType.None;
+            EndAction();
+        }
+
+        //-----------------------------------------------------------
+        // ステッカーを貼りつける処理
+        //-----------------------------------------------------------
+        private void StickerPaste()
+        {
+            if (_input.sticker && _hasAnimator)
+            {
+                _animator.SetTrigger(_animIDStickerPaste);
+                _input.sticker = false;
+            }
+        }
+
+        //-----------------------------------------------------------
+        // ステッカーを貼り付ける処理が終了したら呼ばれる関数
+        //-----------------------------------------------------------
+        public void OnStickerAnimationEnd()
+        {
+            _animator.ResetTrigger(_animIDStickerPaste);
+            Debug.Log("Sticker animation end");
+            EndAction();
+        }
+
+        //-----------------------------------------------------------
+        // カメラの切り替え処理
+        //-----------------------------------------------------------
+        private void CameraChange()
+        {
+            _input.cameraChange = false;
+            isFirstPerson = !isFirstPerson;
+
+            FirstPersonPerspective.SetActive(isFirstPerson);
+            ThirdPersonPerspective.SetActive(!isFirstPerson);
+
+            currentCamera = isFirstPerson ? FirstPersonPerspective : ThirdPersonPerspective;
+
+            _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
+
+            _cinemachineTargetPitch = currentCamera.transform.rotation.eulerAngles.x;
+
+            EndAction();
         }
 
         //debug用に、地面にいるかどうかの判定を可視化するためのGizmosを描画する関数
