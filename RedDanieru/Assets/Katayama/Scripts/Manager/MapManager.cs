@@ -1,4 +1,5 @@
 using UnityEngine;
+//using static TMPro.Examples.TMP_ExampleScript_01;
 
 public class MapManager : MonoBehaviour
 {
@@ -16,11 +17,30 @@ public class MapManager : MonoBehaviour
     [Header("Prefab")]
     public GameObject wallPrefab;
 
+    // 床を生成する高さオフセット
+    [Header("床生成設定")]
+    [SerializeField] private float floorYOffset = -1f;
+
+    // オブジェクトを生成する高さオフセット
+    [Header("オブジェクト配置設定")]
+    [SerializeField] private float objectYOffset = 0f;
+
+    // 配置するオブジェクト
+    [SerializeField] private GameObject objectPrefab;
+
     // マップデータ
     private TileType[,,] map;
 
     // 壁オブジェクトを管理
     private GameObject[,,] wallObjects;
+
+    [SerializeField] private GameObject floorPrefab;
+
+    // 床オブジェクト
+    private GameObject[,,] floorObjects;
+
+    // 配置したオブジェクト
+    private GameObject[,,] placedObjects;
 
     void Start()
     {
@@ -43,6 +63,9 @@ public class MapManager : MonoBehaviour
     {
         map = new TileType[width, height, depth];
         wallObjects = new GameObject[width, height, depth];
+
+        floorObjects = new GameObject[width, height, depth];
+        placedObjects = new GameObject[width, height, depth];
 
         // 全て壁で初期化
         for (int x = 0; x < width; x++)
@@ -102,9 +125,27 @@ public class MapManager : MonoBehaviour
         {
             Destroy(wallObjects[pos.x, pos.y, pos.z]);
             wallObjects[pos.x, pos.y, pos.z] = null;
+
+            // 床を生成
+            GameObject floor = Instantiate(
+                floorPrefab,
+                new Vector3(
+                    pos.x,
+                    pos.y + floorYOffset,
+                    pos.z),
+                Quaternion.identity,
+                transform);
+
+            // 床を保存
+            floorObjects[pos.x, pos.y, pos.z] = floor;
+
+            // 床に座標を設定
+            FloorBlock block = floor.GetComponent<FloorBlock>();
+            block.GridPosition = pos;
         }
     }
 
+    /// 保存用データを作成する
     /// 保存用データを作成する
     public DungeonMapData CreateSaveData()
     {
@@ -114,6 +155,7 @@ public class MapManager : MonoBehaviour
         data.width = width;
         data.height = height;
         data.depth = depth;
+
 
         // タイル情報を1次元配列へ変換
         data.tiles = new byte[width * height * depth];
@@ -126,10 +168,36 @@ public class MapManager : MonoBehaviour
             {
                 for (int x = 0; x < width; x++)
                 {
+                    // 壁・床情報を保存
                     data.tiles[index++] = (byte)map[x, y, z];
                 }
             }
         }
+
+
+        // 配置オブジェクト情報を保存
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    // オブジェクトが存在する場合
+                    if (placedObjects[x, y, z] != null)
+                    {
+                        data.objects.Add(
+                            new ObjectData()
+                            {
+                                x = x,
+                                y = y,
+                                z = z
+                            }
+                        );
+                    }
+                }
+            }
+        }
+
 
         return data;
     }
@@ -142,17 +210,23 @@ public class MapManager : MonoBehaviour
         height = data.height;
         depth = data.depth;
 
+
         // 配列を作成
         map = new TileType[width, height, depth];
         wallObjects = new GameObject[width, height, depth];
+        floorObjects = new GameObject[width, height, depth];
+        placedObjects = new GameObject[width, height, depth];
 
-        // 現在の壁を削除
+
+        // 現在のオブジェクトを削除
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
         }
 
+
         int index = 0;
+
 
         // 保存データからマップを復元
         for (int y = 0; y < height; y++)
@@ -163,7 +237,8 @@ public class MapManager : MonoBehaviour
                 {
                     map[x, y, z] = (TileType)data.tiles[index++];
 
-                    // 壁のみ生成
+
+                    // 壁生成
                     if (map[x, y, z] == TileType.Wall)
                     {
                         GameObject wall = Instantiate(
@@ -172,13 +247,80 @@ public class MapManager : MonoBehaviour
                             Quaternion.identity,
                             transform);
 
+
                         wallObjects[x, y, z] = wall;
 
+
                         WallBlock block = wall.GetComponent<WallBlock>();
+                        block.GridPosition = new Vector3Int(x, y, z);
+                    }
+
+
+                    // 床生成
+                    else if (map[x, y, z] == TileType.Floor)
+                    {
+                        GameObject floor = Instantiate(
+                            floorPrefab,
+                            new Vector3(
+                                x,
+                                y + floorYOffset,
+                                z),
+                            Quaternion.identity,
+                            transform);
+
+
+                        floorObjects[x, y, z] = floor;
+
+
+                        FloorBlock block = floor.GetComponent<FloorBlock>();
                         block.GridPosition = new Vector3Int(x, y, z);
                     }
                 }
             }
         }
+
+
+        // 配置オブジェクト復元
+        foreach (ObjectData objData in data.objects)
+        {
+            Vector3Int pos = new Vector3Int(
+                objData.x,
+                objData.y,
+                objData.z
+            );
+
+            PlaceObject(pos);
+        }
+
+
+        Debug.Log("ダンジョン復元完了");
+    }
+
+    public void PlaceObject(Vector3Int pos)
+    {
+        // 床以外には配置しない
+        if (map[pos.x, pos.y, pos.z] != TileType.Floor)
+        {
+            return;
+        }
+
+        // 既に配置されている場合
+        if (placedObjects[pos.x, pos.y, pos.z] != null)
+        {
+            return;
+        }
+
+        // オブジェクト生成
+        GameObject obj = Instantiate(
+            objectPrefab,
+            new Vector3(
+                pos.x,
+                pos.y + floorYOffset + objectYOffset,
+                pos.z),
+            Quaternion.identity,
+            transform);
+
+        // 配置したオブジェクトを保存
+        placedObjects[pos.x, pos.y, pos.z] = obj;
     }
 }

@@ -5,56 +5,23 @@ public class DungeonExporter : MonoBehaviour
 {
     public static string LastExportedJson;
 
-    public Transform dungeonRoot;
-
-    public void ExportDungeon(
-        string dungeonName,
-        string creatorName)
+    public void ExportDungeon(string dungeonName)
     {
-        DungeonData data = new DungeonData();
-
-        data.dungeonID =
-            System.Guid.NewGuid().ToString();
-
-        data.dungeonName = dungeonName;
-
-        data.creatorName = creatorName;
-
-        data.createDate =
-            System.DateTime.Now.ToString(
-                "yyyy/MM/dd HH:mm:ss"
+        string path = Path.Combine(
+            Application.persistentDataPath,
+            dungeonName + ".json"
             );
 
-        foreach (Transform child in dungeonRoot)
+        if (!File.Exists(path))
         {
-            DungeonObjectData obj =
-                new DungeonObjectData();
-
-            obj.type = child.name;
-            obj.position = child.position;
-
-            data.objects.Add(obj);
+            Debug.LogError("保存データが存在しません：" + path);
+            return;
         }
 
-        LastExportedJson =
-            JsonUtility.ToJson(data, true);
+        LastExportedJson = File.ReadAllText(path);
 
-        string path =
-            Application.persistentDataPath +
-            "/" +
-            dungeonName +
-            ".json";
+        Debug.Log("エクスポート完了");
+        Debug.Log(LastExportedJson);
 
-        File.WriteAllText(
-            path,
-            LastExportedJson
-        );
-
-        Debug.Log("保存完了 : " + path);
-
-        foreach (Transform child in dungeonRoot)
-        {
-            Destroy(child.gameObject);
-        }
     }
 }

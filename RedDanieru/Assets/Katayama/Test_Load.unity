@@ -153,6 +153,10 @@ MonoBehaviour:
   height: 1
   depth: 32
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
+  floorYOffset: -3
+  objectYOffset: 1.5
+  objectPrefab: {fileID: 6372522022111549087, guid: 446ca1027bafc454ba455320d0956e23, type: 3}
+  floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
 --- !u!4 &42808005
 Transform:
   m_ObjectHideFlags: 0
