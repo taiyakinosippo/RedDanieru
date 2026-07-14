@@ -1,5 +1,7 @@
 using UnityEngine;
+//using static MapManager;
 //using static TMPro.Examples.TMP_ExampleScript_01;
+
 
 public class MapManager : MonoBehaviour
 {
@@ -25,8 +27,8 @@ public class MapManager : MonoBehaviour
     [Header("オブジェクト配置設定")]
     [SerializeField] private float objectYOffset = 0f;
 
-    // 配置するオブジェクト
-    [SerializeField] private GameObject objectPrefab;
+    [SerializeField]
+    private PlaceObjectPrefab[] objectPrefabs;
 
     // マップデータ
     private TileType[,,] map;
@@ -41,6 +43,15 @@ public class MapManager : MonoBehaviour
 
     // 配置したオブジェクト
     private GameObject[,,] placedObjects;
+
+    private PlaceObjectType[,,] placedObjectTypes;
+
+    [System.Serializable]
+    public class PlaceObjectPrefab
+    {
+        public PlaceObjectType type;
+        public GameObject prefab;
+    }
 
     void Start()
     {
@@ -63,9 +74,9 @@ public class MapManager : MonoBehaviour
     {
         map = new TileType[width, height, depth];
         wallObjects = new GameObject[width, height, depth];
-
         floorObjects = new GameObject[width, height, depth];
         placedObjects = new GameObject[width, height, depth];
+        placedObjectTypes = new PlaceObjectType[width, height, depth];
 
         // 全て壁で初期化
         for (int x = 0; x < width; x++)
@@ -185,12 +196,14 @@ public class MapManager : MonoBehaviour
                     // オブジェクトが存在する場合
                     if (placedObjects[x, y, z] != null)
                     {
-                        data.objects.Add(
+                        data.objects.Add
+                        (
                             new ObjectData()
                             {
                                 x = x,
                                 y = y,
-                                z = z
+                                z = z,
+                                type = placedObjectTypes[x, y, z]
                             }
                         );
                     }
@@ -213,10 +226,11 @@ public class MapManager : MonoBehaviour
 
         // 配列を作成
         map = new TileType[width, height, depth];
+        placedObjectTypes = new PlaceObjectType[width, height, depth];
         wallObjects = new GameObject[width, height, depth];
         floorObjects = new GameObject[width, height, depth];
         placedObjects = new GameObject[width, height, depth];
-
+        
 
         // 現在のオブジェクトを削除
         foreach (Transform child in transform)
@@ -289,30 +303,42 @@ public class MapManager : MonoBehaviour
                 objData.z
             );
 
-            PlaceObject(pos);
+            PlaceObject(pos, objData.type);
         }
 
 
         Debug.Log("ダンジョン復元完了");
     }
 
-    public void PlaceObject(Vector3Int pos)
+    public void PlaceObject(Vector3Int pos, PlaceObjectType type)
     {
         // 床以外には配置しない
         if (map[pos.x, pos.y, pos.z] != TileType.Floor)
-        {
             return;
-        }
 
-        // 既に配置されている場合
+        // 既に配置済み
         if (placedObjects[pos.x, pos.y, pos.z] != null)
+            return;
+
+        GameObject prefab = null;
+
+        foreach (var data in objectPrefabs)
         {
+            if (data.type == type)
+            {
+                prefab = data.prefab;
+                break;
+            }
+        }
+
+        if (prefab == null)
+        {
+            Debug.LogError(type + " のPrefabが設定されていません");
             return;
         }
 
-        // オブジェクト生成
         GameObject obj = Instantiate(
-            objectPrefab,
+            prefab,
             new Vector3(
                 pos.x,
                 pos.y + floorYOffset + objectYOffset,
@@ -320,7 +346,7 @@ public class MapManager : MonoBehaviour
             Quaternion.identity,
             transform);
 
-        // 配置したオブジェクトを保存
         placedObjects[pos.x, pos.y, pos.z] = obj;
+        placedObjectTypes[pos.x, pos.y, pos.z] = type;
     }
 }
