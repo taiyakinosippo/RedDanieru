@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using static UnityEngine.Rendering.DebugUI;
 #endif
-
+using Fusion;
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
  */
 
@@ -14,7 +14,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class ThirdPersonController : MonoBehaviour
+    public class ThirdPersonController : NetworkBehaviour
     {
         [Header("プレイヤーの設定")]
         [Tooltip("プレイヤーの歩く速度")]
@@ -159,15 +159,15 @@ namespace StarterAssets
             }
         }
 
-        //カメラが追従するオブジェクトを取得するためのAwakeメソッド
-        private void Awake()
-        {
-            // get a reference to our main camera
-            if (currentCamera == null)
-            {
-                currentCamera = GameObject.FindGameObjectWithTag("MainCamera");
-            }
-        }
+        ////カメラが追従するオブジェクトを取得するためのAwakeメソッド
+        //private void Awake()
+        //{
+        //    // get a reference to our main camera
+        //    if (currentCamera == null)
+        //    {
+        //        currentCamera = GameObject.FindGameObjectWithTag("MainCamera");
+        //    }
+        //}
 
         //初期化
         private void Start()
@@ -197,10 +197,17 @@ namespace StarterAssets
 
             _jumpTimeoutDelta = JumpTimeout;　　　　　// ジャンプできるようになるまでの時間を初期化
             _fallTimeoutDelta = FallTimeout;          // 落下アニメーションに入るまでの時間を初期化
-        }
+   }
 
-        private void Update()
+
+        public override void FixedUpdateNetwork()
         {
+            if (!HasInputAuthority)
+                return;
+
+            if (_input == null)
+                return;
+
             //Animatorコンポーネントを取得しているかの判定
             _hasAnimator = TryGetComponent(out _animator);
 
@@ -238,13 +245,17 @@ namespace StarterAssets
             }
         }
 
-       
+
+
 
         private void LateUpdate()
         {
-            //カメラの追従や回転の処理
+            if (!HasInputAuthority)
+                return;
+
             CameraRotation();
         }
+
 
         //-----------------------------------------------------------
         //アニメーションのIDを取得する関数
@@ -267,6 +278,15 @@ namespace StarterAssets
         //-----------------------------------------------------------
         private void CheckInput()
         {
+
+            if (_input == null)
+            {
+                Debug.LogError(
+                    gameObject.name + " _input null"
+                );
+                return;
+            }
+
             if (_input.attack && Grounded)
             {
                 AddAction(ActionType.Attack);

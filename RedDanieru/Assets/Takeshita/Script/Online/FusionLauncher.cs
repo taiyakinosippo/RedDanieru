@@ -3,9 +3,8 @@ using UnityEngine;
 
 public class FusionLauncher : MonoBehaviour
 {
-    async void Start()
+    public async void StartMatch(string roomName)
     {
-       
         var runner = gameObject.AddComponent<NetworkRunner>();
 
         runner.ProvideInput = true;
@@ -14,15 +13,15 @@ public class FusionLauncher : MonoBehaviour
         runner.AddCallbacks(spawner);
 
         var result = await runner.StartGame(
-      new StartGameArgs
-      {
-          GameMode = GameMode.Shared,
-          SessionName = "Room"
-      });
+            new StartGameArgs
+            {
+                GameMode = GameMode.Shared,
+                SessionName = roomName
+            });
 
         if (result.Ok)
         {
-            Debug.Log("Fusionルーム参加成功！");
+            Debug.Log("Fusionルーム参加成功 : " + roomName);
         }
         else
         {
@@ -30,8 +29,5 @@ public class FusionLauncher : MonoBehaviour
                 $"接続失敗 : {result.ShutdownReason}"
             );
         }
-
     }
-
-
 }

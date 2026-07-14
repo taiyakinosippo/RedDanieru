@@ -216,7 +216,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab:
-    RawGuidValue: 215318c31e72f784998aec01835316f1
+    RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
 --- !u!114 &44870707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -441,8 +441,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1133356152}
   m_HandleRect: {fileID: 1133356151}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 1
+  m_Value: 0
+  m_Size: 0.9904803
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -518,6 +518,8 @@ MonoBehaviour:
   content: {fileID: 2004951139}
   buttonPrefab: {fileID: 4555289007072389027, guid: 00a9591aa659a0b469397201f56426c7, type: 3}
   importer: {fileID: 1144079123}
+  fusionLauncher: {fileID: 44870707}
+  scrollView: {fileID: 1556035666}
 --- !u!4 &509992270
 Transform:
   m_ObjectHideFlags: 0
@@ -1436,7 +1438,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00007072349, y: -0.00035146848}
+  m_AnchoredPosition: {x: -0.00007072349, y: 0.04895297}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2004951140

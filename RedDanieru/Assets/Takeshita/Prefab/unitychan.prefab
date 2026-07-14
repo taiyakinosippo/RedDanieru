@@ -6563,7 +6563,8 @@ MonoBehaviour:
   GroundLayers:
     serializedVersion: 2
     m_Bits: 1
-  CinemachineCameraTarget: {fileID: 0}
+  ThirdPersonPerspective: {fileID: 0}
+  FirstPersonPerspective: {fileID: 0}
   TopClamp: 70
   BottomClamp: -30
   CameraAngleOverride: 0
@@ -6602,6 +6603,7 @@ MonoBehaviour:
   jump: 0
   sprint: 0
   cameraChange: 0
+  sticker: 0
   analogMovement: 0
   cursorLocked: 1
   cursorInputForLook: 1
@@ -6636,6 +6638,7 @@ MonoBehaviour:
   Flags: 786433
   NestedObjects: []
   NetworkedBehaviours:
+  - {fileID: 6431877073953911566}
   - {fileID: 1112401073383291495}
   - {fileID: 188448651488199686}
   ForceRemoteRenderTimeframe: 0
