@@ -13,6 +13,7 @@ namespace StarterAssets
 		public bool jump;
 		public bool sprint;
 		public bool cameraChange;
+		public bool sticker;
 
         [Header("Movement Settings")]
 		public bool analogMovement;
@@ -52,9 +53,15 @@ namespace StarterAssets
             AttackInput(value.isPressed);
 		}
 
+		public void OnSticker(InputValue value)
+		{
+			StickerInput(value.isPressed);
+		}
+
 		public void OnCameraChange(InputValue value)
         {
-            CameraChangeInput(value.isPressed);
+            Debug.Log("CameraChange");
+            CameraChangeInput(value.isPressed); 
         }
 #endif
 
@@ -83,6 +90,11 @@ namespace StarterAssets
         {
             attack = newAttackState;
         }
+
+		public void StickerInput(bool newStickerState)
+		{
+			sticker = newStickerState;
+		}
         public void CameraChangeInput(bool newCameraChangeState)
 		{
             cameraChange = newCameraChangeState;

@@ -1,63 +1,55 @@
-using UnityEngine;
 using System.IO;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
 
 public class DungeonImporter : MonoBehaviour
 {
-    public GameObject cubePrefab;
-    public GameObject spherePrefab;
+    [SerializeField]
+    private MapManager mapManager;
 
-    public Transform dungeonRoot;
+    public void ImportDungeon(string dungeonName)
+    {
+        StartCoroutine(
+            ImportDungeonCoroutine(dungeonName)
+        );
+    }
 
-    public void ImportDungeon(
+    private IEnumerator ImportDungeonCoroutine(
         string dungeonName)
     {
-        string path =
-            Application.persistentDataPath +
-            "/" +
-            dungeonName +
-            ".json";
+        string url =
+            "http://localhost/RedDaniel/download_dungeon.php?name="
+            + UnityWebRequest.EscapeURL(dungeonName);
 
-        if (!File.Exists(path))
+        UnityWebRequest request =
+            UnityWebRequest.Get(url);
+
+        yield return request.SendWebRequest();
+
+        if (request.result !=
+            UnityWebRequest.Result.Success)
         {
-            Debug.LogError(
-                "ダンジョンが見つかりません"
-            );
-            return;
+            Debug.LogError(request.error);
+            yield break;
         }
 
         string json =
-            File.ReadAllText(path);
+            request.downloadHandler.text;
 
-        DungeonData data =
-            JsonUtility.FromJson<DungeonData>(
+        DungeonMapData data =
+            JsonUtility.FromJson<DungeonMapData>(
                 json
             );
 
-        foreach (Transform child in dungeonRoot)
+        if (data == null)
         {
-            Destroy(child.gameObject);
+            Debug.LogError("JSON変換失敗");
+            yield break;
         }
 
-        foreach (DungeonObjectData obj in data.objects)
-        {
-            if (obj.type == "Cube")
-            {
-                Instantiate(
-                    cubePrefab,
-                    obj.position,
-                    Quaternion.identity,
-                    dungeonRoot
-                );
-            }
-            else if (obj.type == "Sphere")
-            {
-                Instantiate(
-                    spherePrefab,
-                    obj.position,
-                    Quaternion.identity,
-                    dungeonRoot
-                );
-            }
-        }
+        mapManager.LoadDungeon(data);
+
+        Debug.Log("ダンジョン読込完了");
     }
 }
