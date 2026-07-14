@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+///<summry>
+///プレイヤーの基本的な動きを処理する場所(歩く走るジャンプする等)
+///</summry>>
 namespace Player
 {
     [RequireComponent(typeof(CharacterController))]
