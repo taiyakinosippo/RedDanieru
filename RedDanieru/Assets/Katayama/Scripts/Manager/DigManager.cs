@@ -12,24 +12,51 @@ public class DigManager : MonoBehaviour
     // 現在選択中の壁
     private WallBlock currentWall;
 
+    // 最後に掘った壁
+    private WallBlock lastDigWall;
+
+    // 前フレームのマウス座標
+    private Vector3 lastMousePosition;
+
     // 保存パネル
     [SerializeField] private GameObject savePanel;
 
     void Update()
     {
-        // 保存パネルが開いている間は掘削処理を行わない
+        // 保存パネルが開いている間は掘削しない
         if (savePanel.activeSelf)
-        {
             return;
-        }
 
         // マウスカーソル下の壁を選択
         HighlightWall();
 
-        // 左クリックで壁を掘る
+        // クリックした瞬間は必ず1マス掘る
         if (Input.GetMouseButtonDown(0))
         {
             Dig();
+            lastDigWall = currentWall;
+        }
+
+        // クリックしたままマウスが動いたら掘る
+        if (Input.GetMouseButton(0))
+        {
+            if (Input.mousePosition != lastMousePosition)
+            {
+                if (currentWall != null && currentWall != lastDigWall)
+                {
+                    Dig();
+                    lastDigWall = currentWall;
+                }
+            }
+        }
+
+        // マウス座標を保存
+        lastMousePosition = Input.mousePosition;
+
+        // ボタンを離したらリセット
+        if (Input.GetMouseButtonUp(0))
+        {
+            lastDigWall = null;
         }
     }
 
