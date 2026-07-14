@@ -5,64 +5,45 @@ using System.Collections.Generic;
 
 public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-    public NetworkPrefabRef player1Prefab;
-    public NetworkPrefabRef player2Prefab;
+    public NetworkPrefabRef playerPrefab;
 
-    public static int MyRole = 0;
-
-    public GameObject Button_1;
-    public GameObject Button_2;
-
-    private int count = 0;
-
-    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    public void OnPlayerJoined(
+     NetworkRunner runner,
+     PlayerRef player)
     {
-        if (!runner.IsSharedModeMasterClient)
+        if (player != runner.LocalPlayer)
             return;
 
-        count++;
-
-        var prefab =
-            count == 1
-            ? player1Prefab
-            : player2Prefab;
+        if (runner.TryGetPlayerObject(player, out _))
+            return;
 
         var obj = runner.Spawn(
-     prefab,
-     new Vector3(count * 2, 0, 0),
-     Quaternion.identity,
-     player
- );
+            playerPrefab,
+            new Vector3(
+                player.PlayerId * 2,
+                0,
+                0
+            ),
+            Quaternion.identity,
+            player
+        );
 
-        runner.SetPlayerObject(player, obj);
-
-//        Debug.Log(
-//    $"Spawn {prefab} for {player}"
-//);
-
+        runner.SetPlayerObject(
+            player,
+            obj
+        );
     }
 
-    public void SelectPlayer1()
+    public void OnConnectedToServer(
+        NetworkRunner runner)
     {
-        MyRole = 1;
-        Button_1.SetActive(false);
-        Button_2.SetActive(false);
-        Debug.Log("私は Player1");
-    }
-
-    public void SelectPlayer2()
-    {
-        MyRole = 2;
-        Button_2.SetActive(false);
-        Button_1.SetActive(false);
-        Debug.Log("私は Player2");
+        Debug.Log("オンライン接続成功！");
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason) { }
-    public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason) { }
     public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
@@ -74,7 +55,6 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress) { }
     public void OnSceneLoadDone(NetworkRunner runner) { }
     public void OnSceneLoadStart(NetworkRunner runner) { }
-
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player) { }
 }

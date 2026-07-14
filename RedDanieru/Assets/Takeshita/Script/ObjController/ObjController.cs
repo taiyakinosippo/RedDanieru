@@ -5,15 +5,16 @@ using UnityEngine.InputSystem;
 public class ObjController : NetworkBehaviour
 {
     public float moveSpeed = 5f;
-    public int playerRole;
 
     public override void FixedUpdateNetwork()
     {
+        //Debug.Log(
+        //      $"{Runner.LocalPlayer.PlayerId} " +
+        //      $"Input:{HasInputAuthority} " +
+        //      $"State:{HasStateAuthority}"
+        //  );
 
-        if (!HasStateAuthority)
-            return;
-
-        if (PlayerSpawner.MyRole != playerRole)
+        if (!HasInputAuthority)
             return;
 
         Vector3 move = Vector3.zero;
@@ -33,15 +34,19 @@ public class ObjController : NetworkBehaviour
         if (Keyboard.current.dKey.isPressed)
             move += Vector3.right;
 
-        transform.position += move.normalized * moveSpeed * Runner.DeltaTime;
+        transform.position +=
+            move.normalized *
+            moveSpeed *
+            Runner.DeltaTime;
     }
 
     public override void Spawned()
-{
-        Debug.Log($"MyRole : {PlayerSpawner.MyRole}");
-        //Debug.Log($"{name}");
-        //Debug.Log($"InputAuthority : {Object.InputAuthority}");
-        //Debug.Log($"HasInputAuthority : {HasInputAuthority}");
-        //Debug.Log($"HasStateAuthority : {HasStateAuthority}");
+    {
+        Debug.Log(
+            $"Local:{Runner.LocalPlayer.PlayerId} " +
+            $"Input:{HasInputAuthority} " +
+            $"State:{HasStateAuthority} " +
+            $"InputAuthority:{Object.InputAuthority}"
+        );
     }
 }

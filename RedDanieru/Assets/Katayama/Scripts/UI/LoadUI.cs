@@ -2,6 +2,8 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Networking;
+using System.Collections;
 
 public class LoadUI : MonoBehaviour
 {
@@ -11,10 +13,15 @@ public class LoadUI : MonoBehaviour
     [SerializeField] private Transform content;
 
     [SerializeField] private GameObject buttonPrefab;
+    
+    [SerializeField] private DungeonImporter importer;
+
+    [SerializeField]
+    private GameObject scrollView;
 
     private void OnEnable()
     {
-        CreateButtonList();
+        StartCoroutine(GetDungeonList());
     }
 
     /// <summary>
@@ -51,5 +58,69 @@ public class LoadUI : MonoBehaviour
                 loadManager.Load(dungeonName);
             });
         }
+    }
+
+    private IEnumerator GetDungeonList()
+    {
+        foreach(Transform child in content)
+        {
+            Destroy(child.gameObject);
+        }
+
+        UnityWebRequest request =
+            UnityWebRequest.Get(
+                "http://localhost/RedDaniel/get_dungeon_names.php"
+            );
+
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+
+        string json =
+            request.downloadHandler.text;
+
+        Debug.Log("取得データ:");
+        Debug.Log(json);
+
+        DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
+
+        if (data == null || data.names == null)
+        {
+            Debug.LogError("ダンジョン一覧の読み込み失敗");
+            yield break;
+        }
+
+        foreach (string dungeonName in data.names)
+        {
+            GameObject button =
+                Instantiate(buttonPrefab, content);
+
+            button
+                .GetComponentInChildren<TMP_Text>()
+                .text = dungeonName;
+
+            string selectedDungeon = dungeonName;
+
+            button
+                .GetComponent<Button>()
+                .onClick
+                .AddListener(() =>
+                {
+                    Debug.Log(
+                        selectedDungeon +
+                        " をダウンロードします"
+                    );
+
+                    importer.ImportDungeon(
+                        selectedDungeon
+                    );
+                    scrollView.SetActive(false);
+                });
+        }
+
     }
 }
