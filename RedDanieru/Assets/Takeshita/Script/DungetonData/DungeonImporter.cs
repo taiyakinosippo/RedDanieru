@@ -37,10 +37,27 @@ public class DungeonImporter : MonoBehaviour
         string json =
             request.downloadHandler.text;
 
+        Debug.Log("===== 受信データ =====");
+        Debug.Log(json);
+
         DungeonMapData data =
             JsonUtility.FromJson<DungeonMapData>(
                 json
             );
+
+        Debug.Log("===== 変換結果 =====");
+        Debug.Log("width = " + data.width);
+        Debug.Log("height = " + data.height);
+        Debug.Log("depth = " + data.depth);
+
+        if (data.tiles != null)
+        {
+            Debug.Log("tiles数 = " + data.tiles.Length);
+        }
+        else
+        {
+            Debug.LogError("tiles が null");
+        }
 
         if (data == null)
         {

@@ -13,11 +13,25 @@ public class FusionLauncher : MonoBehaviour
         var spawner = GetComponent<PlayerSpawner>();
         runner.AddCallbacks(spawner);
 
-        var result = await runner.StartGame(new StartGameArgs
+        var result = await runner.StartGame(
+      new StartGameArgs
+      {
+          GameMode = GameMode.Shared,
+          SessionName = "Room"
+      });
+
+        if (result.Ok)
         {
-            GameMode = GameMode.Shared,
-            SessionName = "Room"
-        });
+            Debug.Log("Fusionルーム参加成功！");
+        }
+        else
+        {
+            Debug.LogError(
+                $"接続失敗 : {result.ShutdownReason}"
+            );
+        }
 
     }
+
+
 }
