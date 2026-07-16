@@ -5,7 +5,10 @@ using System.Collections.Generic;
 
 public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
-    public NetworkPrefabRef playerPrefab;
+    public NetworkPrefabRef[] playerPrefabs;
+
+    [SerializeField]
+    private Transform[] spawnPoints;
 
     public void OnPlayerJoined(
      NetworkRunner runner,
@@ -17,16 +20,16 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         if (runner.TryGetPlayerObject(player, out _))
             return;
 
+
+        int prefabIndex = GetPrefabIndex(player, runner);
+
+
         var obj = runner.Spawn(
-            playerPrefab,
-            new Vector3(
-                player.PlayerId * 2,
-                0,
-                0
-            ),
-            Quaternion.identity,
-            player
-        );
+                    playerPrefabs[prefabIndex],
+                    new Vector3(player.PlayerId * 2, 0, 0),
+                    Quaternion.identity,
+                    player
+                );
 
         runner.SetPlayerObject(
             player,
@@ -38,6 +41,12 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         NetworkRunner runner)
     {
         Debug.Log("オンライン接続成功！");
+    }
+
+    private int GetPrefabIndex(PlayerRef player,NetworkRunner runner)
+    {
+        return player.PlayerId %
+               playerPrefabs.Length;
     }
 
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }

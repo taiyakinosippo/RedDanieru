@@ -114,10 +114,17 @@ public class LoadUI : MonoBehaviour
      .AddListener(() =>
      {
 
+
          importer.ImportDungeon(selectedDungeon);
 
-         fusionLauncher.StartMatch(selectedDungeon);
-
+         if (GameModeManager.IsMultiplayer)
+         {
+             fusionLauncher.StartMatch(selectedDungeon);
+         }
+         else
+         {
+             fusionLauncher.StartSolo();
+         }
 
          scrollView.SetActive(false);
      });

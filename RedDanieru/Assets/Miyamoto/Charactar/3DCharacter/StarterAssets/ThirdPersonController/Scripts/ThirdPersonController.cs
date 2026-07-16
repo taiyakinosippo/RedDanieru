@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using static UnityEngine.Rendering.DebugUI;
 #endif
 using Fusion;
+
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
  */
 
@@ -135,6 +136,8 @@ namespace StarterAssets
         private GameObject currentCamera;　　　　　　　　// 現在のカメラを格納する変数
         private bool isFirstPerson = false;              // 現在のカメラが一人称視点かどうかを判定する変数
 
+        private NetworkMecanimAnimator _networkAnimator;
+
         //行動管理
 
         // 現在実行中のアクション
@@ -199,6 +202,38 @@ namespace StarterAssets
             _fallTimeoutDelta = FallTimeout;          // 落下アニメーションに入るまでの時間を初期化
    }
 
+        public override void Spawned()
+        {
+            _networkAnimator =
+                    GetComponent<NetworkMecanimAnimator>();
+
+#if ENABLE_INPUT_SYSTEM
+    _playerInput = GetComponent<PlayerInput>();
+#endif
+
+            if (!HasInputAuthority)
+            {
+                // 相手キャラは入力禁止
+                if (_playerInput != null)
+                    _playerInput.enabled = false;
+                
+                GetComponent<StarterAssetsInputs>().enabled = false;
+
+                var input = GetComponent<StarterAssetsInputs>();
+                if (input != null)
+                    input.enabled = false;
+
+                if (ThirdPersonPerspective != null)
+                    ThirdPersonPerspective.SetActive(false);
+
+                if (FirstPersonPerspective != null)
+                    FirstPersonPerspective.SetActive(false);
+            }
+
+            Debug.Log(
+                $"{gameObject.name} Authority={HasInputAuthority}"
+            );
+        }
 
         public override void FixedUpdateNetwork()
         {
@@ -592,10 +627,9 @@ namespace StarterAssets
         {
             if (_input.attack && _hasAnimator)
             {
-                _animator.SetTrigger(_animIDAttack);
+                _networkAnimator.SetTrigger("Attack");
                 _input.attack = false;
             }
-
         }
 
         //-----------------------------------------------------------
