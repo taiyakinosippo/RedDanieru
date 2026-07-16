@@ -18,7 +18,7 @@ public class StickerState : MonoBehaviour
     private void Update()
     {
         //デバッグ用
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.B))
         {
             Apply(Sticker.Big);
         }
