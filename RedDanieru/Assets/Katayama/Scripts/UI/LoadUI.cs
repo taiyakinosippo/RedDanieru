@@ -22,6 +22,9 @@ public class LoadUI : MonoBehaviour
     [SerializeField]
     private GameObject scrollView;
 
+    [SerializeField]
+    private DungeonUIManager dungeonUIManager;
+
     private void OnEnable()
     {
         StartCoroutine(GetDungeonList());
@@ -113,7 +116,9 @@ public class LoadUI : MonoBehaviour
      .onClick
      .AddListener(() =>
      {
+         RoomInfo.SelectedDungeon = selectedDungeon;
 
+         dungeonUIManager.MapSelectButton();
 
          importer.ImportDungeon(selectedDungeon);
 
