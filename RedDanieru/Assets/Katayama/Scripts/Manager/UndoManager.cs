@@ -11,26 +11,51 @@ public class UndoManager : MonoBehaviour
     // 進む履歴
     private Stack<DungeonMapData> redoStack = new Stack<DungeonMapData>();
 
-    /// 編集前の状態を保存
-    public void SaveState()
-    {
-        undoStack.Push(mapManager.CreateSaveData());
+    // 編集中か
+    private bool isEditing = false;
 
-        // 新しい編集をしたらRedo履歴は消す
+    /// 編集開始
+    public void BeginEdit()
+    {
+        if (isEditing)
+            return;
+
+        isEditing = true;
+
+        DungeonMapData data = mapManager.CreateSaveData();
+
+        Debug.Log("保存: objects数 = " + data.objects.Count);
+
+        undoStack.Push(data);
         redoStack.Clear();
+    }
+
+    /// 編集終了
+    public void EndEdit()
+    {
+        isEditing = false;
     }
 
     /// 一つ前に戻す
     public void Undo()
     {
         if (undoStack.Count == 0)
+        {
+            Debug.Log("Undo履歴なし");
             return;
+        }
 
-        // 現在の状態をRedoへ保存
-        redoStack.Push(mapManager.CreateSaveData());
+        DungeonMapData current = mapManager.CreateSaveData();
 
-        // 一つ前へ戻す
-        mapManager.LoadDungeon(undoStack.Pop());
+        Debug.Log("現在objects数 = " + current.objects.Count);
+
+        DungeonMapData undoData = undoStack.Pop();
+
+        Debug.Log("戻すobjects数 = " + undoData.objects.Count);
+
+        redoStack.Push(current);
+
+        mapManager.LoadDungeon(undoData);
     }
 
     /// 一つ進める
@@ -39,17 +64,14 @@ public class UndoManager : MonoBehaviour
         if (redoStack.Count == 0)
             return;
 
-        // 現在の状態をUndoへ保存
         undoStack.Push(mapManager.CreateSaveData());
-
-        // 次の状態へ進む
         mapManager.LoadDungeon(redoStack.Pop());
     }
 
-    /// 履歴を削除
     public void ClearHistory()
     {
         undoStack.Clear();
         redoStack.Clear();
+        isEditing = false;
     }
 }

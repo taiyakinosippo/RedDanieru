@@ -2,56 +2,73 @@ using UnityEngine;
 
 public class PlaceManager : MonoBehaviour
 {
-    // メインカメラ
     [SerializeField] private Camera mainCamera;
-
-    // マップ管理
     [SerializeField] private MapManager mapManager;
-
-    // Undo管理
     [SerializeField] private UndoManager undoManager;
-
-    // 保存パネル
     [SerializeField] private GameObject savePanel;
+
+    private FloorBlock lastPlaceFloor;
+
+    private bool isEditing = false;
 
     void Update()
     {
-        // 保存画面表示中は配置しない
         if (savePanel.activeSelf)
             return;
 
         if (EditModeManager.Instance.CurrentMode != EditMode.Place)
             return;
 
-        // 左クリックしたら配置
-        if (Input.GetMouseButtonDown(0))
+
+        if (Input.GetMouseButton(0))
         {
             Place();
         }
+
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            if (isEditing)
+            {
+                undoManager.EndEdit();
+                isEditing = false;
+            }
+
+            lastPlaceFloor = null;
+        }
     }
 
-    /// <summary>
-    /// 床をクリックした位置へオブジェクトを配置する
-    /// </summary>
+
     void Place()
     {
-        // マウス位置からレイを飛ばす
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-        // オブジェクトに当たらなければ終了
         if (!Physics.Raycast(ray, out RaycastHit hit))
             return;
 
-        // 床か判定
+
         FloorBlock floor = hit.collider.GetComponent<FloorBlock>();
 
         if (floor == null)
             return;
 
-        // 配置前の状態を保存
-        undoManager.SaveState();
 
-        // パレットで選択中のオブジェクトを配置
+        // 同じ場所は無視
+        if (floor == lastPlaceFloor)
+            return;
+
+
+        // 最初の1回だけ保存
+        if (!isEditing)
+        {
+            undoManager.BeginEdit();
+            isEditing = true;
+        }
+
+
+        lastPlaceFloor = floor;
+
+
         mapManager.PlaceObject(
             floor.GridPosition,
             ObjectPaletteManager.Instance.CurrentObject);
