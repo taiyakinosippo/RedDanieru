@@ -8,6 +8,9 @@ public class PlaceManager : MonoBehaviour
     // マップ管理
     [SerializeField] private MapManager mapManager;
 
+    // Undo管理
+    [SerializeField] private UndoManager undoManager;
+
     // 保存パネル
     [SerializeField] private GameObject savePanel;
 
@@ -15,6 +18,9 @@ public class PlaceManager : MonoBehaviour
     {
         // 保存画面表示中は配置しない
         if (savePanel.activeSelf)
+            return;
+
+        if (EditModeManager.Instance.CurrentMode != EditMode.Place)
             return;
 
         // 左クリックしたら配置
@@ -41,6 +47,9 @@ public class PlaceManager : MonoBehaviour
 
         if (floor == null)
             return;
+
+        // 配置前の状態を保存
+        undoManager.SaveState();
 
         // パレットで選択中のオブジェクトを配置
         mapManager.PlaceObject(

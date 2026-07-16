@@ -32,7 +32,7 @@ public class ObjectPaletteManager : MonoBehaviour
     public void SelectObject(int type)
     {
         CurrentObject = (PlaceObjectType)type;
-
+        EditModeManager.Instance.SetPlaceMode();
         Debug.Log($"‘I‘ð’† : {CurrentObject}");
     }
 }

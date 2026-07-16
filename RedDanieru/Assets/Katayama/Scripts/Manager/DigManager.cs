@@ -21,10 +21,15 @@ public class DigManager : MonoBehaviour
     // 保存パネル
     [SerializeField] private GameObject savePanel;
 
+    [SerializeField] private UndoManager undoManager;
+
     void Update()
     {
         // 保存パネルが開いている間は掘削しない
         if (savePanel.activeSelf)
+            return;
+
+        if (EditModeManager.Instance.CurrentMode != EditMode.Dig)
             return;
 
         // マウスカーソル下の壁を選択
@@ -105,17 +110,12 @@ public class DigManager : MonoBehaviour
     /// 選択中の壁を掘る
     void Dig()
     {
-        Debug.Log("Dig開始");
-
         if (currentWall == null)
-        {
-            Debug.Log("壁未選択");
             return;
-        }
 
-        Debug.Log("掘る壁 : " + currentWall.GridPosition);
+        // 掘る前に保存
+        undoManager.SaveState();
 
-        // 掘る処理はMapManagerへ依頼
         mapManager.Dig(currentWall.GridPosition);
 
         currentWall = null;
