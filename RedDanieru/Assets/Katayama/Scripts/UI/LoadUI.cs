@@ -122,15 +122,6 @@ public class LoadUI : MonoBehaviour
 
          importer.ImportDungeon(selectedDungeon);
 
-         if (GameModeManager.IsMultiplayer)
-         {
-             fusionLauncher.StartMatch(selectedDungeon);
-         }
-         else
-         {
-             fusionLauncher.StartSolo();
-         }
-
          scrollView.SetActive(false);
      });
         }

@@ -10,45 +10,55 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField]
     private Transform[] spawnPoints;
 
-    public void OnPlayerJoined(
-     NetworkRunner runner,
-     PlayerRef player)
+    public void SpawnPlayer(
+        NetworkRunner runner,
+        PlayerRef player)
     {
-        if (player != runner.LocalPlayer)
-            return;
-
         if (runner.TryGetPlayerObject(player, out _))
             return;
 
+        int prefabIndex =
+            player.PlayerId % playerPrefabs.Length;
 
-        int prefabIndex = GetPrefabIndex(player, runner);
-
+        Vector3 spawnPos =
+            spawnPoints[player.PlayerId % spawnPoints.Length]
+            .position;
 
         var obj = runner.Spawn(
-                    playerPrefabs[prefabIndex],
-                    new Vector3(player.PlayerId * 2, 0, 0),
-                    Quaternion.identity,
-                    player
-                );
+            playerPrefabs[prefabIndex],
+            spawnPos,
+            Quaternion.identity,
+            player
+        );
 
         runner.SetPlayerObject(
             player,
             obj
         );
+
+        Debug.Log($"Spawn : {player}");
     }
 
-    public void OnConnectedToServer(
+    public void SpawnAllPlayers(
         NetworkRunner runner)
     {
-        Debug.Log("オンライン接続成功！");
+        foreach (var player in runner.ActivePlayers)
+        {
+            SpawnPlayer(
+                runner,
+                player
+            );
+        }
     }
 
-    private int GetPrefabIndex(PlayerRef player,NetworkRunner runner)
+    public void OnPlayerJoined(
+        NetworkRunner runner,
+        PlayerRef player)
     {
-        return player.PlayerId %
-               playerPrefabs.Length;
+        Debug.Log($"Join : {player}");
     }
 
+    public void OnConnectedToServer(NetworkRunner runner) { }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
