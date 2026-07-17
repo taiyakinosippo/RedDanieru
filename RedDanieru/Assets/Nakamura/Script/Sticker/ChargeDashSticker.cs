@@ -13,6 +13,7 @@ public class ChargeDashSticker : StickerBase
 
     public override void OnEnemyApply()
     {
+
     }
 
     public override void OnEnemyRemove()

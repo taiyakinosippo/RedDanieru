@@ -109,7 +109,7 @@ public class EnemyBase : MonoBehaviour
 
             //プレイヤーとの距離が攻撃範囲内の場合、攻撃する
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer <= enemyAttackArea)
+            if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)
             {
                 //攻撃フラグを立てる
                 if (attackCoolTimer <= 0f)
