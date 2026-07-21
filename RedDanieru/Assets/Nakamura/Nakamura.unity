@@ -581,6 +581,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentSticker: 0
+  currentStickerScript: {fileID: 0}
+  isSpecialMove: 0
 --- !u!1 &1150466025
 GameObject:
   m_ObjectHideFlags: 0
@@ -740,7 +742,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64cf400d5cc410b488d4e6ad91ed765a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentSticker: 1
+  CurrentSticker: 2
+  currentStickerScript: {fileID: 0}
+  isSpecialMove: 0
 --- !u!114 &1272409224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -756,6 +760,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
+  player: {fileID: 0}
 --- !u!4 &1272409225
 Transform:
   m_ObjectHideFlags: 0
@@ -798,7 +803,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!195 &1272409227
 NavMeshAgent:
@@ -1144,6 +1149,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentSticker: 0
+  currentStickerScript: {fileID: 0}
+  isSpecialMove: 0
 --- !u!54 &1295507826
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1186,6 +1193,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
+  player: {fileID: 0}
 --- !u!1 &1384695019
 GameObject:
   m_ObjectHideFlags: 0
@@ -1305,7 +1313,7 @@ GameObject:
   - component: {fileID: 1386337441}
   - component: {fileID: 1386337442}
   - component: {fileID: 1386337443}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Intaract
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2428,6 +2436,10 @@ PrefabInstance:
     - target: {fileID: 3219907853852391422, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_Layer
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5315393377594237422, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6358356672660519411, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_Layer

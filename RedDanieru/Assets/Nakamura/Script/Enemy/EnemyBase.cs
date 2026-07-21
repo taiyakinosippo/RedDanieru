@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -8,6 +9,7 @@ public class EnemyBase : MonoBehaviour
         Idle,
         Move,
         Attack,
+        Special,
         Damage,
         Dead
     }
@@ -23,16 +25,19 @@ public class EnemyBase : MonoBehaviour
     protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
     protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
 
-    protected enemyState currentState;  //現在の状態
+    protected enemyState currentState { get; set; }  //現在の状態
     protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
-    private Vector3 moveDirection;  //敵の移動方向
     protected float attackCoolTimer;  //現在の攻撃クールタイム
     protected float attackTimer;  //現在の攻撃開始タイマー
+
+    private float specialCoolTimer = 0.0f;  //特殊行動のタイマー
+    private float specialInterval = 4.0f;  //特殊行動のクールタイム
 
     protected StickerState stickerState;
     protected Rigidbody rb;
     [SerializeField] protected LayerMask playerLayer;
+    public Transform player;
     protected NavMeshAgent agent;
 
     void Start()
@@ -43,18 +48,24 @@ public class EnemyBase : MonoBehaviour
         currentHp = enemyHP;
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
+        specialCoolTimer = specialInterval;
     }
 
     protected void Update()
     {
+        //行動パターン
         switch (currentState)
         {
             case enemyState.Idle:
             case enemyState.Move:
-                NormalMove();
+                    EnemyMove();
+
                 break;
             case enemyState.Attack:
                 Attack();
+                break;
+            case enemyState.Special:
+                SpecialMove();
                 break;
             case enemyState.Damage:
                 //ダメージ処理
@@ -64,14 +75,7 @@ public class EnemyBase : MonoBehaviour
                 break;
         }
 
-
-        Debug.Log("Enemy is in " + currentState);
-
-        //if (stickerState.CurrentSticker == Sticker.None)
-        //{
-        //    NormalMove();
-        //}
-
+        //攻撃のクールダウン
         if (attackCoolTimer > 0f)
         {
             attackCoolTimer -= Time.deltaTime;
@@ -89,14 +93,14 @@ public class EnemyBase : MonoBehaviour
         //}
     }
 
-    public virtual void NormalMove()
+    public virtual void EnemyMove()
     {
         Collider[] searchHits = Physics.OverlapSphere(transform.position, enemySearchArea, playerLayer);
 
         //プレイヤーが見つかった場合の処理
         if (searchHits.Length > 0)
         {
-            Transform player = searchHits[0].transform;
+            player = searchHits[0].transform;
 
             //プレイヤーの方向を向く
             //Vector3 direction = (player.position - transform.position).normalized;
@@ -106,6 +110,15 @@ public class EnemyBase : MonoBehaviour
             //    Quaternion lookRotation = Quaternion.LookRotation(direction);
             //    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * enemyRotationSpeed);
             //}
+
+            //ステッカーによる特殊な行動パターン
+            if (stickerState.isSpecialMove)
+            {
+                CheckSpecialCooldown();
+
+                if (currentState == enemyState.Special)
+                    return;
+            }
 
             //プレイヤーとの距離が攻撃範囲内の場合、攻撃する
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -118,6 +131,7 @@ public class EnemyBase : MonoBehaviour
                     agent.isStopped = true;
                 }
             }
+            //攻撃範囲じゃない場合は追跡する
             else
             {
                 //プレイヤーに向かって移動
@@ -127,10 +141,25 @@ public class EnemyBase : MonoBehaviour
                 agent.SetDestination(player.position);
             }
         }
-        else
+        //プレイヤーを見失った場合
+        else if (currentState != enemyState.Special)
         {
             currentState = enemyState.Idle;
+            specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
         }
+    }
+
+    //ステッカーによる特殊行動のクールタイム
+    public virtual void CheckSpecialCooldown()
+    {
+        if (specialCoolTimer <= 0f)
+        {
+            currentState = enemyState.Special;
+            agent.isStopped = true;
+            agent.enabled = false;
+            return;   
+        }
+        specialCoolTimer -= Time.deltaTime;
     }
 
     //攻撃処理
@@ -142,20 +171,48 @@ public class EnemyBase : MonoBehaviour
             //クールタイムセット
             attackCoolTimer = enemyAttackCoolTime;
             attackTimer = enemyAttackStartTime + enemyAttackEndTime;
-            agent.isStopped = false;
+            specialCoolTimer = specialInterval;
             currentState = enemyState.Idle;
         }
         else if (attackTimer <= enemyAttackEndTime)  //攻撃判定開始
         {
             //攻撃判定を出す
-            Collider[] attackHits = Physics.OverlapSphere(transform.position, enemyAttackArea, playerLayer);
-            foreach (Collider hit in attackHits)
-            {
-                //プレイヤーにダメージを与える処理
-                Debug.Log("撃たれた。攻撃を受けている！");
-            }
+            AttackEffect();
         }
         //攻撃推移
         attackTimer -= Time.deltaTime;
+    }
+
+    public virtual void AttackEffect()
+    {
+        Collider[] attackHits = Physics.OverlapSphere(transform.position, enemyAttackArea, playerLayer);
+        foreach (Collider hit in attackHits)
+        {
+            //プレイヤーにダメージを与える処理
+            Debug.Log("撃たれた。攻撃を受けている！");
+        }
+    }
+
+    public virtual void SpecialMove()
+    {
+        if (stickerState.currentStickerScript == null)
+        {
+            currentState = enemyState.Idle;
+        }
+        stickerState.currentStickerScript.OnEnemyUpdate();
+    }
+
+    //特殊行動終了時の初期化とか
+    public virtual void EndSpecial()
+    {
+        currentState = enemyState.Idle;
+        agent.enabled = true;
+        specialCoolTimer = specialInterval;
+    }
+
+    //ダメージ処理
+    public virtual void Damage(int playerPow)
+    {
+        currentHp -= playerPow;
     }
 }
