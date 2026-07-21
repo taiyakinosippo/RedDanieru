@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using Fusion;
+using System.Collections;
 
 //ゲームモード
 public static class GameModeManager
@@ -83,6 +84,8 @@ public class DungeonUIManager : MonoBehaviour
     public GameObject CautionObj;
 
     public GameObject MatchingObj;
+    public GameObject MatchingPlayerObj;
+    public Text MatchingPlayerText;
     public GameObject MatchingCautionObj;
 
     public Button GameStartbutton;
@@ -101,10 +104,18 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField]
     private RoomDBUploader roomDBUploader;
 
+    [SerializeField]
+    private PlayerSpawner playerSpawner;
+
+    [SerializeField]
+    private GameStartManager gameManager;
+
     public static int MaxPlayers = 2;
 
     public static bool IsPrivateRoom;
     public static string Password="";
+
+    private Coroutine aliveCoroutine;
 
     public void Start()
     {
@@ -139,6 +150,10 @@ public class DungeonUIManager : MonoBehaviour
         if (runner == null)
         {
             GameStartbutton.interactable = false;
+
+            MatchingPlayerText.text =
+                $"待機中... (0/{MaxPlayers})";
+
             return;
         }
 
@@ -149,7 +164,26 @@ public class DungeonUIManager : MonoBehaviour
             playerCount++;
         }
 
-        GameStartbutton.interactable = playerCount >= 2;
+        int displayCount = playerCount;
+
+        if (displayCount >= MaxPlayers)
+        {
+            MatchingPlayerText.text =
+                $"マッチング完了！ ({displayCount}/{MaxPlayers})";
+        }
+        else
+        {
+            MatchingPlayerText.text =
+                $"待機中... ({displayCount}/{MaxPlayers})";
+        }
+
+        GameStartbutton.interactable =
+            displayCount >= MaxPlayers;
+
+        Debug.Log($"playerCount = {playerCount}");
+        Debug.Log($"displayCount = {displayCount}");
+        Debug.Log($"MaxPlayers = {MaxPlayers}");
+
     }
 
 
@@ -259,6 +293,11 @@ public class DungeonUIManager : MonoBehaviour
             roomDBUploader.UploadRoom()
         );
 
+        aliveCoroutine =
+            StartCoroutine(
+                SendAliveLoop()
+            );
+
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
         RoomInfoObj.SetActive(false);
@@ -267,7 +306,7 @@ public class DungeonUIManager : MonoBehaviour
         if (GameModeManager.IsMultiplayer)
         {
             fusionLauncher.StartMatch(
-                RoomInfo.SelectedDungeon
+                RoomInfo.RoomId
             );
         }
         else
@@ -290,6 +329,11 @@ public class DungeonUIManager : MonoBehaviour
 
     public void MatchingLeaveButton()
     {
+        if (aliveCoroutine != null)
+        {
+            StopCoroutine(aliveCoroutine);
+        }
+
         StartCoroutine(
             roomDBUploader.DeleteRoom()
         );
@@ -306,12 +350,22 @@ public class DungeonUIManager : MonoBehaviour
         MatchingCautionObj.SetActive(false);
     }
 
-
     public void GameStartButton()
     {
-        MatchingObj.SetActive(false);
-        MatchingCautionObj.SetActive(false);
+        NetworkRunner runner =
+            FindObjectOfType<NetworkRunner>();
+
+        if (runner == null)
+            return;
+
+        if (runner.IsSharedModeMasterClient)
+        {
+            playerSpawner.SpawnAllPlayers(
+                runner
+            );
+        }
     }
+
     private void OnPasswordChanged(string value)
     {
         // 数字以外を除去
@@ -365,5 +419,26 @@ public class DungeonUIManager : MonoBehaviour
         Debug.Log(
             $"最大人数 : {MaxPlayers}人"
         );
+    }
+
+    private IEnumerator SendAliveLoop()
+    {
+        while (true)
+        {
+            yield return roomDBUploader.UpdateAlive();
+
+            yield return new WaitForSeconds(5f);
+        }
+    }
+
+    public void HideMatchingUI()
+    {
+        MatchingObj.SetActive(false);
+        MatchingCautionObj.SetActive(false);
+        MatchingPlayerObj.SetActive(false);
+
+        SelectCanvas.SetActive(false);
+        ScrolView.SetActive(false);
+        RoomInfoObj.SetActive(false);
     }
 }

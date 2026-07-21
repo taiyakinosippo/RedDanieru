@@ -76,4 +76,85 @@ public class RoomDBUploader : MonoBehaviour
 
         yield return request.SendWebRequest();
     }
+
+    public IEnumerator UpdateAlive()
+    {
+        WWWForm form = new WWWForm();
+
+        form.AddField(
+            "room_id",
+            RoomInfo.RoomId ?? ""
+        );
+
+        UnityWebRequest request =
+            UnityWebRequest.Post(
+                "http://localhost/RedDaniel/UpdateRoomAlive.php",
+                form
+            );
+
+        yield return request.SendWebRequest();
+
+        if (request.result ==
+            UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Alive更新");
+        }
+    }
+
+    public IEnumerator JoinRoom()
+    {
+        WWWForm form = new WWWForm();
+
+        form.AddField(
+            "room_id",
+            RoomInfo.RoomId
+        );
+
+        UnityWebRequest request =
+            UnityWebRequest.Post(
+                "http://localhost/RedDaniel/JoinRoom.php",
+                form
+            );
+
+        yield return request.SendWebRequest();
+
+        if (request.result ==
+            UnityWebRequest.Result.Success)
+        {
+            Debug.Log("人数追加成功");
+        }
+        else
+        {
+            Debug.LogError(request.error);
+        }
+    }
+
+    public IEnumerator LeaveRoom()
+    {
+        WWWForm form = new WWWForm();
+
+        form.AddField(
+            "room_id",
+            RoomInfo.RoomId
+        );
+
+        UnityWebRequest request =
+            UnityWebRequest.Post(
+                "http://localhost/RedDaniel/LeaveRoom.php",
+                form
+            );
+
+        yield return request.SendWebRequest();
+
+        if (request.result ==
+            UnityWebRequest.Result.Success)
+        {
+            Debug.Log("人数減少成功");
+        }
+        else
+        {
+            Debug.LogError(request.error);
+        }
+    }
+
 }
