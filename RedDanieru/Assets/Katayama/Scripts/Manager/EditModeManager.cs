@@ -6,18 +6,32 @@ public class EditModeManager : MonoBehaviour
 
     public EditMode CurrentMode { get; private set; } = EditMode.Dig;
 
-    void Awake()
+    private void Awake()
     {
         Instance = this;
     }
 
+    /// <summary>
+    /// 掘削モード
+    /// </summary>
     public void SetDigMode()
     {
         CurrentMode = EditMode.Dig;
     }
 
+    /// <summary>
+    /// 配置モード
+    /// </summary>
     public void SetPlaceMode()
     {
         CurrentMode = EditMode.Place;
+    }
+
+    /// <summary>
+    /// 削除モード
+    /// </summary>
+    public void SetDeleteMode()
+    {
+        CurrentMode = EditMode.Delete;
     }
 }

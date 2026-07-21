@@ -348,5 +348,38 @@ public class MapManager : MonoBehaviour
 
         placedObjects[pos.x, pos.y, pos.z] = obj;
         placedObjectTypes[pos.x, pos.y, pos.z] = type;
+
+        PlaceObject placeObject = obj.GetComponent<PlaceObject>();
+        if (placeObject != null)
+        {
+            placeObject.GridPosition = pos;
+        }
+    }
+
+    public void DeleteObject(Vector3Int pos)
+    {
+        // 範囲外
+        if (pos.x < 0 || pos.x >= width ||
+            pos.y < 0 || pos.y >= height ||
+            pos.z < 0 || pos.z >= depth)
+            return;
+
+        // オブジェクトがない
+        if (placedObjects[pos.x, pos.y, pos.z] == null)
+            return;
+
+        Destroy(placedObjects[pos.x, pos.y, pos.z]);
+
+        placedObjects[pos.x, pos.y, pos.z] = null;
+    }
+
+    public GameObject GetPlacedObject(Vector3Int pos)
+    {
+        if (pos.x < 0 || pos.x >= width ||
+            pos.y < 0 || pos.y >= height ||
+            pos.z < 0 || pos.z >= depth)
+            return null;
+
+        return placedObjects[pos.x, pos.y, pos.z];
     }
 }
