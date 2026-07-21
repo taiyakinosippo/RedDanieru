@@ -154,7 +154,12 @@
         144,
         145,
         146,
-        147
+        147,
+        148,
+        149,
+        150,
+        151,
+        152
       ],
       "DebugActionIndex": 0
     },
@@ -163,8 +168,8 @@
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
       "PayloadOffset": 116,
-      "PayloadLength": 23,
-      "PayloadDebugContentSnippet": "C:\\UnityData\\RedDanieru",
+      "PayloadLength": 28,
+      "PayloadDebugContentSnippet": "C:\\NetWorkProject\\RedDanieru",
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -179,8 +184,8 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 241,
-      "PayloadLength": 36470,
+      "PayloadOffset": 246,
+      "PayloadLength": 37127,
       "PayloadDebugContentSnippet": "-target:library\n-out:\"Library/",
       "Inputs": [],
       "InputFlags": [],
@@ -196,9 +201,9 @@
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.rsp2",
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 36814,
-      "PayloadLength": 36,
-      "PayloadDebugContentSnippet": "/pathmap:\"C:\\UnityData\\RedDani",
+      "PayloadOffset": 37476,
+      "PayloadLength": 41,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\NetWorkProject\\Re",
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -460,7 +465,12 @@
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/AndroidPlayer/Unity.Android.Gradle.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/AndroidPlayer/Unity.Android.Types.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.Apple.Extensions.Common.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Common.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.dll",
         "Library/PackageCache/com.unity.multiplayer.center@f3fb577b3546/Common/AnswerData.cs",
         "Library/PackageCache/com.unity.multiplayer.center@f3fb577b3546/Common/IOnboardingSection.cs",
         "Library/PackageCache/com.unity.multiplayer.center@f3fb577b3546/Common/IOnboardingSectionAnalyticsProvider.cs",
@@ -473,6 +483,11 @@
         "Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.rsp"
       ],
       "InputFlags": [
+        0,
+        0,
+        0,
+        0,
+        0,
         0,
         0,
         0,
@@ -745,7 +760,7 @@
         1,
         2,
         3,
-        132
+        137
       ],
       "ToUseDependencies": [
         1,
@@ -915,13 +930,18 @@
         128,
         129,
         130,
-        137,
-        138,
-        139,
+        131,
+        132,
+        133,
+        134,
+        135,
         142,
         143,
         144,
-        145
+        147,
+        148,
+        149,
+        150
       ],
       "DebugActionIndex": 6
     },
@@ -3509,6 +3529,27 @@
       "DebugActionIndex": 129
     },
     {
+      "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.WebGL.Extensions.dll_57018AE1C62AB045.mvfrm",
+      "DisplayName": "Checking for moved APIs",
+      "Action": "\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll\" \"Library\\Bee\\artifacts\\mvdfrm\\UnityEditor.WebGL.Extensions.dll_57018AE1C62AB045.mvfrm\" \"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\PlaybackEngines\\WebGLSupport\\UnityEditor.WebGL.Extensions.dll\"",
+      "Inputs": [
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll"
+      ],
+      "InputFlags": [
+        0,
+        0
+      ],
+      "Outputs": [
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.WebGL.Extensions.dll_57018AE1C62AB045.mvfrm"
+      ],
+      "OutputFlags": [
+        0
+      ],
+      "AllowUnexpectedOutput": true,
+      "DebugActionIndex": 130
+    },
+    {
       "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.WindowsStandalone.Extensions.dll_85C666C738A802B5.mvfrm",
       "DisplayName": "Checking for moved APIs",
       "Action": "\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll\" \"Library\\Bee\\artifacts\\mvdfrm\\UnityEditor.WindowsStandalone.Extensions.dll_85C666C738A802B5.mvfrm\" \"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\PlaybackEngines\\WindowsStandaloneSupport\\UnityEditor.WindowsStandalone.Extensions.dll\"",
@@ -3527,14 +3568,98 @@
         0
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 130
+      "DebugActionIndex": 131
+    },
+    {
+      "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.Apple.Extensions.Common.dll_7CFD2C50C6EB7F5D.mvfrm",
+      "DisplayName": "Checking for moved APIs",
+      "Action": "\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll\" \"Library\\Bee\\artifacts\\mvdfrm\\UnityEditor.Apple.Extensions.Common.dll_7CFD2C50C6EB7F5D.mvfrm\" \"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\PlaybackEngines\\iOSSupport\\UnityEditor.Apple.Extensions.Common.dll\"",
+      "Inputs": [
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.Apple.Extensions.Common.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll"
+      ],
+      "InputFlags": [
+        0,
+        0
+      ],
+      "Outputs": [
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.Apple.Extensions.Common.dll_7CFD2C50C6EB7F5D.mvfrm"
+      ],
+      "OutputFlags": [
+        0
+      ],
+      "AllowUnexpectedOutput": true,
+      "DebugActionIndex": 132
+    },
+    {
+      "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Common.dll_7C0FD3C2C2AD3980.mvfrm",
+      "DisplayName": "Checking for moved APIs",
+      "Action": "\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll\" \"Library\\Bee\\artifacts\\mvdfrm\\UnityEditor.iOS.Extensions.Common.dll_7C0FD3C2C2AD3980.mvfrm\" \"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\PlaybackEngines\\iOSSupport\\UnityEditor.iOS.Extensions.Common.dll\"",
+      "Inputs": [
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Common.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll"
+      ],
+      "InputFlags": [
+        0,
+        0
+      ],
+      "Outputs": [
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Common.dll_7C0FD3C2C2AD3980.mvfrm"
+      ],
+      "OutputFlags": [
+        0
+      ],
+      "AllowUnexpectedOutput": true,
+      "DebugActionIndex": 133
+    },
+    {
+      "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Xcode.dll_C46DA75401E719CC.mvfrm",
+      "DisplayName": "Checking for moved APIs",
+      "Action": "\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll\" \"Library\\Bee\\artifacts\\mvdfrm\\UnityEditor.iOS.Extensions.Xcode.dll_C46DA75401E719CC.mvfrm\" \"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\PlaybackEngines\\iOSSupport\\UnityEditor.iOS.Extensions.Xcode.dll\"",
+      "Inputs": [
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll"
+      ],
+      "InputFlags": [
+        0,
+        0
+      ],
+      "Outputs": [
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Xcode.dll_C46DA75401E719CC.mvfrm"
+      ],
+      "OutputFlags": [
+        0
+      ],
+      "AllowUnexpectedOutput": true,
+      "DebugActionIndex": 134
+    },
+    {
+      "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.dll_0A4543C1A63A3925.mvfrm",
+      "DisplayName": "Checking for moved APIs",
+      "Action": "\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll\" \"Library\\Bee\\artifacts\\mvdfrm\\UnityEditor.iOS.Extensions.dll_0A4543C1A63A3925.mvfrm\" \"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\PlaybackEngines\\iOSSupport\\UnityEditor.iOS.Extensions.dll\"",
+      "Inputs": [
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll"
+      ],
+      "InputFlags": [
+        0,
+        0
+      ],
+      "Outputs": [
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.dll_0A4543C1A63A3925.mvfrm"
+      ],
+      "OutputFlags": [
+        0
+      ],
+      "AllowUnexpectedOutput": true,
+      "DebugActionIndex": 135
     },
     {
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Common.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 36962,
-      "PayloadLength": 10818,
+      "PayloadOffset": 37629,
+      "PayloadLength": 11262,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
       "InputFlags": [],
@@ -3544,7 +3669,7 @@
       "OutputFlags": [
         2
       ],
-      "DebugActionIndex": 131
+      "DebugActionIndex": 136
     },
     {
       "Annotation": "MovedFromExtractor-Combine Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.dll.mvfrm",
@@ -3675,11 +3800,21 @@
         "Library/Bee/artifacts/mvdfrm/Unity.Android.Gradle.dll_A8E3A6F104AF8303.mvfrm",
         "Library/Bee/artifacts/mvdfrm/Unity.Android.Types.dll_B6FD06334558A3E9.mvfrm",
         "Library/Bee/artifacts/mvdfrm/UnityEditor.Android.Extensions.dll_A8BCDA173589AF23.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.WebGL.Extensions.dll_57018AE1C62AB045.mvfrm",
         "Library/Bee/artifacts/mvdfrm/UnityEditor.WindowsStandalone.Extensions.dll_85C666C738A802B5.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.Apple.Extensions.Common.dll_7CFD2C50C6EB7F5D.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Common.dll_7C0FD3C2C2AD3980.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Xcode.dll_C46DA75401E719CC.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.dll_0A4543C1A63A3925.mvfrm",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll",
         "Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Common.dll.mvfrm.rsp"
       ],
       "InputFlags": [
+        0,
+        0,
+        0,
+        0,
+        0,
         0,
         0,
         0,
@@ -3940,18 +4075,23 @@
         128,
         129,
         130,
-        131
+        131,
+        132,
+        133,
+        134,
+        135,
+        136
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 132
+      "DebugActionIndex": 137
     },
     {
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.UnityAdditionalFile.txt",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.UnityAdditionalFile.txt",
       "ActionType": "WriteFile",
-      "PayloadOffset": 47902,
-      "PayloadLength": 23,
-      "PayloadDebugContentSnippet": "C:\\UnityData\\RedDanieru",
+      "PayloadOffset": 49013,
+      "PayloadLength": 28,
+      "PayloadDebugContentSnippet": "C:\\NetWorkProject\\RedDanieru",
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -3960,14 +4100,14 @@
       "OutputFlags": [
         2
       ],
-      "DebugActionIndex": 133
+      "DebugActionIndex": 138
     },
     {
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 48027,
-      "PayloadLength": 41693,
+      "PayloadOffset": 49143,
+      "PayloadLength": 42350,
       "PayloadDebugContentSnippet": "-target:library\n-out:\"Library/",
       "Inputs": [],
       "InputFlags": [],
@@ -3977,15 +4117,15 @@
       "OutputFlags": [
         2
       ],
-      "DebugActionIndex": 134
+      "DebugActionIndex": 139
     },
     {
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.rsp2",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.rsp2",
       "ActionType": "WriteFile",
-      "PayloadOffset": 89823,
-      "PayloadLength": 36,
-      "PayloadDebugContentSnippet": "/pathmap:\"C:\\UnityData\\RedDani",
+      "PayloadOffset": 91596,
+      "PayloadLength": 41,
+      "PayloadDebugContentSnippet": "/pathmap:\"C:\\NetWorkProject\\Re",
       "Inputs": [],
       "InputFlags": [],
       "Outputs": [
@@ -3994,7 +4134,7 @@
       "OutputFlags": [
         2
       ],
-      "DebugActionIndex": 135
+      "DebugActionIndex": 140
     },
     {
       "Annotation": "Csc Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.dll (+2 others)",
@@ -4127,7 +4267,12 @@
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/AndroidPlayer/Unity.Android.Gradle.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/AndroidPlayer/Unity.Android.Types.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.Apple.Extensions.Common.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Common.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll",
+        "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/UnityReferenceAssemblies/unity-4.8-api/Facades/Microsoft.Win32.Primitives.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/UnityReferenceAssemblies/unity-4.8-api/Facades/System.AppContext.dll",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/UnityReferenceAssemblies/unity-4.8-api/Facades/System.Buffers.dll",
@@ -4596,6 +4741,11 @@
         0,
         0,
         0,
+        0,
+        0,
+        0,
+        0,
+        0,
         8
       ],
       "Outputs": [
@@ -4610,14 +4760,14 @@
       ],
       "ToBuildDependencies": [
         4,
-        133,
-        134,
-        135,
-        141
+        138,
+        139,
+        140,
+        146
       ],
       "ToUseDependencies": [
-        133,
-        135
+        138,
+        140
       ],
       "AllowUnexpectedOutput": true,
       "Env": [
@@ -4627,7 +4777,7 @@
         }
       ],
       "CachingMode": "ByDirectInputs",
-      "DebugActionIndex": 136
+      "DebugActionIndex": 141
     },
     {
       "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/Unity.Multiplayer.Center.Common.ref.dll_EE36537354EA42C8.mvfrm",
@@ -4651,7 +4801,7 @@
         4
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 137
+      "DebugActionIndex": 142
     },
     {
       "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEngine.AMDModule.dll_6A8CC27F24DE8345.mvfrm",
@@ -4672,7 +4822,7 @@
         0
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 138
+      "DebugActionIndex": 143
     },
     {
       "Annotation": "MovedFromExtractor Library/Bee/artifacts/mvdfrm/UnityEngine.NVIDIAModule.dll_B9B9E15CB52C3FF2.mvfrm",
@@ -4693,14 +4843,14 @@
         0
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 139
+      "DebugActionIndex": 144
     },
     {
       "Annotation": "WriteText Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.dll.mvfrm.rsp",
       "DisplayName": "Writing Unity.Multiplayer.Center.Editor.dll.mvfrm.rsp",
       "ActionType": "WriteFile",
-      "PayloadOffset": 89971,
-      "PayloadLength": 11072,
+      "PayloadOffset": 91749,
+      "PayloadLength": 11516,
       "PayloadDebugContentSnippet": "Library\\Bee\\artifacts\\mvdfrm\\U",
       "Inputs": [],
       "InputFlags": [],
@@ -4710,7 +4860,7 @@
       "OutputFlags": [
         2
       ],
-      "DebugActionIndex": 140
+      "DebugActionIndex": 145
     },
     {
       "Annotation": "MovedFromExtractor-Combine Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.dll.mvfrm",
@@ -4844,11 +4994,21 @@
         "Library/Bee/artifacts/mvdfrm/Unity.Android.Gradle.dll_A8E3A6F104AF8303.mvfrm",
         "Library/Bee/artifacts/mvdfrm/Unity.Android.Types.dll_B6FD06334558A3E9.mvfrm",
         "Library/Bee/artifacts/mvdfrm/UnityEditor.Android.Extensions.dll_A8BCDA173589AF23.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.WebGL.Extensions.dll_57018AE1C62AB045.mvfrm",
         "Library/Bee/artifacts/mvdfrm/UnityEditor.WindowsStandalone.Extensions.dll_85C666C738A802B5.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.Apple.Extensions.Common.dll_7CFD2C50C6EB7F5D.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Common.dll_7C0FD3C2C2AD3980.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.Xcode.dll_C46DA75401E719CC.mvfrm",
+        "Library/Bee/artifacts/mvdfrm/UnityEditor.iOS.Extensions.dll_0A4543C1A63A3925.mvfrm",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/Compilation/ApiUpdater/ApiUpdater.MovedFromExtractor.dll",
         "Library/Bee/artifacts/1900b0aE.dag/Unity.Multiplayer.Center.Editor.dll.mvfrm.rsp"
       ],
       "InputFlags": [
+        0,
+        0,
+        0,
+        0,
+        0,
         0,
         0,
         0,
@@ -5112,13 +5272,18 @@
         128,
         129,
         130,
-        137,
-        138,
-        139,
-        140
+        131,
+        132,
+        133,
+        134,
+        135,
+        142,
+        143,
+        144,
+        145
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 141
+      "DebugActionIndex": 146
     },
     {
       "Annotation": "CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Common.dll",
@@ -5139,7 +5304,7 @@
       "ToBuildDependencies": [
         4
       ],
-      "DebugActionIndex": 142
+      "DebugActionIndex": 147
     },
     {
       "Annotation": "CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Common.pdb",
@@ -5160,7 +5325,7 @@
       "ToBuildDependencies": [
         4
       ],
-      "DebugActionIndex": 143
+      "DebugActionIndex": 148
     },
     {
       "Annotation": "CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Editor.dll",
@@ -5179,9 +5344,9 @@
         2
       ],
       "ToBuildDependencies": [
-        136
+        141
       ],
-      "DebugActionIndex": 144
+      "DebugActionIndex": 149
     },
     {
       "Annotation": "CopyFiles Library/ScriptAssemblies/Unity.Multiplayer.Center.Editor.pdb",
@@ -5200,14 +5365,14 @@
         2
       ],
       "ToBuildDependencies": [
-        136
+        141
       ],
-      "DebugActionIndex": 145
+      "DebugActionIndex": 150
     },
     {
       "Annotation": "BuildPlayerDataGenerator Library/BuildPlayerData/Editor/TypeDb-All.json",
       "DisplayName": "Extracting script serialization layouts",
-      "Action": "\"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\UnityData\\RedDanieru\\Library\\ScriptAssemblies\\Unity.Multiplayer.Center.Common.dll\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netfx\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netstandard\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\EditorExtensions\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\Extensions\\2.0.0\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\ref\\2.1.0\" -s=\"C:\\UnityData\\RedDanieru\\Library\\ScriptAssemblies\" -o=\"Library/BuildPlayerData/Editor\" -rn=\"\" -tn=\"TypeDb-All.json\"",
+      "Action": "\"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data\\Tools\\netcorerun\\netcorerun.exe\" \"C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe\" -a=\"C:\\NetWorkProject\\RedDanieru\\Library\\ScriptAssemblies\\Unity.Multiplayer.Center.Common.dll\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\Managed\\UnityEngine\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netfx\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\compat\\2.1.0\\shims\\netstandard\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\EditorExtensions\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\Extensions\\2.0.0\" -s=\"C:\\Program Files\\Unity\\Hub\\Editor\\6000.0.78f1\\Editor\\Data\\NetStandard\\ref\\2.1.0\" -s=\"C:\\NetWorkProject\\RedDanieru\\Library\\ScriptAssemblies\" -o=\"Library/BuildPlayerData/Editor\" -rn=\"\" -tn=\"TypeDb-All.json\"",
       "Inputs": [
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/netcorerun/netcorerun.exe",
         "C:/Program Files/Unity/Hub/Editor/6000.0.78f1/Editor/Data/Tools/BuildPlayerDataGenerator/BuildPlayerDataGenerator.exe",
@@ -5225,10 +5390,10 @@
         0
       ],
       "ToBuildDependencies": [
-        142
+        147
       ],
       "AllowUnexpectedOutput": true,
-      "DebugActionIndex": 146
+      "DebugActionIndex": 151
     },
     {
       "Annotation": "ScriptAssembliesAndTypeDB",
@@ -5239,9 +5404,9 @@
       "OutputFlags": [],
       "ToBuildDependencies": [
         6,
-        146
+        151
       ],
-      "DebugActionIndex": 147
+      "DebugActionIndex": 152
     }
   ],
   "FileSignatures": [
@@ -5397,7 +5562,7 @@
         "NamedNodes": {
           "all_tundra_nodes": 0,
           "ScriptAssemblies": 6,
-          "ScriptAssembliesAndTypeDB": 147
+          "ScriptAssembliesAndTypeDB": 152
         }
 ,  "DefaultNodes": [
     0
@@ -5405,6 +5570,6 @@
   "SharedResources": [],
   "Scanners": [],
   "Identifier": "Library/Bee/1900b0aE.dag.json",
-  "PayloadsFile": "C:/UnityData/RedDanieru/Library/Bee/1900b0aE.dag.payloads",
+  "PayloadsFile": "C:/NetWorkProject/RedDanieru/Library/Bee/1900b0aE.dag.payloads",
   "RelativePathToRoot": "../.."
 }
