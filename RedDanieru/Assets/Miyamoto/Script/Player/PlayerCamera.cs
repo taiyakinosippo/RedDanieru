@@ -1,12 +1,11 @@
-using StarterAssets;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 ///<summry>
-///
+///プレイヤーのカメラを制御するためのスクリプト
 ///</summry>
-namespace Player
+namespace StarterAssets
 {
     public class PlayerCamera : MonoBehaviour
     {
@@ -39,59 +38,28 @@ namespace Player
         private float _verticalVelocity;                 // プレイヤーの上下速度
 
 
-#if ENABLE_INPUT_SYSTEM
-        private PlayerInput _playerInput;
-#endif
-        private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのStarterAssetsInputsコンポーネント
-
         private const float _threshold = 0.01f;          // 入力の大きさを判定するための定数
 
-        private GameObject currentCamera;        　　　　// 現在のカメラを格納する変数
-        private bool isFirstPerson = false;              // 現在のカメラが一人称視点かどうかを判定する変数
-
-        // 現在の入力デバイスがマウスかどうかを判定するプロパティ
-        private bool IsCurrentDeviceMouse
-        {
-            get
-            {
-#if ENABLE_INPUT_SYSTEM
-                return _playerInput.currentControlScheme == "KeyboardMouse";
-#else
-				return false;
-#endif
-            }
-        }
-
-        //カメラが追従するオブジェクトを取得するためのAwakeメソッド
+        public GameObject currentCamera { get; private set; }        　　　　// 現在のカメラを格納する変数
+        public bool isFirstPerson { get; private set; } = false;              // 現在のカメラが一人称視点かどうかを判定する変数
+        private PlayerInputPriority _actionPriority;
+        //初期化
         private void Awake()
         {
-            // get a reference to our main camera
-            if (currentCamera == null)
-            {
-                currentCamera = GameObject.FindGameObjectWithTag("MainCamera");
-            }
-        }
-
-        //初期化
-        private void Start()
-        {
-            // 初期化時にカメラの角度を取得
+            // 初期化時にカメラを取得
             currentCamera = ThirdPersonPerspective.activeSelf
             ? ThirdPersonPerspective : FirstPersonPerspective;
 
+            // 初期化時にカメラの角度を取得
             _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
 
-            // プレイヤーの入力を制御するためのStarterAssetsInputsコンポーネント
-            _input = GetComponent<StarterAssetsInputs>();
-#if ENABLE_INPUT_SYSTEM 
-            // プレイヤーの入力を制御するためのPlayerInputコンポーネント
-            _playerInput = GetComponent<PlayerInput>();
-#else
-			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
-#endif
+            _actionPriority = GetComponent<PlayerInputPriority>();
         }
 
-      　void CameraChange()
+        //-------------------------------------------------
+        //カメラを一人称か3人称に切り替える
+        //-------------------------------------------------
+      　public void CameraChange(StarterAssetsInputs _input)
         {
             _input.cameraChange = false;
             isFirstPerson = !isFirstPerson;
@@ -105,15 +73,19 @@ namespace Player
 
             _cinemachineTargetPitch = currentCamera.transform.rotation.eulerAngles.x;
 
-            //EndAction();
+            _actionPriority.EndAction();
         }
-        void CameraLateUpdate()
+
+        //------------------------------------------------
+        //カメラの向きを変更する
+        //------------------------------------------------
+        public void CameraLateUpdate(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
         {
             // カメラが動かせれていないかつロックされていないかどうか
             if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
             {
                 //マウスで操作している場合は1.0f、コントローラーで操作している場合はTime.deltaTimeを使用する
-                float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+                float deltaTimeMultiplier = _IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 
                 // カメラの左右角度を更新する
                 _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
@@ -129,11 +101,10 @@ namespace Player
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
             // 画面を回転させる
-            currentCamera.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,
-                _cinemachineTargetYaw, 0.0f);
+            currentCamera.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,_cinemachineTargetYaw, 0.0f);
         }
 
-                //-----------------------------------------------------------
+        //-----------------------------------------------------------
         // 角度を制限する関数
         //-----------------------------------------------------------
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)

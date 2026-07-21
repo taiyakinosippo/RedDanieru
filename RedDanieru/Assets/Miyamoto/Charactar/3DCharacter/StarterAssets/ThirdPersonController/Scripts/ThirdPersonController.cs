@@ -126,7 +126,7 @@ namespace StarterAssets
 #endif
         private Animator _animator;　　　　　　　　　　　// アニメーションを制御するためのAnimatorコンポーネント
         private CharacterController _controller;         // プレイヤーの移動を制御するためのCharacterControllerコンポーネント
-        private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのStarterAssetsInputsコンポーネント
+        //private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのStarterAssetsInputsコンポーネント
        
         private const float _threshold = 0.01f;          // 入力の大きさを判定するための定数
 
@@ -136,7 +136,7 @@ namespace StarterAssets
         private bool isFirstPerson = false;              // 現在のカメラが一人称視点かどうかを判定する変数
 
         //行動管理
-
+        private StarterAssetsInputs _input;
         // 現在実行中のアクション
         private ActionType currentActionType = ActionType.None;
 

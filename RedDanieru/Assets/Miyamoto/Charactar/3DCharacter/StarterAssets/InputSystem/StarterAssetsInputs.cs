@@ -1,6 +1,7 @@
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 #endif
 
 namespace StarterAssets
@@ -14,6 +15,7 @@ namespace StarterAssets
 		public bool sprint;
 		public bool cameraChange;
 		public bool sticker;
+		public bool debuger;
 
         [Header("Movement Settings")]
 		public bool analogMovement;
@@ -63,6 +65,11 @@ namespace StarterAssets
             Debug.Log("CameraChange");
             CameraChangeInput(value.isPressed); 
         }
+        public void OnDebug(InputValue value)
+        {
+            Debug.Log("Debug");
+            DebugInput(value.isPressed);
+        }
 #endif
 
 
@@ -99,6 +106,11 @@ namespace StarterAssets
 		{
             cameraChange = newCameraChangeState;
         }
+
+		public void DebugInput(bool newDebugState)
+		{
+			debuger = newDebugState;
+		}
 
         private void OnApplicationFocus(bool hasFocus)
 		{
