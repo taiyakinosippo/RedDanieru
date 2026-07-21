@@ -1,5 +1,6 @@
 public enum EditMode
 {
     Dig,
-    Place
+    Place,
+    Delete
 }
