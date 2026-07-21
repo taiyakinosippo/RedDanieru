@@ -2,49 +2,109 @@ using UnityEngine;
 
 public class PlaceManager : MonoBehaviour
 {
-    // メインカメラ
     [SerializeField] private Camera mainCamera;
-
-    // マップ管理
     [SerializeField] private MapManager mapManager;
-
-    // 保存パネル
+    [SerializeField] private UndoManager undoManager;
     [SerializeField] private GameObject savePanel;
+
+    private FloorBlock currentFloor;
+    private FloorBlock lastPlaceFloor;
+
+    private bool isEditing = false;
 
     void Update()
     {
-        // 保存画面表示中は配置しない
         if (savePanel.activeSelf)
             return;
 
-        // 左クリックしたら配置
-        if (Input.GetMouseButtonDown(0))
+        if (EditModeManager.Instance.CurrentMode != EditMode.Place)
+        {
+            ClearSelection();
+            return;
+        }
+
+        HighlightFloor();
+
+        if (Input.GetMouseButton(0))
         {
             Place();
+        }
+
+        if (Input.GetMouseButtonUp(0))
+        {
+            if (isEditing)
+            {
+                undoManager.EndEdit();
+                isEditing = false;
+            }
+
+            lastPlaceFloor = null;
         }
     }
 
     /// <summary>
-    /// 床をクリックした位置へオブジェクトを配置する
+    /// マウスカーソル下の床を選択
     /// </summary>
-    void Place()
+    private void HighlightFloor()
     {
-        // マウス位置からレイを飛ばす
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-        // オブジェクトに当たらなければ終了
-        if (!Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            FloorBlock floor = hit.collider.GetComponent<FloorBlock>();
+
+            if (floor != currentFloor)
+            {
+                if (currentFloor != null)
+                    currentFloor.Deselect();
+
+                currentFloor = floor;
+
+                if (currentFloor != null)
+                    currentFloor.Select();
+            }
+        }
+        else
+        {
+            ClearSelection();
+        }
+    }
+
+    /// <summary>
+    /// オブジェクト配置
+    /// </summary>
+    private void Place()
+    {
+        if (currentFloor == null)
             return;
 
-        // 床か判定
-        FloorBlock floor = hit.collider.GetComponent<FloorBlock>();
-
-        if (floor == null)
+        // 同じ場所は無視
+        if (currentFloor == lastPlaceFloor)
             return;
 
-        // パレットで選択中のオブジェクトを配置
+        // 最初の1回だけ保存
+        if (!isEditing)
+        {
+            undoManager.BeginEdit();
+            isEditing = true;
+        }
+
+        lastPlaceFloor = currentFloor;
+
         mapManager.PlaceObject(
-            floor.GridPosition,
+            currentFloor.GridPosition,
             ObjectPaletteManager.Instance.CurrentObject);
+    }
+
+    /// <summary>
+    /// 選択解除
+    /// </summary>
+    private void ClearSelection()
+    {
+        if (currentFloor != null)
+        {
+            currentFloor.Deselect();
+            currentFloor = null;
+        }
     }
 }

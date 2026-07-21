@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class DigManager : MonoBehaviour
 {
@@ -21,23 +20,35 @@ public class DigManager : MonoBehaviour
     // 保存パネル
     [SerializeField] private GameObject savePanel;
 
+    // Undo管理
+    [SerializeField] private UndoManager undoManager;
+
+    // 編集中か
+    private bool isEditing = false;
+
+
     void Update()
     {
         // 保存パネルが開いている間は掘削しない
         if (savePanel.activeSelf)
             return;
 
+        if (EditModeManager.Instance.CurrentMode != EditMode.Dig)
+            return;
+
         // マウスカーソル下の壁を選択
         HighlightWall();
 
-        // クリックした瞬間は必ず1マス掘る
+
+        // クリックした瞬間
         if (Input.GetMouseButtonDown(0))
         {
             Dig();
             lastDigWall = currentWall;
         }
 
-        // クリックしたままマウスが動いたら掘る
+
+        // ドラッグ中
         if (Input.GetMouseButton(0))
         {
             if (Input.mousePosition != lastMousePosition)
@@ -50,41 +61,45 @@ public class DigManager : MonoBehaviour
             }
         }
 
+
         // マウス座標を保存
         lastMousePosition = Input.mousePosition;
 
-        // ボタンを離したらリセット
+
+        // 離したらリセット
         if (Input.GetMouseButtonUp(0))
         {
+            if (isEditing)
+            {
+                undoManager.EndEdit();
+                isEditing = false;
+            }
+
             lastDigWall = null;
         }
     }
 
+
+    /// <summary>
     /// マウスカーソルが乗っている壁を選択状態にする
+    /// </summary>
     void HighlightWall()
     {
-        // マウス位置からレイを飛ばす
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-        // レイがオブジェクトに当たったか判定
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            // 当たったオブジェクトからWallBlockを取得
             WallBlock wall = hit.collider.GetComponent<WallBlock>();
 
-            // 前回選択していた壁と違う場合
             if (wall != currentWall)
             {
-                // 前回の壁の選択状態を解除
                 if (currentWall != null)
                 {
                     currentWall.Deselect();
                 }
 
-                // 新しい壁を選択
                 currentWall = wall;
 
-                // 壁が存在する場合は選択状態にする
                 if (currentWall != null)
                 {
                     currentWall.Select();
@@ -93,7 +108,6 @@ public class DigManager : MonoBehaviour
         }
         else
         {
-            // 壁以外を見ている場合は選択解除
             if (currentWall != null)
             {
                 currentWall.Deselect();
@@ -102,20 +116,24 @@ public class DigManager : MonoBehaviour
         }
     }
 
+
+    /// <summary>
     /// 選択中の壁を掘る
+    /// </summary>
     void Dig()
     {
-        Debug.Log("Dig開始");
-
         if (currentWall == null)
-        {
-            Debug.Log("壁未選択");
             return;
+
+
+        // 最初に掘る瞬間だけ保存
+        if (!isEditing)
+        {
+            undoManager.BeginEdit();
+            isEditing = true;
         }
 
-        Debug.Log("掘る壁 : " + currentWall.GridPosition);
 
-        // 掘る処理はMapManagerへ依頼
         mapManager.Dig(currentWall.GridPosition);
 
         currentWall = null;

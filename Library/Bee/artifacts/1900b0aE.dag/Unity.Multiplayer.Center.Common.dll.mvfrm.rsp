@@ -122,4 +122,9 @@ Library\Bee\artifacts\mvdfrm\UnityEngine.dll_6E0D0F5D12EAD7EF.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.Android.Gradle.dll_A8E3A6F104AF8303.mvfrm
 Library\Bee\artifacts\mvdfrm\Unity.Android.Types.dll_B6FD06334558A3E9.mvfrm
 Library\Bee\artifacts\mvdfrm\UnityEditor.Android.Extensions.dll_A8BCDA173589AF23.mvfrm
+Library\Bee\artifacts\mvdfrm\UnityEditor.WebGL.Extensions.dll_57018AE1C62AB045.mvfrm
 Library\Bee\artifacts\mvdfrm\UnityEditor.WindowsStandalone.Extensions.dll_85C666C738A802B5.mvfrm
+Library\Bee\artifacts\mvdfrm\UnityEditor.Apple.Extensions.Common.dll_7CFD2C50C6EB7F5D.mvfrm
+Library\Bee\artifacts\mvdfrm\UnityEditor.iOS.Extensions.Common.dll_7C0FD3C2C2AD3980.mvfrm
+Library\Bee\artifacts\mvdfrm\UnityEditor.iOS.Extensions.Xcode.dll_C46DA75401E719CC.mvfrm
+Library\Bee\artifacts\mvdfrm\UnityEditor.iOS.Extensions.dll_0A4543C1A63A3925.mvfrm
