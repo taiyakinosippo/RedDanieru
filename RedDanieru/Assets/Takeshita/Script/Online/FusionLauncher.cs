@@ -3,21 +3,72 @@ using UnityEngine;
 
 public class FusionLauncher : MonoBehaviour
 {
-    async void Start()
+    [SerializeField]
+    private GameObject soloPlayerPrefab;
+
+    [SerializeField]
+    private Transform spawnPoint;
+
+    [SerializeField]
+    private NetworkRunner runner;
+
+    private void Awake()
     {
-       
-        var runner = gameObject.AddComponent<NetworkRunner>();
+        DontDestroyOnLoad(gameObject);
+    }
+
+    public void StartSolo()
+    {
+        Instantiate(
+            soloPlayerPrefab,
+            spawnPoint.position,
+            spawnPoint.rotation
+        );
+
+        Debug.Log("ソロプレイヤー生成");
+    }
+
+    public async void StartMatch(string roomName)
+    {
+        if (runner == null)
+        {
+            GameObject runnerObj =
+                new GameObject("NetworkRunner");
+
+            runner =
+                runnerObj.AddComponent<NetworkRunner>();
+        }
 
         runner.ProvideInput = true;
 
-        var spawner = GetComponent<PlayerSpawner>();
-        runner.AddCallbacks(spawner);
+        var result =
+            await runner.StartGame(
+                new StartGameArgs()
+                {
+                    GameMode = GameMode.Shared,
+                    SessionName = roomName
+                });
 
-        var result = await runner.StartGame(new StartGameArgs
+        if (result.Ok)
         {
-            GameMode = GameMode.Shared,
-            SessionName = "Room"
-        });
+            Debug.Log("ルーム参加成功");
+        }
+    }
 
+    public async void CancelMatch()
+    {
+        if (runner == null)
+        {
+            Debug.Log("Runnerなし");
+            return;
+        }
+
+        await runner.Shutdown();
+
+        //Destroy(runner);
+
+        runner = null;
+
+        Debug.Log("マッチングを中止しました");
     }
 }
