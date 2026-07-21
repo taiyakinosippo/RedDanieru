@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
@@ -6,7 +7,7 @@ using UnityEngine.Windows;
 /// <summary>
 /// アニメーションを管理するためのスクリプト
 /// </summary>
-namespace StarterAssets
+namespace Player
 {
     public class PlayerAnimation : MonoBehaviour
     {
@@ -25,6 +26,7 @@ namespace StarterAssets
         private bool _hasAnimator;                       // Animatorコンポーネントが存在するかどうかを判定するための変数
         private PlayerInputPriority _actionPriority;
         private StickerCheck        _stickerCheck;
+        private NetworkMecanimAnimator _networkAnimator;
 
         //----------------------------------------------------------
         //初期化
@@ -41,6 +43,7 @@ namespace StarterAssets
 
             _stickerCheck = GetComponent<StickerCheck>();
 
+            _networkAnimator = GetComponent<NetworkMecanimAnimator>();
             //アニメーションをIDに変換
             AssignAnimationIDs();
         }

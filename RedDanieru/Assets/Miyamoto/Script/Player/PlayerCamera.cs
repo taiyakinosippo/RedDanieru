@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 ///<summry>
 ///プレイヤーのカメラを制御するためのスクリプト
 ///</summry>
-namespace StarterAssets
+namespace Player
 {
     public class PlayerCamera : MonoBehaviour
     {
@@ -57,9 +57,20 @@ namespace StarterAssets
         }
 
         //-------------------------------------------------
+        // 相手プレイヤーのカメラを無効にする
+        //-------------------------------------------------
+        public void DisableCamera()
+        {
+            if (ThirdPersonPerspective != null)
+                ThirdPersonPerspective.SetActive(false);
+
+            if (FirstPersonPerspective != null)
+                FirstPersonPerspective.SetActive(false);
+        }
+        //-------------------------------------------------
         //カメラを一人称か3人称に切り替える
         //-------------------------------------------------
-      　public void CameraChange(StarterAssetsInputs _input)
+        public void CameraChange(StarterAssetsInputs _input)
         {
             _input.cameraChange = false;
             isFirstPerson = !isFirstPerson;
@@ -114,5 +125,6 @@ namespace StarterAssets
             if (lfAngle > 360f) lfAngle -= 360f;
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
         }
+       
     }
 }

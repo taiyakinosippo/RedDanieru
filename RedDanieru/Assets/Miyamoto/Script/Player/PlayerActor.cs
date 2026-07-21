@@ -3,13 +3,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using static UnityEngine.Rendering.DebugUI;
+using Fusion;
 #endif
-namespace StarterAssets
+namespace Player
 {
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class PlayerActor : MonoBehaviour
+    public class PlayerActor : MonoBehaviour/*NetworkBehaviour*/
     {
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
@@ -21,6 +22,7 @@ namespace StarterAssets
         private PlayerCamera        _playerCamera;
         private PlayerMovement      _playerMovement;
         private StickerCheck        _stickerCheck;
+        private NetworkMecanimAnimator _networkAnimator;
 
         private bool _debugMode = false;
 
@@ -60,7 +62,68 @@ namespace StarterAssets
             _stickerCheck　= GetComponent<StickerCheck>();
         }
 
-        private void FixedUpdate()
+        //public override void Spawned()
+        //{
+        //    _networkAnimator = GetComponent<NetworkMecanimAnimator>();
+
+        //    if (!HasInputAuthority)
+        //    {
+        //        // 相手キャラは入力禁止
+        //        if (_playerInput != null)
+        //            _playerInput.enabled = false;
+
+        //        _playerCamera.DisableCamera();
+        //    }
+
+        //    Debug.Log(
+        //        $"{gameObject.name} Authority={HasInputAuthority}"
+        //    );
+        //}
+
+        //public override void FixedUpdateNetwork()
+        //{
+        //    //コンポーネントを取得できているか
+        //    _animation.AnimatorComPonent();
+
+        //    // 地面にいるかどうかの判定
+        //    _playerMovement.GroundedCheck();
+
+        //    // 入力を取得
+        //    _actionPriority.CheckInput(_input, _playerMovement.Grounded);
+
+
+        //    Debug.Log(_actionPriority.currentActionType);
+
+        //    if (_actionPriority.currentActionType == ActionType.Move ||
+        //        _actionPriority.currentActionType == ActionType.None || 
+        //        _actionPriority.currentActionType == ActionType.Jump)
+        //    {
+        //        // プレイヤーの移動処理
+        //        _playerMovement.PlayerMove(_input);
+
+        //        // ジャンプと重力の処理
+        //        _playerMovement.PlayerJumpAndGravity(_input);
+        //    }
+
+        //    if (_actionPriority.currentActionType == ActionType.Sticker)
+        //    {
+        //        // プレイヤーのスティッカー使用処理
+        //        _stickerCheck.StickerAndWallCheck(_input);
+        //    }
+
+        //    if (_actionPriority.currentActionType == ActionType.Attack)
+        //    {
+        //        // プレイヤーの攻撃処理
+        //        _playerAttack.Attack(_input);
+        //    }
+
+        //    if (_actionPriority.currentActionType == ActionType.CameraChange)
+        //    {
+        //        // カメラ変更処理
+        //        _playerCamera.CameraChange(_input);
+        //    }
+        //}
+        public  void FixedUpdate()
         {
             //コンポーネントを取得できているか
             _animation.AnimatorComPonent();
@@ -75,7 +138,7 @@ namespace StarterAssets
             Debug.Log(_actionPriority.currentActionType);
 
             if (_actionPriority.currentActionType == ActionType.Move ||
-                _actionPriority.currentActionType == ActionType.None || 
+                _actionPriority.currentActionType == ActionType.None ||
                 _actionPriority.currentActionType == ActionType.Jump)
             {
                 // プレイヤーの移動処理

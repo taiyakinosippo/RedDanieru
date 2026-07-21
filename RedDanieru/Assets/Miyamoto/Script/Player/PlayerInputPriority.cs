@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Windows;
-namespace StarterAssets
+
+namespace Player
 {
     public class PlayerInputPriority : MonoBehaviour
     {

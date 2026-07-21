@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 ///<summry>
 ///プレイヤーの基本的な動きを処理するスクリプト(歩く走るジャンプする等)
 ///</summry>>
-namespace StarterAssets
+namespace Player
 {
     [RequireComponent(typeof(CharacterController))]
     public class PlayerMovement : MonoBehaviour

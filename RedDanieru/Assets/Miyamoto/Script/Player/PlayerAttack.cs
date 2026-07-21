@@ -5,7 +5,7 @@ using UnityEngine.Windows;
 ///<summry>
 ///プレイヤーの攻撃を制御するためのスクリプト
 ///</summry>
-namespace StarterAssets
+namespace Player
 {
     public class PlayerAttack : MonoBehaviour
     {
