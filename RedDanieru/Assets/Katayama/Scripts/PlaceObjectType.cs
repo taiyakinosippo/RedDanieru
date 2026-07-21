@@ -1,7 +1,7 @@
 /// 配置するオブジェクト
 public enum PlaceObjectType : byte
 {
-    None,           // 0
+    Block,          // 0
     Chest,          // 1
     Enemy,          // 2
     Trap,           // 3
