@@ -27,6 +27,7 @@ namespace Player
             if (!Grounded)
             {
                 _input.attack = false;
+                _input.sticker = false;
             }
 
             if (_input.attack && Grounded)

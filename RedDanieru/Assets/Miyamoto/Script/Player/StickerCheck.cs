@@ -90,6 +90,7 @@ namespace Player
                     if (isWallDetected)
                     {
                         //ステッカーを持っているかの処理をここに書く
+                        _playerAnimation.PlayerStickerPasteAnimator();
                         Debug.Log("目の前に壁がありまーす");
                         _actionPriority.EndAction();
                         isWallDetected = false;
@@ -133,6 +134,7 @@ namespace Player
                     if (isWallDetected)
                     {
                         //ステッカーを持っているかの処理をここに書く
+                        _playerAnimation.PlayerStickerPasteAnimator();
                         Debug.Log("目の前に壁がありまーす");
                         isWallDetected = false;
                         _actionPriority.EndAction();

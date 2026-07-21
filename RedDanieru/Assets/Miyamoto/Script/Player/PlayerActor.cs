@@ -123,6 +123,7 @@ namespace Player
         //        _playerCamera.CameraChange(_input);
         //    }
         //}
+
         public  void FixedUpdate()
         {
             //コンポーネントを取得できているか
