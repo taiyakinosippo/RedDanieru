@@ -17,7 +17,13 @@ public class LoadUI : MonoBehaviour
     [SerializeField] private DungeonImporter importer;
 
     [SerializeField]
+    private FusionLauncher fusionLauncher;
+
+    [SerializeField]
     private GameObject scrollView;
+
+    [SerializeField]
+    private DungeonUIManager dungeonUIManager;
 
     private void OnEnable()
     {
@@ -106,20 +112,18 @@ public class LoadUI : MonoBehaviour
             string selectedDungeon = dungeonName;
 
             button
-                .GetComponent<Button>()
-                .onClick
-                .AddListener(() =>
-                {
-                    Debug.Log(
-                        selectedDungeon +
-                        " をダウンロードします"
-                    );
+     .GetComponent<Button>()
+     .onClick
+     .AddListener(() =>
+     {
+         RoomInfo.SelectedDungeon = selectedDungeon;
 
-                    importer.ImportDungeon(
-                        selectedDungeon
-                    );
-                    scrollView.SetActive(false);
-                });
+         dungeonUIManager.MapSelectButton();
+
+         importer.ImportDungeon(selectedDungeon);
+
+         scrollView.SetActive(false);
+     });
         }
 
     }

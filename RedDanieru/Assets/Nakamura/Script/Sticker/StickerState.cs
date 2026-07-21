@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class StickerState : MonoBehaviour
 {
-    public Sticker CurrentSticker { get; private set; } = Sticker.None;
+    public Sticker CurrentSticker = Sticker.None;
 
     private StickerBase currentStickerScript;
 
@@ -18,21 +18,22 @@ public class StickerState : MonoBehaviour
     private void Update()
     {
         //デバッグ用
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Apply(Sticker.Big);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            Apply(Sticker.Invisible);
-        }
-        else if (Input.GetKeyDown(KeyCode.Backspace))
-        {
-            Remove();
-        }
-        Debug.Log(CurrentSticker.ToString());
+        //if (Input.GetKeyDown(KeyCode.B))
+        //{
+        //    Apply(Sticker.Big);
+        //}
+        //else if (Input.GetKeyDown(KeyCode.Alpha2))
+        //{
+        //    Apply(Sticker.Invisible);
+        //}
+        //else if (Input.GetKeyDown(KeyCode.Backspace))
+        //{
+        //    Remove();
+        //}
+        //Debug.Log(CurrentSticker.ToString());
     }
 
+    //ステッカーを貼る
     public void Apply(Sticker sticker)
     {
         //既に貼られていたら剥がす
@@ -40,6 +41,7 @@ public class StickerState : MonoBehaviour
 
         CurrentSticker = sticker;
 
+        //ステッカーコンポーネント追加
         switch (sticker)
         {
             case Sticker.Big:
@@ -51,19 +53,32 @@ public class StickerState : MonoBehaviour
                 break;
         }
 
-        currentStickerScript?.OnEnemyApply();
+        //Apply関数実行
+        if (gameObject.CompareTag("Enemy"))
+            currentStickerScript?.OnEnemyApply();
+        else
+            currentStickerScript?.OnTrapApply();
     }
 
+    //ステッカーを剥がす
     public Sticker Remove()
     {
         if (currentStickerScript != null)
         {
-            currentStickerScript.OnEnemyRemove();
+            //Remove関数実行
+            if (gameObject.CompareTag("Enemy"))
+                currentStickerScript?.OnEnemyRemove();
+            else
+                currentStickerScript?.OnTrapRemove();
+
+            //破棄
             Destroy(currentStickerScript);
         }
 
+        //貼られていたステッカーを回収
         Sticker old = CurrentSticker;
 
+        //ステッカー情報初期化
         CurrentSticker = Sticker.None;
         currentStickerScript = null;
 

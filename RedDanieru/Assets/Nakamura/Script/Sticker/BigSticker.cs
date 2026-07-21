@@ -50,13 +50,18 @@ public class BigSticker : StickerBase
         //    transform.localScale = new Vector3(scale, scale, scale);
         //    yield return null;
         //}
+
+        //ステッカーを剥がす
+        Destroy(GetComponent<StickerBase>());
     }
 
     public override void OnTrapApply()
     {
+        OnEnemyApply();
     }
 
     public override void OnTrapRemove()
     {
+        OnEnemyRemove();
     }
 }
