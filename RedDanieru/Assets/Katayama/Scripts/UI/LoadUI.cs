@@ -75,7 +75,7 @@ public class LoadUI : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Get(
-                "http://localhost/RedDaniel/get_dungeon_names.php"
+                "http://10.219.32.66/RedDaniel/get_dungeon_names.php"
             );
 
         yield return request.SendWebRequest();
@@ -112,18 +112,27 @@ public class LoadUI : MonoBehaviour
             string selectedDungeon = dungeonName;
 
             button
-     .GetComponent<Button>()
-     .onClick
-     .AddListener(() =>
+ .GetComponent<Button>()
+ .onClick
+ .AddListener(() =>
+ {
+     RoomInfo.SelectedDungeon = selectedDungeon;
+
+     importer.ImportDungeon(selectedDungeon);
+
+     scrollView.SetActive(false);
+
+     if (!GameModeManager.IsMultiplayer)
      {
-         RoomInfo.SelectedDungeon = selectedDungeon;
+         dungeonUIManager.HideMatchingUI();
 
+         fusionLauncher.StartSolo();
+     }
+     else
+     {
          dungeonUIManager.MapSelectButton();
-
-         importer.ImportDungeon(selectedDungeon);
-
-         scrollView.SetActive(false);
-     });
+     }
+ });
         }
 
     }
