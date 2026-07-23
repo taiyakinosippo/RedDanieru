@@ -320,6 +320,13 @@ public class MapManager : MonoBehaviour
         if (placedObjects[pos.x, pos.y, pos.z] != null)
             return;
 
+        // Goalは1つしか配置できない
+        if (type == PlaceObjectType.Goal && HasGoal())
+        {
+            Debug.Log("Goalは1つしか配置できません。");
+            return;
+        }
+
         GameObject prefab = null;
 
         foreach (var data in objectPrefabs)
@@ -371,6 +378,30 @@ public class MapManager : MonoBehaviour
         Destroy(placedObjects[pos.x, pos.y, pos.z]);
 
         placedObjects[pos.x, pos.y, pos.z] = null;
+        placedObjectTypes[pos.x, pos.y, pos.z] = default;
+    }
+
+    /// <summary>
+    /// Goalが配置されているか
+    /// </summary>
+    public bool HasGoal()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    if (placedObjects[x, y, z] != null &&
+                        placedObjectTypes[x, y, z] == PlaceObjectType.Goal)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public GameObject GetPlacedObject(Vector3Int pos)
