@@ -3,8 +3,9 @@ using UnityEngine;
 public class StickerState : MonoBehaviour
 {
     public Sticker CurrentSticker = Sticker.None;
+    public StickerBase currentStickerScript;
 
-    private StickerBase currentStickerScript;
+    public bool isSpecialMove = false;  //ステッカーによる特殊行動の有無
 
     private void Start()
     {
@@ -17,20 +18,10 @@ public class StickerState : MonoBehaviour
 
     private void Update()
     {
-        //デバッグ用
-        //if (Input.GetKeyDown(KeyCode.B))
-        //{
-        //    Apply(Sticker.Big);
-        //}
-        //else if (Input.GetKeyDown(KeyCode.Alpha2))
-        //{
-        //    Apply(Sticker.Invisible);
-        //}
-        //else if (Input.GetKeyDown(KeyCode.Backspace))
-        //{
-        //    Remove();
-        //}
-        //Debug.Log(CurrentSticker.ToString());
+        if (isSpecialMove && !gameObject.CompareTag("Enemy"))
+        {
+            currentStickerScript.OnTrapUpdate();
+        }
     }
 
     //ステッカーを貼る
@@ -48,8 +39,8 @@ public class StickerState : MonoBehaviour
                 currentStickerScript = gameObject.AddComponent<BigSticker>();
                 break;
 
-            case Sticker.Invisible:
-                //currentStickerScript = gameObject.AddComponent<>();
+            case Sticker.ChargeDash:
+                currentStickerScript = gameObject.AddComponent<ChargeDashSticker>();
                 break;
         }
 
