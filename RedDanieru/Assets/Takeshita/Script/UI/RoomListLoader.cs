@@ -56,7 +56,7 @@ public class RoomListLoader : MonoBehaviour
     {
         UnityWebRequest request =
             UnityWebRequest.Get(
-                "http://localhost/RedDaniel/GetRooms.php"
+                "http://10.219.32.66/RedDaniel/GetRooms.php"
             );
 
         yield return request.SendWebRequest();

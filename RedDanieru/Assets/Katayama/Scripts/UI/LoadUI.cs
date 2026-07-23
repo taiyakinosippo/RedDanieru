@@ -75,7 +75,7 @@ public class LoadUI : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Get(
-                "http://localhost/RedDaniel/get_dungeon_names.php"
+                "http://10.219.32.66/RedDaniel/get_dungeon_names.php"
             );
 
         yield return request.SendWebRequest();

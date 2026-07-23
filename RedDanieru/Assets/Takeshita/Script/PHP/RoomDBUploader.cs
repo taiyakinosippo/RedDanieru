@@ -39,7 +39,7 @@ public class RoomDBUploader : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Post(
-                "http://localhost/RedDaniel/SaveRoom.php",
+                "http://10.219.32.66/RedDaniel/SaveRoom.php",
                 form
             );
 
@@ -70,7 +70,7 @@ public class RoomDBUploader : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Post(
-                "http://localhost/RedDaniel/DeleteRoom.php",
+                "http://10.219.32.66/RedDaniel/DeleteRoom.php",
                 form
             );
 
@@ -88,7 +88,7 @@ public class RoomDBUploader : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Post(
-                "http://localhost/RedDaniel/UpdateRoomAlive.php",
+                "http://10.219.32.66/RedDaniel/UpdateRoomAlive.php",
                 form
             );
 
@@ -112,7 +112,7 @@ public class RoomDBUploader : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Post(
-                "http://localhost/RedDaniel/JoinRoom.php",
+                "http://10.219.32.66/RedDaniel/JoinRoom.php",
                 form
             );
 
@@ -140,7 +140,7 @@ public class RoomDBUploader : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Post(
-                "http://localhost/RedDaniel/LeaveRoom.php",
+                "http://10.219.32.66/RedDaniel/LeaveRoom.php",
                 form
             );
 
