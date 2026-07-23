@@ -320,6 +320,13 @@ public class MapManager : MonoBehaviour
         if (placedObjects[pos.x, pos.y, pos.z] != null)
             return;
 
+        // Goalは1つしか配置できない
+        if (type == PlaceObjectType.Goal && HasGoal())
+        {
+            Debug.Log("Goalは1つしか配置できません。");
+            return;
+        }
+
         GameObject prefab = null;
 
         foreach (var data in objectPrefabs)
@@ -348,5 +355,62 @@ public class MapManager : MonoBehaviour
 
         placedObjects[pos.x, pos.y, pos.z] = obj;
         placedObjectTypes[pos.x, pos.y, pos.z] = type;
+
+        PlaceObject placeObject = obj.GetComponent<PlaceObject>();
+        if (placeObject != null)
+        {
+            placeObject.GridPosition = pos;
+        }
+    }
+
+    public void DeleteObject(Vector3Int pos)
+    {
+        // 範囲外
+        if (pos.x < 0 || pos.x >= width ||
+            pos.y < 0 || pos.y >= height ||
+            pos.z < 0 || pos.z >= depth)
+            return;
+
+        // オブジェクトがない
+        if (placedObjects[pos.x, pos.y, pos.z] == null)
+            return;
+
+        Destroy(placedObjects[pos.x, pos.y, pos.z]);
+
+        placedObjects[pos.x, pos.y, pos.z] = null;
+        placedObjectTypes[pos.x, pos.y, pos.z] = default;
+    }
+
+    /// <summary>
+    /// Goalが配置されているか
+    /// </summary>
+    public bool HasGoal()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    if (placedObjects[x, y, z] != null &&
+                        placedObjectTypes[x, y, z] == PlaceObjectType.Goal)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public GameObject GetPlacedObject(Vector3Int pos)
+    {
+        if (pos.x < 0 || pos.x >= width ||
+            pos.y < 0 || pos.y >= height ||
+            pos.z < 0 || pos.z >= depth)
+            return null;
+
+        return placedObjects[pos.x, pos.y, pos.z];
     }
 }

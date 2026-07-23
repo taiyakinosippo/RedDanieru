@@ -1,12 +1,14 @@
 using UnityEngine;
 
-public class FloorBlock : MonoBehaviour
+public class PlaceObject : MonoBehaviour
 {
-    // グリッド座標
-    public Vector3Int GridPosition;
+    public PlaceObjectType objectType;
+
+    // 配置したマス
+    public Vector3Int GridPosition { get; set; }
 
     [Header("選択色")]
-    [SerializeField] private Color selectColor = Color.green;
+    [SerializeField] private Color selectColor = Color.red;
 
     private Renderer[] renderers;
     private Color[] defaultColors;
