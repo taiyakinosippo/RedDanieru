@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64cf400d5cc410b488d4e6ad91ed765a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentSticker: 2
+  CurrentSticker: 1
   currentStickerScript: {fileID: 0}
   isSpecialMove: 0
 --- !u!54 &6832049853058329181
