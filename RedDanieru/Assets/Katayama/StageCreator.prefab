@@ -2427,6 +2427,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7506288860228615945}
   - component: {fileID: 8602623877151691915}
+  - component: {fileID: 3329469922032564267}
   m_Layer: 0
   m_Name: SaveUI
   m_TagString: Untagged
@@ -2463,9 +2464,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   savePanel: {fileID: 2010277633768818679}
   dungeonNameInput: {fileID: 5200294600040409605}
-  creatorNameInput: {fileID: 0}
+  creatorNameInput: {fileID: 2808680706631227481}
   saveManager: {fileID: 7755967263560064543}
-  uploader: {fileID: 0}
+  uploader: {fileID: 3329469922032564267}
+--- !u!114 &3329469922032564267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4445511104211919120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8368c685937202e47916e78d6d66d3f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4499827944605276989
 GameObject:
   m_ObjectHideFlags: 0
