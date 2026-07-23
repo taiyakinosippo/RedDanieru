@@ -310,6 +310,8 @@ public class MapManager : MonoBehaviour
             PlaceObject(pos, objData.type);
         }
 
+        BuildNavigation();
+
         Debug.Log("ƒ_ƒ“ƒWƒ‡ƒ“•œŒ³Š®—¹");
     }
 
