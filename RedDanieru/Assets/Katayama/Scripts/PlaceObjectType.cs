@@ -7,5 +7,6 @@ public enum PlaceObjectType : byte
     Trap,           // 3
     Door,           // 4
     SpawnPoint,     // 5
-    Goal            // 6
+    Goal,           // 6
+    TentativeEnemy  // 7
 }
