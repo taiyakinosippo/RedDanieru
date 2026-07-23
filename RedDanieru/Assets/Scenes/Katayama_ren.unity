@@ -665,9 +665,13 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 244620060921077288, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: m_Name
+      value: DungeonNameInputField
+      objectReference: {fileID: 0}
     - target: {fileID: 2010277633768818679, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5314758318598723735, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
       propertyPath: m_Name
@@ -717,11 +721,39 @@ PrefabInstance:
       propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8602623877151691915, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: uploader
+      value: 
+      objectReference: {fileID: 633280984272545409}
+    - target: {fileID: 8602623877151691915, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: creatorNameInput
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4445511104211919120, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 633280984272545409}
   m_SourcePrefab: {fileID: 100100000, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+--- !u!1 &633280984272545407 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4445511104211919120, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+  m_PrefabInstance: {fileID: 633280984272545406}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &633280984272545409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633280984272545407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8368c685937202e47916e78d6d66d3f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
