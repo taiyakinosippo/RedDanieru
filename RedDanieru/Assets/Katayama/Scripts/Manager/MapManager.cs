@@ -71,11 +71,6 @@ public class MapManager : MonoBehaviour
     {
         GenerateMap();
         CreateMap();
-
-        if (navMeshSurface != null)
-        {
-            navMeshSurface.BuildNavMesh();
-        }
     }
 
     /// マップデータを初期化する
@@ -162,12 +157,6 @@ public class MapManager : MonoBehaviour
             // 床に座標を設定
             FloorBlock block = floor.GetComponent<FloorBlock>();
             block.GridPosition = pos;
-
-            // NavMeshを更新
-            if (navMeshSurface != null)
-            {
-                navMeshSurface.BuildNavMesh();
-            }
         }
     }
 
@@ -321,11 +310,6 @@ public class MapManager : MonoBehaviour
             PlaceObject(pos, objData.type);
         }
 
-        if (navMeshSurface != null)
-        {
-            navMeshSurface.BuildNavMesh();
-        }
-
         Debug.Log("ダンジョン復元完了");
     }
 
@@ -431,5 +415,16 @@ public class MapManager : MonoBehaviour
             return null;
 
         return placedObjects[pos.x, pos.y, pos.z];
+    }
+
+    /// <summary>
+    /// NavMeshを再生成
+    /// </summary>
+    public void BuildNavigation()
+    {
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
     }
 }
