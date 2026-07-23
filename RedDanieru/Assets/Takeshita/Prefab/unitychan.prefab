@@ -14,19 +14,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7075347287243946155, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: -7075347287243946155, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[0]'
+      value: 
+      objectReference: {fileID: 5050397085380827873}
     - target: {fileID: -7075347287243946155, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
       value: 
-      objectReference: {fileID: 5050397085380827873}
+      objectReference: {fileID: 6861549660615763227}
     - target: {fileID: -7075347287243946155, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
       objectReference: {fileID: 6861549660615763227}
     - target: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_Name
-      value: UnityChan
+      value: unitychan
       objectReference: {fileID: 0}
     - target: {fileID: 5252574830359970969, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_NotificationBehavior
@@ -125,6 +129,6 @@ MonoBehaviour:
   Animator: {fileID: 472262528453075653}
   ApplyTiming: 2
   SyncSettings: 79
-  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f43
-  TriggerHashes: 000000000d286c40
+  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f
+  TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea
   TotalWords: 3
