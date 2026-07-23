@@ -8,6 +8,11 @@ public class StickerBase : MonoBehaviour
         //ステッカーが貼られたときの処理
     }
 
+    public virtual void OnEnemyUpdate() 
+    { 
+
+    }
+
     public virtual void OnEnemyRemove()
     {
         //ステッカーが剥がれたときの処理
@@ -16,6 +21,11 @@ public class StickerBase : MonoBehaviour
     public virtual void OnTrapApply()
     {
         //ステッカーが貼られたときの処理
+    }
+
+    public virtual void OnTrapUpdate()
+    {
+
     }
 
     public virtual void OnTrapRemove()
