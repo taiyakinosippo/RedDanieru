@@ -441,6 +441,7 @@ MonoBehaviour:
   depth: 32
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
   floorYOffset: -3
+  navMeshSurface: {fileID: 0}
   objectYOffset: 1.5
   objectPrefabs:
   - type: 6
@@ -1954,7 +1955,7 @@ Transform:
   m_GameObject: {fileID: 285340710}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.27, y: -1.707532, z: -0.10968153}
+  m_LocalPosition: {x: 1.27, y: 1.99, z: 1.88}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
