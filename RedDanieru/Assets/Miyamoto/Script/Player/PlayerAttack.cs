@@ -1,6 +1,6 @@
+using Fusion;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Windows;
 
 ///<summry>
 ///プレイヤーの攻撃を制御するためのスクリプト
@@ -9,27 +9,56 @@ namespace Player
 {
     public class PlayerAttack : MonoBehaviour
     {
-        private PlayerAnimation _playerAnimation;
+        [SerializeField] private LayerMask enemyLayer;
+        [SerializeField] List<Collider> attackColliders = new List<Collider>();
+        [SerializeField] SerializableDictionary<string, int> attackColliderDictionary = null;
 
+        AnimatorClipInfo[] clipInfos;
+        private PlayerAnimation _playerAnimation;
+        
         void Start()
         {
             _playerAnimation = GetComponent<PlayerAnimation>();
         }
         //------------------------------------------------------
-        //プレイヤーの攻撃関係の処理を書く関数(ダメージ、属性)
+        //プレイヤーの攻撃アニメーションを再生させるかどうか
         //------------------------------------------------------
         public void Attack(StarterAssetsInputs _input)
         {
-
             if (!_input.attack)
                 return;
 
             _input.attack = false;
-            ///ここにダメージや属性を書く
-
             //アッタクモーション
             _playerAnimation.PlayerAttackAnimator();
             
+        }
+        //------------------------------------------------------
+        //プレイヤーの攻撃があたった場合の(ダメージ、属性)
+        //------------------------------------------------------
+        public void AttackHit()
+        {
+            string animName = clipInfos[0].clip.name;
+
+            if (attackColliderDictionary.ContainsKey(animName))
+            {
+                attackColliders[attackColliderDictionary[animName]].enabled = true;
+            }
+
+        }
+
+
+        //------------------------------------------------------
+        //プレイヤーの攻撃アニメーションが終わるときに呼び出される
+        //------------------------------------------------------
+        public void ColliderRemove()
+        {
+            string animName = clipInfos[0].clip.name;
+
+            if (attackColliderDictionary.ContainsKey(animName))
+            {
+                attackColliders[attackColliderDictionary[animName]].enabled = false;
+            }
         }
     }
 }

@@ -12,11 +12,6 @@ namespace Player
     public class PlayerMovement : MonoBehaviour
     {
         [Header("プレイヤーの設定")]
-        [Tooltip("プレイヤーの歩く速度")]
-        public float MoveSpeed = 2.0f;
-
-        [Tooltip("プレイヤーの走る速度")]
-        public float SprintSpeed = 5.335f;
 
         [Tooltip("キャラクターが移動方向を向く速度")]
         [Range(0.0f, 0.3f)]
@@ -52,12 +47,12 @@ namespace Player
         public LayerMask GroundLayers;
 
         // プレイヤーの基礎設定を格納する変数
-        private float _speed;              // プレイヤーの現在の速度
+        public float _speed { get; private set; }        // プレイヤーの現在の速度
         private float _animationBlend;                   // アニメーションへのブレンド値
         private float _targetRotation = 0.0f;            // プレイヤーの目標回転角度
         private float _rotationVelocity;                 // プレイヤーの左右速度
         private float _verticalVelocity;                 // プレイヤーの上下速度
-        private float _terminalVelocity = 53.0f;     // 落下速度の上限値
+        private float _terminalVelocity = 53.0f;         // 落下速度の上限値
 
         // 次のジャンプが出来る時間
         private float _jumpTimeoutDelta;
@@ -68,6 +63,7 @@ namespace Player
         private PlayerCamera _playerCamera;              // プレイヤーのカメラを制御するためのコンポーネント
         private PlayerAnimation _playerAnimation; 
         private PlayerInputPriority _actionPriority;
+        private PlayerStatus _playerStatus;
 
         private void Start()
         {
@@ -80,6 +76,8 @@ namespace Player
             _playerAnimation = GetComponent<PlayerAnimation>();
 
             _actionPriority = GetComponent<PlayerInputPriority>();
+
+            _playerStatus = GetComponent<PlayerStatus>();
 
             _jumpTimeoutDelta = JumpTimeout;　　　　　// ジャンプできるようになるまでの時間を初期化
             _fallTimeoutDelta = FallTimeout;          // 落下アニメーションに入るまでの時間を初期化
@@ -104,7 +102,7 @@ namespace Player
         public void PlayerMove(StarterAssetsInputs _input) 
         {
             // Shiftキーを押している場合は歩き、押していない場合は走る
-            float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+            float targetSpeed = _input.sprint ? _playerStatus._playerRunSpeed : _playerStatus._playerMoveSpeed;
 
 
             // 何も入力されていない場合は速度を0にする

@@ -1,16 +1,44 @@
+using TMPro;
 using UnityEngine;
 
 namespace Player
 {
+    /// <summary>
+    /// プレイヤー用のデバッグスクリプト
+    /// </summary>
     public class PlayerDebug : MonoBehaviour
     {
+        [Header("UI")]
+        [SerializeField] private TMP_Text hpText;
+        [SerializeField] private TMP_Text attackText;
+        [SerializeField] private TMP_Text defenseText;
+        [SerializeField] private TMP_Text speedText;
+
         private PlayerMovement _playerMovement;
 
         private StickerCheck   _stickerCheck;
 
         private PlayerCamera _playerCamera;
-       
-      
+
+        private PlayerStatus _playerStatus;
+
+        private void Start()
+        {
+            _playerStatus = GetComponent<PlayerStatus>();
+            _playerMovement = GetComponent<PlayerMovement>();
+
+        }
+
+        private void Update()
+        {
+            hpText.text = $"HP : {_playerStatus.CurrentHP}/{_playerStatus._playerHP}";
+            attackText.text = $"ATK : {_playerStatus.CurrentAttack}";
+            defenseText.text = $"DEF : {_playerStatus.CurrentDefense}";
+            speedText.text = $"Speed : {_playerMovement._speed}";
+        }
+
+
+
         //debug用に、地面にいるかどうかの判定を可視化するためのGizmosを描画する関数
         private void OnDrawGizmosSelected()
         {
