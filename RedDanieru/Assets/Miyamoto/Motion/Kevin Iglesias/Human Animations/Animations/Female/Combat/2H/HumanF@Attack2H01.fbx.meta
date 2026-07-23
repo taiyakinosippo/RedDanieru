@@ -65,7 +65,7 @@ ModelImporter:
       - time: 0.83040434
         functionName: OnAttackAnimationEnd
         data: 
-        objectReferenceParameter: {instanceID: 0}
+        objectReferenceParameter: {fileID: 11500000, guid: 6fb0f831c7d602545973be8e26325a30, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
