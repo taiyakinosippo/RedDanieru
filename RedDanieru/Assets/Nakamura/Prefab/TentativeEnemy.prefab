@@ -91,6 +91,7 @@ GameObject:
   - component: {fileID: 6832049853058329181}
   - component: {fileID: 4430909885670346199}
   - component: {fileID: 8908385486835622797}
+  - component: {fileID: 8356968776438681485}
   m_Layer: 0
   m_Name: TentativeEnemy
   m_TagString: Enemy
@@ -218,6 +219,20 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!114 &8356968776438681485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986632935637041606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e3f5edc356f5674b9c892b885492b5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectType: 7
+  selectColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &8733923640097866391
 GameObject:
   m_ObjectHideFlags: 0

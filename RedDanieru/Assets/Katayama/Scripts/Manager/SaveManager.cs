@@ -26,6 +26,9 @@ public class SaveManager : MonoBehaviour
             return;
         }
 
+        // 保存前にNavMeshを生成
+        mapManager.BuildNavigation();
+
         // ダンジョン名が入力されているか確認
         if (string.IsNullOrWhiteSpace(dungeonName))
         {
