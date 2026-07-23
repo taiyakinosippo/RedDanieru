@@ -7,14 +7,22 @@ public class SaveManager : MonoBehaviour
     [Header("参照")]
     [SerializeField] private MapManager mapManager;
 
+    /// <summary>
     /// ダンジョンを名前指定で保存する
-    /// <param name="dungeonName">保存するダンジョン名</param>
+    /// </summary>
     public void Save(string dungeonName)
     {
         // MapManagerが設定されているか確認
         if (mapManager == null)
         {
             Debug.LogError("MapManagerが設定されていません。");
+            return;
+        }
+
+        // Goalが配置されているか確認
+        if (!mapManager.HasGoal())
+        {
+            Debug.LogError("Goalを配置してください。");
             return;
         }
 
