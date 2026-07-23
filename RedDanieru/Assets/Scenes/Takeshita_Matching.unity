@@ -442,7 +442,11 @@ MonoBehaviour:
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
   floorYOffset: -3
   objectYOffset: 1.5
-  objectPrefabs: []
+  objectPrefabs:
+  - type: 6
+    prefab: {fileID: 5839628444456617438, guid: 80bcce026605a1f42b896cdf032c27f9, type: 3}
+  - type: 0
+    prefab: {fileID: 7461072477327439928, guid: 71de1f033943d494083b84b295d25403, type: 3}
   floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
 --- !u!4 &42808005
 Transform:
@@ -555,7 +559,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d32e096127476841a84a10ba5ac319d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _IsGameStarted: 0
 --- !u!1 &46315920
 GameObject:
   m_ObjectHideFlags: 0
@@ -1167,7 +1170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &153006332
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1604,8 +1607,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8787e0be1fddc504cb8848ca32ffe47f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soloPlayerPrefab: {fileID: 0}
-  spawnPoint: {fileID: 0}
+  soloPlayerPrefab: {fileID: 3898678134712886083, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
+  spawnPoint: {fileID: 285340711}
   runner: {fileID: 0}
 --- !u!4 &196130120
 Transform:
@@ -4247,7 +4250,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &673411339
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5738,7 +5741,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1058361328
 RectTransform:
   m_ObjectHideFlags: 0

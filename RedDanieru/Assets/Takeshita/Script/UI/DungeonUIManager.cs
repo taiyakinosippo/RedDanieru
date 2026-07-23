@@ -440,5 +440,11 @@ public class DungeonUIManager : MonoBehaviour
         SelectCanvas.SetActive(false);
         ScrolView.SetActive(false);
         RoomInfoObj.SetActive(false);
+
+        RoomCreateObj.SetActive(false);
+        RoomJoinObj.SetActive(false);
+
+        Laycast.SetActive(false);
+        CautionObj.SetActive(false);
     }
 }

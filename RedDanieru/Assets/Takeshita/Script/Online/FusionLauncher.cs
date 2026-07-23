@@ -19,6 +19,11 @@ public class FusionLauncher : MonoBehaviour
 
     public void StartSolo()
     {
+        Debug.Log("StartSolo");
+
+        Debug.Log(soloPlayerPrefab);
+        Debug.Log(spawnPoint);
+
         Instantiate(
             soloPlayerPrefab,
             spawnPoint.position,
