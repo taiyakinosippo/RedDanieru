@@ -178,7 +178,7 @@ public class DungeonUIManager : MonoBehaviour
         }
 
         GameStartbutton.interactable =
-            displayCount >= MaxPlayers;
+            displayCount >= 2;
 
         Debug.Log($"playerCount = {playerCount}");
         Debug.Log($"displayCount = {displayCount}");
