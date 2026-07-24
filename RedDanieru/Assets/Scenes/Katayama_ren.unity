@@ -684,6 +684,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: objectPrefabs.Array.data[4].type
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 3933864267710628900, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
       propertyPath: m_IsActive
       value: 1
