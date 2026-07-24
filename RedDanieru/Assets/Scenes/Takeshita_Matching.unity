@@ -446,13 +446,15 @@ MonoBehaviour:
   objectYOffset: 1.5
   objectPrefabs:
   - type: 0
-    prefab: {fileID: 7461072477327439928, guid: 71de1f033943d494083b84b295d25403, type: 3}
+    prefab: {fileID: 8173197566262819081, guid: f44571431ecfdfb4995703cd6797ef84, type: 3}
   - type: 3
     prefab: {fileID: 6372522022111549087, guid: 446ca1027bafc454ba455320d0956e23, type: 3}
   - type: 6
     prefab: {fileID: 5839628444456617438, guid: 80bcce026605a1f42b896cdf032c27f9, type: 3}
   - type: 7
     prefab: {fileID: 1986632935637041606, guid: c53becb27deab7143a15fef2fc8c2344, type: 3}
+  - type: 8
+    prefab: {fileID: 1986632935637041606, guid: 0b3837c3d701b234e9c2107e5f4ecfc6, type: 3}
   floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
 --- !u!4 &42808005
 Transform:
