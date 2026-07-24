@@ -19,7 +19,7 @@ public class DungeonImporter : MonoBehaviour
         string dungeonName)
     {
         string url =
-            "http://localhost/RedDaniel/download_dungeon.php?name="
+            "http://10.219.32.66/RedDaniel/download_dungeon.php?name="
             + UnityWebRequest.EscapeURL(dungeonName);
 
         UnityWebRequest request =

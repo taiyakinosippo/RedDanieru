@@ -1,4 +1,5 @@
 using UnityEngine;
+using Unity.AI.Navigation;
 //using static MapManager;
 //using static TMPro.Examples.TMP_ExampleScript_01;
 
@@ -22,6 +23,9 @@ public class MapManager : MonoBehaviour
     // 床を生成する高さオフセット
     [Header("床生成設定")]
     [SerializeField] private float floorYOffset = -1f;
+
+    [Header("NavMesh")]
+    [SerializeField] private NavMeshSurface navMeshSurface;
 
     // オブジェクトを生成する高さオフセット
     [Header("オブジェクト配置設定")]
@@ -306,6 +310,7 @@ public class MapManager : MonoBehaviour
             PlaceObject(pos, objData.type);
         }
 
+        BuildNavigation();
 
         Debug.Log("ダンジョン復元完了");
     }
@@ -412,5 +417,16 @@ public class MapManager : MonoBehaviour
             return null;
 
         return placedObjects[pos.x, pos.y, pos.z];
+    }
+
+    /// <summary>
+    /// NavMeshを再生成
+    /// </summary>
+    public void BuildNavigation()
+    {
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+        }
     }
 }

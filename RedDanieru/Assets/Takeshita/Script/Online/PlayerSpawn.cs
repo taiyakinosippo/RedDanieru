@@ -37,6 +37,14 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         );
 
         Debug.Log($"Spawn : {player}");
+
+        DungeonUIManager ui =
+    FindObjectOfType<DungeonUIManager>();
+
+        if (ui != null)
+        {
+            ui.HideMatchingUI();
+        }
     }
 
     public void SpawnAllPlayers(

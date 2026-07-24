@@ -56,7 +56,7 @@ public class DungeonUploader : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Post(
-                "http://localhost/RedDaniel/upload_dungeon.php",
+                "http://10.219.32.66/RedDaniel/upload_dungeon.php",
                 form
             );
 

@@ -19,6 +19,11 @@ public class FusionLauncher : MonoBehaviour
 
     public void StartSolo()
     {
+        Debug.Log("StartSolo");
+
+        Debug.Log(soloPlayerPrefab);
+        Debug.Log(spawnPoint);
+
         Instantiate(
             soloPlayerPrefab,
             spawnPoint.position,
@@ -51,7 +56,16 @@ public class FusionLauncher : MonoBehaviour
 
         if (result.Ok)
         {
-            Debug.Log("ルーム参加成功");
+            int playerCount = 0;
+
+            foreach (var player in runner.ActivePlayers)
+            {
+                playerCount++;
+            }
+
+            Debug.Log(
+                $"参加人数 : {playerCount}"
+            );
         }
     }
 

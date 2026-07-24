@@ -7,4 +7,15 @@ public class SceneManager_Takeshita: MonoBehaviour
     {
         SceneManager.LoadScene("Test_Load");
     }
+
+    public void DungeonCreateButton()
+    {
+        SceneManager.LoadScene("Katayama_ren");
+    }
+
+    public void DungeonDownloadButton()
+    {
+        SceneManager.LoadScene("Takeshita_Matching");
+    }
+
 }
