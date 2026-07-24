@@ -6,14 +6,23 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/TitleScene.unity
+    guid: 57fb36f4e5965e748a931d5e26e239af
+  - enabled: 1
     path: Assets/Scenes/Takeshita_Runa.unity
     guid: d4e2d147f4183a44c9abf97d296a1ca1
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
     path: Assets/Katayama/Test_Load.unity
     guid: 781cccbdb0d60fb4b8ad84ed1ce7593d
+  - enabled: 1
+    path: Assets/Scenes/Takeshita_Matching.unity
+    guid: e25d20cc3d0cfaf40a0e49402f7cc167
+  - enabled: 1
+    path: Assets/Scenes/Katayama_ren.unity
+    guid: 343848cfe4835e04eb40836030c53a96
+  - enabled: 0
+    path: Assets/Scenes/SampleScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
