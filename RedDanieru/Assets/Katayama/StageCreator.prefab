@@ -871,6 +871,7 @@ MonoBehaviour:
   height: 1
   depth: 32
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
+  floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
   floorYOffset: -3
   navMeshSurface: {fileID: 5006102464896479107}
   objectYOffset: 1.5
@@ -885,7 +886,11 @@ MonoBehaviour:
     prefab: {fileID: 1986632935637041606, guid: c53becb27deab7143a15fef2fc8c2344, type: 3}
   - type: 8
     prefab: {fileID: 1986632935637041606, guid: 0b3837c3d701b234e9c2107e5f4ecfc6, type: 3}
-  floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
+  respawnPointPrefab: {fileID: 1416731327575110247, guid: 70df3e21df036f04596219f240419c92, type: 3}
+  respawnAreaPrefab: {fileID: 75136431443110141, guid: 8eb4dfa1cb83ff245ad221c1333df8d9, type: 3}
+  defaultRespawnPointPosition: {x: -3, y: 1.2, z: 4.5}
+  defaultRespawnAreaPosition: {x: 11, y: -7, z: 16}
+  defaultRespawnAreaScale: {x: 100, y: 1, z: 100}
 --- !u!114 &5006102464896479107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -905,8 +910,8 @@ MonoBehaviour:
   m_Center: {x: 0, y: 2, z: 0}
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
-  m_UseGeometry: 0
+    m_Bits: 256
+  m_UseGeometry: 1
   m_DefaultArea: 0
   m_GenerateLinks: 0
   m_IgnoreNavMeshAgent: 1

@@ -1,5 +1,8 @@
 using TMPro;
 using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+using System.IO;
 
 public class SaveUI : MonoBehaviour
 {
@@ -15,8 +18,14 @@ public class SaveUI : MonoBehaviour
     // 保存管理
     [SerializeField] private SaveManager saveManager;
 
-    [SerializeField]
-    private DungeonUploader uploader;
+    [SerializeField] private DungeonUploader uploader;
+
+    [SerializeField] private GameObject cautionObj;
+
+    public void Start()
+    {
+        cautionObj.SetActive(false);
+    }
 
     /// 保存パネルを開く
     public void OpenSavePanel()
@@ -48,6 +57,14 @@ public class SaveUI : MonoBehaviour
             return;
         }
 
+        string path = Path.Combine(Application.persistentDataPath, dungeonName + ".json");
+
+        if (File.Exists(path))
+        {
+            StartCoroutine(CautionText());
+            return;
+        }
+
         // ダンジョンを保存
         saveManager.Save(dungeonName);
 
@@ -58,6 +75,17 @@ public class SaveUI : MonoBehaviour
 
         // 保存パネルを閉じる
         savePanel.SetActive(false);
+    }
+
+    private IEnumerator CautionText()
+    {
+       
+
+        cautionObj.SetActive(true);
+
+        yield return new WaitForSeconds(3f);
+
+        cautionObj.SetActive(false);
     }
 
     /// 保存をキャンセルする
