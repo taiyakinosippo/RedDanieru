@@ -180,6 +180,17 @@ public class DungeonUIManager : MonoBehaviour
         GameStartbutton.interactable =
             displayCount >= 2;
 
+        foreach(var player in runner.ActivePlayers)
+        {
+            if(runner.TryGetPlayerObject(
+                player,
+                out NetworkObject obj))
+            {
+                HideMatchingUI();
+                break;
+            }
+        }
+
         Debug.Log($"playerCount = {playerCount}");
         Debug.Log($"displayCount = {displayCount}");
         Debug.Log($"MaxPlayers = {MaxPlayers}");
@@ -364,6 +375,8 @@ public class DungeonUIManager : MonoBehaviour
                 runner
             );
         }
+
+        HideMatchingUI();
     }
 
     private void OnPasswordChanged(string value)

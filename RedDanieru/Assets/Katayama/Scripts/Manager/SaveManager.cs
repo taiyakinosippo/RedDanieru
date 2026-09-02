@@ -1,62 +1,62 @@
-using System.IO;
+ï»¿using System.IO;
 using UnityEngine;
 
 public class SaveManager : MonoBehaviour
 {
-    // ƒ}ƒbƒvŠÇ—
-    [Header("QÆ")]
+    // ãƒãƒƒãƒ—ç®¡ç†
+    [Header("å‚ç…§")]
     [SerializeField] private MapManager mapManager;
 
     /// <summary>
-    /// ƒ_ƒ“ƒWƒ‡ƒ“‚ğ–¼‘Ow’è‚Å•Û‘¶‚·‚é
+    /// ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³ã‚’åå‰æŒ‡å®šã§ä¿å­˜ã™ã‚‹
     /// </summary>
     public void Save(string dungeonName)
     {
-        // MapManager‚ªİ’è‚³‚ê‚Ä‚¢‚é‚©Šm”F
+        // MapManagerãŒè¨­å®šã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
         if (mapManager == null)
         {
-            Debug.LogError("MapManager‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            Debug.LogError("MapManagerãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             return;
         }
 
-        // Goal‚ª”z’u‚³‚ê‚Ä‚¢‚é‚©Šm”F
+        // GoalãŒé…ç½®ã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
         if (!mapManager.HasGoal())
         {
-            Debug.LogError("Goal‚ğ”z’u‚µ‚Ä‚­‚¾‚³‚¢B");
+            Debug.LogError("Goalã‚’é…ç½®ã—ã¦ãã ã•ã„ã€‚");
             return;
         }
 
-        // •Û‘¶‘O‚ÉNavMesh‚ğ¶¬
+        // ä¿å­˜å‰ã«NavMeshã‚’ç”Ÿæˆ
         mapManager.BuildNavigation();
 
-        // ƒ_ƒ“ƒWƒ‡ƒ“–¼‚ª“ü—Í‚³‚ê‚Ä‚¢‚é‚©Šm”F
+        // ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³åãŒå…¥åŠ›ã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèª
         if (string.IsNullOrWhiteSpace(dungeonName))
         {
-            Debug.LogError("ƒ_ƒ“ƒWƒ‡ƒ“–¼‚ª“ü—Í‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            Debug.LogError("ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³åãŒå…¥åŠ›ã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
             return;
         }
 
-        // ƒtƒ@ƒCƒ‹–¼‚Ég—p‚Å‚«‚È‚¢•¶š‚ğœ‹
+        // ãƒ•ã‚¡ã‚¤ãƒ«åã«ä½¿ç”¨ã§ããªã„æ–‡å­—ã‚’é™¤å»
         foreach (char c in Path.GetInvalidFileNameChars())
         {
             dungeonName = dungeonName.Replace(c.ToString(), "");
         }
 
-        // Œ»İ‚Ìƒ}ƒbƒvî•ñ‚ğæ“¾
+        // ç¾åœ¨ã®ãƒãƒƒãƒ—æƒ…å ±ã‚’å–å¾—
         DungeonMapData dungeonData = mapManager.CreateSaveData();
 
-        // ƒ}ƒbƒvî•ñ‚ğJSONŒ`®‚Ö•ÏŠ·
+        // ãƒãƒƒãƒ—æƒ…å ±ã‚’JSONå½¢å¼ã¸å¤‰æ›
         string json = JsonUtility.ToJson(dungeonData, true);
 
-        // •Û‘¶æ‚ÌƒpƒX‚ğì¬
+        // ä¿å­˜å…ˆã®ãƒ‘ã‚¹ã‚’ä½œæˆ
         string path = Path.Combine(
             Application.persistentDataPath,
             dungeonName + ".json"
         );
 
-        // JSONƒtƒ@ƒCƒ‹‚Æ‚µ‚Ä•Û‘¶
+        // JSONãƒ•ã‚¡ã‚¤ãƒ«ã¨ã—ã¦ä¿å­˜
         File.WriteAllText(path, json);
 
-        Debug.Log($"•Û‘¶Š®—¹ : {path}");
+        Debug.Log($"ä¿å­˜å®Œäº† : {path}");
     }
 }
