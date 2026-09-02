@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.AI.Navigation;
+using UnityEngine.AI;
 //using static MapManager;
 //using static TMPro.Examples.TMP_ExampleScript_01;
 
@@ -317,6 +318,12 @@ public class MapManager : MonoBehaviour
 
     public void PlaceObject(Vector3Int pos, PlaceObjectType type)
     {
+        // 範囲外チェック
+        if (pos.x < 0 || pos.x >= width ||
+            pos.y < 0 || pos.y >= height ||
+            pos.z < 0 || pos.z >= depth)
+            return;
+
         // 床以外には配置しない
         if (map[pos.x, pos.y, pos.z] != TileType.Floor)
             return;
@@ -332,6 +339,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // Prefabを検索
         GameObject prefab = null;
 
         foreach (var data in objectPrefabs)
@@ -349,23 +357,105 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // グリッド位置から配置位置を決定
+        Vector3 spawnPosition = new Vector3(
+            pos.x,
+            pos.y + floorYOffset + objectYOffset,
+            pos.z
+        );
+
+        // オブジェクト生成
         GameObject obj = Instantiate(
             prefab,
-            new Vector3(
-                pos.x,
-                pos.y + floorYOffset + objectYOffset,
-                pos.z),
+            spawnPosition,
             Quaternion.identity,
-            transform);
+            transform
+        );
+
+        // ==================================================
+        // マップクリエイト中の処理
+        // ==================================================
+
+        // Rigidbodyによって配置位置がズレないようにする
+        Rigidbody[] rigidbodies =
+            obj.GetComponentsInChildren<Rigidbody>();
+
+        foreach (Rigidbody rb in rigidbodies)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // 敵の場合はNavMeshAgentを停止
+        if (type == PlaceObjectType.Enemy)
+        {
+            NavMeshAgent[] agents =
+                obj.GetComponentsInChildren<NavMeshAgent>();
+
+            foreach (NavMeshAgent agent in agents)
+            {
+                agent.enabled = false;
+            }
+        }
+
+        // ==================================================
+        // Collider同士の干渉を防ぐ
+        // ==================================================
+
+        Collider[] newColliders =
+            obj.GetComponentsInChildren<Collider>();
+
+        // すでに配置されているオブジェクトを調べる
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    GameObject existingObject =
+                        placedObjects[x, y, z];
+
+                    if (existingObject == null)
+                        continue;
+
+                    Collider[] existingColliders =
+                        existingObject.GetComponentsInChildren<Collider>();
+
+                    foreach (Collider newCollider in newColliders)
+                    {
+                        foreach (Collider existingCollider in existingColliders)
+                        {
+                            Physics.IgnoreCollision(
+                                newCollider,
+                                existingCollider,
+                                true
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        // ==================================================
+        // 配置情報を保存
+        // ==================================================
 
         placedObjects[pos.x, pos.y, pos.z] = obj;
         placedObjectTypes[pos.x, pos.y, pos.z] = type;
 
-        PlaceObject placeObject = obj.GetComponent<PlaceObject>();
+        // PlaceObjectにグリッド座標を設定
+        PlaceObject placeObject =
+            obj.GetComponent<PlaceObject>();
+
         if (placeObject != null)
         {
             placeObject.GridPosition = pos;
         }
+
+        // 最後にグリッド位置へ固定
+        obj.transform.position = spawnPosition;
     }
 
     public void DeleteObject(Vector3Int pos)
@@ -436,6 +526,23 @@ public class MapManager : MonoBehaviour
         foreach (GameObject enemy in enemies)
         {
             enemy.SetActive(true);
+        }
+    }
+
+    public void EnableEnemyMovement()
+    {
+        GameObject[] enemies =
+            GameObject.FindGameObjectsWithTag("Enemy");
+
+        foreach (GameObject enemy in enemies)
+        {
+            NavMeshAgent[] agents =
+                enemy.GetComponentsInChildren<NavMeshAgent>();
+
+            foreach (NavMeshAgent agent in agents)
+            {
+                agent.enabled = true;
+            }
         }
     }
 }
