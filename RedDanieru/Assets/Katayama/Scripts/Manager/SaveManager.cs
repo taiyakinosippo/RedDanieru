@@ -3,60 +3,91 @@ using UnityEngine;
 
 public class SaveManager : MonoBehaviour
 {
-    // マップ管理
     [Header("参照")]
     [SerializeField] private MapManager mapManager;
 
-    /// <summary>
-    /// ダンジョンを名前指定で保存する
-    /// </summary>
     public void Save(string dungeonName)
     {
-        // MapManagerが設定されているか確認
         if (mapManager == null)
         {
-            Debug.LogError("MapManagerが設定されていません。");
+            Debug.LogError(
+                "MapManagerが設定されていません。"
+            );
+
             return;
         }
 
-        // Goalが配置されているか確認
-        if (!mapManager.HasGoal())
-        {
-            Debug.LogError("Goalを配置してください。");
-            return;
-        }
-
-        // 保存前にNavMeshを生成
-        mapManager.BuildNavigation();
-
-        // ダンジョン名が入力されているか確認
+        /*
+         * ダンジョン名を先に確認
+         */
         if (string.IsNullOrWhiteSpace(dungeonName))
         {
-            Debug.LogError("ダンジョン名が入力されていません。");
+            Debug.LogError(
+                "ダンジョン名が入力されていません。"
+            );
+
             return;
         }
 
-        // ファイル名に使用できない文字を除去
+        /*
+         * 使用できない文字を削除
+         */
         foreach (char c in Path.GetInvalidFileNameChars())
         {
-            dungeonName = dungeonName.Replace(c.ToString(), "");
+            dungeonName =
+                dungeonName.Replace(
+                    c.ToString(),
+                    ""
+                );
         }
 
-        // 現在のマップ情報を取得
-        DungeonMapData dungeonData = mapManager.CreateSaveData();
+        /*
+         * Goalがあるか確認
+         */
+        if (!mapManager.HasGoal())
+        {
+            Debug.LogError(
+                "Goalを配置してください。"
+            );
 
-        // マップ情報をJSON形式へ変換
-        string json = JsonUtility.ToJson(dungeonData, true);
+            return;
+        }
 
-        // 保存先のパスを作成
-        string path = Path.Combine(
-            Application.persistentDataPath,
-            dungeonName + ".json"
+        /*
+         * マップデータを作成
+         */
+        DungeonMapData dungeonData =
+            mapManager.CreateSaveData();
+
+        string json =
+            JsonUtility.ToJson(
+                dungeonData,
+                true
+            );
+
+        string path =
+            Path.Combine(
+                Application.persistentDataPath,
+                dungeonName + ".json"
+            );
+
+        /*
+         * JSONを保存
+         */
+        File.WriteAllText(
+            path,
+            json
         );
 
-        // JSONファイルとして保存
-        File.WriteAllText(path, json);
+        /*
+         * 保存が完了してからNavMeshを再生成
+         *
+         * NavMeshは床だけを対象にする。
+         */
+        mapManager.BuildNavigation();
 
-        Debug.Log($"保存完了 : {path}");
+        Debug.Log(
+            $"保存完了 : {path}"
+        );
     }
 }
