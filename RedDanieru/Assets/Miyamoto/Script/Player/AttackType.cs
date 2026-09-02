@@ -1,11 +1,10 @@
 using UnityEngine;
 
-public enum ActionType
+public enum AttackType 
 {
-    None,
-    Move,
-    CameraChange,
-    Sticker,
-    Attack,
-    Jump
+    Attack1,
+    Attack2,
+    JumpAttack,
+    DashAttack
 }
+

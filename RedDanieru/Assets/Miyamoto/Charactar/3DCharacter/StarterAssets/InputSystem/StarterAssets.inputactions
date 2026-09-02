@@ -281,7 +281,7 @@
                 {
                     "name": "",
                     "id": "f69fcd0c-a658-47bd-9128-e42bae3e546c",
-                    "path": "<Keyboard>/e",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": ";KeyboardMouse",

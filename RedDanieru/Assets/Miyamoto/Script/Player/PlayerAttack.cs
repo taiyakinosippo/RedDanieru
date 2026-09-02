@@ -10,10 +10,10 @@ namespace Player
     public class PlayerAttack : MonoBehaviour
     {
         [SerializeField] private LayerMask enemyLayer;
-        [SerializeField] List<Collider> attackColliders = new List<Collider>();
-        [SerializeField] SerializableDictionary<string, int> attackColliderDictionary = null;
+        [SerializeField] List<PlayerAttackData> attackData = new ();
 
-        AnimatorClipInfo[] clipInfos;
+        private PlayerAttackData currentAttackData;
+       
         private PlayerAnimation _playerAnimation;
         
         void Start()
@@ -38,12 +38,7 @@ namespace Player
         //------------------------------------------------------
         public void AttackHit()
         {
-            string animName = clipInfos[0].clip.name;
-
-            if (attackColliderDictionary.ContainsKey(animName))
-            {
-                attackColliders[attackColliderDictionary[animName]].enabled = true;
-            }
+         
 
         }
 
@@ -53,12 +48,7 @@ namespace Player
         //------------------------------------------------------
         public void ColliderRemove()
         {
-            string animName = clipInfos[0].clip.name;
-
-            if (attackColliderDictionary.ContainsKey(animName))
-            {
-                attackColliders[attackColliderDictionary[animName]].enabled = false;
-            }
+           
         }
     }
 }
