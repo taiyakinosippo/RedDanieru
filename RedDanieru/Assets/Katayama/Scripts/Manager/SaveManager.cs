@@ -39,7 +39,11 @@ public class SaveManager : MonoBehaviour
         // ファイル名に使用できない文字を除去
         foreach (char c in Path.GetInvalidFileNameChars())
         {
-            dungeonName = dungeonName.Replace(c.ToString(), "");
+            dungeonName =
+                dungeonName.Replace(
+                    c.ToString(),
+                    ""
+                );
         }
 
         // 現在のマップ情報を取得
