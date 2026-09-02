@@ -36,7 +36,37 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             obj
         );
 
-        Debug.Log($"Spawn : {player}");
+        if (obj.HasInputAuthority)
+        {
+            Debug.Log(
+                "これは自分のプレイヤー"
+            );
+        }
+        else
+        {
+            Debug.Log(
+                "これは相手のプレイヤー"
+            );
+        }
+
+        Debug.Log(
+     $"Player:{player.PlayerId} SpawnPos:{spawnPos}"
+ );
+        StartCoroutine(CheckPosition(obj.gameObject));
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(
+            spawnPos + Vector3.up * 10f,
+            Vector3.down,
+            out hit,
+            50f))
+        {
+            Debug.Log(
+                $"Ground Y = {hit.point.y}"
+            );
+        }
+
 
         DungeonUIManager ui =
     FindObjectOfType<DungeonUIManager>();
@@ -45,6 +75,19 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             ui.HideMatchingUI();
         }
+
+        if (obj.HasInputAuthority == false)
+        {
+            Camera[] cameras =
+                obj.GetComponentsInChildren<Camera>(true);
+
+            foreach (Camera cam in cameras)
+            {
+                cam.gameObject.SetActive(false);
+            }
+        }
+
+
     }
 
     public void SpawnAllPlayers(
@@ -64,6 +107,17 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         PlayerRef player)
     {
         Debug.Log($"Join : {player}");
+    }
+
+    private System.Collections.IEnumerator CheckPosition(
+    GameObject player)
+    {
+        yield return new WaitForSeconds(3f);
+
+        Debug.Log(
+            $"{player.name} Position = " +
+            player.transform.position
+        );
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }
