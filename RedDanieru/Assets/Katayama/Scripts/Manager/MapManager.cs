@@ -424,9 +424,18 @@ public class MapManager : MonoBehaviour
     /// </summary>
     public void BuildNavigation()
     {
-        if (navMeshSurface != null)
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+        foreach (GameObject enemy in enemies)
         {
-            navMeshSurface.BuildNavMesh();
+            enemy.SetActive(false);
+        }
+
+        navMeshSurface.BuildNavMesh();
+
+        foreach (GameObject enemy in enemies)
+        {
+            enemy.SetActive(true);
         }
     }
 }
