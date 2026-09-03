@@ -111,12 +111,19 @@ public class LoadUI : MonoBehaviour
 
             string selectedDungeonId = dungeon.dungeonId;
 
+            string selectedDungeonName = dungeon.dungeonName;
+
+            Debug.Log("ID=" + dungeon.dungeonId);
+            Debug.Log("NAME=" + dungeon.dungeonName);
+
             button
  .GetComponent<Button>()
  .onClick
  .AddListener(() =>
  {
      RoomInfo.SelectedDungeon = selectedDungeonId;
+
+     RoomInfo.SelectedDungeonName = selectedDungeonName;
 
      importer.ImportDungeon(selectedDungeonId);
 
