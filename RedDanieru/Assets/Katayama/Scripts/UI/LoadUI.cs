@@ -94,31 +94,31 @@ public class LoadUI : MonoBehaviour
 
         DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
 
-        if (data == null || data.names == null)
+        if (data == null || data.dungeons == null)
         {
             Debug.LogError("É_ÉìÉWÉáÉìàÍóóÇÃì«Ç›çûÇ›é∏îs");
             yield break;
         }
 
-        foreach (string dungeonName in data.names)
+        foreach (var dungeon in data.dungeons)
         {
             GameObject button =
                 Instantiate(buttonPrefab, content);
 
             button
                 .GetComponentInChildren<TMP_Text>()
-                .text = dungeonName;
+                .text = dungeon.dungeonName;
 
-            string selectedDungeon = dungeonName;
+            string selectedDungeonId = dungeon.dungeonId;
 
             button
  .GetComponent<Button>()
  .onClick
  .AddListener(() =>
  {
-     RoomInfo.SelectedDungeon = selectedDungeon;
+     RoomInfo.SelectedDungeon = selectedDungeonId;
 
-     importer.ImportDungeon(selectedDungeon);
+     importer.ImportDungeon(selectedDungeonId);
 
      scrollView.SetActive(false);
 
