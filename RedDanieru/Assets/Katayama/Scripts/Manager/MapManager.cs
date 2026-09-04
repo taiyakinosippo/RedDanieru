@@ -514,12 +514,17 @@ public class MapManager : MonoBehaviour
     //==================================================
 
     public void LoadDungeon(
-        DungeonMapData data)
+        DungeonMapData data,
+        bool enableEnemyMovement = true)
     {
         width = data.width;
         height = data.height;
         depth = data.depth;
 
+
+        //==================================================
+        // 配列を作成
+        //==================================================
 
         map =
             new TileType[
@@ -561,7 +566,53 @@ public class MapManager : MonoBehaviour
             ];
 
 
+        //==================================================
+        // 現在動いている敵を停止
+        //==================================================
+
+        GameObject[] enemies =
+            GameObject.FindGameObjectsWithTag(
+                "Enemy"
+            );
+
+
+        foreach (
+            GameObject enemy
+            in enemies
+        )
+        {
+            NavMeshAgent[] agents =
+                enemy.GetComponentsInChildren<
+                    NavMeshAgent
+                >();
+
+
+            foreach (
+                NavMeshAgent agent
+                in agents
+            )
+            {
+                if (!agent.enabled)
+                    continue;
+
+
+                agent.isStopped = true;
+
+                agent.ResetPath();
+
+                agent.velocity =
+                    Vector3.zero;
+
+                // ロード中はAgentを無効化
+                agent.enabled = false;
+            }
+        }
+
+
+        //==================================================
         // 現在のマップを削除
+        //==================================================
+
         for (
             int i = transform.childCount - 1;
             i >= 0;
@@ -595,7 +646,10 @@ public class MapManager : MonoBehaviour
                         (TileType)data.tiles[index++];
 
 
+                    //==================================================
                     // 壁
+                    //==================================================
+
                     if (
                         map[x, y, z]
                         == TileType.Wall
@@ -637,7 +691,10 @@ public class MapManager : MonoBehaviour
                     }
 
 
+                    //==================================================
                     // 床
+                    //==================================================
+
                     else if (
                         map[x, y, z]
                         == TileType.Floor
@@ -684,7 +741,7 @@ public class MapManager : MonoBehaviour
 
 
         //==================================================
-        // 床が完成してからNavMeshを作る
+        // 床が完成してからNavMeshを作成
         //==================================================
 
         BuildNavigation();
@@ -718,10 +775,15 @@ public class MapManager : MonoBehaviour
 
 
         //==================================================
-        // 敵をNavMesh上に配置して動かす
+        // 敵をNavMesh上に配置
         //==================================================
 
-        EnableEnemyMovement();
+        // Undo / Redoの場合はfalseにして、
+        // この場では敵を有効化しない
+        if (enableEnemyMovement)
+        {
+            EnableEnemyMovement();
+        }
 
 
         //==================================================
