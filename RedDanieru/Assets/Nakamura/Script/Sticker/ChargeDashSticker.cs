@@ -88,7 +88,7 @@ public class ChargeDashSticker : StickerBase
     public override void OnTrapRemove()
     {
         stickerState.isSpecialMove = false;
-        stickerState.CurrentSticker = Sticker.None;
+        stickerState.currentSticker = Sticker.None;
     }
 
     //溜め

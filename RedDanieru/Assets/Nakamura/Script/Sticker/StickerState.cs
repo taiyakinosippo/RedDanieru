@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class StickerState : MonoBehaviour
 {
-    public Sticker CurrentSticker = Sticker.None;
+    public Sticker currentSticker = Sticker.None;
     public StickerBase currentStickerScript;
 
     public bool isSpecialMove = false;  //ステッカーによる特殊行動の有無
@@ -10,9 +10,9 @@ public class StickerState : MonoBehaviour
     private void Start()
     {
         //ゲーム開始時に貼られているステッカーがあれば適用する
-        if (CurrentSticker != Sticker.None)
+        if (currentSticker != Sticker.None)
         {
-            Apply(CurrentSticker);
+            Apply(currentSticker);
         }
     }
 
@@ -30,7 +30,7 @@ public class StickerState : MonoBehaviour
         //既に貼られていたら剥がす
         Remove();
 
-        CurrentSticker = sticker;
+        currentSticker = sticker;
 
         //ステッカーコンポーネント追加
         switch (sticker)
@@ -67,10 +67,10 @@ public class StickerState : MonoBehaviour
         }
 
         //貼られていたステッカーを回収
-        Sticker old = CurrentSticker;
+        Sticker old = currentSticker;
 
         //ステッカー情報初期化
-        CurrentSticker = Sticker.None;
+        currentSticker = Sticker.None;
         currentStickerScript = null;
 
         return old;
