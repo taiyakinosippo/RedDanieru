@@ -107,7 +107,7 @@ public class LoadUI : MonoBehaviour
 
             button
                 .GetComponentInChildren<TMP_Text>()
-                .text = dungeon.dungeonName;
+                .text = "Map:"+dungeon.dungeonName+"\nCreator:"+dungeon.creatorName;
 
             string selectedDungeonId = dungeon.dungeonId;
 
