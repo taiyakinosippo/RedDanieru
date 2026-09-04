@@ -3,5 +3,12 @@ using System;
 [Serializable]
 public class DungeonNameArray
 {
-    public string[] names;
+    public DungeonListItem[] dungeons;
+}
+
+[Serializable]
+public class DungeonListItem
+{
+    public string dungeonId;
+    public string dungeonName;
 }
