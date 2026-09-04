@@ -22,6 +22,14 @@ namespace Player
         //-----------------------------------------------------------
         public void CheckInput(StarterAssetsInputs _input, bool Grounded)
         {
+            if (currentActionType == ActionType.Attack || currentActionType == ActionType.Jump || currentActionType == ActionType.Sticker)
+            {
+                // 攻撃中やジャンプ中に押されたジャンプ入力・攻撃入力を消費（リセット）して残らないようにする
+                _input.jump = false;
+                _input.attack = false;
+                _input.sticker = false;
+                return;
+            }
 
             // 空中で押した攻撃は無効
             if (!Grounded)
@@ -51,7 +59,7 @@ namespace Player
                 AddAction(ActionType.CameraChange);
             }
 
-            if (_input.sticker)
+            if (_input.sticker && Grounded)
             {
                 AddAction(ActionType.Sticker);
             }
@@ -68,10 +76,10 @@ namespace Player
                 case ActionType.Sticker:
                     return 100;
 
-                case ActionType.Attack:
+                case ActionType.Jump:
                     return 80;
 
-                case ActionType.Jump:
+                case ActionType.Attack:
                     return 70;
 
                 case ActionType.CameraChange:
