@@ -28,7 +28,9 @@ namespace Player
             if (!_input.attack)
                 return;
 
+            //ここでアクションン
             _input.attack = false;
+
             //アッタクモーション
             _playerAnimation.PlayerAttackAnimator();
             
