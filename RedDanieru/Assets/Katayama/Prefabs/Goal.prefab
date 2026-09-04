@@ -377,6 +377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clearPanel: {fileID: 7983007032705598969}
+  clearCameraPrefab: {fileID: 2207088915897826225, guid: 35aa3220c025650439e9b70a39c54a7c, type: 3}
   titleSceneName: TitleScene
 --- !u!1 &6479654475357674865
 GameObject:
