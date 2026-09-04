@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5798830342839126903}
   - component: {fileID: 6471299810762595912}
   - component: {fileID: 9137245477801241348}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -122,3 +122,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GridPosition: {x: 0, y: 0, z: 0}
+  selectColor: {r: 0, g: 1, b: 0, a: 1}

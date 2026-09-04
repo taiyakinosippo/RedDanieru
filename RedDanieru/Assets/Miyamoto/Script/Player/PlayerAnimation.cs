@@ -56,7 +56,7 @@ namespace Player
             _hasAnimator = TryGetComponent(out _animator);
         }
 
-        //-----------------------------------------------------------
+        //----------------------------------------------------------
         //アニメーションのIDを取得する関数
         //-----------------------------------------------------------
         private void AssignAnimationIDs()
@@ -107,6 +107,7 @@ namespace Player
                 // ここでアニメーションをジャンプと落下のフラグをfalseにする
                 _animator.SetBool(_animIDJump, false);
                 _animator.SetBool(_animIDFreeFall, false);
+                _actionPriority.EndAction();
             }
         }
 

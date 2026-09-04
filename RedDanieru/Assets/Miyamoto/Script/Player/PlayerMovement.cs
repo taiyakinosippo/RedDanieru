@@ -58,6 +58,7 @@ namespace Player
         private float _jumpTimeoutDelta;
         // 落下アニメーションに入るまでの時間
         private float _fallTimeoutDelta;
+        private bool _wasGrounded;                                 // 前回のフレームで地面にいたかどうかを判定する変数
 
         private CharacterController _controller;         // プレイヤーの移動を制御するためのCharacterControllerコンポーネント
         private PlayerCamera _playerCamera;              // プレイヤーのカメラを制御するためのコンポーネント
@@ -81,8 +82,10 @@ namespace Player
 
             _jumpTimeoutDelta = JumpTimeout;　　　　　// ジャンプできるようになるまでの時間を初期化
             _fallTimeoutDelta = FallTimeout;          // 落下アニメーションに入るまでの時間を初期化
+            _wasGrounded = Grounded;
         }
 
+        
         public void GroundedCheck()
         {
             // プレイヤーの下にある球体を使って地面にいるかどうかを判定
@@ -103,7 +106,6 @@ namespace Player
         {
             // Shiftキーを押している場合は歩き、押していない場合は走る
             float targetSpeed = _input.sprint ? _playerStatus._playerRunSpeed : _playerStatus._playerMoveSpeed;
-
 
             // 何も入力されていない場合は速度を0にする
             if (_input.move == Vector2.zero) targetSpeed = 0.0f;
@@ -177,6 +179,19 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerJumpAndGravity(StarterAssetsInputs _input)
         {
+            // 空中から地面に戻った瞬間
+            if (Grounded && !_wasGrounded)
+            {
+                Debug.Log("着地しました");
+
+                if (_actionPriority.currentActionType == ActionType.Jump)
+                {
+                    _actionPriority.EndAction();
+                }
+
+                _input.jump = false;
+            }
+
             // 地面にいる場合の処理
             if (Grounded)
             {
@@ -221,9 +236,6 @@ namespace Player
                 {
                     _playerAnimation.PlayerfallAnimatorFall();
                 }
-
-                // ジャンプの入力をリセットする
-                _input.jump = false;
             }
 
             // 重力を適用する(重力が終端速度に達するまで)
@@ -231,6 +243,9 @@ namespace Player
             {
                 _verticalVelocity += Gravity * Time.deltaTime;
             }
+
+            // 今回の地面状態を保存
+            _wasGrounded = Grounded;
         }
     }
 }
