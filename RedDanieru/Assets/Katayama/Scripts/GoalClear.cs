@@ -10,8 +10,13 @@ public class GoalClear : MonoBehaviour
     [SerializeField] private GameObject clearCameraPrefab;
 
     [Header("Clearカメラ設定")]
-    [SerializeField] private Vector3 clearCameraPosition = new Vector3(16f, 30f, 16f);
-    [SerializeField] private Vector3 clearCameraRotation = new Vector3(90f, 0f, 0f);
+    [SerializeField]
+    private Vector3 clearCameraPosition =
+        new Vector3(16f, 30f, 16f);
+
+    [SerializeField]
+    private Vector3 clearCameraRotation =
+        new Vector3(90f, 0f, 0f);
 
     [Header("タイトルシーン")]
     [SerializeField] private string titleSceneName = "Title";
@@ -23,6 +28,16 @@ public class GoalClear : MonoBehaviour
         if (clearPanel != null)
         {
             clearPanel.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        // Clear後はカーソルを常に表示
+        if (isCleared)
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 
@@ -71,13 +86,17 @@ public class GoalClear : MonoBehaviour
 
         if (clearCamera == null)
         {
-            Debug.LogError("Clear Camera PrefabにCameraがありません。");
+            Debug.LogError(
+                "Clear Camera PrefabにCameraがありません。"
+            );
+
             Destroy(cameraObject);
             return;
         }
 
-        // 現在のカメラを停止
-        Camera[] cameras = FindObjectsOfType<Camera>();
+        // 通常カメラを停止
+        Camera[] cameras =
+            FindObjectsOfType<Camera>();
 
         foreach (Camera camera in cameras)
         {
@@ -87,8 +106,11 @@ public class GoalClear : MonoBehaviour
             }
         }
 
-        // Inspectorで設定した位置・角度を使用
-        clearCamera.transform.position = clearCameraPosition;
+        // Clearカメラの位置
+        clearCamera.transform.position =
+            clearCameraPosition;
+
+        // Clearカメラの角度
         clearCamera.transform.rotation =
             Quaternion.Euler(clearCameraRotation);
 
@@ -97,10 +119,10 @@ public class GoalClear : MonoBehaviour
 
     public void ReturnToTitle()
     {
-        // ゲーム時間を戻す
+        // ゲーム時間を元に戻す
         Time.timeScale = 1f;
 
-        // カーソル表示
+        // カーソルを表示
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
