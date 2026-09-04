@@ -4,6 +4,7 @@ using UnityEngine;
 public class StickerInteractor : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
+    [SerializeField] private StickerSlotUI stickerSlotUI;
 
     private List<GameObject> interactObjects = new List<GameObject>();  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
     [SerializeField] private Sticker[] holdSticker;  //保持してるステッカーのタイプ
@@ -14,6 +15,9 @@ public class StickerInteractor : MonoBehaviour
     {
         //保持できるステッカーの数を設定
         holdSticker = new Sticker[maxHoldCount];
+
+        //ステッカーのスロットを生成
+        stickerSlotUI.CreateStickerSlots(maxHoldCount);
     }
 
     void Update()
@@ -49,15 +53,18 @@ public class StickerInteractor : MonoBehaviour
         {
             if (scroll > 0)
             {
-                holdIndex = (holdIndex + 1) % maxHoldCount;
+                holdIndex = (holdIndex - 1 + maxHoldCount) % maxHoldCount;
             }
             else if (scroll < 0)
             {
-                holdIndex = (holdIndex - 1 + maxHoldCount) % maxHoldCount;
+                holdIndex = (holdIndex + 1) % maxHoldCount;
             }
 
             Debug.Log("HoldIndex: " + holdIndex);
         }
+
+        //ステッカーUIの選択中のスロットを更新
+        stickerSlotUI.SetSelectedSlot(holdIndex);
     }
 
     private void ReceiptPickup()
@@ -66,12 +73,16 @@ public class StickerInteractor : MonoBehaviour
         StickerState target = interactObj.GetComponent<StickerState>();  //インタラクトしているオブジェクトのStickerStateを取得
         if (target == null)
             return;
+
         //既に貼られているなら剥がして保持
-        if (target.CurrentSticker != Sticker.None)
+        if (target.currentSticker != Sticker.None)
         {
             //選択中のスロットが空なら剥がしたステッカーを保持
             if (holdSticker[holdIndex] == Sticker.None)
             {
+                //ステッカーUIの更新
+                stickerSlotUI.SetStickerUI(holdIndex, target.currentSticker);
+
                 holdSticker[holdIndex] = target.Remove();
             }
             else
@@ -81,12 +92,16 @@ public class StickerInteractor : MonoBehaviour
                 {
                     if (holdSticker[i] == Sticker.None)
                     {
+                        //ステッカーUIの更新
+                        stickerSlotUI.SetStickerUI(i, target.currentSticker);
+
                         holdSticker[i] = target.Remove();
                         return;
                     }
                 }
 
                 //保持中のステッカーが全て埋まっている場合は選択中のスロットのステッカーを剥がしたステッカーに上書き
+                stickerSlotUI.SetStickerUI(holdIndex, target.currentSticker);
                 holdSticker[holdIndex] = target.Remove();
             }
         }
@@ -95,6 +110,8 @@ public class StickerInteractor : MonoBehaviour
         {
             target.Apply(holdSticker[holdIndex]);
             holdSticker[holdIndex] = Sticker.None;
+            //ステッカーUIのスロットを空にする
+            stickerSlotUI.SetStickerUI(holdIndex, Sticker.None);
         }
         //ステッカーを持っていない
         else
