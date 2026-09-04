@@ -9,7 +9,7 @@ public class RoomDBUploader : MonoBehaviour
         WWWForm form = new WWWForm();
 
         Debug.Log("RoomId = " + RoomInfo.RoomId);
-        Debug.Log("Map = " + RoomInfo.SelectedDungeon);
+        Debug.Log("Map = " + RoomInfo.SelectedDungeonName);
         Debug.Log("Password = " + DungeonUIManager.Password);
 
         form.AddField(
@@ -19,7 +19,7 @@ public class RoomDBUploader : MonoBehaviour
 
         form.AddField(
             "map_name",
-            RoomInfo.SelectedDungeon
+            RoomInfo.SelectedDungeonName
         );
 
         form.AddField(

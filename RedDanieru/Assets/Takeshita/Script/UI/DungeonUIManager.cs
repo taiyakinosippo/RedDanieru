@@ -290,7 +290,7 @@ public class DungeonUIManager : MonoBehaviour
         }
 
         CautionText.text =
-            "マップ：" + RoomInfo.SelectedDungeon +
+            "マップ：" + RoomInfo.SelectedDungeonName +
             "\nRoomID：" + roomId +
             "\n" + roomType +
             "\n最大人数：" + MaxPlayers + "人";
