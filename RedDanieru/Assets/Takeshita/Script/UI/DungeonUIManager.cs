@@ -14,13 +14,11 @@ public static class GameModeManager
 public static class RoomInfo
 {
     public static string SelectedDungeon;
+    public static string SelectedDungeonName;
 
     public static string RoomId;
-
     public static string Password;
-
     public static bool IsPrivate;
-
     public static int MaxPlayers;
 }
 
@@ -256,7 +254,7 @@ public class DungeonUIManager : MonoBehaviour
     public void MapSelectButton()
     {
         dungeonNameText.text =
-            "マップ：" + RoomInfo.SelectedDungeon;
+            "マップ：" + RoomInfo.SelectedDungeonName;
 
         RoomInfo.RoomId =
             RoomIdGenerator.GenerateRoomId();
