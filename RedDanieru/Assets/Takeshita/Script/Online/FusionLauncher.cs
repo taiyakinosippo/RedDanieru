@@ -12,9 +12,27 @@ public class FusionLauncher : MonoBehaviour
     [SerializeField]
     private NetworkRunner runner;
 
+    [SerializeField]
+    private PlayerSpawner playerSpawner;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+
+        if (runner == null)
+        {
+            GameObject runnerObj =
+                new GameObject("NetworkRunner");
+
+            DontDestroyOnLoad(runnerObj);
+
+            runner =
+                runnerObj.AddComponent<NetworkRunner>();
+
+            runnerObj.AddComponent<NetworkSceneManagerDefault>();
+
+            runner.AddCallbacks(playerSpawner);
+        }
     }
 
     public void StartSolo()
@@ -35,24 +53,35 @@ public class FusionLauncher : MonoBehaviour
 
     public async void StartMatch(string roomName)
     {
-        if (runner == null)
-        {
-            GameObject runnerObj =
-                new GameObject("NetworkRunner");
+        Debug.Log($"StartMatch開始：{Time.realtimeSinceStartup}");
 
-            runner =
-                runnerObj.AddComponent<NetworkRunner>();
+        if (runner.IsRunning)
+        {
+            Debug.Log("既に接続中");
+            return;
         }
 
+        Debug.Log("Runner IsRunning = " + runner.IsRunning);
+
         runner.ProvideInput = true;
+
+        float startTime = Time.realtimeSinceStartup;
 
         var result =
             await runner.StartGame(
                 new StartGameArgs()
                 {
                     GameMode = GameMode.Shared,
-                    SessionName = roomName
+                    SessionName = roomName,
+                    DisableNATPunchthrough = true
                 });
+
+        Debug.Log(
+            $"StartGame完了 : {Time.realtimeSinceStartup - startTime}秒"
+        );
+
+        Debug.Log("Result = " + result.Ok);
+        Debug.Log("ShutdownReason = " + result.ShutdownReason);
 
         if (result.Ok)
         {
@@ -78,10 +107,6 @@ public class FusionLauncher : MonoBehaviour
         }
 
         await runner.Shutdown();
-
-        //Destroy(runner);
-
-        runner = null;
 
         Debug.Log("マッチングを中止しました");
     }

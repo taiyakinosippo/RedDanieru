@@ -91,8 +91,11 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     public void SpawnAllPlayers(
-        NetworkRunner runner)
+     NetworkRunner runner)
     {
+        if (!runner.IsSharedModeMasterClient)
+            return;
+
         foreach (var player in runner.ActivePlayers)
         {
             SpawnPlayer(
@@ -106,7 +109,7 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         NetworkRunner runner,
         PlayerRef player)
     {
-        Debug.Log($"Join : {player}");
+        Debug.Log($"PlayerJoin : {Time.realtimeSinceStartup}");
     }
 
     private System.Collections.IEnumerator CheckPosition(
@@ -120,7 +123,7 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         );
     }
 
-    public void OnConnectedToServer(NetworkRunner runner) { }
+    public void OnConnectedToServer(NetworkRunner runner) { Debug.Log($"ConnectedToServer:{Time.realtimeSinceStartup}"); }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
     public void OnInput(NetworkRunner runner, NetworkInput input) { }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }

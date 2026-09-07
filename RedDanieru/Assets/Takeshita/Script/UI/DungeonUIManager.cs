@@ -438,7 +438,7 @@ public class DungeonUIManager : MonoBehaviour
         {
             yield return roomDBUploader.UpdateAlive();
 
-            yield return new WaitForSeconds(5f);
+            //yield return new WaitForSeconds(5f);
         }
     }
 
