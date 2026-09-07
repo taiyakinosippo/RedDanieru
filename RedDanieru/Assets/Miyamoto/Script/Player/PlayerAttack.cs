@@ -102,6 +102,7 @@ namespace Player
 
                     hitEnemies.Add(enemy);
 
+                    // 今のところ仕様が決まっていないので、ダメージはプレイヤーの攻撃力と攻撃モーションによって決まるようにする
                     int damage =_currentAttackData.additionalDamage + _playerStatus.CurrentAttack;
 
                     enemy.Damage(damage);
