@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -22,13 +24,38 @@ namespace Player
 
         private PlayerStatus _playerStatus;
 
+        private PlayerAttack _playerAttack;
+
+        // 攻撃データのリスト
+        [SerializeField] private List<PlayerAttackData> attackData = new();
+
+        // 攻撃の範囲などを見たいときに指定の名前を入力することで、Gizmosで攻撃範囲を表示することができる
+        [SerializeField] private string debugAttackName;
+
         private void Start()
         {
             _playerStatus = GetComponent<PlayerStatus>();
             _playerMovement = GetComponent<PlayerMovement>();
-
+            _playerAttack = GetComponent<PlayerAttack>();
         }
 
+        // デバッグ用の攻撃データを取得する関数
+        public PlayerAttackData GetDebugAttackData()
+        {
+            if (attackData == null)
+                return null;
+
+            foreach (PlayerAttackData data in attackData)
+            {
+                if (data == null)
+                    continue;
+
+                if (data.attackName == debugAttackName)
+                    return data;
+            }
+
+            return null;
+        }
         private void Update()
         {
             hpText.text = $"HP : {_playerStatus.CurrentHP}/{_playerStatus._playerHP}";
@@ -39,7 +66,7 @@ namespace Player
 
 
 
-        //debug用に、地面にいるかどうかの判定を可視化するためのGizmosを描画する関数
+        //debug用の範囲などをGizmosで表示するための関数
         private void OnDrawGizmosSelected()
         {
             _playerMovement = GetComponent<PlayerMovement>();
@@ -92,6 +119,53 @@ namespace Player
                 // ステッカーあるかの判定を行う
                 Gizmos.DrawSphere(spherePosition, _stickerCheck.checkRadius);
             }
+
+            if (attackData == null)
+                return;
+
+            PlayerAttackData debugData = null;
+
+            // 入力された名前と一致する攻撃を探す
+            foreach (PlayerAttackData data in attackData)
+            {
+                if (data == null)
+                    continue;
+
+                if (data.attackName == debugAttackName)
+                {
+                    debugData = data;
+                    break;
+                }
+            }
+
+            // 見つからなかった
+            if (debugData == null)
+                return;
+
+            // 攻撃判定の中心位置
+            Vector3 center =
+            _playerAttack._attackPoint.position +
+            _playerAttack._attackPoint.rotation * debugData.attackOffset;
+
+            // 攻撃判定の向きを計算する
+            Quaternion attackRotation =
+    　　　　_playerAttack._attackPoint.rotation * Quaternion.Euler(debugData.attackRotation);
+
+            // 攻撃判定の向き
+            Gizmos.matrix = Matrix4x4.TRS(
+                center,
+                attackRotation,
+                Vector3.one
+            );
+
+            // 攻撃範囲を表示
+            Gizmos.DrawWireCube(
+                Vector3.zero,
+                debugData.playerAttackRadius
+            );
+
+            // Gizmosの設定を元に戻す
+            Gizmos.matrix = Matrix4x4.identity;
         }
         
     }
