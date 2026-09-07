@@ -521,6 +521,7 @@ GameObject:
   - component: {fileID: 44870705}
   - component: {fileID: 44870710}
   - component: {fileID: 44870709}
+  - component: {fileID: 44870711}
   m_Layer: 0
   m_Name: NetworkRunner
   m_TagString: Untagged
@@ -553,11 +554,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefabs:
-  - RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
   - RawGuidValue: ecbd0c7ad4784ae469d37950d35cc600
+  - RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
   spawnPoints:
   - {fileID: 285340711}
   - {fileID: 49885551}
+  _CanSpawn:
+    _value: 0
 --- !u!4 &44870708
 Transform:
   m_ObjectHideFlags: 0
@@ -590,6 +593,7 @@ MonoBehaviour:
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
+  - {fileID: 44870706}
   - {fileID: 44870710}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &44870710
@@ -602,6 +606,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d32e096127476841a84a10ba5ac319d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &44870711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 44870704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b74c43539ff23c4f886eb7f0f51d350, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &46315920

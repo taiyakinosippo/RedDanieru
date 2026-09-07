@@ -361,19 +361,6 @@ public class DungeonUIManager : MonoBehaviour
 
     public void GameStartButton()
     {
-        NetworkRunner runner =
-            FindObjectOfType<NetworkRunner>();
-
-        if (runner == null)
-            return;
-
-        if (runner.IsSharedModeMasterClient)
-        {
-            playerSpawner.SpawnAllPlayers(
-                runner
-            );
-        }
-
         HideMatchingUI();
     }
 

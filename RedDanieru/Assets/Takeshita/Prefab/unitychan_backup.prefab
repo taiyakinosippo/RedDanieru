@@ -14,14 +14,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: NetworkedBehaviours.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[0]'
       value: 
-      objectReference: {fileID: 3873388935660617896}
+      objectReference: {fileID: 8979677413800348638}
     - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[1]'
+      value: 
+      objectReference: {fileID: 3873388935660617896}
+    - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[2]'
+      value: 
+      objectReference: {fileID: -4442747001464199512}
+    - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
+      propertyPath: 'NetworkedBehaviours.Array.data[3]'
       value: 
       objectReference: {fileID: -4442747001464199512}
     - target: {fileID: 3898678134712886083, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
@@ -112,3 +120,14 @@ MonoBehaviour:
   braking: 10
   maxSpeed: 2
   rotationSpeed: 15
+--- !u!114 &8979677413800348638 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1614026655119289965, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
+  m_PrefabInstance: {fileID: 7707934646344787379}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6693183178085648112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b097b5903026804d87183bb6bb48ef7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
