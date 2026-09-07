@@ -886,6 +886,11 @@ Transform:
   - {fileID: 833481695}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!20 &1961443346 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 6566965278065172514, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+  m_PrefabInstance: {fileID: 633280984272545406}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &633280984272545406
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -901,6 +906,38 @@ PrefabInstance:
     - target: {fileID: 2010277633768818679, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: wallSize
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: floorSize
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: mapCamera
+      value: 
+      objectReference: {fileID: 1961443346}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: baseMapSize
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: wallSpacing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: enemySpacing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: floorSpacing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
+      propertyPath: objectSpacing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2153949976941881518, guid: c8a3b16a7d320224aa4f71a564bfac95, type: 3}
       propertyPath: objectPrefabs.Array.data[4].type

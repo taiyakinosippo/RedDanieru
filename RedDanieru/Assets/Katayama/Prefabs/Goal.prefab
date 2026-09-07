@@ -378,6 +378,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clearPanel: {fileID: 7983007032705598969}
   clearCameraPrefab: {fileID: 2207088915897826225, guid: 35aa3220c025650439e9b70a39c54a7c, type: 3}
+  clearCameraPosition: {x: 16, y: 30, z: 16}
+  clearCameraRotation: {x: 90, y: 0, z: 0}
+  baseFieldOfView: 60
+  baseMapSize: 32
   titleSceneName: TitleScene
 --- !u!1 &6479654475357674865
 GameObject:

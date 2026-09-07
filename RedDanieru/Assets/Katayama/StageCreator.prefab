@@ -870,11 +870,18 @@ MonoBehaviour:
   width: 32
   height: 1
   depth: 32
+  wallSize: 1
+  wallSpacing: 1
+  floorSize: 1
+  floorSpacing: 1
+  floorYOffset: -3
+  enemySize: 1
+  enemySpacing: 1
+  objectSize: 1
+  objectSpacing: 1
+  objectYOffset: 1.5
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
   floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
-  floorYOffset: -3
-  navMeshSurface: {fileID: 5006102464896479107}
-  objectYOffset: 1.5
   objectPrefabs:
   - type: 0
     prefab: {fileID: 8173197566262819081, guid: f44571431ecfdfb4995703cd6797ef84, type: 3}
@@ -886,6 +893,12 @@ MonoBehaviour:
     prefab: {fileID: 1986632935637041606, guid: c53becb27deab7143a15fef2fc8c2344, type: 3}
   - type: 8
     prefab: {fileID: 1986632935637041606, guid: 0b3837c3d701b234e9c2107e5f4ecfc6, type: 3}
+  navMeshSurface: {fileID: 5006102464896479107}
+  mapCamera: {fileID: 6566965278065172514}
+  baseCameraPosition: {x: 15.5, y: 35, z: 18.5}
+  cameraRotation: {x: 90, y: 0, z: 0}
+  baseOrthographicSize: 20
+  baseMapSize: 31
   respawnPointPrefab: {fileID: 1416731327575110247, guid: 70df3e21df036f04596219f240419c92, type: 3}
   respawnAreaPrefab: {fileID: 75136431443110141, guid: 8eb4dfa1cb83ff245ad221c1333df8d9, type: 3}
   defaultRespawnPointPosition: {x: -3, y: 1.2, z: 4.5}
@@ -2475,6 +2488,7 @@ MonoBehaviour:
   creatorNameInput: {fileID: 2808680706631227481}
   saveManager: {fileID: 7755967263560064543}
   uploader: {fileID: 3329469922032564267}
+  cautionObj: {fileID: 0}
 --- !u!114 &3329469922032564267
 MonoBehaviour:
   m_ObjectHideFlags: 0
