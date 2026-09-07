@@ -4,27 +4,94 @@ using UnityEngine.AI;
 
 public class MapManager : MonoBehaviour
 {
+    //==================================================
+    // 新規マップ
+    //==================================================
+
     [Header("新規マップを生成する（EditorSceneのみON）")]
     [SerializeField] private bool createOnStart = true;
+
+    //==================================================
+    // Map Size
+    //==================================================
 
     [Header("Map Size")]
     public int width = 32;
     public int height = 1;
     public int depth = 32;
 
+    //==================================================
+    // 壁サイズ設定
+    //==================================================
+
+    [Header("壁サイズ設定")]
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float wallSize = 1f;
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float wallSpacing = 1f;
+
+    //==================================================
+    // 床サイズ設定
+    //==================================================
+
+    [Header("床サイズ設定")]
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float floorSize = 1f;
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float floorSpacing = 1f;
+
+    [SerializeField]
+    private float floorYOffset = -1f;
+
+    //==================================================
+    // 敵サイズ設定
+    //==================================================
+
+    [Header("敵サイズ設定")]
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float enemySize = 1f;
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float enemySpacing = 1f;
+
+    //==================================================
+    // 設置オブジェクトサイズ設定
+    //==================================================
+
+    [Header("設置オブジェクトサイズ設定")]
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float objectSize = 1f;
+
+    [SerializeField]
+    [Min(0.01f)]
+    private float objectSpacing = 1f;
+
+    [SerializeField]
+    private float objectYOffset = 0f;
+
+    //==================================================
+    // Prefab
+    //==================================================
+
     [Header("Prefab")]
+
     public GameObject wallPrefab;
 
-    [SerializeField] private GameObject floorPrefab;
-
-    [Header("床生成設定")]
-    [SerializeField] private float floorYOffset = -1f;
-
-    [Header("NavMesh")]
-    [SerializeField] private NavMeshSurface navMeshSurface;
-
-    [Header("オブジェクト配置設定")]
-    [SerializeField] private float objectYOffset = 0f;
+    [SerializeField]
+    private GameObject floorPrefab;
 
     [SerializeField]
     private PlaceObjectPrefab[] objectPrefabs;
@@ -37,30 +104,95 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
+    // NavMesh
+    //==================================================
+
+    [Header("NavMesh")]
+
+    [SerializeField]
+    private NavMeshSurface navMeshSurface;
+
+    //==================================================
+    // カメラ
+    //==================================================
+
+    [Header("カメラ設定")]
+
+    [SerializeField]
+    private Camera mapCamera;
+
+    [Tooltip("32×32マップ時のカメラ位置")]
+    [SerializeField]
+    private Vector3 baseCameraPosition =
+        new Vector3(
+            15.5f,
+            35f,
+            18.5f
+        );
+
+    [Tooltip("カメラ角度")]
+    [SerializeField]
+    private Vector3 cameraRotation =
+        new Vector3(
+            90f,
+            0f,
+            0f
+        );
+
+    [Tooltip("32×32マップ時のOrthographic Size")]
+    [SerializeField]
+    private float baseOrthographicSize = 20f;
+
+    [Tooltip("基準となるマップサイズ")]
+    [SerializeField]
+    private float baseMapSize = 31f;
+
+    //==================================================
     // リスポーン
     //==================================================
 
     [Header("リスポーン")]
-    [SerializeField] private GameObject respawnPointPrefab;
-    [SerializeField] private GameObject respawnAreaPrefab;
+
+    [SerializeField]
+    private GameObject respawnPointPrefab;
+
+    [SerializeField]
+    private GameObject respawnAreaPrefab;
 
     [Header("リスポーン初期位置")]
+
     [SerializeField]
     private Vector3 defaultRespawnPointPosition =
-        new Vector3(0f, 0f, 0f);
+        new Vector3(
+            0f,
+            0f,
+            0f
+        );
 
     [SerializeField]
     private Vector3 defaultRespawnAreaPosition =
-        new Vector3(0f, -1f, 0f);
+        new Vector3(
+            0f,
+            -1f,
+            0f
+        );
 
     [Header("リスポーンエリア初期サイズ")]
+
     [SerializeField]
     private Vector3 defaultRespawnAreaScale =
-        new Vector3(3f, 1f, 3f);
+        new Vector3(
+            3f,
+            1f,
+            3f
+        );
 
     private GameObject respawnPointObject;
     private GameObject respawnAreaObject;
 
+    //==================================================
+    // マップデータ
+    //==================================================
 
     private TileType[,,] map;
 
@@ -69,7 +201,6 @@ public class MapManager : MonoBehaviour
     private GameObject[,,] placedObjects;
 
     private PlaceObjectType[,,] placedObjectTypes;
-
 
     //==================================================
     // Start
@@ -83,6 +214,107 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    //==================================================
+    // 壁ワールド座標
+    //==================================================
+
+    private Vector3 GetWallWorldPosition(Vector3Int pos)
+    {
+        return new Vector3(
+            pos.x * wallSpacing,
+            pos.y * wallSpacing,
+            pos.z * wallSpacing
+        );
+    }
+
+    //==================================================
+    // 床ワールド座標
+    //==================================================
+
+    private Vector3 GetFloorWorldPosition(Vector3Int pos)
+    {
+        return new Vector3(
+            pos.x * floorSpacing,
+            pos.y * floorSpacing + floorYOffset,
+            pos.z * floorSpacing
+        );
+    }
+
+    //==================================================
+    // 敵ワールド座標
+    //==================================================
+
+    private Vector3 GetEnemyWorldPosition(Vector3Int pos)
+    {
+        return new Vector3(
+            pos.x * enemySpacing,
+            pos.y * enemySpacing + floorYOffset,
+            pos.z * enemySpacing
+        );
+    }
+
+    //==================================================
+    // オブジェクトワールド座標
+    //==================================================
+
+    private Vector3 GetObjectWorldPosition(Vector3Int pos)
+    {
+        return new Vector3(
+            pos.x * objectSpacing,
+            pos.y * objectSpacing
+                + floorYOffset
+                + objectYOffset,
+            pos.z * objectSpacing
+        );
+    }
+
+    //==================================================
+    // 壁サイズ
+    //==================================================
+
+    private void SetWallScale(GameObject obj)
+    {
+        if (obj == null)
+            return;
+
+        obj.transform.localScale *= wallSize;
+    }
+
+    //==================================================
+    // 床サイズ
+    //==================================================
+
+    private void SetFloorScale(GameObject obj)
+    {
+        if (obj == null)
+            return;
+
+        obj.transform.localScale *= floorSize;
+    }
+
+    //==================================================
+    // 敵サイズ
+    //==================================================
+
+    private void SetEnemyScale(GameObject obj)
+    {
+        if (obj == null)
+            return;
+
+        obj.transform.localScale *= enemySize;
+    }
+
+    //==================================================
+    // オブジェクトサイズ
+    //==================================================
+
+    private void SetObjectScale(GameObject obj)
+    {
+        if (obj == null)
+            return;
+
+        obj.transform.localScale *= objectSize;
+    }
 
     //==================================================
     // 新規マップ作成
@@ -94,32 +326,51 @@ public class MapManager : MonoBehaviour
 
         CreateMap();
 
-        // 新規マップでは最初から配置
         CreateDefaultRespawnObjects();
+
+        AdjustCamera();
     }
 
-
     //==================================================
-    // 配列生成
+    // マップ配列生成
     //==================================================
 
     private void GenerateMap()
     {
         map =
-            new TileType[width, height, depth];
+            new TileType[
+                width,
+                height,
+                depth
+            ];
 
         wallObjects =
-            new GameObject[width, height, depth];
+            new GameObject[
+                width,
+                height,
+                depth
+            ];
 
         floorObjects =
-            new GameObject[width, height, depth];
+            new GameObject[
+                width,
+                height,
+                depth
+            ];
 
         placedObjects =
-            new GameObject[width, height, depth];
+            new GameObject[
+                width,
+                height,
+                depth
+            ];
 
         placedObjectTypes =
-            new PlaceObjectType[width, height, depth];
-
+            new PlaceObjectType[
+                width,
+                height,
+                depth
+            ];
 
         for (int x = 0; x < width; x++)
         {
@@ -127,13 +378,11 @@ public class MapManager : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    map[x, y, z] =
-                        TileType.Wall;
+                    map[x, y, z] = TileType.Wall;
                 }
             }
         }
     }
-
 
     //==================================================
     // マップ生成
@@ -147,53 +396,35 @@ public class MapManager : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    if (
-                        map[x, y, z]
-                        != TileType.Wall
-                    )
-                    {
+                    if (map[x, y, z] != TileType.Wall)
                         continue;
-                    }
 
+                    Vector3Int pos =
+                        new Vector3Int(x, y, z);
 
                     GameObject wall =
                         Instantiate(
                             wallPrefab,
-                            new Vector3(
-                                x,
-                                y,
-                                z
-                            ),
+                            GetWallWorldPosition(pos),
                             Quaternion.identity,
                             transform
                         );
 
+                    SetWallScale(wall);
 
-                    wallObjects[
-                        x,
-                        y,
-                        z
-                    ] = wall;
-
+                    wallObjects[x, y, z] = wall;
 
                     WallBlock block =
                         wall.GetComponent<WallBlock>();
 
-
                     if (block != null)
                     {
-                        block.GridPosition =
-                            new Vector3Int(
-                                x,
-                                y,
-                                z
-                            );
+                        block.GridPosition = pos;
                     }
                 }
             }
         }
     }
-
 
     //==================================================
     // 初期リスポーン生成
@@ -201,7 +432,6 @@ public class MapManager : MonoBehaviour
 
     private void CreateDefaultRespawnObjects()
     {
-        // リスポーンポイント
         if (respawnPointPrefab != null)
         {
             respawnPointObject =
@@ -222,8 +452,6 @@ public class MapManager : MonoBehaviour
             );
         }
 
-
-        // リスポーンエリア
         if (respawnAreaPrefab != null)
         {
             respawnAreaObject =
@@ -237,10 +465,7 @@ public class MapManager : MonoBehaviour
             respawnAreaObject.name =
                 "RespawnArea";
 
-
-            respawnAreaObject
-                .transform
-                .localScale =
+            respawnAreaObject.transform.localScale =
                 defaultRespawnAreaScale;
         }
         else
@@ -251,7 +476,6 @@ public class MapManager : MonoBehaviour
         }
     }
 
-
     //==================================================
     // 掘る
     //==================================================
@@ -261,27 +485,13 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return;
 
-
-        if (
-            map[pos.x, pos.y, pos.z]
-            != TileType.Wall
-        )
-        {
+        if (map[pos.x, pos.y, pos.z] != TileType.Wall)
             return;
-        }
-
 
         map[pos.x, pos.y, pos.z] =
             TileType.Floor;
 
-
-        if (
-            wallObjects[
-                pos.x,
-                pos.y,
-                pos.z
-            ] != null
-        )
+        if (wallObjects[pos.x, pos.y, pos.z] != null)
         {
             Destroy(
                 wallObjects[
@@ -291,47 +501,37 @@ public class MapManager : MonoBehaviour
                 ]
             );
 
-
             wallObjects[
                 pos.x,
                 pos.y,
                 pos.z
             ] = null;
+        }
 
+        GameObject floor =
+            Instantiate(
+                floorPrefab,
+                GetFloorWorldPosition(pos),
+                Quaternion.identity,
+                transform
+            );
 
-            GameObject floor =
-                Instantiate(
-                    floorPrefab,
-                    new Vector3(
-                        pos.x,
-                        pos.y +
-                        floorYOffset,
-                        pos.z
-                    ),
-                    Quaternion.identity,
-                    transform
-                );
+        SetFloorScale(floor);
 
+        floorObjects[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = floor;
 
-            floorObjects[
-                pos.x,
-                pos.y,
-                pos.z
-            ] = floor;
+        FloorBlock block =
+            floor.GetComponent<FloorBlock>();
 
-
-            FloorBlock block =
-                floor.GetComponent<FloorBlock>();
-
-
-            if (block != null)
-            {
-                block.GridPosition =
-                    pos;
-            }
+        if (block != null)
+        {
+            block.GridPosition = pos;
         }
     }
-
 
     //==================================================
     // セーブデータ作成
@@ -342,15 +542,9 @@ public class MapManager : MonoBehaviour
         DungeonMapData data =
             new DungeonMapData();
 
-
         data.width = width;
         data.height = height;
         data.depth = depth;
-
-
-        //==================================================
-        // 壁・床
-        //==================================================
 
         data.tiles =
             new byte[
@@ -359,9 +553,7 @@ public class MapManager : MonoBehaviour
                 depth
             ];
 
-
         int index = 0;
-
 
         for (int y = 0; y < height; y++)
         {
@@ -370,19 +562,10 @@ public class MapManager : MonoBehaviour
                 for (int x = 0; x < width; x++)
                 {
                     data.tiles[index++] =
-                        (byte)map[
-                            x,
-                            y,
-                            z
-                        ];
+                        (byte)map[x, y, z];
                 }
             }
         }
-
-
-        //==================================================
-        // 配置Object
-        //==================================================
 
         for (int x = 0; x < width; x++)
         {
@@ -401,14 +584,12 @@ public class MapManager : MonoBehaviour
                         continue;
                     }
 
-
                     data.objects.Add(
                         new ObjectData()
                         {
                             x = x,
                             y = y,
                             z = z,
-
                             type =
                                 placedObjectTypes[
                                     x,
@@ -421,31 +602,20 @@ public class MapManager : MonoBehaviour
             }
         }
 
-
         //==================================================
-        // リスポーンポイント保存
+        // リスポーンポイント
         //==================================================
 
         if (respawnPointObject != null)
         {
             data.hasRespawnPoint = true;
 
-
             Vector3 position =
-                respawnPointObject
-                    .transform
-                    .position;
+                respawnPointObject.transform.position;
 
-
-            data.spawnPointX =
-                position.x;
-
-            data.spawnPointY =
-                position.y;
-
-            data.spawnPointZ =
-                position.z;
-
+            data.spawnPointX = position.x;
+            data.spawnPointY = position.y;
+            data.spawnPointZ = position.z;
 
             data.spawnPointRotY =
                 respawnPointObject
@@ -458,73 +628,56 @@ public class MapManager : MonoBehaviour
             data.hasRespawnPoint = false;
         }
 
-
         //==================================================
-        // リスポーンエリア保存
+        // リスポーンエリア
         //==================================================
 
         if (respawnAreaObject != null)
         {
             data.hasRespawnArea = true;
 
-
             Vector3 position =
-                respawnAreaObject
-                    .transform
-                    .position;
+                respawnAreaObject.transform.position;
 
-
-            data.respawnAreaX =
-                position.x;
-
-            data.respawnAreaY =
-                position.y;
-
-            data.respawnAreaZ =
-                position.z;
-
+            data.respawnAreaX = position.x;
+            data.respawnAreaY = position.y;
+            data.respawnAreaZ = position.z;
 
             Vector3 scale =
-                respawnAreaObject
-                    .transform
-                    .localScale;
+                respawnAreaObject.transform.localScale;
 
-
-            data.respawnAreaScaleX =
-                scale.x;
-
-            data.respawnAreaScaleY =
-                scale.y;
-
-            data.respawnAreaScaleZ =
-                scale.z;
+            data.respawnAreaScaleX = scale.x;
+            data.respawnAreaScaleY = scale.y;
+            data.respawnAreaScaleZ = scale.z;
         }
         else
         {
             data.hasRespawnArea = false;
         }
 
-
         return data;
     }
 
-
     //==================================================
-    // ロード
+    // ダンジョンロード
     //==================================================
 
     public void LoadDungeon(
         DungeonMapData data,
         bool enableEnemyMovement = true)
     {
+        if (data == null)
+        {
+            Debug.LogError(
+                "DungeonMapDataがnullです。"
+            );
+
+            return;
+        }
+
         width = data.width;
         height = data.height;
         depth = data.depth;
-
-
-        //==================================================
-        // 配列を作成
-        //==================================================
 
         map =
             new TileType[
@@ -533,14 +686,12 @@ public class MapManager : MonoBehaviour
                 depth
             ];
 
-
         placedObjectTypes =
             new PlaceObjectType[
                 width,
                 height,
                 depth
             ];
-
 
         wallObjects =
             new GameObject[
@@ -549,14 +700,12 @@ public class MapManager : MonoBehaviour
                 depth
             ];
 
-
         floorObjects =
             new GameObject[
                 width,
                 height,
                 depth
             ];
-
 
         placedObjects =
             new GameObject[
@@ -565,9 +714,8 @@ public class MapManager : MonoBehaviour
                 depth
             ];
 
-
         //==================================================
-        // 現在動いている敵を停止
+        // 敵停止
         //==================================================
 
         GameObject[] enemies =
@@ -575,42 +723,27 @@ public class MapManager : MonoBehaviour
                 "Enemy"
             );
 
-
-        foreach (
-            GameObject enemy
-            in enemies
-        )
+        foreach (GameObject enemy in enemies)
         {
             NavMeshAgent[] agents =
                 enemy.GetComponentsInChildren<
                     NavMeshAgent
                 >();
 
-
-            foreach (
-                NavMeshAgent agent
-                in agents
-            )
+            foreach (NavMeshAgent agent in agents)
             {
                 if (!agent.enabled)
                     continue;
 
-
                 agent.isStopped = true;
-
                 agent.ResetPath();
-
-                agent.velocity =
-                    Vector3.zero;
-
-                // ロード中はAgentを無効化
+                agent.velocity = Vector3.zero;
                 agent.enabled = false;
             }
         }
 
-
         //==================================================
-        // 現在のマップを削除
+        // 現在のマップ削除
         //==================================================
 
         for (
@@ -624,17 +757,14 @@ public class MapManager : MonoBehaviour
             );
         }
 
-
         respawnPointObject = null;
         respawnAreaObject = null;
-
-
-        int index = 0;
-
 
         //==================================================
         // 壁・床復元
         //==================================================
+
+        int index = 0;
 
         for (int y = 0; y < height; y++)
         {
@@ -645,6 +775,12 @@ public class MapManager : MonoBehaviour
                     map[x, y, z] =
                         (TileType)data.tiles[index++];
 
+                    Vector3Int pos =
+                        new Vector3Int(
+                            x,
+                            y,
+                            z
+                        );
 
                     //==================================================
                     // 壁
@@ -658,15 +794,12 @@ public class MapManager : MonoBehaviour
                         GameObject wall =
                             Instantiate(
                                 wallPrefab,
-                                new Vector3(
-                                    x,
-                                    y,
-                                    z
-                                ),
+                                GetWallWorldPosition(pos),
                                 Quaternion.identity,
                                 transform
                             );
 
+                        SetWallScale(wall);
 
                         wallObjects[
                             x,
@@ -674,22 +807,14 @@ public class MapManager : MonoBehaviour
                             z
                         ] = wall;
 
-
                         WallBlock block =
                             wall.GetComponent<WallBlock>();
 
-
                         if (block != null)
                         {
-                            block.GridPosition =
-                                new Vector3Int(
-                                    x,
-                                    y,
-                                    z
-                                );
+                            block.GridPosition = pos;
                         }
                     }
-
 
                     //==================================================
                     // 床
@@ -703,16 +828,12 @@ public class MapManager : MonoBehaviour
                         GameObject floor =
                             Instantiate(
                                 floorPrefab,
-                                new Vector3(
-                                    x,
-                                    y +
-                                    floorYOffset,
-                                    z
-                                ),
+                                GetFloorWorldPosition(pos),
                                 Quaternion.identity,
                                 transform
                             );
 
+                        SetFloorScale(floor);
 
                         floorObjects[
                             x,
@@ -720,35 +841,26 @@ public class MapManager : MonoBehaviour
                             z
                         ] = floor;
 
-
                         FloorBlock block =
                             floor.GetComponent<FloorBlock>();
 
-
                         if (block != null)
                         {
-                            block.GridPosition =
-                                new Vector3Int(
-                                    x,
-                                    y,
-                                    z
-                                );
+                            block.GridPosition = pos;
                         }
                     }
                 }
             }
         }
 
-
         //==================================================
-        // 床が完成してからNavMeshを作成
+        // NavMesh生成
         //==================================================
 
         BuildNavigation();
 
-
         //==================================================
-        // 保存したObjectを復元
+        // Object復元
         //==================================================
 
         if (data.objects != null)
@@ -765,7 +877,6 @@ public class MapManager : MonoBehaviour
                         objData.z
                     );
 
-
                 PlaceObject(
                     pos,
                     objData.type
@@ -773,18 +884,14 @@ public class MapManager : MonoBehaviour
             }
         }
 
-
         //==================================================
-        // 敵をNavMesh上に配置
+        // 敵移動開始
         //==================================================
 
-        // Undo / Redoの場合はfalseにして、
-        // この場では敵を有効化しない
         if (enableEnemyMovement)
         {
             EnableEnemyMovement();
         }
-
 
         //==================================================
         // リスポーン復元
@@ -792,12 +899,16 @@ public class MapManager : MonoBehaviour
 
         CreateRespawnObjects(data);
 
+        //==================================================
+        // カメラ調整
+        //==================================================
+
+        AdjustCamera();
 
         Debug.Log(
             "ダンジョン復元完了"
         );
     }
-
 
     //==================================================
     // リスポーン復元
@@ -806,15 +917,10 @@ public class MapManager : MonoBehaviour
     private void CreateRespawnObjects(
         DungeonMapData data)
     {
-        //==================================================
-        // リスポーンポイント
-        //==================================================
-
         if (respawnPointPrefab != null)
         {
             Vector3 position;
             Quaternion rotation;
-
 
             if (data.hasRespawnPoint)
             {
@@ -824,7 +930,6 @@ public class MapManager : MonoBehaviour
                         data.spawnPointY,
                         data.spawnPointZ
                     );
-
 
                 rotation =
                     Quaternion.Euler(
@@ -838,11 +943,9 @@ public class MapManager : MonoBehaviour
                 position =
                     defaultRespawnPointPosition;
 
-
                 rotation =
                     Quaternion.identity;
             }
-
 
             respawnPointObject =
                 Instantiate(
@@ -852,21 +955,14 @@ public class MapManager : MonoBehaviour
                     transform
                 );
 
-
             respawnPointObject.name =
                 "RespawnPoint";
         }
-
-
-        //==================================================
-        // リスポーンエリア
-        //==================================================
 
         if (respawnAreaPrefab != null)
         {
             Vector3 position;
             Vector3 scale;
-
 
             if (data.hasRespawnArea)
             {
@@ -876,7 +972,6 @@ public class MapManager : MonoBehaviour
                         data.respawnAreaY,
                         data.respawnAreaZ
                     );
-
 
                 scale =
                     new Vector3(
@@ -890,11 +985,9 @@ public class MapManager : MonoBehaviour
                 position =
                     defaultRespawnAreaPosition;
 
-
                 scale =
                     defaultRespawnAreaScale;
             }
-
 
             respawnAreaObject =
                 Instantiate(
@@ -904,18 +997,13 @@ public class MapManager : MonoBehaviour
                     transform
                 );
 
-
             respawnAreaObject.name =
                 "RespawnArea";
 
-
-            respawnAreaObject
-                .transform
-                .localScale =
+            respawnAreaObject.transform.localScale =
                 scale;
         }
     }
-
 
     //==================================================
     // Object配置
@@ -928,8 +1016,10 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return;
 
+        //==================================================
+        // 床以外には配置不可
+        //==================================================
 
-        // 床以外には配置できない
         if (
             map[pos.x, pos.y, pos.z]
             != TileType.Floor
@@ -942,8 +1032,10 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        //==================================================
+        // すでにObjectがある
+        //==================================================
 
-        // すでにオブジェクトがある
         if (
             placedObjects[
                 pos.x,
@@ -955,8 +1047,10 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        //==================================================
+        // Goalは1つ
+        //==================================================
 
-        // Goalは1個だけ
         if (
             type == PlaceObjectType.Goal &&
             HasGoal()
@@ -969,9 +1063,11 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        //==================================================
+        // Prefab検索
+        //==================================================
 
         GameObject prefab = null;
-
 
         foreach (
             var data
@@ -985,7 +1081,6 @@ public class MapManager : MonoBehaviour
             }
         }
 
-
         if (prefab == null)
         {
             Debug.LogError(
@@ -996,16 +1091,26 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        //==================================================
+        // 配置位置
+        //==================================================
 
-        Vector3 spawnPosition =
-            new Vector3(
-                pos.x,
-                pos.y +
-                floorYOffset +
-                objectYOffset,
-                pos.z
-            );
+        Vector3 spawnPosition;
 
+        if (type == PlaceObjectType.Enemy)
+        {
+            spawnPosition =
+                GetEnemyWorldPosition(pos);
+        }
+        else
+        {
+            spawnPosition =
+                GetObjectWorldPosition(pos);
+        }
+
+        //==================================================
+        // 生成
+        //==================================================
 
         GameObject obj =
             Instantiate(
@@ -1015,50 +1120,51 @@ public class MapManager : MonoBehaviour
                 transform
             );
 
+        //==================================================
+        // サイズ
+        //==================================================
+
+        if (type == PlaceObjectType.Enemy)
+        {
+            SetEnemyScale(obj);
+        }
+        else
+        {
+            SetObjectScale(obj);
+        }
 
         //==================================================
-        // Rigidbodyを固定
+        // Rigidbody固定
         //==================================================
 
         Rigidbody[] rigidbodies =
-            obj.GetComponentsInChildren<Rigidbody>();
+            obj.GetComponentsInChildren<
+                Rigidbody
+            >();
 
-
-        foreach (
-            Rigidbody rb
-            in rigidbodies
-        )
+        foreach (Rigidbody rb in rigidbodies)
         {
             rb.isKinematic = true;
             rb.useGravity = false;
-
-            rb.linearVelocity =
-                Vector3.zero;
-
-            rb.angularVelocity =
-                Vector3.zero;
-
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
             rb.constraints =
                 RigidbodyConstraints.FreezeAll;
         }
 
-
         //==================================================
-        // NavMeshAgentは一旦無効
+        // NavMeshAgent無効
         //==================================================
 
         NavMeshAgent[] agents =
-            obj.GetComponentsInChildren<NavMeshAgent>();
+            obj.GetComponentsInChildren<
+                NavMeshAgent
+            >();
 
-
-        foreach (
-            NavMeshAgent agent
-            in agents
-        )
+        foreach (NavMeshAgent agent in agents)
         {
             agent.enabled = false;
         }
-
 
         //==================================================
         // 配置情報保存
@@ -1070,43 +1176,29 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = obj;
 
-
         placedObjectTypes[
             pos.x,
             pos.y,
             pos.z
         ] = type;
 
-
         PlaceObject placeObject =
             obj.GetComponent<PlaceObject>();
 
-
         if (placeObject != null)
         {
-            placeObject.GridPosition =
-                pos;
+            placeObject.GridPosition = pos;
         }
-
-
-        obj.transform.position =
-            spawnPosition;
-
-        obj.transform.rotation =
-            Quaternion.identity;
     }
-
 
     //==================================================
     // Object削除
     //==================================================
 
-    public void DeleteObject(
-        Vector3Int pos)
+    public void DeleteObject(Vector3Int pos)
     {
         if (!IsInsideMap(pos))
             return;
-
 
         if (
             placedObjects[
@@ -1119,7 +1211,6 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-
         Destroy(
             placedObjects[
                 pos.x,
@@ -1128,13 +1219,11 @@ public class MapManager : MonoBehaviour
             ]
         );
 
-
         placedObjects[
             pos.x,
             pos.y,
             pos.z
         ] = null;
-
 
         placedObjectTypes[
             pos.x,
@@ -1142,7 +1231,6 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = default;
     }
-
 
     //==================================================
     // Goal確認
@@ -1176,10 +1264,8 @@ public class MapManager : MonoBehaviour
             }
         }
 
-
         return false;
     }
-
 
     //==================================================
     // Object取得
@@ -1191,14 +1277,12 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return null;
 
-
         return placedObjects[
             pos.x,
             pos.y,
             pos.z
         ];
     }
-
 
     //==================================================
     // NavMesh生成
@@ -1215,18 +1299,15 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-
         navMeshSurface.BuildNavMesh();
-
 
         Debug.Log(
             "床のNavMeshを再生成しました。"
         );
     }
 
-
     //==================================================
-    // 敵のNavMesh移動を有効化
+    // 敵移動有効化
     //==================================================
 
     public void EnableEnemyMovement()
@@ -1236,25 +1317,16 @@ public class MapManager : MonoBehaviour
                 "Enemy"
             );
 
-
-        foreach (
-            GameObject enemy
-            in enemies
-        )
+        foreach (GameObject enemy in enemies)
         {
             NavMeshAgent[] agents =
                 enemy.GetComponentsInChildren<
                     NavMeshAgent
                 >();
 
-
-            foreach (
-                NavMeshAgent agent
-                in agents
-            )
+            foreach (NavMeshAgent agent in agents)
             {
                 NavMeshHit hit;
-
 
                 bool found =
                     NavMesh.SamplePosition(
@@ -1264,19 +1336,13 @@ public class MapManager : MonoBehaviour
                         NavMesh.AllAreas
                     );
 
-
                 if (found)
                 {
-                    // NavMesh上へ移動
                     enemy.transform.position =
                         hit.position;
 
-
-                    // Agentを有効化
                     agent.enabled = true;
 
-
-                    // Agent自身もNavMesh上へ移動
                     agent.Warp(
                         hit.position
                     );
@@ -1292,6 +1358,134 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    //==================================================
+    // カメラ自動調整
+    //==================================================
+
+    public void AdjustCamera()
+    {
+        if (mapCamera == null)
+        {
+            Debug.LogWarning(
+                "Map Cameraが設定されていません。"
+            );
+
+            return;
+        }
+
+        //==================================================
+        // マップサイズ
+        //==================================================
+
+        float mapWidth =
+            (width - 1) *
+            wallSpacing;
+
+        float mapDepth =
+            (depth - 1) *
+            wallSpacing;
+
+        float mapSize =
+            Mathf.Max(
+                mapWidth,
+                mapDepth
+            );
+
+        //==================================================
+        // マップ中央
+        //==================================================
+
+        float centerX =
+            mapWidth / 2f;
+
+        float centerZ =
+            mapDepth / 2f;
+
+        //==================================================
+        // 基準サイズとの倍率
+        //==================================================
+
+        float scale =
+            mapSize /
+            baseMapSize;
+
+        // 小さいマップにも対応
+        if (scale <= 0f)
+        {
+            scale = 1f;
+        }
+
+        //==================================================
+        // 基準カメラの中心からのズレ
+        //==================================================
+
+        float baseCenterX =
+            baseMapSize / 2f;
+
+        float baseCenterZ =
+            baseMapSize / 2f;
+
+        float offsetX =
+            baseCameraPosition.x -
+            baseCenterX;
+
+        float offsetZ =
+            baseCameraPosition.z -
+            baseCenterZ;
+
+        //==================================================
+        // カメラ位置
+        //==================================================
+
+        float cameraX =
+            centerX +
+            offsetX * scale;
+
+        float cameraY =
+            baseCameraPosition.y *
+            scale;
+
+        float cameraZ =
+            centerZ +
+            offsetZ * scale;
+
+        mapCamera.transform.position =
+            new Vector3(
+                cameraX,
+                cameraY,
+                cameraZ
+            );
+
+        mapCamera.transform.rotation =
+            Quaternion.Euler(
+                cameraRotation
+            );
+
+        //==================================================
+        // Orthographic Size
+        //==================================================
+
+        if (mapCamera.orthographic)
+        {
+            mapCamera.orthographicSize =
+                baseOrthographicSize *
+                scale;
+        }
+
+        //==================================================
+        // デバッグ
+        //==================================================
+
+        Debug.Log(
+            "カメラ位置 : " +
+            mapCamera.transform.position
+        );
+
+        Debug.Log(
+            "Orthographic Size : " +
+            mapCamera.orthographicSize
+        );
+    }
 
     //==================================================
     // マップ範囲確認
