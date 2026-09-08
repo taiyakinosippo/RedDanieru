@@ -28,6 +28,7 @@ public class EnemyBase : MonoBehaviour
     protected enemyState currentState { get; set; }  //現在の状態
     protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
+    protected float trackingTimer = 0.0f;  //現在の追跡時間
     protected float attackCoolTimer;  //現在の攻撃クールタイム
     protected float attackTimer;  //現在の攻撃開始タイマー
 
@@ -36,7 +37,8 @@ public class EnemyBase : MonoBehaviour
 
     protected StickerState stickerState;
     protected Rigidbody rb;
-    [SerializeField] protected LayerMask playerLayer;
+    [SerializeField] protected LayerMask playerLayer;  //プレイヤーのレイヤー
+    [SerializeField] protected LayerMask obstacleLayer;  //障害物のレイヤー
     public Transform player;
     protected NavMeshAgent agent;
 
@@ -72,6 +74,7 @@ public class EnemyBase : MonoBehaviour
                 break;
             case enemyState.Dead:
                 //死亡処理
+                Destroy(gameObject);
                 break;
         }
 
@@ -101,6 +104,37 @@ public class EnemyBase : MonoBehaviour
         if (searchHits.Length > 0)
         {
             player = searchHits[0].transform;
+
+            if(!CanSeePlayer(player))
+            {
+                Debug.Log("壁越し");
+
+                //追跡時間が残っている場合は追跡を続ける
+                if (trackingTimer > 0f)
+                {
+                    //追跡時間を減らす
+                    trackingTimer -= Time.deltaTime;
+
+                    //最後にプレイヤーを確認した位置に向かって移動
+                    currentState = enemyState.Move;
+                    agent.isStopped = false;
+                    //agent.SetDestination(lastPlayerPosition);
+                }
+                else
+                {
+                    currentState = enemyState.Idle;
+                    specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
+                    return;
+                }
+
+                return;
+            }
+
+            //プレイヤーを確認できた位置を保存
+            //lastPlayerPosition = player.position;
+
+            //追跡時間をリセット
+            trackingTimer = enemyTrackingTime;
 
             //プレイヤーの方向を向く
             //Vector3 direction = (player.position - transform.position).normalized;
@@ -144,8 +178,24 @@ public class EnemyBase : MonoBehaviour
         //プレイヤーを見失った場合
         else if (currentState != enemyState.Special)
         {
-            currentState = enemyState.Idle;
-            specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
+            //追跡時間が残っている場合は追跡を続ける
+            if (trackingTimer > 0f)
+            {
+                //追跡時間を減らす
+                trackingTimer -= Time.deltaTime;
+
+                //最後にプレイヤーを確認した位置に向かって移動
+                currentState = enemyState.Move;
+                agent.isStopped = false;
+                //agent.SetDestination(lastPlayerPosition);
+            }
+            else
+            {
+                currentState = enemyState.Idle;
+                agent.isStopped = true;
+                specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
+                return;
+            }
         }
     }
 
@@ -183,6 +233,7 @@ public class EnemyBase : MonoBehaviour
         attackTimer -= Time.deltaTime;
     }
 
+    //攻撃判定の処理
     public virtual void AttackEffect()
     {
         Collider[] attackHits = Physics.OverlapSphere(transform.position, enemyAttackArea, playerLayer);
@@ -193,6 +244,7 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
+    //特殊行動の処理
     public virtual void SpecialMove()
     {
         if (stickerState.currentStickerScript == null)
@@ -200,6 +252,35 @@ public class EnemyBase : MonoBehaviour
             currentState = enemyState.Idle;
         }
         stickerState.currentStickerScript.OnEnemyUpdate();
+    }
+
+    //プレイヤーが見えるかどうかを判定する関数
+    public virtual bool CanSeePlayer(Transform target)
+    {
+        //プレイヤーと障害物の位置
+        Vector3 origin = transform.position + Vector3.up;
+        Vector3 targetPosition = target.position + Vector3.up;
+
+        //プレイヤーの方向と距離を計算する
+        Vector3 direction = targetPosition - origin;
+        float distance = direction.magnitude;
+
+        Debug.DrawRay(origin, direction, Color.red);
+
+        //レイキャストで障害物があるかどうかを判定する
+        //return !Physics.Raycast(origin, direction.normalized, distance, obstacleLayer);
+        if (Physics.Raycast(
+        origin,
+        direction.normalized,
+        out RaycastHit hit,
+        distance,
+        obstacleLayer))
+        {
+            Debug.Log("視界を遮っているオブジェクト: " + hit.collider.name);
+            return false;
+        }
+
+        return true;
     }
 
     //特殊行動終了時の初期化とか
@@ -214,6 +295,18 @@ public class EnemyBase : MonoBehaviour
     public virtual void Damage(int playerPow)
     {
         currentHp -= playerPow;
-        Debug.Log("プレイヤーからのダメージを受ける");
+
+        if (currentHp <= 0)
+        {
+            currentState = enemyState.Dead;
+            //死亡処理
+            Debug.Log("敵が死亡しました。");
+        }
+        else
+        {
+            currentState = enemyState.Damage;
+            //ダメージ処理
+            Debug.Log("敵がダメージを受けました。残りHP: " + currentHp);
+        }
     }
 }
