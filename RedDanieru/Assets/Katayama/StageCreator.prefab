@@ -676,6 +676,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1c88554ba15f4148a061a1eb8408f88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  objectButtons:
+  - {fileID: 1224219453863147828}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 6872182696809334104}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 6550242590561455843}
+  - {fileID: 534548363145386939}
+  - {fileID: 5514848756030224967}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &1750157913192306522
 GameObject:
   m_ObjectHideFlags: 0
@@ -4420,6 +4432,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 716a94c1f42005d45a35544be216b379, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  digButton: {fileID: 5903982139247554624}
+  deleteButton: {fileID: 5571150481813375427}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &6876595515004337365
 GameObject:
   m_ObjectHideFlags: 0
