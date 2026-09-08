@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ca3cafbf0c30264bb30c2546eb5e0e6, type: 3}
+  m_Name: PlayerAttackData
+  m_EditorClassIdentifier: 
+  attackName: "\u30CE\u30FC\u30DE\u30EB\u30A2\u30C3\u30BF\u30AF"
+  additionalDamage: 3
+  playerAttackRadius: {x: 0.3, y: 0.6, z: 0.3}
+  attackOffset: {x: 0, y: 0.5, z: 0.1}
+  attackRotation: {x: 12, y: -2, z: -1.3}
+  staminaCost: 1
+  cooldownTime: 1
+  hitLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  attackType: 0
