@@ -1,5 +1,6 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class FusionLauncher : MonoBehaviour
 {
@@ -111,5 +112,18 @@ public class FusionLauncher : MonoBehaviour
         await runner.Shutdown();
 
         Debug.Log("マッチングを中止しました");
+    }
+
+    public async void ShutdownAndLoadTitle(string sceneName)
+    {
+        if (runner != null && runner.IsRunning)
+        {
+            await runner.Shutdown();
+        }
+
+        Destroy(runner.gameObject);
+        Destroy(gameObject);
+
+        SceneManager.LoadScene(sceneName);
     }
 }
