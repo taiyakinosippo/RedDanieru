@@ -15,6 +15,9 @@ public class FusionLauncher : MonoBehaviour
     [SerializeField]
     private PlayerSpawner playerSpawner;
 
+    [SerializeField]
+    private NetworkGameState networkGameStatePrefab;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -53,7 +56,7 @@ public class FusionLauncher : MonoBehaviour
 
     public async void StartMatch(string roomName)
     {
-        Debug.Log($"StartMatch開始：{Time.realtimeSinceStartup}");
+        Debug.Log(networkGameStatePrefab);
 
         if (runner.IsRunning)
         {
@@ -61,8 +64,7 @@ public class FusionLauncher : MonoBehaviour
             return;
         }
 
-        Debug.Log("Runner IsRunning = " + runner.IsRunning);
-
+      
         runner.ProvideInput = true;
 
         float startTime = Time.realtimeSinceStartup;
@@ -76,25 +78,25 @@ public class FusionLauncher : MonoBehaviour
                     DisableNATPunchthrough = true
                 });
 
-        Debug.Log(
-            $"StartGame完了 : {Time.realtimeSinceStartup - startTime}秒"
-        );
-
-        Debug.Log("Result = " + result.Ok);
-        Debug.Log("ShutdownReason = " + result.ShutdownReason);
-
         if (result.Ok)
         {
+            if (runner.IsSharedModeMasterClient)
+            {
+                var obj=runner.Spawn(
+                    networkGameStatePrefab,
+                    Vector3.zero,
+                    Quaternion.identity
+                );
+
+                Debug.Log($"Spawned GameState = {obj}");
+            }
+
             int playerCount = 0;
 
             foreach (var player in runner.ActivePlayers)
             {
                 playerCount++;
             }
-
-            Debug.Log(
-                $"参加人数 : {playerCount}"
-            );
         }
     }
 

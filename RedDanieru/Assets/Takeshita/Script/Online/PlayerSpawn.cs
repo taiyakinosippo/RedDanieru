@@ -11,12 +11,14 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField]
     private Transform[] spawnPoints;
 
+    [SerializeField] private NetworkGameState networkGameState;
+
     public bool CanSpawn = false;
 
     public void SpawnPlayer(NetworkRunner runner,PlayerRef player)
     {
 
-        Debug.Log($"SpawnPlayer: player={player}");
+        //Debug.Log($"SpawnPlayer: player={player}");
 
         if (runner.TryGetPlayerObject(player, out _))
             return;
@@ -40,11 +42,11 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
           obj
       );
 
-        Debug.Log(
-            $"Local={runner.LocalPlayer} " +
-            $"Player={player} " +
-            $"Obj={obj.name}"
-        );
+        //Debug.Log(
+        //    $"Local={runner.LocalPlayer} " +
+        //    $"Player={player} " +
+        //    $"Obj={obj.name}"
+        //);
 
         //    Debug.Log(
         //$"LocalPlayer={runner.LocalPlayer}");
@@ -122,7 +124,7 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"Join:{player}");
 
-        StartCoroutine(WaitGameStartAndSpawn(runner, player));
+        //StartCoroutine(WaitGameStartAndSpawn(runner, player));
     }
 
     private System.Collections.IEnumerator CheckPosition(GameObject player)
@@ -137,10 +139,13 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     private IEnumerator WaitGameStartAndSpawn(NetworkRunner runner,PlayerRef player)
     {
-        //while (!NetGameStart.CanSpawn)
+        //while (!NetworkGameState.Instance == null || !NetworkGameState.Instance.CanSpawn)
         //{
-        //     yield return null;
+        //    Debug.Log($"WaitingStart {runner.LocalPlayer}");
+        //    yield return null;
         //}
+
+        Debug.Log($"Start Spawn {runner.LocalPlayer}");
 
         if (player != runner.LocalPlayer)
             yield break;

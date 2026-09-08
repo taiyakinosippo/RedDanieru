@@ -92,21 +92,17 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private Text RoomIdText;
     [SerializeField] private Text RoomKeyText;
     [SerializeField] private Text CautionText;
-    [SerializeField]
-    private InputField passwordInputField;
-    [SerializeField]
-    private Dropdown playerCountDropdown;
+    [SerializeField] private InputField passwordInputField;
+    [SerializeField] private Dropdown playerCountDropdown;
 
-    [SerializeField]
-    private FusionLauncher fusionLauncher;
-    [SerializeField]
-    private RoomDBUploader roomDBUploader;
+    [SerializeField] private FusionLauncher fusionLauncher;
+    [SerializeField] private RoomDBUploader roomDBUploader;
 
-    [SerializeField]
-    private PlayerSpawner playerSpawner;
+    [SerializeField] private PlayerSpawner playerSpawner;
 
-    [SerializeField]
-    private GameStartManager gameManager;
+    [SerializeField] private GameStartManager gameManager;
+
+    [SerializeField] private NetworkGameState networkGameState;
 
     public static int MaxPlayers = 2;
 
@@ -361,6 +357,11 @@ public class DungeonUIManager : MonoBehaviour
 
     public void GameStartButton()
     {
+        if (NetworkGameState.Instance == null)
+            return;
+
+        NetworkGameState.Instance.RPC_StartGame();
+
         HideMatchingUI();
     }
 
