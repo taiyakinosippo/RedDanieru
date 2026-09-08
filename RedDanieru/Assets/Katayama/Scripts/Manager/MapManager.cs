@@ -52,14 +52,10 @@ public class MapManager : MonoBehaviour
     private float floorYOffset = -1f;
 
     //==================================================
-    // 敵サイズ設定
+    // 敵配置間隔設定
     //==================================================
 
-    [Header("敵サイズ設定")]
-
-    [SerializeField]
-    [Min(0.01f)]
-    private float enemySize = 1f;
+    [Header("敵配置設定")]
 
     [SerializeField]
     [Min(0.01f)]
@@ -290,18 +286,6 @@ public class MapManager : MonoBehaviour
             return;
 
         obj.transform.localScale *= floorSize;
-    }
-
-    //==================================================
-    // 敵サイズ
-    //==================================================
-
-    private void SetEnemyScale(GameObject obj)
-    {
-        if (obj == null)
-            return;
-
-        obj.transform.localScale *= enemySize;
     }
 
     //==================================================
@@ -1124,14 +1108,12 @@ public class MapManager : MonoBehaviour
         // サイズ
         //==================================================
 
-        if (type == PlaceObjectType.Enemy)
-        {
-            SetEnemyScale(obj);
-        }
-        else
+        if (type != PlaceObjectType.Enemy)
         {
             SetObjectScale(obj);
         }
+
+        // 敵はPrefab側のScaleをそのまま使用します。
 
         //==================================================
         // Rigidbody固定
@@ -1373,10 +1355,6 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        //==================================================
-        // マップサイズ
-        //==================================================
-
         float mapWidth =
             (width - 1) *
             wallSpacing;
@@ -1391,33 +1369,20 @@ public class MapManager : MonoBehaviour
                 mapDepth
             );
 
-        //==================================================
-        // マップ中央
-        //==================================================
-
         float centerX =
             mapWidth / 2f;
 
         float centerZ =
             mapDepth / 2f;
 
-        //==================================================
-        // 基準サイズとの倍率
-        //==================================================
-
         float scale =
             mapSize /
             baseMapSize;
 
-        // 小さいマップにも対応
         if (scale <= 0f)
         {
             scale = 1f;
         }
-
-        //==================================================
-        // 基準カメラの中心からのズレ
-        //==================================================
 
         float baseCenterX =
             baseMapSize / 2f;
@@ -1432,10 +1397,6 @@ public class MapManager : MonoBehaviour
         float offsetZ =
             baseCameraPosition.z -
             baseCenterZ;
-
-        //==================================================
-        // カメラ位置
-        //==================================================
 
         float cameraX =
             centerX +
@@ -1461,20 +1422,12 @@ public class MapManager : MonoBehaviour
                 cameraRotation
             );
 
-        //==================================================
-        // Orthographic Size
-        //==================================================
-
         if (mapCamera.orthographic)
         {
             mapCamera.orthographicSize =
                 baseOrthographicSize *
                 scale;
         }
-
-        //==================================================
-        // デバッグ
-        //==================================================
 
         Debug.Log(
             "カメラ位置 : " +
