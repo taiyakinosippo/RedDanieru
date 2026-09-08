@@ -59,6 +59,7 @@ GameObject:
   - component: {fileID: 5538748856985837120}
   - component: {fileID: 7489732825488192994}
   - component: {fileID: 3244406581610145446}
+  - component: {fileID: -5874542748976444499}
   m_Layer: 6
   m_Name: PlayerArmature
   m_TagString: Player
@@ -296,6 +297,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: -3896439683665299784}
   - {fileID: 8290669454086937819}
+  - {fileID: -5874542748976444499}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &-3896439683665299784
 MonoBehaviour:
@@ -484,6 +486,18 @@ MonoBehaviour:
   PlayerMoveSpeed: 2
   PlayerRunSpeed: 5
   PlayerSticker: 
+--- !u!114 &-5874542748976444499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010391631509636739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b097b5903026804d87183bb6bb48ef7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5430622058021284881
 GameObject:
   m_ObjectHideFlags: 0
