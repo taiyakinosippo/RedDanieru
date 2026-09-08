@@ -389,12 +389,7 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
-  attackColliders:
-  - {fileID: 1346964323187943019}
-  attackColliderDictionary:
-    _items:
-    - Key: 
-      Value: 0
+  attackData: []
 --- !u!114 &7366741231797108926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -696,6 +691,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 2853854080895533013}
+  holdSticker: 
+  maxHoldCount: 3
 --- !u!1001 &2015721304042475271
 PrefabInstance:
   m_ObjectHideFlags: 0
