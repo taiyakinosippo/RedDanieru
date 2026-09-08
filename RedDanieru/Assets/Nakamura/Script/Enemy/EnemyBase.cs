@@ -214,5 +214,6 @@ public class EnemyBase : MonoBehaviour
     public virtual void Damage(int playerPow)
     {
         currentHp -= playerPow;
+        Debug.Log("プレイヤーからのダメージを受ける");
     }
 }
