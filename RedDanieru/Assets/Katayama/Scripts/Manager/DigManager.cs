@@ -65,15 +65,23 @@ public class DigManager : MonoBehaviour
 
     void Update()
     {
+        //==================================================
         // 保存パネルが開いている間は何もしない
-        if (savePanel != null &&
-            savePanel.activeSelf)
+        //==================================================
+
+        if (
+            savePanel != null &&
+            savePanel.activeSelf
+        )
         {
             ClearHighlight();
             return;
         }
 
+        //==================================================
         // 掘削モード以外
+        //==================================================
+
         if (
             EditModeManager.Instance == null ||
             EditModeManager.Instance.CurrentMode
@@ -85,10 +93,30 @@ public class DigManager : MonoBehaviour
         }
 
         //==================================================
+        // マウス位置からグリッド位置を取得
+        //==================================================
+
+        Vector3Int mouseGridPosition;
+
+        bool hasGridPosition =
+            GetMouseGridPosition(
+                out mouseGridPosition
+            );
+
+        //==================================================
         // 3×3ハイライト
         //==================================================
 
-        HighlightWalls();
+        if (hasGridPosition)
+        {
+            HighlightWalls(
+                mouseGridPosition
+            );
+        }
+        else
+        {
+            ClearHighlight();
+        }
 
         //==================================================
         // クリックした瞬間
@@ -96,10 +124,23 @@ public class DigManager : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            Dig();
-
             lastMousePosition =
                 Input.mousePosition;
+
+            // 新しい操作なのでリセット
+            lastDigPosition =
+                new Vector3Int(
+                    int.MinValue,
+                    int.MinValue,
+                    int.MinValue
+                );
+
+            if (hasGridPosition)
+            {
+                Dig(
+                    mouseGridPosition
+                );
+            }
         }
 
         //==================================================
@@ -113,13 +154,11 @@ public class DigManager : MonoBehaviour
                 != lastMousePosition
             )
             {
-                if (
-                    currentWalls[4] != null &&
-                    currentWalls[4].GridPosition
-                    != lastDigPosition
-                )
+                if (hasGridPosition)
                 {
-                    Dig();
+                    Dig(
+                        mouseGridPosition
+                    );
                 }
             }
         }
@@ -154,39 +193,96 @@ public class DigManager : MonoBehaviour
 
 
     //==================================================
-    // 3×3の壁をハイライト
+    // マウス位置からグリッド座標を取得
     //==================================================
 
-    void HighlightWalls()
+    bool GetMouseGridPosition(
+        out Vector3Int gridPosition)
     {
+        gridPosition =
+            new Vector3Int();
+
+        if (mainCamera == null)
+            return false;
+
+        if (mapManager == null)
+            return false;
+
+        //==================================================
+        // マウスからRayを作成
+        //==================================================
+
         Ray ray =
             mainCamera.ScreenPointToRay(
                 Input.mousePosition
             );
 
-        if (
-            !Physics.Raycast(
+        //==================================================
+        // マップの水平面とRayを交差させる
+        //==================================================
+
+        Plane mapPlane =
+            new Plane(
+                Vector3.up,
+                Vector3.zero
+            );
+
+        float distance;
+
+        if (!mapPlane.Raycast(
                 ray,
-                out RaycastHit hit
-            )
+                out distance))
+        {
+            return false;
+        }
+
+        //==================================================
+        // ワールド座標を取得
+        //==================================================
+
+        Vector3 worldPosition =
+            ray.GetPoint(distance);
+
+        //==================================================
+        // ワールド座標 → グリッド座標
+        //==================================================
+
+        gridPosition =
+            new Vector3Int(
+                Mathf.RoundToInt(
+                    worldPosition.x
+                ),
+                0,
+                Mathf.RoundToInt(
+                    worldPosition.z
+                )
+            );
+
+        //==================================================
+        // マップ範囲確認
+        //==================================================
+
+        if (
+            gridPosition.x < 0 ||
+            gridPosition.x >= mapManager.width ||
+            gridPosition.z < 0 ||
+            gridPosition.z >= mapManager.depth
         )
         {
-            ClearHighlight();
-            return;
+            return false;
         }
 
-        WallBlock centerWall =
-            hit.collider.GetComponent<WallBlock>();
+        return true;
+    }
 
-        if (centerWall == null)
-        {
-            ClearHighlight();
-            return;
-        }
 
-        Vector3Int center =
-            centerWall.GridPosition;
+    //==================================================
+    // 3×3の壁をハイライト
+    //==================================================
 
+    void HighlightWalls(
+        Vector3Int center)
+    {
         //==================================================
         // 現在の3×3と同じ場所なら何もしない
         //==================================================
@@ -246,24 +342,27 @@ public class DigManager : MonoBehaviour
     WallBlock GetWallBlock(
         Vector3Int pos)
     {
-        if (pos.x < 0 ||
+        if (
+            pos.x < 0 ||
             pos.x >= mapManager.width ||
             pos.y < 0 ||
             pos.y >= mapManager.height ||
             pos.z < 0 ||
-            pos.z >= mapManager.depth)
+            pos.z >= mapManager.depth
+        )
         {
             return null;
         }
 
-        Ray ray = new Ray(
-            new Vector3(
-                pos.x,
-                1000f,
-                pos.z
-            ),
-            Vector3.down
-        );
+        Ray ray =
+            new Ray(
+                new Vector3(
+                    pos.x,
+                    1000f,
+                    pos.z
+                ),
+                Vector3.down
+            );
 
         RaycastHit[] hits =
             Physics.RaycastAll(
@@ -276,8 +375,10 @@ public class DigManager : MonoBehaviour
             WallBlock wall =
                 hit.collider.GetComponent<WallBlock>();
 
-            if (wall != null &&
-                wall.GridPosition == pos)
+            if (
+                wall != null &&
+                wall.GridPosition == pos
+            )
             {
                 return wall;
             }
@@ -291,23 +392,31 @@ public class DigManager : MonoBehaviour
     // 3×3を掘る
     //==================================================
 
-    void Dig()
+    void Dig(
+        Vector3Int center)
     {
-        WallBlock centerWall =
-            currentWalls[4];
+        //==================================================
+        // マップ範囲確認
+        //==================================================
 
-        if (centerWall == null)
+        if (
+            center.x < 0 ||
+            center.x >= mapManager.width ||
+            center.z < 0 ||
+            center.z >= mapManager.depth
+        )
+        {
             return;
-
-        Vector3Int center =
-            centerWall.GridPosition;
+        }
 
         //==================================================
         // 同じ場所を連続して掘らない
         //==================================================
 
         if (center == lastDigPosition)
+        {
             return;
+        }
 
         //==================================================
         // 最初の掘削だけUndo開始
@@ -345,7 +454,11 @@ public class DigManager : MonoBehaviour
 
     void ClearHighlight()
     {
-        for (int i = 0; i < currentWalls.Length; i++)
+        for (
+            int i = 0;
+            i < currentWalls.Length;
+            i++
+        )
         {
             if (currentWalls[i] != null)
             {
