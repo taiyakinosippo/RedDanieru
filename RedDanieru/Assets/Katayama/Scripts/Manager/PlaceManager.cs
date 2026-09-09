@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlaceManager : MonoBehaviour
 {
@@ -12,12 +13,30 @@ public class PlaceManager : MonoBehaviour
 
     private bool isEditing = false;
 
-    void Update()
+    private void Update()
     {
-        if (savePanel.activeSelf)
+        // セーブ画面を開いている場合
+        if (savePanel != null && savePanel.activeSelf)
+        {
+            ClearSelection();
+            return;
+        }
+
+        // EditModeManagerが存在しない場合
+        if (EditModeManager.Instance == null)
             return;
 
+        // 配置モード以外では処理しない
         if (EditModeManager.Instance.CurrentMode != EditMode.Place)
+        {
+            ClearSelection();
+            lastPlaceFloor = null;
+            return;
+        }
+
+        // UIボタンの上にマウスがある場合は配置しない
+        if (EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
         {
             ClearSelection();
             return;
@@ -25,11 +44,13 @@ public class PlaceManager : MonoBehaviour
 
         HighlightFloor();
 
+        // マウスを押している間は配置
         if (Input.GetMouseButton(0))
         {
             Place();
         }
 
+        // マウスを離したら編集終了
         if (Input.GetMouseButtonUp(0))
         {
             if (isEditing)
@@ -56,12 +77,16 @@ public class PlaceManager : MonoBehaviour
             if (floor != currentFloor)
             {
                 if (currentFloor != null)
+                {
                     currentFloor.Deselect();
+                }
 
                 currentFloor = floor;
 
                 if (currentFloor != null)
+                {
                     currentFloor.Select();
+                }
             }
         }
         else
@@ -71,18 +96,21 @@ public class PlaceManager : MonoBehaviour
     }
 
     /// <summary>
-    /// オブジェクト配置
+    /// オブジェクトを配置
     /// </summary>
     private void Place()
     {
         if (currentFloor == null)
             return;
 
-        // 同じ場所は無視
+        if (ObjectPaletteManager.Instance == null)
+            return;
+
+        // 同じ場所には連続配置しない
         if (currentFloor == lastPlaceFloor)
             return;
 
-        // 最初の1回だけ保存
+        // 最初の配置時だけUndo用の編集開始
         if (!isEditing)
         {
             undoManager.BeginEdit();
@@ -93,11 +121,12 @@ public class PlaceManager : MonoBehaviour
 
         mapManager.PlaceObject(
             currentFloor.GridPosition,
-            ObjectPaletteManager.Instance.CurrentObject);
+            ObjectPaletteManager.Instance.CurrentObject
+        );
     }
 
     /// <summary>
-    /// 選択解除
+    /// 床の選択を解除
     /// </summary>
     private void ClearSelection()
     {
