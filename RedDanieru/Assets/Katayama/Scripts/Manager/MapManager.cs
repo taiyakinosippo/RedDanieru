@@ -462,6 +462,7 @@ public class MapManager : MonoBehaviour
 
     //==================================================
     // 掘る
+    // 一律3×3で掘削
     //==================================================
 
     public void Dig(Vector3Int pos)
@@ -469,11 +470,50 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return;
 
+        //==================================================
+        // 中心マスを基準に3×3を掘る
+        //==================================================
+
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int z = -1; z <= 1; z++)
+            {
+                Vector3Int digPos =
+                    new Vector3Int(
+                        pos.x + x,
+                        pos.y,
+                        pos.z + z
+                    );
+
+                DigSingleTile(digPos);
+            }
+        }
+    }
+
+    //==================================================
+    // 1マスだけ掘る
+    //==================================================
+
+    private void DigSingleTile(Vector3Int pos)
+    {
+        // マップ外なら何もしない
+        if (!IsInsideMap(pos))
+            return;
+
+        // 壁以外は掘らない
         if (map[pos.x, pos.y, pos.z] != TileType.Wall)
             return;
 
+        //==================================================
+        // 壁 → 床
+        //==================================================
+
         map[pos.x, pos.y, pos.z] =
             TileType.Floor;
+
+        //==================================================
+        // 壁オブジェクト削除
+        //==================================================
 
         if (wallObjects[pos.x, pos.y, pos.z] != null)
         {
@@ -492,6 +532,10 @@ public class MapManager : MonoBehaviour
             ] = null;
         }
 
+        //==================================================
+        // 床生成
+        //==================================================
+
         GameObject floor =
             Instantiate(
                 floorPrefab,
@@ -507,6 +551,10 @@ public class MapManager : MonoBehaviour
             pos.y,
             pos.z
         ] = floor;
+
+        //==================================================
+        // GridPosition設定
+        //==================================================
 
         FloorBlock block =
             floor.GetComponent<FloorBlock>();
