@@ -26,15 +26,18 @@ public class RoomListLoader : MonoBehaviour
     [SerializeField]
     private Text JoinCautionRoomText;
 
-    [SerializeField]
-    private InputField passwordInputField;
-
     private RoomData selectedRoom;
 
     [SerializeField]
     private FusionLauncher fusionLauncher;
     [SerializeField]
     private RoomDBUploader roomDBUploader;
+
+    [SerializeField]
+    private DungeonUIManager dungeonUIManager;
+
+    [SerializeField]
+    private DungeonImporter importer;
 
     private void Start()
     {
@@ -44,7 +47,6 @@ public class RoomListLoader : MonoBehaviour
         MatchingObj.SetActive(false);
         MaxPlayerCautionObj.SetActive(false);
 
-        passwordInputField.gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -145,8 +147,7 @@ public class RoomListLoader : MonoBehaviour
 
         bool isPrivate = room.is_private == 1;
 
-        passwordInputField.gameObject.SetActive(isPrivate);
-
+      
         string roomType =
             room.is_private == 1
             ? "非公開ルーム"
@@ -163,10 +164,15 @@ public class RoomListLoader : MonoBehaviour
 
     public void YesButton()
     {
+        Debug.Log(
+    "dungeon_id = " +
+    selectedRoom.dungeon_id);
+
         if (selectedRoom == null)
             return;
 
-        if (selectedRoom.current_players >= selectedRoom.max_players)
+        if (selectedRoom.current_players >=
+            selectedRoom.max_players)
         {
             StartCoroutine(MaxPlayer());
             return;
@@ -174,7 +180,8 @@ public class RoomListLoader : MonoBehaviour
 
         if (selectedRoom.is_private == 1)
         {
-            if (passwordInputField.text != selectedRoom.password)
+            if (dungeonUIManager.RoomSearchPassword
+                != selectedRoom.password)
             {
                 StartCoroutine(PswObj());
                 return;
@@ -186,12 +193,17 @@ public class RoomListLoader : MonoBehaviour
         RoomInfoObj.SetActive(false);
         MatchingObj.SetActive(true);
 
-
         RoomInfo.RoomId =
             selectedRoom.room_id;
 
+        RoomInfo.SelectedDungeon =
+            selectedRoom.dungeon_id;
+
         RoomInfo.SelectedDungeonName =
             selectedRoom.map_name;
+
+        importer.ImportDungeon(selectedRoom.dungeon_id );
+
 
         StartCoroutine(
             roomDBUploader.JoinRoom()
@@ -201,8 +213,8 @@ public class RoomListLoader : MonoBehaviour
             selectedRoom.room_id
         );
 
+        dungeonUIManager.MatchingNow();
     }
-
 
     public IEnumerator PswObj()
     {
@@ -220,8 +232,7 @@ public class RoomListLoader : MonoBehaviour
 
     public void NoButton()
     {
-        passwordInputField.text = "";
-        JoinCautionObj.SetActive(false);
+       JoinCautionObj.SetActive(false);
         LaycastObj.SetActive(false);
     }
 

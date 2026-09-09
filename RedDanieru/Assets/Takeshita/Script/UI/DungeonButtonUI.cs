@@ -13,13 +13,53 @@ public class DungeonButtonUI : MonoBehaviour
 
     public Image thumbnailImage;
 
-    public GameObject selectArea;
+    public GameObject extendArea;
 
-    private bool isOpen;
+    private static DungeonButtonUI currentOpen;
 
-    public void ToggleOpen()
+    public Button soloButton;
+    public Button multiButton;
+
+    public void Toggle()
     {
-        isOpen = !isOpen;
-        selectArea.SetActive(isOpen);
+        // 別のボタンが開いていたら閉じる
+        if (currentOpen != null &&
+            currentOpen != this)
+        {
+            currentOpen.Close();
+        }
+
+        bool open = !extendArea.activeSelf;
+
+        extendArea.SetActive(open);
+
+        LayoutElement layout =
+            GetComponent<LayoutElement>();
+
+        layout.preferredHeight =
+            open ? 350 : 250;
+
+        if (open)
+        {
+            currentOpen = this;
+        }
+        else if (currentOpen == this)
+        {
+            currentOpen = null;
+        }
+
+        Canvas.ForceUpdateCanvases();
+    }
+
+    public void Close()
+    {
+        extendArea.SetActive(false);
+
+        LayoutElement layout =
+            GetComponent<LayoutElement>();
+
+        layout.preferredHeight = 250;
+
+        Canvas.ForceUpdateCanvases();
     }
 }

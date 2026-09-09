@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using Fusion;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 //ゲームモード
 public static class GameModeManager
@@ -48,8 +49,12 @@ public static class RoomIdGenerator
 public class RoomData
 {
     public string room_id;
+
+    public string dungeon_id;
+
     public string map_name;
     public string password;
+
     public int is_private;
     public int max_players;
     public int current_players;
@@ -69,8 +74,7 @@ public class DungeonUIManager : MonoBehaviour
     public TMP_InputField dungeonNameInput;
     public TMP_InputField creatorNameInput;
 
-    public GameObject SelectCanvas;
-
+    [Header("マップ選択画面")]
     public GameObject ScrolView;
 
     public GameObject RoomInfoObj;
@@ -78,9 +82,25 @@ public class DungeonUIManager : MonoBehaviour
     public GameObject RoomCreateObj;
     public GameObject RoomJoinObj;
 
-    public GameObject Laycast;
-    public GameObject CautionObj;
+    [Header("部屋検索")]
+    public GameObject RoomSearchObj;
+    public Button RoomInButton;
 
+    private bool roomFound;
+    private bool roomHasPassword;
+    private string roomPassword;
+    [SerializeField]private TMP_InputField roomSearchPasswordInput;
+    [SerializeField]private TMP_InputField roomIdInput;
+
+    public GameObject Laycast;
+    public GameObject RoomSearchLaycast;
+
+    [Header("Caution")]
+    public GameObject CautionObj;
+    public GameObject RoomInCautionObj;
+    public GameObject RoomInCautionLayout;
+
+    [Header("マッチング諸々")]
     public GameObject MatchingObj;
     public GameObject MatchingPlayerObj;
     public Text MatchingPlayerText;
@@ -88,6 +108,7 @@ public class DungeonUIManager : MonoBehaviour
 
     public Button GameStartbutton;
 
+    [Header("UI")]
     [SerializeField]private Text dungeonNameText;
     [SerializeField] private Text RoomIdText;
     [SerializeField] private Text RoomKeyText;
@@ -95,6 +116,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
 
+    [Header("大事な奴ら")]
     [SerializeField] private FusionLauncher fusionLauncher;
     [SerializeField] private RoomDBUploader roomDBUploader;
 
@@ -104,34 +126,42 @@ public class DungeonUIManager : MonoBehaviour
 
     [SerializeField] private NetworkGameState networkGameState;
 
+    [SerializeField] private RoomListLoader roomListLoader;
+
+    [Header("数値")]
     public static int MaxPlayers = 2;
 
     public static bool IsPrivateRoom;
     public static string Password="";
 
+    [Header("コルーチン")]
     private Coroutine aliveCoroutine;
+    private Coroutine searchCoroutine;
 
     public void Start()
     {
-        SelectCanvas.SetActive(true);
-        ScrolView.SetActive(false);
+         ScrolView.SetActive(true);
         RoomInfoObj.SetActive(false);
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
         MatchingObj.SetActive(false);
         MatchingCautionObj.SetActive(false);
+        RoomSearchObj.SetActive(false);
+        RoomSearchLaycast.SetActive(false);
+        RoomInCautionObj.SetActive(false);
+        RoomInCautionLayout.SetActive(false);
 
+        RoomInButton.interactable = false;
         GameStartbutton.interactable = false;
 
         passwordInputField.onValueChanged.AddListener(OnPasswordChanged);
 
-        playerCountDropdown.onValueChanged.AddListener(
-            OnPlayerCountChanged
-        );
+        playerCountDropdown.onValueChanged.AddListener(OnPlayerCountChanged);
 
-        OnPlayerCountChanged(
-            playerCountDropdown.value
-        );
+        OnPlayerCountChanged(playerCountDropdown.value);
+
+        roomSearchPasswordInput.onValueChanged.AddListener(OnRoomSearchPasswordChanged);
+        roomIdInput.onValueChanged.AddListener(OnRoomIdChanged);
     }
 
     private void Update()
@@ -210,29 +240,47 @@ public class DungeonUIManager : MonoBehaviour
     public void SoloMode()
     {
         GameModeManager.IsMultiplayer = false;
+
         Debug.Log("Solo");
-        SelectCanvas.SetActive(false);
-        ScrolView.SetActive(true);
+
+        ScrolView.SetActive(false);
+
+        importer.ImportDungeon(
+            RoomInfo.SelectedDungeon
+        );
+
+        fusionLauncher.StartSolo();
     }
 
     public void MultiMode()
     {
         GameModeManager.IsMultiplayer = true;
         Debug.Log("Multi");
-        SelectCanvas.SetActive(false);
-        ScrolView.SetActive(true);
+        ScrolView.SetActive(false);
+        RoomInfoObj.SetActive(true);
     }
 
     public void ScrollBackButton()
     {
-        SelectCanvas.SetActive(true);
-        ScrolView.SetActive(false);
+        SceneManager.LoadScene("TitleScene");
     }
 
     public void  RoomInfoBackButton()
     {
         ScrolView.SetActive(true);
         RoomInfoObj.SetActive(false);
+    }
+
+    public void RoomSearchButton()
+    {
+        RoomSearchLaycast.SetActive(true);
+        RoomSearchObj.SetActive(true);
+    }
+
+    public void RoomSearchBackButton()
+    {
+        RoomSearchLaycast.SetActive(false);
+        RoomSearchObj.SetActive(false);
     }
 
     public void RoomCreateButton()
@@ -347,12 +395,26 @@ public class DungeonUIManager : MonoBehaviour
 
         MatchingCautionObj.SetActive(false);
         MatchingObj.SetActive(false);
-        SelectCanvas.SetActive(true);
     }
 
     public void MatchingNoLeaveButton()
     {
         MatchingCautionObj.SetActive(false);
+    }
+
+    public void OnClickRoomInButton()
+    {
+        if (roomDBUploader.foundRoom == null)
+            return;
+
+        RoomInfo.SelectedDungeon = roomDBUploader.foundRoom.map_name;
+
+        importer.ImportDungeon(RoomInfo.SelectedDungeon);
+
+        roomListLoader.ShowJoinCaution(roomDBUploader.foundRoom);
+
+        RoomInCautionObj.SetActive(true);
+        RoomInCautionLayout.SetActive(true);
     }
 
     public void GameStartButton()
@@ -430,13 +492,85 @@ public class DungeonUIManager : MonoBehaviour
         }
     }
 
+    private void OnRoomSearchPasswordChanged(string value)
+    {
+        if (!roomFound)
+        {
+            RoomInButton.interactable = false;
+            return;
+        }
+
+        if (!roomHasPassword)
+        {
+            RoomInButton.interactable = true;
+            return;
+        }
+
+        RoomInButton.interactable =
+            !string.IsNullOrEmpty(value);
+    }
+
+    private void OnRoomIdChanged(string roomId)
+    {
+        if (searchCoroutine != null)
+        {
+            StopCoroutine(searchCoroutine);
+        }
+
+        searchCoroutine = StartCoroutine(DelayedSearch(roomId));
+    }
+
+    private IEnumerator DelayedSearch(string roomId)
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        yield return SearchRoomCoroutine(roomId);
+    }
+
+    private IEnumerator SearchRoomCoroutine(string roomId)
+    {
+        yield return roomDBUploader.SearchRoom(roomId);
+
+        RoomData room = roomDBUploader.foundRoom;
+
+        if (room == null)
+        {
+            roomFound = false;
+
+            RoomInButton.interactable = false;
+            yield break;
+        }
+
+        roomFound = true;
+
+        roomHasPassword = room.is_private == 1;
+
+        roomPassword = room.password;
+
+        if (!roomHasPassword)
+        {
+            RoomInButton.interactable = true;
+        }
+        else
+        {
+            RoomInButton.interactable = false;
+        }
+    }
+
+    public string RoomSearchPassword
+    {
+        get
+        {
+            return roomSearchPasswordInput.text;
+        }
+    }
+
     public void HideMatchingUI()
     {
         MatchingObj.SetActive(false);
         MatchingCautionObj.SetActive(false);
         MatchingPlayerObj.SetActive(false);
 
-        SelectCanvas.SetActive(false);
         ScrolView.SetActive(false);
         RoomInfoObj.SetActive(false);
 
@@ -445,5 +579,13 @@ public class DungeonUIManager : MonoBehaviour
 
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
+
+        RoomSearchObj.SetActive(false);
+    }
+
+    public void MatchingNow()
+    {
+        ScrolView.SetActive(false);
+        RoomSearchObj.SetActive(false);
     }
 }
