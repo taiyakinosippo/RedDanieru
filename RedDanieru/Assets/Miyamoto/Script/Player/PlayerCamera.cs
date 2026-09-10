@@ -1,6 +1,10 @@
 using System.Collections.Generic;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.GraphicsBuffer;
 
 ///<summry>
 ///プレイヤーのカメラを制御するためのスクリプト
@@ -15,7 +19,6 @@ namespace Player
         public GameObject ThirdPersonPerspective;           //3人称視点
         public GameObject FirstPersonPerspective;　　　　　 //1人称視点
 
-
         [Tooltip("プレイヤーがカメラを上に移動できる最大角度")]
         public float TopClamp = 70.0f;
 
@@ -28,17 +31,27 @@ namespace Player
         [Tooltip("カメラを動かせるかどうか")]
         public bool LockCameraPosition = false;
 
+        [Tooltip("壁判定をするレイヤー")]
+        public LayerMask _wallLayer;
+
+        [Tooltip("とんできたRayを受け取る位置")]
+        public float _playerRay = 0.5f;
+
+        [Tooltip("壁からどれだけ離すか")]
+        public float _wallOffset = 0.1f;
+
+        [Tooltip("カメラの追従速度")]
+        public float _followSpeed = 10.0f;
+
         // 左右の角度
         private float _cinemachineTargetYaw;
         // 上下の角度
         private float _cinemachineTargetPitch;
 
-        private float _targetRotation = 0.0f;            // プレイヤーの目標回転角度
-        private float _rotationVelocity;                 // プレイヤーの左右速度
-        private float _verticalVelocity;                 // プレイヤーの上下速度
-
-
         private const float _threshold = 0.01f;          // 入力の大きさを判定するための定数
+
+        private Vector3 diff;
+
 
         public GameObject currentCamera { get; private set; }        　　　　// 現在のカメラを格納する変数
         public bool isFirstPerson { get; private set; } = false;              // 現在のカメラが一人称視点かどうかを判定する変数
@@ -111,8 +124,10 @@ namespace Player
             // 縦は制限あり
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
-            // 画面を回転させる
-            currentCamera.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride,_cinemachineTargetYaw, 0.0f);
+            //カメラの回転を作る
+            Quaternion cameraRoation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+
+            currentCamera.transform.rotation = cameraRoation;
         }
 
         //-----------------------------------------------------------

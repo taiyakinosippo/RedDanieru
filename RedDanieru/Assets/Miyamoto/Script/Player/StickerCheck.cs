@@ -115,8 +115,7 @@ namespace Player
                 transform.position + transform.forward * thirdPersonWallDistance + Vector3.up * thirdPersonWallCheckHeight;
                 // ステッカーあるかの判定を行う
                 isStickerDected = 
-                Physics.CheckSphere(spherePosition, checkRadius, stickerLayer,
-                                    QueryTriggerInteraction.Ignore);
+                Physics.CheckSphere(spherePosition, checkRadius, stickerLayer, QueryTriggerInteraction.Ignore);
 
                 //あればはがすアニメーションを再生させる
                 if (isStickerDected)
@@ -130,8 +129,7 @@ namespace Player
 
                     // 壁があるのかどうかの判定を行う
                     isWallDetected =
-                    Physics.CheckSphere(spherePosition, checkRadius, wallLayer,
-                                        QueryTriggerInteraction.Ignore);
+                    Physics.CheckSphere(spherePosition, checkRadius, wallLayer, QueryTriggerInteraction.Ignore);
 
                     //もし壁があった場合次にステッカーがないのかを確認する
                     if (isWallDetected)
