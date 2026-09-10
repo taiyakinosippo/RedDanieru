@@ -8,6 +8,10 @@ public class DungeonMapData
     public int height;
     public int depth;
 
+    //ƒ_ƒ“ƒWƒ‡ƒ“î•ñ
+    public string dungeonId;
+    public string dungeonName;
+
     // •ÇE°î•ñ
     public byte[] tiles;
 

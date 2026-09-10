@@ -7,6 +7,8 @@ public class SaveManager : MonoBehaviour
     [Header("参照")]
     [SerializeField] private MapManager mapManager;
 
+    public static string LastDungeonId;
+
     /// <summary>
     /// ダンジョンを名前指定で保存する
     /// </summary>
@@ -49,13 +51,21 @@ public class SaveManager : MonoBehaviour
         // 現在のマップ情報を取得
         DungeonMapData dungeonData = mapManager.CreateSaveData();
 
+        string dungeonId = System.Guid.NewGuid().ToString();
+
+        dungeonData.dungeonId = dungeonId;
+
+        dungeonData.dungeonName = dungeonName;
+
+        LastDungeonId = dungeonId;
+
         // マップ情報をJSON形式へ変換
         string json = JsonUtility.ToJson(dungeonData, true);
 
         // 保存先のパスを作成
         string path = Path.Combine(
             Application.persistentDataPath,
-            dungeonName + ".json"
+            dungeonId + ".json"
         );
 
         // JSONファイルとして保存

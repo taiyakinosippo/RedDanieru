@@ -157,6 +157,8 @@ public class RoomListLoader : MonoBehaviour
             $"RoomID : {room.room_id}\n" +
             $"{roomType}\n" +
             $"{room.current_players}/{room.max_players}";
+
+        Debug.Log("map_name = " + room.map_name);
     }
 
     public void YesButton()
@@ -188,7 +190,7 @@ public class RoomListLoader : MonoBehaviour
         RoomInfo.RoomId =
             selectedRoom.room_id;
 
-        RoomInfo.SelectedDungeon =
+        RoomInfo.SelectedDungeonName =
             selectedRoom.map_name;
 
         StartCoroutine(

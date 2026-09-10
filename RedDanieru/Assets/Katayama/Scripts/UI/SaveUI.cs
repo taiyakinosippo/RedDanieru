@@ -57,13 +57,13 @@ public class SaveUI : MonoBehaviour
             return;
         }
 
-        string path = Path.Combine(Application.persistentDataPath, dungeonName + ".json");
+        //string path = Path.Combine(Application.persistentDataPath, dungeonName + ".json");
 
-        if (File.Exists(path))
-        {
-            StartCoroutine(CautionText());
-            return;
-        }
+        //if (File.Exists(path))
+        //{
+        //    StartCoroutine(CautionText());
+        //    return;
+        //}
 
         // ƒ_ƒ“ƒWƒ‡ƒ“‚ð•Û‘¶
         saveManager.Save(dungeonName);
