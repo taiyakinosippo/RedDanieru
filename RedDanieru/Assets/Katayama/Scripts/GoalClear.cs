@@ -343,12 +343,22 @@ public class GoalClear : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
+        //マッチング中止
+        FusionLauncher launcher = FindObjectOfType<FusionLauncher>();
+
+        if (launcher != null)
+        {
+            launcher.ShutdownAndLoadTitle(titleSceneName);
+        }
+
         //==================================================
         // タイトルシーン
         //==================================================
-
-        SceneManager.LoadScene(
-            titleSceneName
-        );
+        else
+        {
+            SceneManager.LoadScene(
+                titleSceneName
+            );
+        }
     }
 }

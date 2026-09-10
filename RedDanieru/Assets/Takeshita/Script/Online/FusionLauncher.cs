@@ -1,5 +1,6 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class FusionLauncher : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class FusionLauncher : MonoBehaviour
 
     [SerializeField]
     private PlayerSpawner playerSpawner;
+
+    [SerializeField]
+    private NetworkGameState networkGameStatePrefab;
 
     private void Awake()
     {
@@ -53,7 +57,7 @@ public class FusionLauncher : MonoBehaviour
 
     public async void StartMatch(string roomName)
     {
-        Debug.Log($"StartMatch開始：{Time.realtimeSinceStartup}");
+        Debug.Log(networkGameStatePrefab);
 
         if (runner.IsRunning)
         {
@@ -61,8 +65,7 @@ public class FusionLauncher : MonoBehaviour
             return;
         }
 
-        Debug.Log("Runner IsRunning = " + runner.IsRunning);
-
+      
         runner.ProvideInput = true;
 
         float startTime = Time.realtimeSinceStartup;
@@ -76,25 +79,25 @@ public class FusionLauncher : MonoBehaviour
                     DisableNATPunchthrough = true
                 });
 
-        Debug.Log(
-            $"StartGame完了 : {Time.realtimeSinceStartup - startTime}秒"
-        );
-
-        Debug.Log("Result = " + result.Ok);
-        Debug.Log("ShutdownReason = " + result.ShutdownReason);
-
         if (result.Ok)
         {
+            if (runner.IsSharedModeMasterClient)
+            {
+                var obj=runner.Spawn(
+                    networkGameStatePrefab,
+                    Vector3.zero,
+                    Quaternion.identity
+                );
+
+                Debug.Log($"Spawned GameState = {obj}");
+            }
+
             int playerCount = 0;
 
             foreach (var player in runner.ActivePlayers)
             {
                 playerCount++;
             }
-
-            Debug.Log(
-                $"参加人数 : {playerCount}"
-            );
         }
     }
 
@@ -109,5 +112,18 @@ public class FusionLauncher : MonoBehaviour
         await runner.Shutdown();
 
         Debug.Log("マッチングを中止しました");
+    }
+
+    public async void ShutdownAndLoadTitle(string sceneName)
+    {
+        if (runner != null && runner.IsRunning)
+        {
+            await runner.Shutdown();
+        }
+
+        Destroy(runner.gameObject);
+        Destroy(gameObject);
+
+        SceneManager.LoadScene(sceneName);
     }
 }
