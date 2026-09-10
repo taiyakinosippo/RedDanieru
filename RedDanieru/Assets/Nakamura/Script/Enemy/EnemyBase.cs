@@ -98,6 +98,7 @@ public class EnemyBase : MonoBehaviour
 
     public virtual void EnemyMove()
     {
+        //プレイヤーを探索する
         Collider[] searchHits = Physics.OverlapSphere(transform.position, enemySearchArea, playerLayer);
 
         //プレイヤーが見つかった場合の処理
@@ -105,10 +106,8 @@ public class EnemyBase : MonoBehaviour
         {
             player = searchHits[0].transform;
 
-            if(!CanSeePlayer(player))
+            if (!CanSeePlayer(player))
             {
-                Debug.Log("壁越し");
-
                 //追跡時間が残っている場合は追跡を続ける
                 if (trackingTimer > 0f)
                 {
@@ -265,16 +264,11 @@ public class EnemyBase : MonoBehaviour
         Vector3 direction = targetPosition - origin;
         float distance = direction.magnitude;
 
-        Debug.DrawRay(origin, direction, Color.red);
+        Debug.DrawRay(origin, direction.normalized, Color.red);
 
         //レイキャストで障害物があるかどうかを判定する
         //return !Physics.Raycast(origin, direction.normalized, distance, obstacleLayer);
-        if (Physics.Raycast(
-        origin,
-        direction.normalized,
-        out RaycastHit hit,
-        distance,
-        obstacleLayer))
+        if (Physics.Raycast(origin, direction.normalized, out RaycastHit hit, distance, obstacleLayer))
         {
             Debug.Log("視界を遮っているオブジェクト: " + hit.collider.name);
             return false;
@@ -294,6 +288,7 @@ public class EnemyBase : MonoBehaviour
     //ダメージ処理
     public virtual void Damage(int playerPow)
     {
+        Debug.Log("Enemy hit");
         currentHp -= playerPow;
 
         if (currentHp <= 0)
