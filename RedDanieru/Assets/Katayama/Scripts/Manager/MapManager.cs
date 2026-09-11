@@ -199,6 +199,20 @@ public class MapManager : MonoBehaviour
     private PlaceObjectType[,,] placedObjectTypes;
 
     //==================================================
+    // マップ変更管理
+    //==================================================
+
+    private int mapRevision = 0;
+
+    public int MapRevision
+    {
+        get
+        {
+            return mapRevision;
+        }
+    }
+
+    //==================================================
     // Start
     //==================================================
 
@@ -301,6 +315,23 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
+    // マップ変更通知
+    //==================================================
+
+    private void MarkMapChanged()
+    {
+        mapRevision++;
+
+        SaveManager saveManager =
+            FindObjectOfType<SaveManager>();
+
+        if (saveManager != null)
+        {
+            saveManager.SetMapModified();
+        }
+    }
+
+    //==================================================
     // 新規マップ作成
     //==================================================
 
@@ -313,6 +344,16 @@ public class MapManager : MonoBehaviour
         CreateDefaultRespawnObjects();
 
         AdjustCamera();
+
+        mapRevision = 0;
+
+        SaveManager saveManager =
+            FindObjectOfType<SaveManager>();
+
+        if (saveManager != null)
+        {
+            saveManager.SetMapModified();
+        }
     }
 
     //==================================================
@@ -508,6 +549,8 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return;
 
+        bool changed = false;
+
         for (int x = -1; x <= 1; x++)
         {
             for (int z = -1; z <= 1; z++)
@@ -519,8 +562,17 @@ public class MapManager : MonoBehaviour
                         pos.z + z
                     );
 
-                DigSingleTile(digPos);
+                if (IsDiggable(digPos))
+                {
+                    DigSingleTile(digPos);
+                    changed = true;
+                }
             }
+        }
+
+        if (changed)
+        {
+            MarkMapChanged();
         }
     }
 
@@ -601,7 +653,6 @@ public class MapManager : MonoBehaviour
                 pos.z
             ] = default;
 
-            // 元々床なのでFloorのまま
             return;
         }
 
@@ -667,7 +718,6 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
-        // すでに床がある場合は作らない
         if (
             floorObjects[
                 pos.x,
@@ -1033,6 +1083,20 @@ public class MapManager : MonoBehaviour
 
         AdjustCamera();
 
+        //==================================================
+        // ロードは新しい編集状態として扱う
+        //==================================================
+
+        mapRevision++;
+
+        SaveManager saveManager =
+            FindObjectOfType<SaveManager>();
+
+        if (saveManager != null)
+        {
+            saveManager.SetMapModified();
+        }
+
         Debug.Log(
             "ダンジョン復元完了"
         );
@@ -1312,6 +1376,12 @@ public class MapManager : MonoBehaviour
         {
             placeObject.GridPosition = pos;
         }
+
+        //==================================================
+        // マップ変更
+        //==================================================
+
+        MarkMapChanged();
     }
 
     //==================================================
@@ -1344,7 +1414,7 @@ public class MapManager : MonoBehaviour
         }
 
         //==================================================
-        // すでにObjectがある場合は配置しない
+        // すでにObjectがある場合
         //==================================================
 
         if (
@@ -1363,7 +1433,7 @@ public class MapManager : MonoBehaviour
         }
 
         //==================================================
-        // 通常の壁が残っている場合は配置しない
+        // 通常の壁が残っている場合
         //==================================================
 
         if (
@@ -1451,6 +1521,12 @@ public class MapManager : MonoBehaviour
             pos.y,
             pos.z
         ] = PlaceObjectType.Wall;
+
+        //==================================================
+        // マップ変更
+        //==================================================
+
+        MarkMapChanged();
     }
 
     //==================================================
@@ -1505,7 +1581,6 @@ public class MapManager : MonoBehaviour
                 pos.z
             ];
 
-        // Wallの場合
         if (
             placedObjectTypes[
                 pos.x,
@@ -1514,8 +1589,6 @@ public class MapManager : MonoBehaviour
             ] == PlaceObjectType.Wall
         )
         {
-            // 床に配置したWallなので
-            // wallObjectsは使用しない
             wallObjects[
                 pos.x,
                 pos.y,
@@ -1536,6 +1609,12 @@ public class MapManager : MonoBehaviour
             pos.y,
             pos.z
         ] = default;
+
+        //==================================================
+        // マップ変更
+        //==================================================
+
+        MarkMapChanged();
     }
 
     //==================================================
@@ -1544,6 +1623,9 @@ public class MapManager : MonoBehaviour
 
     public bool HasGoal()
     {
+        if (placedObjects == null)
+            return false;
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -1574,6 +1656,24 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
+    // SpawnPoint確認
+    //==================================================
+
+    public bool HasRespawnPoint()
+    {
+        return respawnPointObject != null;
+    }
+
+    //==================================================
+    // SpawnPoint取得
+    //==================================================
+
+    public GameObject GetRespawnPointObject()
+    {
+        return respawnPointObject;
+    }
+
+    //==================================================
     // Object取得
     //==================================================
 
@@ -1600,7 +1700,10 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return false;
 
+        //==================================================
         // 通常の壁
+        //==================================================
+
         if (
             map[
                 pos.x,
@@ -1612,7 +1715,10 @@ public class MapManager : MonoBehaviour
             return true;
         }
 
+        //==================================================
         // 床に配置されたWall
+        //==================================================
+
         if (
             map[
                 pos.x,
@@ -1649,7 +1755,10 @@ public class MapManager : MonoBehaviour
         if (!IsInsideMap(pos))
             return null;
 
+        //==================================================
         // 通常の壁
+        //==================================================
+
         if (
             map[
                 pos.x,
@@ -1665,7 +1774,10 @@ public class MapManager : MonoBehaviour
             ];
         }
 
+        //==================================================
         // 床に配置されたWall
+        //==================================================
+
         if (
             placedObjects[
                 pos.x,

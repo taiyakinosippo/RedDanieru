@@ -75,6 +75,11 @@ public class GoalClear : MonoBehaviour
         {
             clearPanel.SetActive(false);
         }
+
+        Time.timeScale = 1f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     //==================================================
@@ -102,10 +107,53 @@ public class GoalClear : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
+        //==================================================
+        // クリア状態
+        //==================================================
+
         isCleared = true;
 
         //==================================================
-        // ゲーム停止
+        // TestPlayManager確認
+        //==================================================
+
+        TestPlayManager testPlayManager =
+            FindObjectOfType<TestPlayManager>();
+
+        //==================================================
+        // テストプレイの場合
+        //==================================================
+
+        if (testPlayManager != null &&
+            testPlayManager.IsTestPlay)
+        {
+            // テストプレイクリアをSaveManagerへ通知
+            SaveManager saveManager =
+                FindObjectOfType<SaveManager>();
+
+            if (saveManager != null)
+            {
+                saveManager.SetTestPlayCleared();
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "SaveManagerが見つかりません。"
+                );
+            }
+
+            // 編集モードへ戻る
+            testPlayManager.ReturnToEdit();
+
+            Debug.Log(
+                "テストプレイクリア。編集モードへ戻りました。"
+            );
+
+            return;
+        }
+
+        //==================================================
+        // ゲームプレイの場合
         //==================================================
 
         Time.timeScale = 0f;
@@ -131,8 +179,16 @@ public class GoalClear : MonoBehaviour
         {
             clearPanel.SetActive(true);
         }
+        else
+        {
+            Debug.LogWarning(
+                "Clear Panelが設定されていません。"
+            );
+        }
 
-        Debug.Log("GAME CLEAR!");
+        Debug.Log(
+            "GAME CLEAR! Clear UIを表示しました。"
+        );
     }
 
     //==================================================
@@ -150,12 +206,10 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
-        //==================================================
-        // Clearカメラ生成
-        //==================================================
-
         GameObject cameraObject =
-            Instantiate(clearCameraPrefab);
+            Instantiate(
+                clearCameraPrefab
+            );
 
         Camera clearCamera =
             cameraObject.GetComponentInChildren<Camera>();
@@ -202,10 +256,10 @@ public class GoalClear : MonoBehaviour
         if (mapManager != null)
         {
             float mapWidth =
-                (mapManager.width - 1);
+                mapManager.width - 1;
 
             float mapDepth =
-                (mapManager.depth - 1);
+                mapManager.depth - 1;
 
             float mapSize =
                 Mathf.Max(
@@ -233,7 +287,7 @@ public class GoalClear : MonoBehaviour
                 mapDepth / 2f;
 
             //==================================================
-            // 基準カメラの中心からのズレ
+            // 基準カメラ中心からのズレ
             //==================================================
 
             float baseCenterX =
@@ -275,7 +329,6 @@ public class GoalClear : MonoBehaviour
         }
         else
         {
-            // MapManagerが見つからない場合
             clearCamera.transform.position =
                 clearCameraPosition;
         }
@@ -297,7 +350,7 @@ public class GoalClear : MonoBehaviour
             baseFieldOfView * scale;
 
         //==================================================
-        // Field of Viewを安全な範囲に制限
+        // Field of View制限
         //==================================================
 
         clearCamera.fieldOfView =
@@ -343,19 +396,25 @@ public class GoalClear : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        //マッチング中止
-        FusionLauncher launcher = FindObjectOfType<FusionLauncher>();
+        //==================================================
+        // マッチング中止
+        //==================================================
+
+        FusionLauncher launcher =
+            FindObjectOfType<FusionLauncher>();
 
         if (launcher != null)
         {
-            launcher.ShutdownAndLoadTitle(titleSceneName);
+            launcher.ShutdownAndLoadTitle(
+                titleSceneName
+            );
         }
-
-        //==================================================
-        // タイトルシーン
-        //==================================================
         else
         {
+            //==================================================
+            // タイトルシーン
+            //==================================================
+
             SceneManager.LoadScene(
                 titleSceneName
             );
