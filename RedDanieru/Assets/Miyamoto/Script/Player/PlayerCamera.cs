@@ -141,38 +141,78 @@ namespace Player
 
             Vector3 rotatedDiff = cameraRotation * diff;
 
-            // カメラの位置
-            Vector3 targetPosition = _playerPosition + rotatedDiff;
+            //==================================================
+            // カメラの理想位置を計算
+            //==================================================
 
-            // カメラを移動
-            currentCamera.transform.position =
-                targetPosition;
-
-            // カメラを移動
-            currentCamera.transform.position =
-                targetPosition;
+            Vector3 targetPosition =
+                _playerPosition + rotatedDiff;
 
 
-            currentCamera.transform.LookAt(_playerPosition);
+            //==================================================
+            // プレイヤーから理想カメラ位置への方向
+            //==================================================
 
-            if (Physics.SphereCast(currentCamera.transform.position, _sphereSize, _playerPosition - currentCamera.transform.position, 
-                out RaycastHit hit, (_playerPosition - currentCamera.transform.position).magnitude, _wallLayer))
+            Vector3 direction =
+                targetPosition - _playerPosition;
+
+            float distance =
+                direction.magnitude;
+
+            Vector3 normalizedDirection =
+                direction.normalized;
+            // SphereCastの方向をSceneビューに表示
+            Debug.DrawRay(
+                _playerPosition,
+                normalizedDirection * distance,
+                Color.red
+            );
+           
+            //==================================================
+            // 壁判定
+            //==================================================
+
+            if (Physics.SphereCast(
+                _playerPosition,
+                _sphereSize,
+                normalizedDirection,
+                out RaycastHit hit,
+                distance,
+                _wallLayer))
             {
-                // 壁に当たった位置
-                Vector3 wallPosition =
-                    hit.point;
+                //==============================================
+                // 壁がある
+                //==============================================
 
-                // 壁から球の半径分だけ離す
-                Vector3 cameraPosition =
-                    wallPosition +
-                    hit.normal * (-_sphereSize + _wallOffset);
+                // 壁に接触する位置より少し手前
+                float safeDistance =
+                    hit.distance - _wallOffset;
 
+                safeDistance =
+                    Mathf.Max(safeDistance, 0.0f);
+
+                // 壁の手前のカメラ位置
+                Vector3 safePosition =
+                    _playerPosition +
+                    normalizedDirection * safeDistance;
+
+                // 現在のカメラ位置から安全位置へゆっくり移動
                 currentCamera.transform.position =
-                    cameraPosition;
-
-                Debug.Log("Wall hit detected!");
+                    Vector3.Lerp(
+                        currentCamera.transform.position,
+                        safePosition,
+                        _followSpeed * Time.deltaTime);
             }
-      
+            else
+            {
+                //==============================================
+                // 壁がない
+                //==============================================
+
+                // 本来の位置に一瞬で戻す
+                currentCamera.transform.position =
+                    targetPosition;
+            }
         }
 
         //-----------------------------------------------------------
