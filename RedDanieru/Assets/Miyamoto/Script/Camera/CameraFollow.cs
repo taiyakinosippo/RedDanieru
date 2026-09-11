@@ -15,16 +15,16 @@ public class CameraFollow : MonoBehaviour
 
     void Start()
     {
-        playerPosition = target.transform.position + Vector3.up * _cameraHeight;
-        diff = transform.position - playerPosition;
+        //playerPosition = target.transform.position + Vector3.up * _cameraHeight;
+        //diff = transform.position - playerPosition;
     }
 
 
     public void FixedUpdate()
     {
-        playerPosition = target.transform.position + Vector3.up * _cameraHeight;
-        Vector3 targetPosition =　playerPosition + diff;
-        transform.position = playerPosition + diff;
+        //playerPosition = target.transform.position + Vector3.up * _cameraHeight;
+        //Vector3 targetPosition =　playerPosition + diff;
+        //transform.position = playerPosition + diff;
 
         // カメラの正面方向にRayを飛ばす
         Debug.DrawRay(

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackName: "\u30CE\u30FC\u30DE\u30EB\u30A2\u30C3\u30BF\u30AF"
   additionalDamage: 3
-  playerAttackRadius: {x: 0.3, y: 0.6, z: 0.3}
-  attackOffset: {x: 0, y: 0.5, z: 0.1}
-  attackRotation: {x: 12, y: -2, z: -1.3}
+  playerAttackRadius: {x: 0.1, y: 0.1, z: 1}
+  attackOffset: {x: 0, y: 0, z: 0}
+  attackRotation: {x: 356.47025, y: 1.403254, z: 6.6413283}
   staminaCost: 1.06
   cooldownTime: 1
   hitLayer:

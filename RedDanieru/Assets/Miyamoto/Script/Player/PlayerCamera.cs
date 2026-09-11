@@ -34,14 +34,17 @@ namespace Player
         [Tooltip("壁判定をするレイヤー")]
         public LayerMask _wallLayer;
 
-        [Tooltip("とんできたRayを受け取る位置")]
-        public float _playerRay = 0.5f;
+        [Tooltip("飛ばすRayの大きさ")]
+        public float _sphereSize = 0.5f;
 
         [Tooltip("壁からどれだけ離すか")]
         public float _wallOffset = 0.1f;
 
         [Tooltip("カメラの追従速度")]
         public float _followSpeed = 10.0f;
+
+        [Tooltip("カメラの高さ")]
+        public float _cameraHeight = 1.0f;
 
         // 左右の角度
         private float _cinemachineTargetYaw;
@@ -52,6 +55,7 @@ namespace Player
 
         private Vector3 diff;
 
+        private Vector3 _playerPosition;
 
         public GameObject currentCamera { get; private set; }        　　　　// 現在のカメラを格納する変数
         public bool isFirstPerson { get; private set; } = false;              // 現在のカメラが一人称視点かどうかを判定する変数
@@ -67,6 +71,10 @@ namespace Player
             _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
 
             _actionPriority = GetComponent<PlayerInputPriority>();
+
+            _playerPosition = transform.position + Vector3.up * _cameraHeight;
+          
+            diff =currentCamera.transform.position - _playerPosition;
         }
 
         //-------------------------------------------------
@@ -125,9 +133,46 @@ namespace Player
             _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
             //カメラの回転を作る
-            Quaternion cameraRoation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+            Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 
-            currentCamera.transform.rotation = cameraRoation;
+            currentCamera.transform.rotation = cameraRotation;
+
+            _playerPosition = transform.position + Vector3.up * _cameraHeight;
+
+            Vector3 rotatedDiff = cameraRotation * diff;
+
+            // カメラの位置
+            Vector3 targetPosition = _playerPosition + rotatedDiff;
+
+            // カメラを移動
+            currentCamera.transform.position =
+                targetPosition;
+
+            // カメラを移動
+            currentCamera.transform.position =
+                targetPosition;
+
+
+            currentCamera.transform.LookAt(_playerPosition);
+
+            if (Physics.SphereCast(currentCamera.transform.position, _sphereSize, _playerPosition - currentCamera.transform.position, 
+                out RaycastHit hit, (_playerPosition - currentCamera.transform.position).magnitude, _wallLayer))
+            {
+                // 壁に当たった位置
+                Vector3 wallPosition =
+                    hit.point;
+
+                // 壁から球の半径分だけ離す
+                Vector3 cameraPosition =
+                    wallPosition +
+                    hit.normal * (-_sphereSize + _wallOffset);
+
+                currentCamera.transform.position =
+                    cameraPosition;
+
+                Debug.Log("Wall hit detected!");
+            }
+      
         }
 
         //-----------------------------------------------------------
