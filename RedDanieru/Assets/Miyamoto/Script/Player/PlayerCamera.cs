@@ -1,28 +1,27 @@
-using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using static UnityEngine.GraphicsBuffer;
 
-///<summry>
-///プレイヤーのカメラを制御するためのスクリプト
-///</summry>
 namespace Player
 {
+    /// <summary>
+    /// プレイヤーのカメラを制御するためのスクリプト
+    /// </summary>
     public class PlayerCamera : MonoBehaviour
     {
         [Header("カメラの機能")]
-        [Tooltip("このGameObjectはカメラで使用されます")]
 
-        public GameObject ThirdPersonPerspective;           //3人称視点
-        public GameObject FirstPersonPerspective;　　　　　 //1人称視点
+        [Tooltip("3人称視点のカメラ")]
+        public GameObject ThirdPersonPerspective;
 
-        [Tooltip("プレイヤーがカメラを上に移動できる最大角度")]
+        [Tooltip("1人称視点のカメラ")]
+        public GameObject FirstPersonPerspective;
+
+
+        [Header("カメラ角度")]
+
+        [Tooltip("カメラを上に移動できる最大角度")]
         public float TopClamp = 70.0f;
 
-        [Tooltip("プレイヤーがカメラを下に移動できる最大角度")]
+        [Tooltip("カメラを下に移動できる最大角度")]
         public float BottomClamp = -30.0f;
 
         [Tooltip("カメラの角度")]
@@ -31,55 +30,95 @@ namespace Player
         [Tooltip("カメラを動かせるかどうか")]
         public bool LockCameraPosition = false;
 
-        [Tooltip("壁判定をするレイヤー")]
+
+        [Header("壁判定")]
+
+        [Tooltip("壁として扱うレイヤー")]
         public LayerMask _wallLayer;
 
-        [Tooltip("飛ばすRayの大きさ")]
+        [Tooltip("SphereCastで使用する球の半径")]
         public float _sphereSize = 0.5f;
 
-        [Tooltip("壁からどれだけ離すか")]
+        [Tooltip("壁から離す距離")]
         public float _wallOffset = 0.1f;
 
-        [Tooltip("カメラの追従速度")]
+        [Tooltip("壁に接触したときのカメラの最低距離")]
+        public float _minimumCameraDistance = 0.5f;
+
+
+        [Header("カメラ追従")]
+
+        [Tooltip("壁に当たったときのカメラの移動速度")]
         public float _followSpeed = 10.0f;
 
-        [Tooltip("カメラの高さ")]
+        [Tooltip("プレイヤーからのカメラの高さ")]
         public float _cameraHeight = 1.0f;
 
-        // 左右の角度
+
+        // 左右のカメラ角度
         private float _cinemachineTargetYaw;
-        // 上下の角度
+
+        // 上下のカメラ角度
         private float _cinemachineTargetPitch;
 
-        private const float _threshold = 0.01f;          // 入力の大きさを判定するための定数
+        private const float _threshold = 0.01f;
 
+
+        // プレイヤーとカメラの初期位置関係
         private Vector3 diff;
 
+        // プレイヤーのカメラ中心位置
         private Vector3 _playerPosition;
 
-        public GameObject currentCamera { get; private set; }        　　　　// 現在のカメラを格納する変数
-        public bool isFirstPerson { get; private set; } = false;              // 現在のカメラが一人称視点かどうかを判定する変数
+
+        // 現在使用しているカメラ
+        public GameObject currentCamera { get; private set; }
+
+        // 一人称視点かどうか
+        public bool isFirstPerson { get; private set; } = false;
+
+
+        // 入力優先度管理
         private PlayerInputPriority _actionPriority;
-        //初期化
+
+
+        // プレイヤー自身が壁に接触しているか
+        private bool _isPlayerTouchingWall;
+
+
         private void Awake()
         {
-            // 初期化時にカメラを取得
-            currentCamera = ThirdPersonPerspective.activeSelf
-            ? ThirdPersonPerspective : FirstPersonPerspective;
+            // 現在使用するカメラを取得
+            currentCamera =
+                ThirdPersonPerspective.activeSelf
+                ? ThirdPersonPerspective
+                : FirstPersonPerspective;
 
-            // 初期化時にカメラの角度を取得
-            _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
+            // カメラの初期角度を保存
+            _cinemachineTargetYaw =
+                currentCamera.transform.rotation.eulerAngles.y;
 
+            _cinemachineTargetPitch =
+                currentCamera.transform.rotation.eulerAngles.x;
+
+            // InputPriority取得
             _actionPriority = GetComponent<PlayerInputPriority>();
 
-            _playerPosition = transform.position + Vector3.up * _cameraHeight;
-          
-            diff =currentCamera.transform.position - _playerPosition;
+            // プレイヤーのカメラ中心位置
+            _playerPosition =
+                transform.position +
+                Vector3.up * _cameraHeight;
+
+            // プレイヤーから見たカメラの相対位置を保存
+            diff =
+                currentCamera.transform.position -
+                _playerPosition;
         }
 
-        //-------------------------------------------------
-        // 相手プレイヤーのカメラを無効にする
-        //-------------------------------------------------
+
+        /// <summary>
+        /// カメラを無効化する
+        /// </summary>
         public void DisableCamera()
         {
             if (ThirdPersonPerspective != null)
@@ -88,70 +127,123 @@ namespace Player
             if (FirstPersonPerspective != null)
                 FirstPersonPerspective.SetActive(false);
         }
-        //-------------------------------------------------
-        //カメラを一人称か3人称に切り替える
-        //-------------------------------------------------
+
+
+        /// <summary>
+        /// 1人称 / 3人称カメラを切り替える
+        /// </summary>
         public void CameraChange(StarterAssetsInputs _input)
         {
             _input.cameraChange = false;
+
             isFirstPerson = !isFirstPerson;
 
             FirstPersonPerspective.SetActive(isFirstPerson);
             ThirdPersonPerspective.SetActive(!isFirstPerson);
 
-            currentCamera = isFirstPerson ? FirstPersonPerspective : ThirdPersonPerspective;
+            currentCamera =
+                isFirstPerson
+                ? FirstPersonPerspective
+                : ThirdPersonPerspective;
 
-            _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
+            _cinemachineTargetYaw =
+                currentCamera.transform.rotation.eulerAngles.y;
 
-            _cinemachineTargetPitch = currentCamera.transform.rotation.eulerAngles.x;
+            _cinemachineTargetPitch =
+                currentCamera.transform.rotation.eulerAngles.x;
 
             _actionPriority.EndAction();
         }
 
-        //------------------------------------------------
-        //カメラの向きを変更する
-        //------------------------------------------------
-        public void CameraLateUpdate(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
+
+        /// <summary>
+        /// カメラの回転・位置を更新する
+        /// </summary>
+        public void CameraLateUpdate(
+            bool _IsCurrentDeviceMouse,
+            StarterAssetsInputs _input)
         {
-            // カメラが動かせれていないかつロックされていないかどうか
-            if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+            // ========================================
+            // ① カメラ入力
+            // ========================================
+
+            if (_input.look.sqrMagnitude >= _threshold &&
+                !LockCameraPosition)
             {
-                //マウスで操作している場合は1.0f、コントローラーで操作している場合はTime.deltaTimeを使用する
-                float deltaTimeMultiplier = _IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+                float deltaTimeMultiplier =
+                    _IsCurrentDeviceMouse
+                    ? 1.0f
+                    : Time.deltaTime;
 
-                // カメラの左右角度を更新する
-                _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
+                _cinemachineTargetYaw +=
+                    _input.look.x * deltaTimeMultiplier;
 
-                // カメラの上下角度を更新する
-                _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+                _cinemachineTargetPitch +=
+                    _input.look.y * deltaTimeMultiplier;
             }
 
-            // 横は無制限
-            _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
 
-            // 縦は制限あり
-            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
+            // ========================================
+            // ② カメラ角度を制限
+            // ========================================
 
-            //カメラの回転を作る
-            Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+            _cinemachineTargetYaw =
+                ClampAngle(
+                    _cinemachineTargetYaw,
+                    float.MinValue,
+                    float.MaxValue);
 
-            currentCamera.transform.rotation = cameraRotation;
+            _cinemachineTargetPitch =
+                ClampAngle(
+                    _cinemachineTargetPitch,
+                    BottomClamp,
+                    TopClamp);
 
-            _playerPosition = transform.position + Vector3.up * _cameraHeight;
 
-            Vector3 rotatedDiff = cameraRotation * diff;
+            // ========================================
+            // ③ カメラの回転を作る
+            // ========================================
 
-            //==================================================
-            // カメラの理想位置を計算
-            //==================================================
+            Quaternion cameraRotation =
+                Quaternion.Euler(
+                    _cinemachineTargetPitch +
+                    CameraAngleOverride,
 
+                    _cinemachineTargetYaw,
+
+                    0.0f);
+
+
+            currentCamera.transform.rotation =
+                cameraRotation;
+
+
+            // ========================================
+            // ④ プレイヤーのカメラ中心位置
+            // ========================================
+
+            _playerPosition =
+                transform.position +
+                Vector3.up * _cameraHeight;
+
+
+            // ========================================
+            // ⑤ カメラの理想位置を計算
+            // ========================================
+
+            // 初期のプレイヤー→カメラ距離を
+            // 現在のカメラ回転に合わせて回転させる
+            Vector3 rotatedDiff =
+                cameraRotation * diff;
+
+            // プレイヤー位置 + 回転後の距離
             Vector3 targetPosition =
                 _playerPosition + rotatedDiff;
 
 
-            //==================================================
-            // プレイヤーから理想カメラ位置への方向
-            //==================================================
+            // ========================================
+            // ⑥ プレイヤー → 理想カメラの方向
+            // ========================================
 
             Vector3 direction =
                 targetPosition - _playerPosition;
@@ -161,70 +253,153 @@ namespace Player
 
             Vector3 normalizedDirection =
                 direction.normalized;
-            // SphereCastの方向をSceneビューに表示
+
+
+            // ========================================
+            // デバッグ用Ray
+            // ========================================
+
             Debug.DrawRay(
                 _playerPosition,
                 normalizedDirection * distance,
-                Color.red
-            );
-           
-            //==================================================
-            // 壁判定
-            //==================================================
+                Color.red);
 
-            if (Physics.SphereCast(
-                _playerPosition,
-                _sphereSize,
-                normalizedDirection,
-                out RaycastHit hit,
-                distance,
-                _wallLayer))
+
+            // ========================================
+            // ⑦ カメラ経路に壁があるか調べる
+            // ========================================
+
+            bool isWallDetected =
+                Physics.SphereCast(
+                    _playerPosition,
+                    _sphereSize,
+                    normalizedDirection,
+                    out RaycastHit hit,
+                    distance,
+                    _wallLayer,
+                    QueryTriggerInteraction.Ignore);
+
+
+            // ========================================
+            // ⑧ プレイヤー自身が壁に接触しているか
+            // ========================================
+
+            bool isPlayerTouchingWall =
+            Physics.CheckSphere(
+           _playerPosition,
+           _sphereSize,
+           _wallLayer,
+           QueryTriggerInteraction.Ignore);
+
+
+            // ========================================
+            // ⑨ カメラ位置を決定
+            // ========================================
+
+            // ========================================
+            // ⑨ カメラ位置を決定
+            // ========================================
+
+            if (isPlayerTouchingWall)
             {
-                //==============================================
-                // 壁がある
-                //==============================================
+                // ------------------------------------
+                // プレイヤー自身が壁に接触
+                // ------------------------------------
 
-                // 壁に接触する位置より少し手前
-                float safeDistance =
-                    hit.distance - _wallOffset;
-
-                safeDistance =
-                    Mathf.Max(safeDistance, 0.0f);
-
-                // 壁の手前のカメラ位置
                 Vector3 safePosition =
                     _playerPosition +
-                    normalizedDirection * safeDistance;
+                    normalizedDirection *
+                    _minimumCameraDistance;
 
-                // 現在のカメラ位置から安全位置へゆっくり移動
+                // 壁に接触しているときはゆっくり寄せる
                 currentCamera.transform.position =
                     Vector3.Lerp(
                         currentCamera.transform.position,
                         safePosition,
                         _followSpeed * Time.deltaTime);
+
+                Debug.DrawLine(
+                    _playerPosition,
+                    safePosition,
+                    Color.blue);
+            }
+            else if (isWallDetected)
+            {
+                // ------------------------------------
+                // カメラとプレイヤーの間に壁がある
+                // ------------------------------------
+
+                float safeDistance =
+                    hit.distance - _wallOffset;
+
+                safeDistance =
+                    Mathf.Max(
+                        safeDistance,
+                        _minimumCameraDistance);
+
+                Vector3 safePosition =
+                    _playerPosition +
+                    normalizedDirection *
+                    safeDistance;
+
+                // 壁に当たったときはゆっくり寄せる
+                currentCamera.transform.position =
+                    Vector3.Lerp(
+                        currentCamera.transform.position,
+                        safePosition,
+                        _followSpeed * Time.deltaTime);
+
+                Debug.DrawLine(
+                    _playerPosition,
+                    safePosition,
+                    Color.yellow);
             }
             else
             {
-                //==============================================
+                // ------------------------------------
                 // 壁がない
-                //==============================================
+                // ------------------------------------
 
-                // 本来の位置に一瞬で戻す
+                // 理想位置へゆっくり戻す
                 currentCamera.transform.position =
-                    targetPosition;
+                    Vector3.Lerp(
+                        currentCamera.transform.position,
+                        targetPosition,
+                        _followSpeed * Time.deltaTime);
+
+                Debug.DrawLine(
+                    _playerPosition,
+                    targetPosition,
+                    Color.green);
             }
+
+
+            // ========================================
+            // ⑩ カメラをプレイヤーへ向ける
+            // ========================================
+
+            currentCamera.transform.LookAt(
+                _playerPosition);
         }
 
-        //-----------------------------------------------------------
-        // 角度を制限する関数
-        //-----------------------------------------------------------
-        private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
+        /// <summary>
+        /// 角度を制限する
+        /// </summary>
+        private static float ClampAngle(
+            float lfAngle,
+            float lfMin,
+            float lfMax)
         {
-            //
-            if (lfAngle < -360f) lfAngle += 360f;
-            if (lfAngle > 360f) lfAngle -= 360f;
-            return Mathf.Clamp(lfAngle, lfMin, lfMax);
+            if (lfAngle < -360f)
+                lfAngle += 360f;
+
+            if (lfAngle > 360f)
+                lfAngle -= 360f;
+
+            return Mathf.Clamp(
+                lfAngle,
+                lfMin,
+                lfMax);
         }
-       
     }
 }
