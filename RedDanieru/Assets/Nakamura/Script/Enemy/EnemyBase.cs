@@ -1,3 +1,4 @@
+using Player;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -24,6 +25,7 @@ public class EnemyBase : MonoBehaviour
     protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
     protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
     protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
+    protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
     protected enemyState currentState { get; set; }  //現在の状態
     protected float currentHp;  //現在のHP
@@ -31,6 +33,7 @@ public class EnemyBase : MonoBehaviour
     protected float trackingTimer = 0.0f;  //現在の追跡時間
     protected float attackCoolTimer;  //現在の攻撃クールタイム
     protected float attackTimer;  //現在の攻撃開始タイマー
+    protected float damageTimer;  //現在のダメージタイマー
 
     private float specialCoolTimer = 0.0f;  //特殊行動のタイマー
     private float specialInterval = 4.0f;  //特殊行動のクールタイム
@@ -58,22 +61,33 @@ public class EnemyBase : MonoBehaviour
         //行動パターン
         switch (currentState)
         {
-            case enemyState.Idle:
-            case enemyState.Move:
-                    EnemyMove();
-
+            case enemyState.Idle:  //待機状態
+            case enemyState.Move:  //移動状態
+                EnemyMove();
                 break;
-            case enemyState.Attack:
+
+            case enemyState.Attack:  //攻撃状態
                 Attack();
                 break;
-            case enemyState.Special:
+
+            case enemyState.Special:  //特殊行動状態
                 SpecialMove();
                 break;
-            case enemyState.Damage:
-                //ダメージ処理
+
+            case enemyState.Damage:  //ダメージ状態
+                if (damageTimer <= 0f)
+                {
+                    //ダメージモーションが終了したら通常状態に戻す
+                    currentState = enemyState.Idle;
+                    damageTimer = enemyDamageTime;
+                }
+                else
+                {
+                    damageTimer -= Time.deltaTime;
+                }
                 break;
-            case enemyState.Dead:
-                //死亡処理
+
+            case enemyState.Dead:  //死亡状態
                 Destroy(gameObject);
                 break;
         }
@@ -117,7 +131,6 @@ public class EnemyBase : MonoBehaviour
                     //最後にプレイヤーを確認した位置に向かって移動
                     currentState = enemyState.Move;
                     agent.isStopped = false;
-                    //agent.SetDestination(lastPlayerPosition);
                 }
                 else
                 {
@@ -128,9 +141,6 @@ public class EnemyBase : MonoBehaviour
 
                 return;
             }
-
-            //プレイヤーを確認できた位置を保存
-            //lastPlayerPosition = player.position;
 
             //追跡時間をリセット
             trackingTimer = enemyTrackingTime;
@@ -186,12 +196,10 @@ public class EnemyBase : MonoBehaviour
                 //最後にプレイヤーを確認した位置に向かって移動
                 currentState = enemyState.Move;
                 agent.isStopped = false;
-                //agent.SetDestination(lastPlayerPosition);
             }
             else
             {
                 currentState = enemyState.Idle;
-                agent.isStopped = true;
                 specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
                 return;
             }
@@ -206,7 +214,7 @@ public class EnemyBase : MonoBehaviour
             currentState = enemyState.Special;
             agent.isStopped = true;
             agent.enabled = false;
-            return;   
+            return;
         }
         specialCoolTimer -= Time.deltaTime;
     }
@@ -239,7 +247,12 @@ public class EnemyBase : MonoBehaviour
         foreach (Collider hit in attackHits)
         {
             //プレイヤーにダメージを与える処理
-            Debug.Log("撃たれた。攻撃を受けている！");
+            Debug.Log("攻撃を受けている！");
+            PlayerStatus playerStatus = hit.GetComponent<PlayerStatus>();
+            if (playerStatus != null && !playerStatus.isInvincible)
+            {
+                playerStatus.Damage(enemyPower);
+            }
         }
     }
 
@@ -288,19 +301,24 @@ public class EnemyBase : MonoBehaviour
     //ダメージ処理
     public virtual void Damage(int playerPow)
     {
+        //ダメージ中はダメージを受けない
+        if (currentState == enemyState.Damage)
+            return;
+
         Debug.Log("Enemy hit");
+        //ダメージ計算
         currentHp -= playerPow;
 
         if (currentHp <= 0)
         {
-            currentState = enemyState.Dead;
             //死亡処理
+            currentState = enemyState.Dead;
             Debug.Log("敵が死亡しました。");
         }
         else
         {
-            currentState = enemyState.Damage;
             //ダメージ処理
+            currentState = enemyState.Damage;
             Debug.Log("敵がダメージを受けました。残りHP: " + currentHp);
         }
     }
