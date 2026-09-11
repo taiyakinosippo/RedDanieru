@@ -71,15 +71,7 @@ public class GoalClear : MonoBehaviour
 
     private void Start()
     {
-        if (clearPanel != null)
-        {
-            clearPanel.SetActive(false);
-        }
-
-        Time.timeScale = 1f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        ResetClearState();
     }
 
     //==================================================
@@ -93,6 +85,25 @@ public class GoalClear : MonoBehaviour
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
+    }
+
+    //==================================================
+    // クリア状態リセット
+    //==================================================
+
+    public void ResetClearState()
+    {
+        isCleared = false;
+
+        if (clearPanel != null)
+        {
+            clearPanel.SetActive(false);
+        }
+
+        Time.timeScale = 1f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     //==================================================
@@ -383,22 +394,10 @@ public class GoalClear : MonoBehaviour
 
     public void ReturnToTitle()
     {
-        //==================================================
-        // ゲーム時間を元に戻す
-        //==================================================
-
         Time.timeScale = 1f;
-
-        //==================================================
-        // カーソル表示
-        //==================================================
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-
-        //==================================================
-        // マッチング中止
-        //==================================================
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
@@ -411,10 +410,6 @@ public class GoalClear : MonoBehaviour
         }
         else
         {
-            //==================================================
-            // タイトルシーン
-            //==================================================
-
             SceneManager.LoadScene(
                 titleSceneName
             );
