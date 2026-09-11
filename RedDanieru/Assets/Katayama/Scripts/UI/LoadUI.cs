@@ -93,9 +93,7 @@ public class LoadUI : MonoBehaviour
         string json =
             request.downloadHandler.text;
 
-        Debug.Log("取得データ:");
-        Debug.Log(json);
-
+     
         DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
 
         if (data == null || data.dungeons == null)
@@ -116,6 +114,7 @@ public class LoadUI : MonoBehaviour
             DungeonButtonUI ui =
                 button.GetComponent<DungeonButtonUI>();
 
+         
             ui.stageNameText.text =
                 "DUNGEON:" + dungeon.dungeonName;
 
@@ -145,30 +144,60 @@ public class LoadUI : MonoBehaviour
             string selectedDungeonName =
                 dungeon.dungeonName;
 
-            button.GetComponent<Button>()
-                .onClick.AddListener(() =>
-                {
-                    RoomInfo.SelectedDungeon =
-                        selectedDungeonId;
+            button.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                ui.Toggle();
 
-                    RoomInfo.SelectedDungeonName =
-                        selectedDungeonName;
+                importer.ImportDungeon(selectedDungeonId);
+            });
 
-                    importer.ImportDungeon(
-                        selectedDungeonId);
+            ui.soloButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
 
-                    scrollView.SetActive(false);
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
 
-                    if (!GameModeManager.IsMultiplayer)
-                    {
-                        dungeonUIManager.HideMatchingUI();
-                        fusionLauncher.StartSolo();
-                    }
-                    else
-                    {
-                        dungeonUIManager.MapSelectButton();
-                    }
-                });
+                dungeonUIManager.SoloMode();
+            });
+
+            ui.multiButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.MultiMode();
+                dungeonUIManager.MapSelectButton();
+            });
+
+            //button.GetComponent<Button>()
+            //    .onClick.AddListener(() =>
+            //    {
+            //        RoomInfo.SelectedDungeon =
+            //            selectedDungeonId;
+
+            //        RoomInfo.SelectedDungeonName =
+            //            selectedDungeonName;
+
+            //        importer.ImportDungeon(
+            //            selectedDungeonId);
+
+            //        scrollView.SetActive(false);
+
+            //        if (!GameModeManager.IsMultiplayer)
+            //        {
+            //            dungeonUIManager.HideMatchingUI();
+            //            fusionLauncher.StartSolo();
+            //        }
+            //        else
+            //        {
+            //            dungeonUIManager.MapSelectButton();
+            //        }
+            //    });
         }
     }
 
@@ -224,30 +253,68 @@ public class LoadUI : MonoBehaviour
             string selectedDungeonName =
                 dungeon.dungeonName;
 
-            button.GetComponent<Button>()
-                .onClick.AddListener(() =>
-                {
-                    RoomInfo.SelectedDungeon =
-                        selectedDungeonId;
+            ui.multiButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon = selectedDungeonId;
+                RoomInfo.SelectedDungeonName = selectedDungeonName;
 
-                    RoomInfo.SelectedDungeonName =
-                        selectedDungeonName;
+                Debug.Log("保存前 = " + RoomInfo.SelectedDungeonName);
 
-                    importer.ImportDungeon(
-                        selectedDungeonId);
+                dungeonUIManager.MultiMode();
 
-                    scrollView.SetActive(false);
+                Debug.Log("MultiMode後 = " + RoomInfo.SelectedDungeonName);
 
-                    if (!GameModeManager.IsMultiplayer)
-                    {
-                        dungeonUIManager.HideMatchingUI();
-                        fusionLauncher.StartSolo();
-                    }
-                    else
-                    {
-                        dungeonUIManager.MapSelectButton();
-                    }
-                });
+                dungeonUIManager.MapSelectButton();
+
+                Debug.Log("MapSelectButton後 = " + RoomInfo.SelectedDungeonName);
+            });
+
+            button.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                ui.Toggle();
+
+                importer.ImportDungeon(
+                    selectedDungeonId
+                );
+            });
+
+            ui.soloButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.SoloMode();
+            });
+
+           
+
+            //button.GetComponent<Button>()
+            //    .onClick.AddListener(() =>
+            //    {
+            //        RoomInfo.SelectedDungeon =
+            //            selectedDungeonId;
+
+            //        RoomInfo.SelectedDungeonName =
+            //            selectedDungeonName;
+
+            //        importer.ImportDungeon(
+            //            selectedDungeonId);
+
+            //        scrollView.SetActive(false);
+
+            //        if (!GameModeManager.IsMultiplayer)
+            //        {
+            //            dungeonUIManager.HideMatchingUI();
+            //            fusionLauncher.StartSolo();
+            //        }
+            //        else
+            //        {
+            //            dungeonUIManager.MapSelectButton();
+            //        }
+            //    });
         }
     }
 }
