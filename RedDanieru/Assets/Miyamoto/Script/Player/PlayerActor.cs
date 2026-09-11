@@ -172,6 +172,7 @@ namespace Player
         {
             //カメラの動き
             _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
+            
         }
     }
 }
