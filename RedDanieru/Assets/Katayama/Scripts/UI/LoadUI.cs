@@ -93,9 +93,7 @@ public class LoadUI : MonoBehaviour
         string json =
             request.downloadHandler.text;
 
-        Debug.Log("取得データ:");
-        Debug.Log(json);
-
+     
         DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
 
         if (data == null || data.dungeons == null)
@@ -254,6 +252,44 @@ public class LoadUI : MonoBehaviour
 
             string selectedDungeonName =
                 dungeon.dungeonName;
+
+            ui.multiButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon = selectedDungeonId;
+                RoomInfo.SelectedDungeonName = selectedDungeonName;
+
+                Debug.Log("保存前 = " + RoomInfo.SelectedDungeonName);
+
+                dungeonUIManager.MultiMode();
+
+                Debug.Log("MultiMode後 = " + RoomInfo.SelectedDungeonName);
+
+                dungeonUIManager.MapSelectButton();
+
+                Debug.Log("MapSelectButton後 = " + RoomInfo.SelectedDungeonName);
+            });
+
+            button.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                ui.Toggle();
+
+                importer.ImportDungeon(
+                    selectedDungeonId
+                );
+            });
+
+            ui.soloButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.SoloMode();
+            });
+
+           
 
             //button.GetComponent<Button>()
             //    .onClick.AddListener(() =>

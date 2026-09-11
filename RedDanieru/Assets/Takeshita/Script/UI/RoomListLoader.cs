@@ -39,6 +39,8 @@ public class RoomListLoader : MonoBehaviour
     [SerializeField]
     private DungeonImporter importer;
 
+    private Coroutine refresCoroutine;
+
     private void Start()
     {
         JoinCautionObj.SetActive(false);
@@ -51,7 +53,26 @@ public class RoomListLoader : MonoBehaviour
 
     private void OnEnable()
     {
-        StartCoroutine(LoadRooms());
+        refresCoroutine =
+            StartCoroutine(RefreshLoop());
+    }
+
+    private void OnDisable()
+    {
+        if (refresCoroutine != null)
+        {
+            StopCoroutine(refresCoroutine);
+        }
+    }
+
+    private IEnumerator RefreshLoop()
+    {
+        while (true)
+        {
+            yield return LoadRooms();
+
+            yield return new WaitForSeconds(1f);
+        }
     }
 
     IEnumerator LoadRooms()
@@ -72,10 +93,7 @@ public class RoomListLoader : MonoBehaviour
             yield break;
         }
 
-        string json =
-     "{\"rooms\":" +
-     request.downloadHandler.text +
-     "}";
+        string json ="{\"rooms\":" +request.downloadHandler.text +"}";
 
         RoomList list =
             JsonUtility.FromJson<RoomList>(json);
@@ -89,6 +107,14 @@ public class RoomListLoader : MonoBehaviour
 
         foreach (RoomData room in list.rooms)
         {
+            if (room.is_private == 1)
+                continue;
+
+            if (room.map_name != RoomInfo.SelectedDungeonName)
+                continue;
+
+            Debug.Log("表示対象：" + room.room_id);
+
             GameObject obj =
                 Instantiate(
                     roomButtonPrefab,

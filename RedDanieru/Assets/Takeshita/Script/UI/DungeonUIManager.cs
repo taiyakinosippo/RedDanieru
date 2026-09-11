@@ -77,10 +77,12 @@ public class DungeonUIManager : MonoBehaviour
     [Header("マップ選択画面")]
     public GameObject ScrolView;
 
-    public GameObject RoomInfoObj;
+    public GameObject MatchingRoomCreateWindow;
 
     public GameObject RoomCreateObj;
+    public Button RoomHostButton;
     public GameObject RoomJoinObj;
+    public Button JoinButton;
 
     [Header("部屋検索")]
     public GameObject RoomSearchObj;
@@ -113,7 +115,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private Text RoomIdText;
     [SerializeField] private Text RoomKeyText;
     [SerializeField] private Text CautionText;
-    [SerializeField] private InputField passwordInputField;
+    [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
 
     [Header("大事な奴ら")]
@@ -128,6 +130,8 @@ public class DungeonUIManager : MonoBehaviour
 
     [SerializeField] private RoomListLoader roomListLoader;
 
+    [SerializeField]private PublicRoomList publicRoomList;
+
     [Header("数値")]
     public static int MaxPlayers = 2;
 
@@ -141,7 +145,7 @@ public class DungeonUIManager : MonoBehaviour
     public void Start()
     {
          ScrolView.SetActive(true);
-        RoomInfoObj.SetActive(false);
+        MatchingRoomCreateWindow.SetActive(false);
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
         MatchingObj.SetActive(false);
@@ -153,6 +157,8 @@ public class DungeonUIManager : MonoBehaviour
 
         RoomInButton.interactable = false;
         GameStartbutton.interactable = false;
+        RoomHostButton.interactable = false;
+        JoinButton.interactable = true;
 
         passwordInputField.onValueChanged.AddListener(OnPasswordChanged);
 
@@ -256,8 +262,7 @@ public class DungeonUIManager : MonoBehaviour
     {
         GameModeManager.IsMultiplayer = true;
         Debug.Log("Multi");
-        ScrolView.SetActive(false);
-        RoomInfoObj.SetActive(true);
+        MapSelectButton();
     }
 
     public void ScrollBackButton()
@@ -268,7 +273,7 @@ public class DungeonUIManager : MonoBehaviour
     public void  RoomInfoBackButton()
     {
         ScrolView.SetActive(true);
-        RoomInfoObj.SetActive(false);
+        MatchingRoomCreateWindow.SetActive(false);
     }
 
     public void RoomSearchButton()
@@ -287,16 +292,27 @@ public class DungeonUIManager : MonoBehaviour
     {
         RoomCreateObj.SetActive(true);
         RoomJoinObj.SetActive(false);
+
+        JoinButton.interactable = true;
+        RoomHostButton.interactable = false;
     }
 
     public void RoomJoinButton()
     {
         RoomCreateObj.SetActive(false);
         RoomJoinObj.SetActive(true);
+
+        RoomHostButton.interactable = true;
+        JoinButton.interactable = false;
+
+        publicRoomList.RefreshRoomList();
     }
 
     public void MapSelectButton()
     {
+        Debug.Log("MapSelectButton");
+        Debug.Log("DungeonName=" + RoomInfo.SelectedDungeonName);
+
         dungeonNameText.text =
             "マップ：" + RoomInfo.SelectedDungeonName;
 
@@ -306,10 +322,9 @@ public class DungeonUIManager : MonoBehaviour
         RoomIdText.text =
             "RoomID：" + RoomInfo.RoomId;
 
-        RoomInfoObj.SetActive(true);
-        ScrolView.SetActive(false);
-
-        RoomCreateObj.SetActive(false);
+        MatchingRoomCreateWindow.SetActive(true);
+      
+        RoomCreateObj.SetActive(true);
         RoomJoinObj.SetActive(false);
     }
 
@@ -353,7 +368,8 @@ public class DungeonUIManager : MonoBehaviour
 
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
-        RoomInfoObj.SetActive(false);
+        ScrolView.SetActive(false);
+        MatchingRoomCreateWindow.SetActive(false);
         MatchingObj.SetActive(true);
 
         if (GameModeManager.IsMultiplayer)
@@ -572,7 +588,7 @@ public class DungeonUIManager : MonoBehaviour
         MatchingPlayerObj.SetActive(false);
 
         ScrolView.SetActive(false);
-        RoomInfoObj.SetActive(false);
+        MatchingRoomCreateWindow.SetActive(false);
 
         RoomCreateObj.SetActive(false);
         RoomJoinObj.SetActive(false);
