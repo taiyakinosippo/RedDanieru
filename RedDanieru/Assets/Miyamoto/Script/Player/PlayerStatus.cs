@@ -35,6 +35,10 @@ namespace Player
 
         [Tooltip("プレイヤーの現在の防御力")]
         public int CurrentDefense { get; private set; }
+        
+        private float damageTimer = 0.0f; //ダメージを受けた後の無敵時間のタイマー
+        private float damageInvincibleTime = 3.0f; //ダメージを受けた後の無敵時間
+        public bool isInvincible => damageTimer > 0.0f; //無敵状態かどうかを判定するプロパティ
 
         public int _playerHP => PlayerHP;
         public int _playerAttack => PlayerAttack;
@@ -50,8 +54,19 @@ namespace Player
             CurrentDefense = PlayerDefense;
         }
 
+        private void Update()
+        {
+            //ダメージを受けた後の無敵時間のタイマーを更新
+            if (damageTimer > 0.0f)
+            {
+                damageTimer -= Time.deltaTime;
+            }
+        }
+
         public void Damage(int damage)
         {
+            damageTimer = damageInvincibleTime; //ダメージを受けた後の無敵時間をリセット
+
             damage -= PlayerDefense;
 
             if (damage < 1)
