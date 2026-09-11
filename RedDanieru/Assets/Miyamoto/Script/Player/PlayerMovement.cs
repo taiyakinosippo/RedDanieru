@@ -62,7 +62,7 @@ namespace Player
 
         private CharacterController _controller;         // プレイヤーの移動を制御するためのCharacterControllerコンポーネント
         private PlayerCamera _playerCamera;              // プレイヤーのカメラを制御するためのコンポーネント
-        private PlayerAnimation _playerAnimation; 
+        private PlayerAnimation _playerAnimation;
         private PlayerInputPriority _actionPriority;
         private PlayerStatus _playerStatus;
 
@@ -85,7 +85,7 @@ namespace Player
             _wasGrounded = Grounded;
         }
 
-        
+
         public void GroundedCheck()
         {
             // プレイヤーの下にある球体を使って地面にいるかどうかを判定
@@ -102,7 +102,7 @@ namespace Player
         //-----------------------------------------------------
         //プレイヤーの基本的な動きを処理する
         //-----------------------------------------------------
-        public void PlayerMove(StarterAssetsInputs _input) 
+        public void PlayerMove(StarterAssetsInputs _input)
         {
             // Shiftキーを押している場合は歩き、押していない場合は走る
             float targetSpeed = _input.sprint ? _playerStatus._playerRunSpeed : _playerStatus._playerMoveSpeed;
@@ -170,7 +170,7 @@ namespace Player
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
                              new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
-            _playerAnimation.PlayerMoveAnimatior(_animationBlend,inputMagnitude);
+            _playerAnimation.PlayerMoveAnimatior(_animationBlend, inputMagnitude);
         }
 
 
@@ -200,9 +200,9 @@ namespace Player
 
                 //アニメーションのリセット
                 _playerAnimation.PlayerJumpAnimatorFalse();
-        
-                    // 今までの落下速度が0より小さい場合は、落下速度を-2fにする
-                    if (_verticalVelocity < 0.0f)
+
+                // 今までの落下速度が0より小さい場合は、落下速度を-2fにする
+                if (_verticalVelocity < 0.0f)
                 {
                     _verticalVelocity = -2f;
                 }
