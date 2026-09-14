@@ -190,12 +190,10 @@ public class RoomListLoader : MonoBehaviour
 
     public void YesButton()
     {
-        Debug.Log(
-    "dungeon_id = " +
-    selectedRoom.dungeon_id);
-
         if (selectedRoom == null)
             return;
+
+        Debug.Log("dungeon_id = " + selectedRoom.dungeon_id);
 
         if (selectedRoom.current_players >=
             selectedRoom.max_players)
@@ -204,11 +202,20 @@ public class RoomListLoader : MonoBehaviour
             return;
         }
 
+        // プライベートルームの場合
         if (selectedRoom.is_private == 1)
         {
-            if (dungeonUIManager.RoomSearchPassword
-                != selectedRoom.password)
+            string inputPassword =
+                dungeonUIManager.PrivatePassword;
+
+            Debug.Log($"入力PW=[{inputPassword}]");
+            Debug.Log($"DB PW=[{selectedRoom.password}]");
+
+            if (inputPassword.Trim() !=
+                selectedRoom.password.Trim())
             {
+                Debug.Log("パスワード不一致");
+
                 StartCoroutine(PswObj());
                 return;
             }
@@ -228,8 +235,9 @@ public class RoomListLoader : MonoBehaviour
         RoomInfo.SelectedDungeonName =
             selectedRoom.map_name;
 
-        importer.ImportDungeon(selectedRoom.dungeon_id );
-
+        importer.ImportDungeon(
+            selectedRoom.dungeon_id
+        );
 
         StartCoroutine(
             roomDBUploader.JoinRoom()

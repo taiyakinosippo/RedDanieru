@@ -26,13 +26,11 @@ public static class RoomInfo
 public static class RoomIdGenerator
 {
     private const string Characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-        "abcdefghijklmnopqrstuvwxyz" +
-        "0123456789";
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     public static string GenerateRoomId()
     {
-        char[] id = new char[10];
+        char[] id = new char[4];
 
         for(int i = 0; i < id.Length; i++)
         {
@@ -91,8 +89,11 @@ public class DungeonUIManager : MonoBehaviour
     private bool roomFound;
     private bool roomHasPassword;
     private string roomPassword;
-    [SerializeField]private TMP_InputField roomSearchPasswordInput;
-    [SerializeField]private TMP_InputField roomIdInput;
+    [SerializeField] private TMP_InputField roomSearchPasswordInput;
+    [SerializeField] private TMP_InputField roomIdInput;
+    [SerializeField] private TMP_InputField privateRoomIdInput;
+    [SerializeField] private TMP_InputField privatePasswordInput;
+    [SerializeField] private Button privateJoinButton;
 
     public GameObject Laycast;
     public GameObject RoomSearchLaycast;
@@ -117,6 +118,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private Text CautionText;
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
+    [SerializeField] private TMP_InputField createRoomIdInput;
 
     [Header("大事な奴ら")]
     [SerializeField] private FusionLauncher fusionLauncher;
@@ -159,6 +161,11 @@ public class DungeonUIManager : MonoBehaviour
         GameStartbutton.interactable = false;
         RoomHostButton.interactable = false;
         JoinButton.interactable = true;
+        privateJoinButton.interactable = false;
+
+        privateRoomIdInput.onValueChanged.AddListener(delegate { CheckPrivateRoom(); });
+
+        privatePasswordInput.onValueChanged.AddListener(delegate { CheckPrivateRoom(); });
 
         passwordInputField.onValueChanged.AddListener(OnPasswordChanged);
 
@@ -166,8 +173,12 @@ public class DungeonUIManager : MonoBehaviour
 
         OnPlayerCountChanged(playerCountDropdown.value);
 
+        privateRoomIdInput.onValueChanged.AddListener(OnPrivateRoomIdChanged);
+
         roomSearchPasswordInput.onValueChanged.AddListener(OnRoomSearchPasswordChanged);
         roomIdInput.onValueChanged.AddListener(OnRoomIdChanged);
+
+        createRoomIdInput.onValueChanged.AddListener(OnCreateRoomIdChanged);
     }
 
     private void Update()
@@ -316,12 +327,6 @@ public class DungeonUIManager : MonoBehaviour
         dungeonNameText.text =
             "マップ：" + RoomInfo.SelectedDungeonName;
 
-        RoomInfo.RoomId =
-            RoomIdGenerator.GenerateRoomId();
-
-        RoomIdText.text =
-            "RoomID：" + RoomInfo.RoomId;
-
         MatchingRoomCreateWindow.SetActive(true);
       
         RoomCreateObj.SetActive(true);
@@ -330,6 +335,20 @@ public class DungeonUIManager : MonoBehaviour
 
     public void CreateButton()
     {
+        // RoomID決定
+        if (string.IsNullOrEmpty(createRoomIdInput.text))
+        {
+            RoomInfo.RoomId =
+                RoomIdGenerator.GenerateRoomId();
+        }
+        else
+        {
+            RoomInfo.RoomId =
+                createRoomIdInput.text;
+        }
+
+        Debug.Log("RoomID = " + RoomInfo.RoomId);
+
         Laycast.SetActive(true);
         CautionObj.SetActive(true);
 
@@ -443,6 +462,32 @@ public class DungeonUIManager : MonoBehaviour
         HideMatchingUI();
     }
 
+    public void PrivateRoomJoinButton()
+    {
+        StartCoroutine(SearchPrivateRoom());
+    }
+
+    private IEnumerator SearchPrivateRoom()
+    {
+        yield return roomDBUploader.SearchRoom(privateRoomIdInput.text);
+
+        RoomData room = roomDBUploader.foundRoom;
+
+        if (room == null)
+        {
+            Debug.Log("部屋が見つからない");
+            yield break;
+        }
+
+        if (room.password != privatePasswordInput.text)
+        {
+            Debug.Log("パスワード不一致");
+            yield break;
+        }
+
+        roomListLoader.ShowJoinCaution(room);
+    }
+
     private void OnPasswordChanged(string value)
     {
         // 数字以外を除去
@@ -487,6 +532,47 @@ public class DungeonUIManager : MonoBehaviour
             ? "Private Room"
             : "Public Room"
         );
+    }
+
+    private void CheckPrivateRoom()
+    {
+        if (roomDBUploader.foundRoom == null)
+        {
+            Debug.Log("foundRoom NULL");
+            privateJoinButton.interactable = false;
+            return;
+        }
+
+        bool roomMatch =
+            privateRoomIdInput.text ==
+            roomDBUploader.foundRoom.room_id;
+
+        bool passwordMatch =
+            privatePasswordInput.text ==
+            roomDBUploader.foundRoom.password;
+
+        Debug.Log("roomMatch=" + roomMatch);
+        Debug.Log("passwordMatch=" + passwordMatch);
+
+        privateJoinButton.interactable =
+            roomMatch && passwordMatch;
+
+        Debug.Log(
+            "interactable=" +
+            privateJoinButton.interactable
+        );
+    }
+
+    private void OnPrivateRoomIdChanged(string roomId)
+    {
+        StartCoroutine(SearchPrivateRoom(roomId));
+    }
+
+    private IEnumerator SearchPrivateRoom(string roomId)
+    {
+        yield return roomDBUploader.SearchRoom(roomId);
+
+        CheckPrivateRoom();
     }
 
     private void OnPlayerCountChanged(int index)
@@ -534,6 +620,33 @@ public class DungeonUIManager : MonoBehaviour
         }
 
         searchCoroutine = StartCoroutine(DelayedSearch(roomId));
+    }
+
+    private void OnCreateRoomIdChanged(string value)
+    {
+        string validText = "";
+
+        foreach (char c in value.ToUpper())
+        {
+            if ((c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9'))
+            {
+                validText += c;
+            }
+        }
+
+        if (validText.Length > 4)
+        {
+            validText = validText.Substring(0, 4);
+        }
+
+        if (createRoomIdInput.text != validText)
+        {
+            createRoomIdInput.text = validText;
+        }
+
+        RoomHostButton.interactable =
+            validText.Length == 4;
     }
 
     private IEnumerator DelayedSearch(string roomId)
@@ -604,4 +717,13 @@ public class DungeonUIManager : MonoBehaviour
         ScrolView.SetActive(false);
         RoomSearchObj.SetActive(false);
     }
+
+    public string PrivatePassword
+    {
+        get
+        {
+            return privatePasswordInput.text;
+        }
+    }
+
 }
