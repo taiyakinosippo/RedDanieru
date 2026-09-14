@@ -15,6 +15,30 @@ public class PlaceManager : MonoBehaviour
 
     private void Update()
     {
+        // テストプレイ中は配置処理を完全に停止
+        TestPlayManager testPlayManager =
+            FindObjectOfType<TestPlayManager>();
+
+        if (testPlayManager != null &&
+            testPlayManager.IsTestPlay)
+        {
+            ClearSelection();
+
+            if (isEditing)
+            {
+                if (undoManager != null)
+                {
+                    undoManager.EndEdit();
+                }
+
+                isEditing = false;
+            }
+
+            lastPlaceFloor = null;
+
+            return;
+        }
+
         // セーブ画面を開いている場合
         if (savePanel != null && savePanel.activeSelf)
         {
@@ -68,11 +92,13 @@ public class PlaceManager : MonoBehaviour
     /// </summary>
     private void HighlightFloor()
     {
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        Ray ray =
+            mainCamera.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            FloorBlock floor = hit.collider.GetComponent<FloorBlock>();
+            FloorBlock floor =
+                hit.collider.GetComponent<FloorBlock>();
 
             if (floor != currentFloor)
             {
