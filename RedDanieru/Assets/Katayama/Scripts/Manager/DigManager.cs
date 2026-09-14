@@ -1,5 +1,6 @@
-using UnityEngine.EventSystems;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class DigManager : MonoBehaviour
 {
@@ -59,14 +60,41 @@ public class DigManager : MonoBehaviour
 
     private bool isEditing = false;
 
+    [Header("再編集UI")]
+    [SerializeField] private ReEditUI reEditUI;
+
     //==================================================
     // Update
     //==================================================
 
-    void Update()
+    private void Update()
     {
         //==================================================
-        // テストプレイ中は掘削処理を完全停止
+        // 再編集ダンジョン選択中は掘削を停止
+        //==================================================
+
+        if (
+            reEditUI != null &&
+            reEditUI.IsSelectingDungeon
+        )
+        {
+            ClearHighlight();
+
+            if (isEditing)
+            {
+                if (undoManager != null)
+                {
+                    undoManager.EndEdit();
+                }
+
+                isEditing = false;
+            }
+
+            return;
+        }
+
+        //==================================================
+        // テストプレイ中は掘削を停止
         //==================================================
 
         TestPlayManager testPlayManager =
@@ -93,19 +121,20 @@ public class DigManager : MonoBehaviour
         }
 
         //==================================================
-        // UIをクリックしている場合は掘削処理をしない
+        // UI上をクリックしている場合
         //==================================================
 
         if (
-            EventSystem.current != null &&
-            EventSystem.current.IsPointerOverGameObject()
+            UnityEngine.EventSystems.EventSystem.current != null &&
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()
         )
         {
+            ClearHighlight();
             return;
         }
 
         //==================================================
-        // 保存パネル表示中
+        // セーブパネル表示中
         //==================================================
 
         if (
@@ -118,93 +147,88 @@ public class DigManager : MonoBehaviour
         }
 
         //==================================================
-        // 掘削モード以外では処理しない
+        // 掘削モード確認
         //==================================================
 
         if (
             EditModeManager.Instance == null ||
-            EditModeManager.Instance.CurrentMode !=
-            EditMode.Dig
+            EditModeManager.Instance.CurrentMode != EditMode.Dig
         )
         {
             ClearHighlight();
             return;
         }
 
-        Vector3Int mouseGridPosition;
-
-        bool hasGridPosition =
-            GetMouseGridPosition(
-                out mouseGridPosition
-            );
-
         //==================================================
-        // 3×3ハイライト
+        // マウス位置からグリッド取得
         //==================================================
 
-        if (hasGridPosition)
-        {
-            HighlightWalls(
-                mouseGridPosition
-            );
-        }
-        else
+        Vector3Int gridPosition;
+
+        if (!GetMouseGridPosition(out gridPosition))
         {
             ClearHighlight();
+            return;
         }
 
         //==================================================
-        // クリック開始
+        // 3×3の壁をハイライト
         //==================================================
 
-        if (Input.GetMouseButtonDown(0))
+        HighlightWalls(gridPosition);
+
+        //==================================================
+        // マウスクリック
+        //==================================================
+
+        if (
+            Mouse.current != null &&
+            Mouse.current.leftButton.wasPressedThisFrame
+        )
         {
-            lastMousePosition =
-                Input.mousePosition;
+            lastDigPosition = gridPosition;
+            lastMousePosition = Mouse.current.position.ReadValue();
 
-            lastDigPosition =
-                new Vector3Int(
-                    int.MinValue,
-                    int.MinValue,
-                    int.MinValue
-                );
-
-            if (hasGridPosition)
-            {
-                Dig(
-                    mouseGridPosition
-                );
-            }
+            Dig(gridPosition);
         }
 
         //==================================================
-        // ドラッグ中
+        // ドラッグ掘削
         //==================================================
 
-        if (Input.GetMouseButton(0))
+        if (
+            Mouse.current != null &&
+            Mouse.current.leftButton.isPressed
+        )
         {
+            Vector2 currentMousePosition =
+                Mouse.current.position.ReadValue();
+
             if (
-                Input.mousePosition !=
-                lastMousePosition
+                Vector2.Distance(
+                    currentMousePosition,
+                    lastMousePosition
+                ) > 5f
             )
             {
-                if (hasGridPosition)
+                lastMousePosition =
+                    currentMousePosition;
+
+                if (gridPosition != lastDigPosition)
                 {
-                    Dig(
-                        mouseGridPosition
-                    );
+                    Dig(gridPosition);
                 }
             }
         }
 
-        lastMousePosition =
-            Input.mousePosition;
-
         //==================================================
-        // クリック終了
+        // マウスを離した
         //==================================================
 
-        if (Input.GetMouseButtonUp(0))
+        if (
+            Mouse.current != null &&
+            Mouse.current.leftButton.wasReleasedThisFrame
+        )
         {
             if (isEditing)
             {
@@ -215,13 +239,6 @@ public class DigManager : MonoBehaviour
 
                 isEditing = false;
             }
-
-            lastDigPosition =
-                new Vector3Int(
-                    int.MinValue,
-                    int.MinValue,
-                    int.MinValue
-                );
         }
     }
 
