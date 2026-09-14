@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.Networking;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
 
 public class LoadUI : MonoBehaviour
 {
@@ -104,7 +105,14 @@ public class LoadUI : MonoBehaviour
         }
 
         cachedDungeons = data.dungeons;
-        
+
+        foreach (var dungeon in cachedDungeons)
+        {
+            Debug.Log(
+                $"Name={dungeon.dungeonName} Tag={dungeon.tag}"
+            );
+        }
+
         var randomDungeons = cachedDungeons.OrderBy(x => Random.value).Take(Mathf.Min(20, cachedDungeons.Length));
 
         foreach (var dungeon in randomDungeons)
@@ -174,31 +182,6 @@ public class LoadUI : MonoBehaviour
                 dungeonUIManager.MultiMode();
                 dungeonUIManager.MapSelectButton();
             });
-
-            //button.GetComponent<Button>()
-            //    .onClick.AddListener(() =>
-            //    {
-            //        RoomInfo.SelectedDungeon =
-            //            selectedDungeonId;
-
-            //        RoomInfo.SelectedDungeonName =
-            //            selectedDungeonName;
-
-            //        importer.ImportDungeon(
-            //            selectedDungeonId);
-
-            //        scrollView.SetActive(false);
-
-            //        if (!GameModeManager.IsMultiplayer)
-            //        {
-            //            dungeonUIManager.HideMatchingUI();
-            //            fusionLauncher.StartSolo();
-            //        }
-            //        else
-            //        {
-            //            dungeonUIManager.MapSelectButton();
-            //        }
-            //    });
         }
     }
 
@@ -231,16 +214,7 @@ public class LoadUI : MonoBehaviour
             ui.creatorNameText.text =
                 "CREATOR:" + dungeon.creatorName;
 
-            string[] tags =
-            {
-            "EASY",
-            "NORMAL",
-            "HARD",
-            "HELL"
-        };
-
-            ui.tagText.text =
-                "#" + tags[Random.Range(0, tags.Length)];
+            ui.tagText.text = dungeon.tag;
 
             ui.likeCountText.text =
                 "GOOD:" + Random.Range(0, 100);
@@ -322,19 +296,25 @@ public class LoadUI : MonoBehaviour
         }
     }
 
-    public void SearchDungeon(
-      string stageName,
-      string creatorName)
+    public void SearchDungeon(string stageName, string creatorName,string tag)
     {
         foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
 
-        var results = cachedDungeons.Where(d =>
-            d.dungeonName == stageName &&
-            d.creatorName == creatorName);
+        IEnumerable<DungeonListItem> results;
 
+        //タグだけ検索
+        if (string.IsNullOrEmpty(stageName) && string.IsNullOrEmpty(creatorName))
+        {
+            results = cachedDungeons.Where(d=> d.tag == tag);
+        }
+        else {
+                results = cachedDungeons.Where(d =>
+                d.dungeonName == stageName &&
+                d.creatorName == creatorName&&(string.IsNullOrEmpty(tag)||d.tag==tag));
+        }
         bool found = false;
 
         foreach (var dungeon in results)
@@ -354,6 +334,14 @@ public class LoadUI : MonoBehaviour
 
             ui.creatorNameText.text =
                 "CREATOR:" + dungeon.creatorName;
+
+            ui.tagText.text =dungeon.tag;
+
+            ui.likeCountText.text =
+                "GOOD:" + Random.Range(0, 100);
+
+            ui.clearCountText.text =
+                "CLEAR:" + Random.Range(0, 20);
 
             string selectedDungeonId =
                 dungeon.dungeonId;
@@ -396,13 +384,20 @@ public class LoadUI : MonoBehaviour
         }
     }
 
-    public bool ExistsDungeon(string stageName, string creatorName)
+    public bool ExistsDungeon(string stageName, string creatorName,string tag)
     {
         if (cachedDungeons == null)
             return false;
 
+        //タグだけ検索
+        if (string.IsNullOrEmpty(stageName) && string.IsNullOrEmpty(creatorName))
+        {
+            return cachedDungeons.Any(d => string.IsNullOrEmpty(tag) || d.tag == tag);
+        }
+
+        //ステージ名＋クリエイター名検索
         return cachedDungeons.Any(d =>
             d.dungeonName == stageName &&
-            d.creatorName == creatorName);
+            d.creatorName == creatorName && (string.IsNullOrEmpty(tag) || d.tag == tag));
     }
 }

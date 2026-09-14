@@ -104,6 +104,9 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private TMP_InputField creatorNameSearchInput;
     [SerializeField] private Button searchButton;
     public GameObject StageSearchLaycast;
+    [SerializeField] private Button EASYButton;
+    [SerializeField] private Button NORMALButton;
+    [SerializeField] private Button HARDButton;
 
     [Header("Caution")]
     public GameObject CautionObj;
@@ -141,6 +144,8 @@ public class DungeonUIManager : MonoBehaviour
 
     [SerializeField] private PublicRoomList publicRoomList;
     [SerializeField] private LoadUI loadUI;
+
+    public string selectedTag { get; private set; } = "NORMAL";
 
     [Header("数値")]
     public static int MaxPlayers = 2;
@@ -513,7 +518,8 @@ public class DungeonUIManager : MonoBehaviour
 
         loadUI.SearchDungeon(
             stageName,
-            creatorName
+            creatorName,
+            selectedTag
         );
 
         StageSearchObj.SetActive(false);
@@ -524,6 +530,49 @@ public class DungeonUIManager : MonoBehaviour
     {
         StageSearchObj.SetActive(true);
         StageSearchLaycast.SetActive(true);
+    }
+
+    public void EasyButton()
+    {
+        selectedTag = "EASY";
+
+        EASYButton.interactable = false;
+        NORMALButton.interactable = true;
+        HARDButton.interactable = true;
+
+        CheckSearchCondition();
+
+        Debug.Log("EASY選択");
+    }
+
+    public void NormalButton()
+    {
+        selectedTag = "NORMAL";
+
+        EASYButton.interactable = true;
+        NORMALButton.interactable = false;
+        HARDButton.interactable = true;
+
+        searchButton.interactable = true;
+
+        CheckSearchCondition();
+
+        Debug.Log("NORMAL選択");
+    }
+
+    public void HardButton()
+    {
+        selectedTag = "HARD";
+
+        EASYButton.interactable = true;
+        NORMALButton.interactable = true;
+        HARDButton.interactable = false;
+
+        searchButton.interactable = true;
+
+        CheckSearchCondition();
+
+        Debug.Log("HARD選択");
     }
 
     public void StageSearchBackButton()
@@ -630,18 +679,22 @@ public class DungeonUIManager : MonoBehaviour
 
     private void CheckSearchCondition()
     {
-        bool found =
+        bool foundByName =
             loadUI.ExistsDungeon(
                 stageNameSearchInput.text,
-                creatorNameSearchInput.text
+                creatorNameSearchInput.text,
+                selectedTag
             );
 
-        searchButton.interactable = found;
+        bool tagSelected =
+            !string.IsNullOrEmpty(selectedTag);
 
-        if (found)
-        {
-            Debug.Log("見つけた");
-        }
+        searchButton.interactable =
+            foundByName || tagSelected;
+
+        Debug.Log(
+            $"tag={selectedTag} interactable={searchButton.interactable}"
+        );
     }
 
     private IEnumerator SendAliveLoop()
