@@ -4,6 +4,8 @@ using UnityEngine.Networking;
 
 public class RoomDBUploader : MonoBehaviour
 {
+    public RoomData foundRoom;
+
     public IEnumerator UploadRoom()
     {
         WWWForm form = new WWWForm();
@@ -16,6 +18,11 @@ public class RoomDBUploader : MonoBehaviour
             "room_id",
             RoomInfo.RoomId
         );
+
+        form.AddField(
+            "dungeon_id",
+            RoomInfo.SelectedDungeon
+            );
 
         form.AddField(
             "map_name",
@@ -157,4 +164,49 @@ public class RoomDBUploader : MonoBehaviour
         }
     }
 
+    public IEnumerator SearchRoom(string roomId)
+    {
+        WWWForm form = new WWWForm();
+
+        form.AddField(
+            "room_id",
+            roomId
+        );
+
+        UnityWebRequest request =
+            UnityWebRequest.Post(
+                "http://10.219.32.66/RedDaniel/SearchRoom.php",
+                form
+            );
+
+        yield return request.SendWebRequest();
+
+        if (request.result ==
+            UnityWebRequest.Result.Success)
+        {
+            string json =
+                request.downloadHandler.text;
+
+            Debug.Log("検索結果 : " + json);
+
+            if (string.IsNullOrEmpty(json) ||
+                json == "NOT_FOUND")
+            {
+                foundRoom = null;
+            }
+            else
+            {
+                foundRoom =
+                    JsonUtility.FromJson<RoomData>(
+                        json
+                    );
+            }
+        }
+        else
+        {
+            Debug.LogError(request.error);
+
+            foundRoom = null;
+        }
+    }
 }
