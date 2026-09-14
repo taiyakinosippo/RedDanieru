@@ -98,6 +98,13 @@ public class DungeonUIManager : MonoBehaviour
     public GameObject Laycast;
     public GameObject RoomSearchLaycast;
 
+    [Header("ステージ検索")]
+    public GameObject StageSearchObj;
+    [SerializeField] private TMP_InputField stageNameSearchInput;
+    [SerializeField] private TMP_InputField creatorNameSearchInput;
+    [SerializeField] private Button searchButton;
+    public GameObject StageSearchLaycast;
+
     [Header("Caution")]
     public GameObject CautionObj;
     public GameObject RoomInCautionObj;
@@ -119,7 +126,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
     [SerializeField] private TMP_InputField createRoomIdInput;
-
+  
     [Header("大事な奴ら")]
     [SerializeField] private FusionLauncher fusionLauncher;
     [SerializeField] private RoomDBUploader roomDBUploader;
@@ -132,7 +139,8 @@ public class DungeonUIManager : MonoBehaviour
 
     [SerializeField] private RoomListLoader roomListLoader;
 
-    [SerializeField]private PublicRoomList publicRoomList;
+    [SerializeField] private PublicRoomList publicRoomList;
+    [SerializeField] private LoadUI loadUI;
 
     [Header("数値")]
     public static int MaxPlayers = 2;
@@ -156,16 +164,23 @@ public class DungeonUIManager : MonoBehaviour
         RoomSearchLaycast.SetActive(false);
         RoomInCautionObj.SetActive(false);
         RoomInCautionLayout.SetActive(false);
+        StageSearchLaycast.SetActive(false);
+        StageSearchObj.SetActive(false);
 
         RoomInButton.interactable = false;
         GameStartbutton.interactable = false;
         RoomHostButton.interactable = false;
         JoinButton.interactable = true;
         privateJoinButton.interactable = false;
+        searchButton.interactable = false;
 
         privateRoomIdInput.onValueChanged.AddListener(delegate { CheckPrivateRoom(); });
 
         privatePasswordInput.onValueChanged.AddListener(delegate { CheckPrivateRoom(); });
+
+        stageNameSearchInput.onValueChanged.AddListener(delegate { CheckSearchCondition(); });
+
+        creatorNameSearchInput.onValueChanged.AddListener(delegate { CheckSearchCondition(); });
 
         passwordInputField.onValueChanged.AddListener(OnPasswordChanged);
 
@@ -488,6 +503,35 @@ public class DungeonUIManager : MonoBehaviour
         roomListLoader.ShowJoinCaution(room);
     }
 
+    public void SearchDungeonButton()
+    {
+        string stageName =
+            stageNameSearchInput.text;
+
+        string creatorName =
+            creatorNameSearchInput.text;
+
+        loadUI.SearchDungeon(
+            stageName,
+            creatorName
+        );
+
+        StageSearchObj.SetActive(false);
+        StageSearchLaycast.SetActive(false);
+    }
+
+    public void StageSearchButton()
+    {
+        StageSearchObj.SetActive(true);
+        StageSearchLaycast.SetActive(true);
+    }
+
+    public void StageSearchBackButton()
+    {
+        StageSearchObj.SetActive(false);
+        StageSearchLaycast.SetActive(false);
+    }
+
     private void OnPasswordChanged(string value)
     {
         // 数字以外を除去
@@ -582,6 +626,22 @@ public class DungeonUIManager : MonoBehaviour
         Debug.Log(
             $"最大人数 : {MaxPlayers}人"
         );
+    }
+
+    private void CheckSearchCondition()
+    {
+        bool found =
+            loadUI.ExistsDungeon(
+                stageNameSearchInput.text,
+                creatorNameSearchInput.text
+            );
+
+        searchButton.interactable = found;
+
+        if (found)
+        {
+            Debug.Log("見つけた");
+        }
     }
 
     private IEnumerator SendAliveLoop()
@@ -716,6 +776,11 @@ public class DungeonUIManager : MonoBehaviour
     {
         ScrolView.SetActive(false);
         RoomSearchObj.SetActive(false);
+    }
+
+    private IEnumerator SearchDungeon(string stageName,string creatorName)
+    {
+        yield return null;
     }
 
     public string PrivatePassword

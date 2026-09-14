@@ -26,6 +26,7 @@ public class LoadUI : MonoBehaviour
     [SerializeField]
     private DungeonUIManager dungeonUIManager;
 
+    [SerializeField] private ScrollRect scrollRect;
 
     private DungeonListItem[] cachedDungeons;
 
@@ -289,7 +290,9 @@ public class LoadUI : MonoBehaviour
                 dungeonUIManager.SoloMode();
             });
 
-           
+            Canvas.ForceUpdateCanvases();
+
+            scrollRect.verticalNormalizedPosition = 1f;
 
             //button.GetComponent<Button>()
             //    .onClick.AddListener(() =>
@@ -315,6 +318,91 @@ public class LoadUI : MonoBehaviour
             //            dungeonUIManager.MapSelectButton();
             //        }
             //    });
+
         }
+    }
+
+    public void SearchDungeon(
+      string stageName,
+      string creatorName)
+    {
+        foreach (Transform child in content)
+        {
+            Destroy(child.gameObject);
+        }
+
+        var results = cachedDungeons.Where(d =>
+            d.dungeonName == stageName &&
+            d.creatorName == creatorName);
+
+        bool found = false;
+
+        foreach (var dungeon in results)
+        {
+            found = true;
+
+            Debug.Log("Œ©‚Â‚¯‚½");
+
+            GameObject button =
+                Instantiate(buttonPrefab, content);
+
+            DungeonButtonUI ui =
+                button.GetComponent<DungeonButtonUI>();
+
+            ui.stageNameText.text =
+                "DUNGEON:" + dungeon.dungeonName;
+
+            ui.creatorNameText.text =
+                "CREATOR:" + dungeon.creatorName;
+
+            string selectedDungeonId =
+                dungeon.dungeonId;
+
+            string selectedDungeonName =
+                dungeon.dungeonName;
+
+            button.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                ui.Toggle();
+                importer.ImportDungeon(selectedDungeonId);
+            });
+
+            ui.soloButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.SoloMode();
+            });
+
+            ui.multiButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.MultiMode();
+            });
+        }
+
+        if (!found)
+        {
+            Debug.Log("Œ©‚Â‚©‚ç‚È‚¢");
+        }
+    }
+
+    public bool ExistsDungeon(string stageName, string creatorName)
+    {
+        if (cachedDungeons == null)
+            return false;
+
+        return cachedDungeons.Any(d =>
+            d.dungeonName == stageName &&
+            d.creatorName == creatorName);
     }
 }
