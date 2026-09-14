@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.AI;
 
 public class TestPlayManager : MonoBehaviour
 {
@@ -15,6 +17,9 @@ public class TestPlayManager : MonoBehaviour
     [Header("スタート地点")]
     [SerializeField] private Transform startPoint;
 
+    [Header("マップ管理")]
+    [SerializeField] private MapManager mapManager;
+
     [Header("マップクリエイトUI")]
     [SerializeField] private GameObject mapCreateUI;
 
@@ -29,6 +34,7 @@ public class TestPlayManager : MonoBehaviour
 
     [Header("カメラ")]
     [SerializeField] private Camera editCamera;
+
     [SerializeField] private Camera playerCamera;
 
     private GameObject playerInstance;
@@ -37,6 +43,24 @@ public class TestPlayManager : MonoBehaviour
         TestPlayMode.Edit;
 
     private bool testPlayCleared = false;
+
+    //==================================================
+    // テストプレイ開始時の敵位置保存
+    //==================================================
+
+    private class EnemyTransformData
+    {
+        public GameObject enemy;
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+
+    private List<EnemyTransformData> enemyPositions =
+        new List<EnemyTransformData>();
+
+    //==================================================
+    // プロパティ
+    //==================================================
 
     public bool IsTestPlay =>
         currentMode == TestPlayMode.TestPlay;
@@ -62,7 +86,6 @@ public class TestPlayManager : MonoBehaviour
         if (!IsTestPlay)
             return;
 
-        // ESCキーでメニューを開閉
         if (Keyboard.current != null &&
             Keyboard.current.escapeKey.wasPressedThisFrame)
         {
@@ -116,6 +139,27 @@ public class TestPlayManager : MonoBehaviour
         }
 
         //==================================================
+        // 敵の位置を保存
+        //==================================================
+
+        SaveEnemyPositions();
+
+        //==================================================
+        // NavMesh生成
+        //==================================================
+
+        if (mapManager != null)
+        {
+            mapManager.BuildNavigation();
+        }
+        else
+        {
+            Debug.LogError(
+                "TestPlayManagerにMapManagerが設定されていません。"
+            );
+        }
+
+        //==================================================
         // 既存Player削除
         //==================================================
 
@@ -136,6 +180,15 @@ public class TestPlayManager : MonoBehaviour
                 startPoint.position,
                 startPoint.rotation
             );
+
+        //==================================================
+        // 敵のNavMeshAgentを有効化
+        //==================================================
+
+        if (mapManager != null)
+        {
+            mapManager.EnableEnemyMovement();
+        }
 
         //==================================================
         // マップクリエイトUI非表示
@@ -198,11 +251,94 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = false;
+
         Cursor.lockState =
             CursorLockMode.Locked;
 
         Debug.Log(
             "テストプレイ開始"
+        );
+    }
+
+    //==================================================
+    // 敵の位置を保存
+    //==================================================
+
+    private void SaveEnemyPositions()
+    {
+        enemyPositions.Clear();
+
+        GameObject[] enemies =
+            GameObject.FindGameObjectsWithTag(
+                "Enemy"
+            );
+
+        foreach (GameObject enemy in enemies)
+        {
+            enemyPositions.Add(
+                new EnemyTransformData()
+                {
+                    enemy = enemy,
+                    position = enemy.transform.position,
+                    rotation = enemy.transform.rotation
+                }
+            );
+        }
+
+        Debug.Log(
+            "テストプレイ開始時の敵位置を保存しました : "
+            + enemyPositions.Count
+            + "体"
+        );
+    }
+
+    //==================================================
+    // 敵の位置を復元
+    //==================================================
+
+    private void RestoreEnemyPositions()
+    {
+        foreach (
+            EnemyTransformData data
+            in enemyPositions
+        )
+        {
+            if (data.enemy == null)
+                continue;
+
+            NavMeshAgent[] agents =
+                data.enemy.GetComponentsInChildren<
+                    NavMeshAgent
+                >();
+
+            foreach (NavMeshAgent agent in agents)
+            {
+                if (agent.enabled)
+                {
+                    agent.isStopped = true;
+                    agent.ResetPath();
+                    agent.velocity = Vector3.zero;
+                }
+            }
+
+            data.enemy.transform.SetPositionAndRotation(
+                data.position,
+                data.rotation
+            );
+
+            foreach (NavMeshAgent agent in agents)
+            {
+                if (agent.enabled)
+                {
+                    agent.Warp(data.position);
+                }
+            }
+        }
+
+        enemyPositions.Clear();
+
+        Debug.Log(
+            "敵の位置をテストプレイ開始時の状態に戻しました。"
         );
     }
 
@@ -224,19 +360,19 @@ public class TestPlayManager : MonoBehaviour
 
         if (!isPaused)
         {
-            // メニューを開く
             Time.timeScale = 0f;
 
             Cursor.visible = true;
+
             Cursor.lockState =
                 CursorLockMode.None;
         }
         else
         {
-            // メニューを閉じる
             Time.timeScale = 1f;
 
             Cursor.visible = false;
+
             Cursor.lockState =
                 CursorLockMode.Locked;
         }
@@ -248,6 +384,15 @@ public class TestPlayManager : MonoBehaviour
 
     public void ReturnToEdit()
     {
+        //==================================================
+        // 敵の位置を元に戻す
+        //==================================================
+
+        if (currentMode == TestPlayMode.TestPlay)
+        {
+            RestoreEnemyPositions();
+        }
+
         currentMode =
             TestPlayMode.Edit;
 
@@ -260,6 +405,34 @@ public class TestPlayManager : MonoBehaviour
             Destroy(playerInstance);
 
             playerInstance = null;
+        }
+
+        //==================================================
+        // 敵のNavMeshAgentを停止
+        //==================================================
+
+        GameObject[] enemies =
+            GameObject.FindGameObjectsWithTag(
+                "Enemy"
+            );
+
+        foreach (GameObject enemy in enemies)
+        {
+            NavMeshAgent[] agents =
+                enemy.GetComponentsInChildren<
+                    NavMeshAgent
+                >();
+
+            foreach (NavMeshAgent agent in agents)
+            {
+                if (!agent.enabled)
+                    continue;
+
+                agent.isStopped = true;
+                agent.ResetPath();
+                agent.velocity = Vector3.zero;
+                agent.enabled = false;
+            }
         }
 
         //==================================================
@@ -306,7 +479,6 @@ public class TestPlayManager : MonoBehaviour
         {
             editCamera.gameObject.SetActive(true);
 
-            // 上からの視点
             editCamera.transform.rotation =
                 Quaternion.Euler(
                     90f,
@@ -331,6 +503,7 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = true;
+
         Cursor.lockState =
             CursorLockMode.None;
 
