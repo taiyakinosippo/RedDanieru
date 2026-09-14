@@ -1982,7 +1982,6 @@ RectTransform:
   - {fileID: 4290616050012607750}
   - {fileID: 6698486995907375990}
   - {fileID: 7506288860228615945}
-  - {fileID: 5965325137589280389}
   - {fileID: 1871490027894511045}
   m_Father: {fileID: 7621071906704463637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3451,6 +3450,7 @@ Transform:
   - {fileID: 4782383750643008322}
   - {fileID: 596085277243241941}
   - {fileID: 6760151276619886213}
+  - {fileID: 5965325137589280389}
   - {fileID: 3983395367169691207}
   - {fileID: 387988107159124010}
   - {fileID: 6859426098290417856}
@@ -4200,11 +4200,11 @@ Transform:
   m_GameObject: {fileID: 6411468790203100484}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -960, y: -540, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3983395367169691207}
+  m_Father: {fileID: 7621071906704463637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7755967263560064543
 MonoBehaviour:
@@ -4219,6 +4219,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapManager: {fileID: 2153949976941881518}
+  saveButton: {fileID: 1257470623476793978}
+  disabledColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &6452218678874109578
 GameObject:
   m_ObjectHideFlags: 0
