@@ -15,15 +15,15 @@ public class EnemyBase : MonoBehaviour
         Dead
     }
 
-    protected int enemyHP = 100;                  //敵のHP
-    protected int enemyPower = 10;                //敵の攻撃力
-    protected int enemyDefense = 5;               //敵の防御力
-    protected float enemyMoveSpeed = 3.0f;        //敵の移動速度
-    protected float enemySearchArea = 6.0f;       //敵の探索範囲
-    protected float enemyTrackingTime = 3.0f;     //敵の追跡時間
-    protected float enemyAttackArea = 1.5f;       //敵の攻撃範囲
-    protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
-    protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
+    [SerializeField] protected int enemyHP = 100;                  //敵のHP
+    [SerializeField] protected int enemyPower = 10;                //敵の攻撃力
+    [SerializeField] protected int enemyDefense = 5;               //敵の防御力
+    [SerializeField] protected float enemyMoveSpeed = 3.0f;        //敵の移動速度
+    [SerializeField] protected float enemySearchArea = 6.0f;       //敵の探索範囲
+    [SerializeField] protected float enemyTrackingTime = 3.0f;     //敵の追跡時間
+    [SerializeField] protected float enemyAttackArea = 1.5f;       //敵の攻撃範囲
+    [SerializeField] protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
+    [SerializeField] protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
     protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
