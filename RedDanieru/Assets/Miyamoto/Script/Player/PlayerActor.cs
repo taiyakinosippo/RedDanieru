@@ -170,14 +170,12 @@ namespace Player
                 // カメラ変更処理
                 _playerCamera.CameraChange(_input);
             }
-        }
 
-        private void LateUpdate()
-        {
-            if (_playerStatus._isDead) return;
             //カメラの動き
             _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
-            
+
         }
+
+     
     }
 }
