@@ -26,38 +26,16 @@ public class DigManager : MonoBehaviour
 
     private bool isEditing = false;
 
-    [Header("再編集UI")]
-    [SerializeField] private ReEditUI reEditUI;
+    [Header("再編集・読み込みUI")]
+    [SerializeField]
+    private ReEditUI reEditUI;
 
     private void Update()
     {
-        // クリアチェック一覧を開いている間は掘削しない
-        ClearCheckUI clearCheckUI =
-            FindObjectOfType<ClearCheckUI>();
-
-        if (
-            clearCheckUI != null &&
-            clearCheckUI.IsSelectingDungeon
-        )
-        {
-            StopDigging();
-            return;
-        }
-
-        // 再編集一覧を開いている間は掘削しない
-        if (
-            reEditUI != null &&
-            reEditUI.IsSelectingDungeon
-        )
-        {
-            StopDigging();
-            return;
-        }
-
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
 
-        // テストプレイ・クリアチェック中は掘削しない
+        // テストプレイ中は掘削しない
         if (
             testPlayManager != null &&
             testPlayManager.IsPlaying
@@ -71,6 +49,16 @@ public class DigManager : MonoBehaviour
         if (
             testPlayManager != null &&
             testPlayManager.IsReturningToEdit
+        )
+        {
+            StopDigging();
+            return;
+        }
+
+        // 読み込み一覧を開いている間は掘削しない
+        if (
+            reEditUI != null &&
+            reEditUI.IsSelectingDungeon
         )
         {
             StopDigging();
@@ -151,7 +139,9 @@ public class DigManager : MonoBehaviour
                     currentMousePosition;
 
                 if (gridPosition != lastDigPosition)
+                {
                     Dig(gridPosition);
+                }
             }
         }
 
@@ -164,7 +154,9 @@ public class DigManager : MonoBehaviour
             if (isEditing)
             {
                 if (undoManager != null)
+                {
                     undoManager.EndEdit();
+                }
 
                 isEditing = false;
             }
@@ -189,7 +181,9 @@ public class DigManager : MonoBehaviour
         if (isEditing)
         {
             if (undoManager != null)
+            {
                 undoManager.EndEdit();
+            }
 
             isEditing = false;
         }
@@ -216,13 +210,18 @@ public class DigManager : MonoBehaviour
         out Vector3Int gridPosition
     )
     {
-        gridPosition = new Vector3Int();
+        gridPosition =
+            new Vector3Int();
 
         if (mainCamera == null)
+        {
             return false;
+        }
 
         if (mapManager == null)
+        {
             return false;
+        }
 
         Ray ray =
             mainCamera.ScreenPointToRay(
@@ -237,10 +236,12 @@ public class DigManager : MonoBehaviour
 
         float distance;
 
-        if (!mapPlane.Raycast(
-            ray,
-            out distance
-        ))
+        if (
+            !mapPlane.Raycast(
+                ray,
+                out distance
+            )
+        )
         {
             return false;
         }
@@ -389,7 +390,9 @@ public class DigManager : MonoBehaviour
         }
 
         if (center == lastDigPosition)
+        {
             return;
+        }
 
         bool canDig = false;
 
@@ -412,16 +415,22 @@ public class DigManager : MonoBehaviour
             }
 
             if (canDig)
+            {
                 break;
+            }
         }
 
         if (!canDig)
+        {
             return;
+        }
 
         if (!isEditing)
         {
             if (undoManager != null)
+            {
                 undoManager.BeginEdit();
+            }
 
             isEditing = true;
         }
@@ -439,7 +448,11 @@ public class DigManager : MonoBehaviour
 
     void ClearHighlight()
     {
-        for (int i = 0; i < currentWalls.Length; i++)
+        for (
+            int i = 0;
+            i < currentWalls.Length;
+            i++
+        )
         {
             if (currentWalls[i] != null)
             {

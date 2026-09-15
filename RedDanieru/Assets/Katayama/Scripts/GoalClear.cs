@@ -46,7 +46,8 @@ public class GoalClear : MonoBehaviour
         if (isCleared)
         {
             Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState =
+                CursorLockMode.None;
         }
     }
 
@@ -62,7 +63,8 @@ public class GoalClear : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState =
+            CursorLockMode.None;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -76,21 +78,6 @@ public class GoalClear : MonoBehaviour
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
 
-        // クリアチェック
-        if (testPlayManager != null &&
-            testPlayManager.IsClearCheck)
-        {
-            isCleared = true;
-
-            testPlayManager.ClearCheckSuccess();
-
-            Debug.Log(
-                "クリアチェック成功。"
-            );
-
-            return;
-        }
-
         // テストプレイ
         if (testPlayManager != null &&
             testPlayManager.IsTestPlay)
@@ -98,10 +85,10 @@ public class GoalClear : MonoBehaviour
             isCleared = true;
 
             Debug.Log(
-                "テストプレイクリア。編集モードへ戻ります。"
+                "テストプレイクリア。"
             );
 
-            testPlayManager.ReturnToEdit();
+            testPlayManager.PlayClear();
 
             return;
         }
@@ -112,7 +99,8 @@ public class GoalClear : MonoBehaviour
         Time.timeScale = 0f;
 
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState =
+            CursorLockMode.None;
 
         SpawnClearCamera();
 
@@ -144,7 +132,9 @@ public class GoalClear : MonoBehaviour
         }
 
         GameObject cameraObject =
-            Instantiate(clearCameraPrefab);
+            Instantiate(
+                clearCameraPrefab
+            );
 
         Camera clearCamera =
             cameraObject.GetComponentInChildren<Camera>();
@@ -274,7 +264,8 @@ public class GoalClear : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState =
+            CursorLockMode.None;
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
