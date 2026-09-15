@@ -8,19 +8,19 @@ public class DungeonImporter : MonoBehaviour
     [SerializeField]
     private MapManager mapManager;
 
-    public void ImportDungeon(string dungeonName)
+    public void ImportDungeon(string dungeonId)
     {
         StartCoroutine(
-            ImportDungeonCoroutine(dungeonName)
+            ImportDungeonCoroutine(dungeonId)
         );
     }
 
     private IEnumerator ImportDungeonCoroutine(
-        string dungeonName)
+        string dungeonId)
     {
         string url =
-            "http://10.219.32.66/RedDaniel/download_dungeon.php?name="
-            + UnityWebRequest.EscapeURL(dungeonName);
+            "http://10.219.32.66/RedDaniel/download_dungeon.php?id="
+            + UnityWebRequest.EscapeURL(dungeonId);
 
         UnityWebRequest request =
             UnityWebRequest.Get(url);
@@ -38,7 +38,14 @@ public class DungeonImporter : MonoBehaviour
             request.downloadHandler.text;
 
         Debug.Log("===== 受信データ =====");
-        Debug.Log(json);
+        Debug.Log("受信文字数=" + json.Length);
+        Debug.Log("[" + json + "]");
+
+        if (string.IsNullOrEmpty(json))
+        {
+            Debug.LogError("PHPから何も返ってきていません");
+            yield break;
+        }
 
         DungeonMapData data =
             JsonUtility.FromJson<DungeonMapData>(

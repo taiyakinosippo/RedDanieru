@@ -1,40 +1,148 @@
-using NUnit.Framework;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class StickerInteractor : MonoBehaviour
 {
-    [SerializeField] private Camera mainCamera;
+    [SerializeField] private Transform player;
+    [SerializeField] private StickerSlotUI stickerSlotUI;
 
     private List<GameObject> interactObjects = new List<GameObject>();  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
-    private Sticker holdSticker;  //保持してるステッカーのタイプ
+    [SerializeField] private Sticker[] holdSticker;  //保持してるステッカーのタイプ
+    [SerializeField] private int maxHoldCount = 3;  //保持できるステッカーの数
+
+    private float wallCheckDistance = 1.5f;
+    private float wallCheckHeight = 1.5f;
+    private float checkRadius = 1.5f;
+    private int holdIndex = 0;  //保持しているステッカーのインデックス
 
     void Start()
     {
+        //保持できるステッカーの数を設定
+        holdSticker = new Sticker[maxHoldCount];
 
+        //ステッカーのスロットを生成
+        stickerSlotUI.CreateStickerSlots(maxHoldCount);
+
+        //プレイヤーのTransformを取得
+        player = gameObject.transform;
     }
 
     void Update()
     {
-        if (interactObjects.Count <= 0 || !Input.GetMouseButtonDown(1))
-            return;
+        // インタラクト対象を更新
+        UpdateInteractObjects();
 
+        //保持中のステッカーのインデックスを変更
+        HoldIndex();
+
+        //右クリックでステッカーを貼る、剥がす
+        if (interactObjects.Count > 0 && Input.GetMouseButtonDown(1))
+        {
+            ReceiptPickup();
+        }
+    }
+
+    //インタラクト対象のオブジェクトを更新
+    private void UpdateInteractObjects()
+    {
+        interactObjects.Clear();
+
+        //プレイヤーの前方にある壁の位置を計算
+        Vector3 spherePosition = player.position + player.forward * wallCheckDistance + Vector3.up * wallCheckHeight;
+
+        //プレイヤーの前方にあるオブジェクトを取得
+        Collider[] objects = Physics.OverlapSphere(spherePosition, checkRadius, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+
+        foreach (Collider sticker in objects)
+        {
+            StickerState stickerState = sticker.GetComponent<StickerState>();
+
+            //StickerStateを持っているものだけインタラクト対象に追加
+            if (stickerState != null)
+            {
+                interactObjects.Add(sticker.gameObject);
+            }
+        }
+    }
+
+    private void HoldIndex()
+    {
+        //数字キーで保持中のステッカーのインデックスを変更
+        for (int i = 0; i < maxHoldCount && i <= 9; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha0 + i + 1))
+            {
+                holdIndex = i;
+                Debug.Log("HoldIndex: " + holdIndex);
+                break;
+            }
+        }
+
+        //マウスホイールで保持中のステッカーのインデックスを変更
+        float scroll = Input.mouseScrollDelta.y;
+
+        //スクロールの方向に応じてインデックスを変更
+        if (scroll != 0)
+        {
+            if (scroll > 0)  //上方向にスクロールした場合
+            {
+                holdIndex = (holdIndex - 1 + maxHoldCount) % maxHoldCount;
+            }
+            else if (scroll < 0)  //下方向にスクロールした場合
+            {
+                holdIndex = (holdIndex + 1) % maxHoldCount;
+            }
+        }
+
+        //ステッカーUIの選択中のスロットを更新
+        stickerSlotUI.SetSelectedSlot(holdIndex);
+    }
+
+    private void ReceiptPickup()
+    {
         GameObject interactObj = GetInteractObject();  //ステッカーを貼り、剥がすオブジェクト
-
-        StickerState target = interactObj.GetComponent<StickerState>();
+        StickerState target = interactObj.GetComponent<StickerState>();  //インタラクトしているオブジェクトのStickerStateを取得
         if (target == null)
             return;
 
         //既に貼られているなら剥がして保持
-        if (target.CurrentSticker != Sticker.None)
+        if (target.currentSticker != Sticker.None)
         {
-            holdSticker = target.Remove();
+            //選択中のスロットが空なら剥がしたステッカーを保持
+            if (holdSticker[holdIndex] == Sticker.None)
+            {
+                //ステッカーUIの更新
+                stickerSlotUI.SetStickerUI(holdIndex, target.currentSticker);
+
+                holdSticker[holdIndex] = target.Remove();
+            }
+            else
+            {
+                //選択中のスロットが埋まってたなら他の空いているスロットに剥がしたステッカーを保持
+                for (int i = 0; i < maxHoldCount; i++)
+                {
+                    if (holdSticker[i] == Sticker.None)
+                    {
+                        //ステッカーUIの更新
+                        stickerSlotUI.SetStickerUI(i, target.currentSticker);
+
+                        holdSticker[i] = target.Remove();
+                        return;
+                    }
+                }
+
+                //保持中のステッカーが全て埋まっている場合は選択中のスロットのステッカーを剥がしたステッカーに上書き
+                stickerSlotUI.SetStickerUI(holdIndex, target.currentSticker);
+                holdSticker[holdIndex] = target.Remove();
+            }
         }
-        //何も貼られていないなら保持中のステッカーを貼る
-        else if (holdSticker != Sticker.None)
+        //何も貼られていないなら保持中のステッカーを貼り、保持中のステッカーを空にする
+        else if (holdSticker[holdIndex] != Sticker.None)
         {
-            target.Apply(holdSticker);
-            holdSticker = Sticker.None;
+            target.Apply(holdSticker[holdIndex]);
+            holdSticker[holdIndex] = Sticker.None;
+            //ステッカーUIのスロットを空にする
+            stickerSlotUI.SetStickerUI(holdIndex, Sticker.None);
         }
         //ステッカーを持っていない
         else
@@ -46,16 +154,17 @@ public class StickerInteractor : MonoBehaviour
     //一番カメラの中央にあるオブジェクトを取得
     private GameObject GetInteractObject()
     {
-        GameObject targetObject = null;
-        float maxDot = -1.0f;  //中央にどれほど近いか
+        GameObject targetObject = null;  //一番カメラの中央にあるオブジェクト
+        float maxDot = -1.0f;  //カメラの中央にあるオブジェクトを取得するためのドット積の最大値
 
+        //インタラクト対象のオブジェクトの中で一番カメラの中央にあるオブジェクトを取得
         foreach (GameObject target in interactObjects)
         {
-            Vector3 dir = (target.transform.position - mainCamera.transform.position).normalized;
+            //プレイヤーの前方ベクトルと対象オブジェクトへの方向ベクトルのドット積を計算
+            Vector3 dir = (target.transform.position - player.position).normalized;
+            float dot = Vector3.Dot(player.forward, dir);
 
-            float dot = Vector3.Dot(mainCamera.transform.forward, dir);  //
-
-            //比較
+            //ドット積が最大のオブジェクトを取得
             if (dot > maxDot)
             {
                 maxDot = dot;
@@ -64,23 +173,5 @@ public class StickerInteractor : MonoBehaviour
         }
 
         return targetObject;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.GetComponent<StickerState>() != null)
-        {
-            //インタラクト候補入り
-            interactObjects.Add(other.gameObject);
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.GetComponent<StickerState>() != null)
-        {
-            //インタラクト候補脱落
-            interactObjects.Remove(other.gameObject);
-        }
     }
 }

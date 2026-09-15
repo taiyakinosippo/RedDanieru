@@ -27,6 +27,7 @@ namespace Player
         private PlayerInputPriority _actionPriority;
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
+        private PlayerAttack _playerAttack;
 
         //----------------------------------------------------------
         //初期化
@@ -44,6 +45,9 @@ namespace Player
             _stickerCheck = GetComponent<StickerCheck>();
 
             _networkAnimator = GetComponent<NetworkMecanimAnimator>();
+
+            _playerAttack = GetComponent<PlayerAttack>();
+
             //アニメーションをIDに変換
             AssignAnimationIDs();
         }
@@ -56,7 +60,7 @@ namespace Player
             _hasAnimator = TryGetComponent(out _animator);
         }
 
-        //-----------------------------------------------------------
+        //----------------------------------------------------------
         //アニメーションのIDを取得する関数
         //-----------------------------------------------------------
         private void AssignAnimationIDs()
@@ -107,6 +111,7 @@ namespace Player
                 // ここでアニメーションをジャンプと落下のフラグをfalseにする
                 _animator.SetBool(_animIDJump, false);
                 _animator.SetBool(_animIDFreeFall, false);
+                _actionPriority.EndAction();
             }
         }
 
@@ -151,7 +156,7 @@ namespace Player
         {
             _animator.ResetTrigger(_animIDAttack);
             Debug.Log("Attack animation end");
-            _actionPriority.EndAction();
+            _playerAttack.AttackEnd();
         }
 
         //----------------------------------------------------------

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Linq;
 
 public class LoadUI : MonoBehaviour
 {
@@ -24,6 +25,9 @@ public class LoadUI : MonoBehaviour
 
     [SerializeField]
     private DungeonUIManager dungeonUIManager;
+
+
+    private DungeonListItem[] cachedDungeons;
 
     private void OnEnable()
     {
@@ -68,7 +72,7 @@ public class LoadUI : MonoBehaviour
 
     private IEnumerator GetDungeonList()
     {
-        foreach(Transform child in content)
+        foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
@@ -89,51 +93,228 @@ public class LoadUI : MonoBehaviour
         string json =
             request.downloadHandler.text;
 
-        Debug.Log("取得データ:");
-        Debug.Log(json);
-
+     
         DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
 
-        if (data == null || data.names == null)
+        if (data == null || data.dungeons == null)
         {
             Debug.LogError("ダンジョン一覧の読み込み失敗");
             yield break;
         }
 
-        foreach (string dungeonName in data.names)
+        cachedDungeons = data.dungeons;
+        
+        var randomDungeons = cachedDungeons.OrderBy(x => Random.value).Take(Mathf.Min(20, cachedDungeons.Length));
+
+        foreach (var dungeon in randomDungeons)
         {
             GameObject button =
                 Instantiate(buttonPrefab, content);
 
-            button
-                .GetComponentInChildren<TMP_Text>()
-                .text = dungeonName;
+            DungeonButtonUI ui =
+                button.GetComponent<DungeonButtonUI>();
 
-            string selectedDungeon = dungeonName;
+         
+            ui.stageNameText.text =
+                "DUNGEON:" + dungeon.dungeonName;
 
-            button
- .GetComponent<Button>()
- .onClick
- .AddListener(() =>
- {
-     RoomInfo.SelectedDungeon = selectedDungeon;
+            ui.creatorNameText.text =
+                "CREATOR:" + dungeon.creatorName;
 
-     importer.ImportDungeon(selectedDungeon);
+            string[] tags =
+            {
+        "EASY",
+        "NORMAL",
+        "HARD",
+        "HELL"
+    };
 
-     scrollView.SetActive(false);
+            ui.tagText.text =
+                "#" + tags[Random.Range(0, tags.Length)];
 
-     if (!GameModeManager.IsMultiplayer)
-     {
-         dungeonUIManager.HideMatchingUI();
+            ui.likeCountText.text =
+                "GOOD:" + Random.Range(0, 100);
 
-         fusionLauncher.StartSolo();
-     }
-     else
-     {
-         dungeonUIManager.MapSelectButton();
-     }
- });
+            ui.clearCountText.text =
+                "CLEAR:" + Random.Range(0, 20);
+
+            string selectedDungeonId =
+                dungeon.dungeonId;
+
+            string selectedDungeonName =
+                dungeon.dungeonName;
+
+            button.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                ui.Toggle();
+
+                importer.ImportDungeon(selectedDungeonId);
+            });
+
+            ui.soloButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.SoloMode();
+            });
+
+            ui.multiButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.MultiMode();
+                dungeonUIManager.MapSelectButton();
+            });
+
+            //button.GetComponent<Button>()
+            //    .onClick.AddListener(() =>
+            //    {
+            //        RoomInfo.SelectedDungeon =
+            //            selectedDungeonId;
+
+            //        RoomInfo.SelectedDungeonName =
+            //            selectedDungeonName;
+
+            //        importer.ImportDungeon(
+            //            selectedDungeonId);
+
+            //        scrollView.SetActive(false);
+
+            //        if (!GameModeManager.IsMultiplayer)
+            //        {
+            //            dungeonUIManager.HideMatchingUI();
+            //            fusionLauncher.StartSolo();
+            //        }
+            //        else
+            //        {
+            //            dungeonUIManager.MapSelectButton();
+            //        }
+            //    });
+        }
+    }
+
+    public void RefreshButton()
+    {
+        if (cachedDungeons == null)
+            return;
+
+        foreach (Transform child in content)
+        {
+            Destroy(child.gameObject);
         }
 
+        var randomDungeons =
+            cachedDungeons
+            .OrderBy(x => Random.value)
+            .Take(Mathf.Min(20, cachedDungeons.Length));
+
+        foreach (var dungeon in randomDungeons)
+        {
+            GameObject button =
+                Instantiate(buttonPrefab, content);
+
+            DungeonButtonUI ui =
+                button.GetComponent<DungeonButtonUI>();
+
+            ui.stageNameText.text =
+                "DUNGEON:" + dungeon.dungeonName;
+
+            ui.creatorNameText.text =
+                "CREATOR:" + dungeon.creatorName;
+
+            string[] tags =
+            {
+            "EASY",
+            "NORMAL",
+            "HARD",
+            "HELL"
+        };
+
+            ui.tagText.text =
+                "#" + tags[Random.Range(0, tags.Length)];
+
+            ui.likeCountText.text =
+                "GOOD:" + Random.Range(0, 100);
+
+            ui.clearCountText.text =
+                "CLEAR:" + Random.Range(0, 20);
+
+            string selectedDungeonId =
+                dungeon.dungeonId;
+
+            string selectedDungeonName =
+                dungeon.dungeonName;
+
+            ui.multiButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon = selectedDungeonId;
+                RoomInfo.SelectedDungeonName = selectedDungeonName;
+
+                Debug.Log("保存前 = " + RoomInfo.SelectedDungeonName);
+
+                dungeonUIManager.MultiMode();
+
+                Debug.Log("MultiMode後 = " + RoomInfo.SelectedDungeonName);
+
+                dungeonUIManager.MapSelectButton();
+
+                Debug.Log("MapSelectButton後 = " + RoomInfo.SelectedDungeonName);
+            });
+
+            button.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                ui.Toggle();
+
+                importer.ImportDungeon(
+                    selectedDungeonId
+                );
+            });
+
+            ui.soloButton.onClick.AddListener(() =>
+            {
+                RoomInfo.SelectedDungeon =
+                    selectedDungeonId;
+
+                RoomInfo.SelectedDungeonName =
+                    selectedDungeonName;
+
+                dungeonUIManager.SoloMode();
+            });
+
+           
+
+            //button.GetComponent<Button>()
+            //    .onClick.AddListener(() =>
+            //    {
+            //        RoomInfo.SelectedDungeon =
+            //            selectedDungeonId;
+
+            //        RoomInfo.SelectedDungeonName =
+            //            selectedDungeonName;
+
+            //        importer.ImportDungeon(
+            //            selectedDungeonId);
+
+            //        scrollView.SetActive(false);
+
+            //        if (!GameModeManager.IsMultiplayer)
+            //        {
+            //            dungeonUIManager.HideMatchingUI();
+            //            fusionLauncher.StartSolo();
+            //        }
+            //        else
+            //        {
+            //            dungeonUIManager.MapSelectButton();
+            //        }
+            //    });
+        }
     }
 }

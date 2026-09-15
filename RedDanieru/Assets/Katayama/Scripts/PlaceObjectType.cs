@@ -10,4 +10,5 @@ public enum PlaceObjectType : byte
     Goal,           // 6
     TentativeEnemy, // 7
     ChargeEnemy,    // 8
+    Wall            // 9
 }

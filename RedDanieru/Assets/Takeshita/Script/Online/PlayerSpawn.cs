@@ -2,6 +2,7 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -10,10 +11,15 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField]
     private Transform[] spawnPoints;
 
-    public void SpawnPlayer(
-        NetworkRunner runner,
-        PlayerRef player)
+    [SerializeField] private NetworkGameState networkGameState;
+
+    public bool CanSpawn = false;
+
+    public void SpawnPlayer(NetworkRunner runner,PlayerRef player)
     {
+
+        //Debug.Log($"SpawnPlayer: player={player}");
+
         if (runner.TryGetPlayerObject(player, out _))
             return;
 
@@ -32,11 +38,52 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         );
 
         runner.SetPlayerObject(
-            player,
-            obj
-        );
+          player,
+          obj
+      );
 
-        Debug.Log($"Spawn : {player}");
+        //Debug.Log(
+        //    $"Local={runner.LocalPlayer} " +
+        //    $"Player={player} " +
+        //    $"Obj={obj.name}"
+        //);
+
+        //    Debug.Log(
+        //$"LocalPlayer={runner.LocalPlayer}");
+
+        //    Debug.Log($"SpawnTarget={player}");
+
+        //    Debug.Log($"InputAuthority={obj.InputAuthority}");
+
+        //    Debug.Log($"HasInputAuthority={obj.HasInputAuthority}");
+
+        if (obj.HasInputAuthority)
+        {
+            Debug.Log(
+                "これは自分のプレイヤー"
+            );
+        }
+        else
+        {
+            Debug.Log(
+                "これは相手のプレイヤー"
+            );
+        }
+
+        Debug.Log(
+     $"Player:{player.PlayerId} SpawnPos:{spawnPos}"
+ );
+        StartCoroutine(CheckPosition(obj.gameObject));
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(spawnPos + Vector3.up * 10f,Vector3.down,out hit,50f))
+        {
+            //Debug.Log(
+            //    $"Ground Y = {hit.point.y}"
+            //);
+        }
+
 
         DungeonUIManager ui =
     FindObjectOfType<DungeonUIManager>();
@@ -45,25 +92,65 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             ui.HideMatchingUI();
         }
+
+        //if (obj.HasInputAuthority == false)
+        //{
+        //    Camera[] cameras =
+        //        obj.GetComponentsInChildren<Camera>(true);
+
+        //    foreach (Camera cam in cameras)
+        //    {
+        //        cam.gameObject.SetActive(false);
+        //    }
+        //}
+
+
     }
 
-    public void SpawnAllPlayers(
-        NetworkRunner runner)
+    public void SpawnAllPlayers(   NetworkRunner runner)
     {
+        if (!runner.IsSharedModeMasterClient)
+            return;
+
         foreach (var player in runner.ActivePlayers)
         {
-            SpawnPlayer(
-                runner,
-                player
-            );
+            SpawnPlayer(runner,player);
         }
+
+
     }
 
-    public void OnPlayerJoined(
-        NetworkRunner runner,
-        PlayerRef player)
+    public void OnPlayerJoined(NetworkRunner runner,PlayerRef player)
     {
-        Debug.Log($"Join : {player}");
+        Debug.Log($"Join:{player}");
+
+        //StartCoroutine(WaitGameStartAndSpawn(runner, player));
+    }
+
+    private System.Collections.IEnumerator CheckPosition(GameObject player)
+    {
+        yield return new WaitForSeconds(3f);
+
+        Debug.Log(
+            $"{player.name} Position = " +
+            player.transform.position
+        );
+    }
+
+    private IEnumerator WaitGameStartAndSpawn(NetworkRunner runner,PlayerRef player)
+    {
+        //while (!NetworkGameState.Instance == null || !NetworkGameState.Instance.CanSpawn)
+        //{
+        //    Debug.Log($"WaitingStart {runner.LocalPlayer}");
+        //    yield return null;
+        //}
+
+        Debug.Log($"Start Spawn {runner.LocalPlayer}");
+
+        if (player != runner.LocalPlayer)
+            yield break;
+
+        SpawnPlayer(runner, player);
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }

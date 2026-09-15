@@ -54,9 +54,6 @@ namespace Player
             //押されていないなら処理を動かさない
             if (!input.sticker) return;
 
-            //押された判定を元に戻す
-            input.sticker = false;
-
             //1人称の時のRayの判定
             if (_playerCamera.isFirstPerson)
             {
@@ -73,6 +70,9 @@ namespace Player
                 //あればはがすアニメーションを再生させる
                 if (isStickerDected)
                 {
+                    // ステッカー入力を消費
+                    input.sticker = false;
+
                     _playerAnimation.StickerPeelOffAnimation();
                 }
 
@@ -89,6 +89,8 @@ namespace Player
                     //もし壁があった場合次にステッカーがないのかを確認する
                     if (isWallDetected)
                     {
+                        // ステッカー入力を消費
+                        input.sticker = false;
                         //ステッカーを持っているかの処理をここに書く
                         _playerAnimation.PlayerStickerPasteAnimator();
                         Debug.Log("目の前に壁がありまーす");
@@ -96,6 +98,8 @@ namespace Player
                     }
                     else
                     {
+                        // ステッカー入力を消費
+                        input.sticker = false;
                         Debug.Log("目の前に壁がありませーん");
                         _actionPriority.EndAction();
                         isWallDetected = false;
@@ -111,8 +115,7 @@ namespace Player
                 transform.position + transform.forward * thirdPersonWallDistance + Vector3.up * thirdPersonWallCheckHeight;
                 // ステッカーあるかの判定を行う
                 isStickerDected = 
-                Physics.CheckSphere(spherePosition, checkRadius, stickerLayer,
-                                    QueryTriggerInteraction.Ignore);
+                Physics.CheckSphere(spherePosition, checkRadius, stickerLayer, QueryTriggerInteraction.Ignore);
 
                 //あればはがすアニメーションを再生させる
                 if (isStickerDected)
@@ -126,12 +129,13 @@ namespace Player
 
                     // 壁があるのかどうかの判定を行う
                     isWallDetected =
-                    Physics.CheckSphere(spherePosition, checkRadius, wallLayer,
-                                        QueryTriggerInteraction.Ignore);
+                    Physics.CheckSphere(spherePosition, checkRadius, wallLayer, QueryTriggerInteraction.Ignore);
 
                     //もし壁があった場合次にステッカーがないのかを確認する
                     if (isWallDetected)
                     {
+                        // ステッカー入力を消費
+                        input.sticker = false;
                         //ステッカーを持っているかの処理をここに書く
                         _playerAnimation.PlayerStickerPasteAnimator();
                         Debug.Log("目の前に壁がありまーす");
@@ -141,7 +145,10 @@ namespace Player
                     {
                         Debug.Log("目の前に壁がありませーん");
                         isWallDetected = false;
+                        // ステッカー入力を消費
+                        input.sticker = false;
                         _actionPriority.EndAction();
+
                     }
                 }
             }
