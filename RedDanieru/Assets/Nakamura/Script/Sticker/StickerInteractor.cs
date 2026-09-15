@@ -84,16 +84,14 @@ public class StickerInteractor : MonoBehaviour
         //スクロールの方向に応じてインデックスを変更
         if (scroll != 0)
         {
-            if (scroll > 0)
+            if (scroll > 0)  //上方向にスクロールした場合
             {
                 holdIndex = (holdIndex - 1 + maxHoldCount) % maxHoldCount;
             }
-            else if (scroll < 0)
+            else if (scroll < 0)  //下方向にスクロールした場合
             {
                 holdIndex = (holdIndex + 1) % maxHoldCount;
             }
-
-            Debug.Log("HoldIndex: " + holdIndex);
         }
 
         //ステッカーUIの選択中のスロットを更新
@@ -156,14 +154,17 @@ public class StickerInteractor : MonoBehaviour
     //一番カメラの中央にあるオブジェクトを取得
     private GameObject GetInteractObject()
     {
-        GameObject targetObject = null;
-        float maxDot = -1.0f;
+        GameObject targetObject = null;  //一番カメラの中央にあるオブジェクト
+        float maxDot = -1.0f;  //カメラの中央にあるオブジェクトを取得するためのドット積の最大値
 
+        //インタラクト対象のオブジェクトの中で一番カメラの中央にあるオブジェクトを取得
         foreach (GameObject target in interactObjects)
         {
+            //プレイヤーの前方ベクトルと対象オブジェクトへの方向ベクトルのドット積を計算
             Vector3 dir = (target.transform.position - player.position).normalized;
             float dot = Vector3.Dot(player.forward, dir);
 
+            //ドット積が最大のオブジェクトを取得
             if (dot > maxDot)
             {
                 maxDot = dot;
