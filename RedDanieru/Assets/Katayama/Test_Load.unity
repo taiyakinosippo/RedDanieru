@@ -4336,7 +4336,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cf97d239fdd66e45abbb58867caaba1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  createOnStart: 1
+  createOnStart: 0
   width: 32
   height: 1
   depth: 32
@@ -5272,13 +5272,24 @@ MonoBehaviour:
   importer: {fileID: 903842236}
   dungeonNameInput: {fileID: 0}
   creatorNameInput: {fileID: 0}
-  SelectCanvas: {fileID: 22874236}
   ScrolView: {fileID: 372586886}
-  RoomInfoObj: {fileID: 1859420257}
+  MatchingRoomCreateWindow: {fileID: 0}
   RoomCreateObj: {fileID: 1089435637}
+  RoomHostButton: {fileID: 0}
   RoomJoinObj: {fileID: 1099801684}
+  JoinButton: {fileID: 0}
+  RoomSearchObj: {fileID: 0}
+  RoomInButton: {fileID: 0}
+  roomSearchPasswordInput: {fileID: 0}
+  roomIdInput: {fileID: 0}
+  privateRoomIdInput: {fileID: 0}
+  privatePasswordInput: {fileID: 0}
+  privateJoinButton: {fileID: 0}
   Laycast: {fileID: 905659300}
+  RoomSearchLaycast: {fileID: 0}
   CautionObj: {fileID: 428274275}
+  RoomInCautionObj: {fileID: 0}
+  RoomInCautionLayout: {fileID: 0}
   MatchingObj: {fileID: 916908216}
   MatchingPlayerObj: {fileID: 211751868}
   MatchingPlayerText: {fileID: 1688106174}
@@ -5288,13 +5299,16 @@ MonoBehaviour:
   RoomIdText: {fileID: 243738175}
   RoomKeyText: {fileID: 413287930}
   CautionText: {fileID: 639352331}
-  passwordInputField: {fileID: 145441098}
+  passwordInputField: {fileID: 0}
   playerCountDropdown: {fileID: 814998413}
+  createRoomIdInput: {fileID: 0}
   fusionLauncher: {fileID: 1177932715}
   roomDBUploader: {fileID: 903842234}
   playerSpawner: {fileID: 1846594309}
   gameManager: {fileID: 1846594307}
   networkGameState: {fileID: 0}
+  roomListLoader: {fileID: 0}
+  publicRoomList: {fileID: 0}
 --- !u!114 &903842234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5307,6 +5321,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59782f39d51f20041ad58da07eaf7da9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  foundRoom:
+    room_id: 
+    dungeon_id: 
+    map_name: 
+    password: 
+    is_private: 0
+    max_players: 0
+    current_players: 0
 --- !u!114 &903842235
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5329,9 +5351,10 @@ MonoBehaviour:
   MatchingObj: {fileID: 211751868}
   SelecCanvas: {fileID: 22874236}
   JoinCautionRoomText: {fileID: 1214627647}
-  passwordInputField: {fileID: 745798192}
   fusionLauncher: {fileID: 1177932715}
   roomDBUploader: {fileID: 903842234}
+  dungeonUIManager: {fileID: 0}
+  importer: {fileID: 0}
 --- !u!114 &903842236
 MonoBehaviour:
   m_ObjectHideFlags: 0
