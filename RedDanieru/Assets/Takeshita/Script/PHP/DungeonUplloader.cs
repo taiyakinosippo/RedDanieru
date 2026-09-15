@@ -5,9 +5,10 @@ using UnityEngine.Networking;
 
 public class DungeonUploader : MonoBehaviour
 {
-    public void UploadDungeon(
-        string dungeonName,
-        string creatorName)
+    [SerializeField]
+    private DungeonUIManager dungeonUIManager;
+
+    public void UploadDungeon( string dungeonName, string creatorName)
     {
         StartCoroutine(
             UploadCoroutine(
@@ -17,9 +18,7 @@ public class DungeonUploader : MonoBehaviour
         );
     }
 
-    private IEnumerator UploadCoroutine(
-        string dungeonName,
-        string creatorName)
+    private IEnumerator UploadCoroutine(string dungeonName,  string creatorName)
     {
         string[]files=Directory.GetFiles(
             Application.persistentDataPath,
@@ -61,6 +60,8 @@ public class DungeonUploader : MonoBehaviour
         form.AddField("creatorName", creatorName);
 
         form.AddField("jsonData", jsonData);
+
+        form.AddField("tag", dungeonUIManager.UploadTag);
 
         UnityWebRequest request =
             UnityWebRequest.Post(
