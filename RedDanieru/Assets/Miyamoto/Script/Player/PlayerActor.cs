@@ -23,6 +23,7 @@ namespace Player
         private PlayerMovement      _playerMovement;
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
+        private PlayerStatus        _playerStatus;
 
         private bool _debugMode = false;
 
@@ -60,6 +61,8 @@ namespace Player
             _playerMovement= GetComponent<PlayerMovement>();
             //プレイヤーのステッカーの基本的な処理を行うコンポーネント
             _stickerCheck　= GetComponent<StickerCheck>();
+
+            _playerStatus = GetComponent<PlayerStatus>();
         }
 
         //public override void Spawned()
@@ -126,6 +129,7 @@ namespace Player
 
         public  void FixedUpdate()
         {
+            if(_playerStatus._isDead) return; 
             //コンポーネントを取得できているか
             _animation.AnimatorComPonent();
 
@@ -170,6 +174,7 @@ namespace Player
 
         private void LateUpdate()
         {
+            if (_playerStatus._isDead) return;
             //カメラの動き
             _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
             
