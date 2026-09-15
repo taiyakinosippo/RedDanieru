@@ -1557,6 +1557,7 @@ MonoBehaviour:
   content: {fileID: 1158581021}
   buttonPrefab: {fileID: 4555289007072389027, guid: 357ab9e21f080334b914f186d32590f0, type: 3}
   scrollView: {fileID: 103755322}
+  loadCanvas: {fileID: 1457021000}
   testPlayManager: {fileID: 855452809}
 --- !u!1 &727165798
 GameObject:
@@ -4506,7 +4507,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1883373897
 RectTransform:
   m_ObjectHideFlags: 0

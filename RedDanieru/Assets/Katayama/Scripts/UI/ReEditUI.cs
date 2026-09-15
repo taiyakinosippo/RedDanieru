@@ -1,7 +1,7 @@
 using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class ReEditUI : MonoBehaviour
 {
@@ -12,6 +12,9 @@ public class ReEditUI : MonoBehaviour
     [SerializeField] private Transform content;
     [SerializeField] private GameObject buttonPrefab;
     [SerializeField] private GameObject scrollView;
+
+    [Header("読み込み用Canvas")]
+    [SerializeField] private Canvas loadCanvas;
 
     [Header("編集管理")]
     [SerializeField] private TestPlayManager testPlayManager;
@@ -58,25 +61,10 @@ public class ReEditUI : MonoBehaviour
             return;
         }
 
-        IsSelectingDungeon = true;
-
-        scrollView.SetActive(true);
-
-        scrollView.transform.SetAsLastSibling();
-
-        CreateButtonList();
-    }
-
-    //==================================================
-    // ダンジョン一覧作成
-    //==================================================
-
-    private void CreateButtonList()
-    {
         if (content == null)
         {
             Debug.LogError(
-                "読み込み一覧のContentが設定されていません。"
+                "Contentが設定されていません。"
             );
 
             return;
@@ -85,12 +73,53 @@ public class ReEditUI : MonoBehaviour
         if (buttonPrefab == null)
         {
             Debug.LogError(
-                "読み込み用ButtonPrefabが設定されていません。"
+                "ButtonPrefabが設定されていません。"
             );
 
             return;
         }
 
+        // 読み込み用Canvasを最前面にする
+        if (loadCanvas == null)
+        {
+            loadCanvas =
+                scrollView.GetComponentInParent<Canvas>();
+        }
+
+        if (loadCanvas != null)
+        {
+            loadCanvas.overrideSorting = true;
+            loadCanvas.sortingOrder = 100;
+        }
+        else
+        {
+            Debug.LogError(
+                "読み込み用Canvasが見つかりません。"
+            );
+        }
+
+        IsSelectingDungeon = true;
+
+        // ScrollViewを表示
+        scrollView.SetActive(true);
+
+        // 同じCanvas内でも最前面にする
+        scrollView.transform.SetAsLastSibling();
+
+        // ダンジョン一覧を作成
+        CreateButtonList();
+
+        Debug.Log(
+            "Loadリストを表示しました。"
+        );
+    }
+
+    //==================================================
+    // ダンジョン一覧作成
+    //==================================================
+
+    private void CreateButtonList()
+    {
         // 以前のボタンを削除
         for (
             int i = content.childCount - 1;
@@ -153,6 +182,8 @@ public class ReEditUI : MonoBehaviour
                 content
             );
 
+        buttonObject.SetActive(true);
+
         TMP_Text text =
             buttonObject.GetComponentInChildren<TMP_Text>();
 
@@ -176,15 +207,26 @@ public class ReEditUI : MonoBehaviour
                 "ButtonPrefabにButtonコンポーネントがありません。"
             );
 
+            Destroy(buttonObject);
+
             return;
         }
+
+        button.interactable = true;
 
         string selectedDungeon =
             dungeonName;
 
+        button.onClick.RemoveAllListeners();
+
         button.onClick.AddListener(
             () =>
             {
+                Debug.Log(
+                    "ダンジョンボタンをクリック : " +
+                    selectedDungeon
+                );
+
                 LoadDungeon(
                     selectedDungeon
                 );
@@ -249,6 +291,7 @@ public class ReEditUI : MonoBehaviour
             false
         );
 
+        // 読み込み一覧を閉じる
         CloseLoadList();
 
         // 編集モードへ戻す
