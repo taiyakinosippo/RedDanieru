@@ -134,12 +134,11 @@ public class LoadUI : MonoBehaviour
             {
         "EASY",
         "NORMAL",
-        "HARD",
-        "HELL"
+        "HARD"
     };
 
             ui.tagText.text =
-                "#" + tags[Random.Range(0, tags.Length)];
+                tags[Random.Range(0, tags.Length)];
 
             ui.likeCountText.text =
                 "GOOD:" + Random.Range(0, 100);
@@ -204,6 +203,8 @@ public class LoadUI : MonoBehaviour
         {
             GameObject button =
                 Instantiate(buttonPrefab, content);
+
+            Debug.Log("ボタン生成");
 
             DungeonButtonUI ui =
                 button.GetComponent<DungeonButtonUI>();
@@ -296,7 +297,7 @@ public class LoadUI : MonoBehaviour
         }
     }
 
-    public void SearchDungeon(string stageName, string creatorName,string tag)
+    public void SearchDungeon(string stageName, string creatorName,HashSet<string> tags)
     {
         foreach (Transform child in content)
         {
@@ -308,13 +309,26 @@ public class LoadUI : MonoBehaviour
         //タグだけ検索
         if (string.IsNullOrEmpty(stageName) && string.IsNullOrEmpty(creatorName))
         {
-            results = cachedDungeons.Where(d=> d.tag == tag);
+            if (tags.Count==0)
+            {
+                results = cachedDungeons;
+            }
+            else
+            {
+                results = cachedDungeons.Where(
+                   d=> tags.Contains(d.tag)
+                );
+            }
         }
-        else {
-                results = cachedDungeons.Where(d =>
-                d.dungeonName == stageName &&
-                d.creatorName == creatorName&&(string.IsNullOrEmpty(tag)||d.tag==tag));
+        else 
+        {
+            results = cachedDungeons.Where(d =>((!string.IsNullOrEmpty(stageName) &&
+            d.dungeonName.ToLower().Contains(stageName.ToLower()))||
+            (!string.IsNullOrEmpty(creatorName) &&d.creatorName.ToLower()
+            .Contains(creatorName.ToLower())))
+            &&(tags.Count==0 || tags.Contains(d.tag)));
         }
+        
         bool found = false;
 
         foreach (var dungeon in results)
@@ -384,20 +398,39 @@ public class LoadUI : MonoBehaviour
         }
     }
 
-    public bool ExistsDungeon(string stageName, string creatorName,string tag)
+    public bool ExistsDungeon(
+     string stageName,
+     string creatorName,
+     HashSet<string> tags)
     {
         if (cachedDungeons == null)
             return false;
 
-        //タグだけ検索
-        if (string.IsNullOrEmpty(stageName) && string.IsNullOrEmpty(creatorName))
+        if (string.IsNullOrEmpty(stageName) &&
+            string.IsNullOrEmpty(creatorName))
         {
-            return cachedDungeons.Any(d => string.IsNullOrEmpty(tag) || d.tag == tag);
+            if (tags.Count == 0)
+                return true;
+
+            return cachedDungeons.Any(
+                d => tags.Contains(d.tag)
+            );
         }
 
-        //ステージ名＋クリエイター名検索
         return cachedDungeons.Any(d =>
-            d.dungeonName == stageName &&
-            d.creatorName == creatorName && (string.IsNullOrEmpty(tag) || d.tag == tag));
+        (
+            (!string.IsNullOrEmpty(stageName) &&
+             d.dungeonName.ToLower()
+             .Contains(stageName.ToLower()))
+            ||
+            (!string.IsNullOrEmpty(creatorName) &&
+             d.creatorName.ToLower()
+             .Contains(creatorName.ToLower()))
+        )
+        &&
+        (
+            tags.Count == 0 ||
+            tags.Contains(d.tag)
+        ));
     }
 }

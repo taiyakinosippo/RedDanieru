@@ -61,7 +61,7 @@ public class DungeonUploader : MonoBehaviour
 
         form.AddField("jsonData", jsonData);
 
-        form.AddField("tag", dungeonUIManager.selectedTag);
+        form.AddField("tag", dungeonUIManager.UploadTag);
 
         UnityWebRequest request =
             UnityWebRequest.Post(
