@@ -16,7 +16,7 @@ public class EnemyBase : MonoBehaviour
     }
 
     protected int enemyHP = 100;                  //敵のHP
-    protected int enemyPower = 10;                //敵の攻撃力
+    protected int enemyPower = 100;                //敵の攻撃力
     protected int enemyDefense = 5;               //敵の防御力
     protected float enemyMoveSpeed = 3.0f;        //敵の移動速度
     protected float enemySearchArea = 6.0f;       //敵の探索範囲
