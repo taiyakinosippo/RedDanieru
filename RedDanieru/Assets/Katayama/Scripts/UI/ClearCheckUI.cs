@@ -42,12 +42,13 @@ public class ClearCheckUI : MonoBehaviour
     // クリアチェック一覧を開く
     //==================================================
 
-    public void OpenClearCheckList()
+public void OpenClearCheckList()
     {
         IsSelectingDungeon = true;
 
         Debug.Log("クリアチェックリストを開きます。");
 
+        // クリア状態を最新にする
         LoadClearedDungeons();
 
         if (scrollView == null)
@@ -55,16 +56,27 @@ public class ClearCheckUI : MonoBehaviour
             Debug.LogError(
                 "ClearCheckUI : ScrollViewが設定されていません。"
             );
+
+            IsSelectingDungeon = false;
             return;
         }
 
+        // 一度表示する
         scrollView.SetActive(true);
 
-        // リストを一番手前にする
+        // UIの表示順を一番手前にする
+        transform.SetAsLastSibling();
         scrollView.transform.SetAsLastSibling();
 
+        // リストを作り直す
         CreateButtonList();
+
+        // ボタン生成後もScrollViewを一番手前にする
+        scrollView.transform.SetAsLastSibling();
+
+        Debug.Log("クリアチェックリストを表示しました。");
     }
+
 
     //==================================================
     // ダンジョン一覧作成
