@@ -70,6 +70,7 @@ namespace Player
             // 初期化時にカメラの角度を取得
             _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
             _actionPriority = GetComponent<PlayerInputPriority>();
+            _playerStatus = GetComponent<PlayerStatus>();
             _playerPosition = transform.position + Vector3.up * _playerRayOffset.y;
             _rayPosition = transform.position + _playerRayOffset;
             Vector3 cameraOffset = currentCamera.transform.position - _playerPosition;
@@ -186,6 +187,7 @@ namespace Player
         {
             if (_playerStatus != null && _playerStatus._isDead)
             {
+                Debug.Log("死亡カメラに切り替え");
                 currentCamera.SetActive(false);
 
                 _deadCamera.SetActive(true);
