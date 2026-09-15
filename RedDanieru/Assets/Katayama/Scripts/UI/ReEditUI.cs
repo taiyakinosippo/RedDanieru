@@ -16,6 +16,9 @@ public class ReEditUI : MonoBehaviour
     [Header("編集管理")]
     [SerializeField] private TestPlayManager testPlayManager;
 
+    [Header("クリアチェック済みボタンの色")]
+    [SerializeField] private Color clearedColor = Color.yellow;
+
     // 再編集ダンジョン一覧を開いているか
     public bool IsSelectingDungeon { get; private set; }
 
@@ -61,6 +64,9 @@ public class ReEditUI : MonoBehaviour
         }
 
         scrollView.SetActive(true);
+
+        // リストを一番手前にする
+        scrollView.transform.SetAsLastSibling();
 
         CreateButtonList();
     }
@@ -172,6 +178,21 @@ public class ReEditUI : MonoBehaviour
             return;
         }
 
+        //==================================================
+        // クリアチェック済みなら黄色
+        //==================================================
+
+        if (IsCleared(dungeonName))
+        {
+            Image image =
+                buttonObject.GetComponent<Image>();
+
+            if (image != null)
+            {
+                image.color = clearedColor;
+            }
+        }
+
         string selectedDungeon =
             dungeonName;
 
@@ -183,6 +204,24 @@ public class ReEditUI : MonoBehaviour
                 );
             }
         );
+    }
+
+    //==================================================
+    // クリアチェック済みか確認
+    //==================================================
+
+    private bool IsCleared(
+        string dungeonName
+    )
+    {
+        string key =
+            "DungeonClearCheck_" +
+            dungeonName;
+
+        return PlayerPrefs.GetInt(
+            key,
+            0
+        ) == 1;
     }
 
     //==================================================
