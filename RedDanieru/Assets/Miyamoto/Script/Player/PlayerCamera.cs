@@ -64,9 +64,9 @@ namespace Player
             {
                 _deadCamera.SetActive(false);
             }
-            // 初期化時にカメラを取得
-            currentCamera = ThirdPersonPerspective.activeSelf
-            ? ThirdPersonPerspective : FirstPersonPerspective;
+            // 最初は3人称視点
+            ThirdPersonPerspective.SetActive(true);
+            FirstPersonPerspective.SetActive(false);
             // 初期化時にカメラの角度を取得
             _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
             _actionPriority = GetComponent<PlayerInputPriority>();
