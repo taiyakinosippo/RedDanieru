@@ -1,4 +1,5 @@
 using Player;
+using System.Runtime.InteropServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,19 +13,20 @@ public class EnemyBase : MonoBehaviour
         Attack,
         Special,
         Damage,
+        Stun,
         Dead
     }
 
-    [SerializeField] protected int enemyHP = 100;                  //敵のHP
-    [SerializeField] protected int enemyPower = 10;                //敵の攻撃力
-    [SerializeField] protected int enemyDefense = 5;               //敵の防御力
+    [SerializeField] protected int enemyHP = 1000;                  //敵のHP
+    [SerializeField] protected int enemyPower = 200;                //敵の攻撃力
+    [SerializeField] protected int enemyDefense = 100;               //敵の防御力
     [SerializeField] protected float enemyMoveSpeed = 3.0f;        //敵の移動速度
     [SerializeField] protected float enemySearchArea = 6.0f;       //敵の探索範囲
     [SerializeField] protected float enemyTrackingTime = 3.0f;     //敵の追跡時間
     [SerializeField] protected float enemyAttackArea = 1.5f;       //敵の攻撃範囲
     [SerializeField] protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
     [SerializeField] protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
-    protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
+    [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
     protected enemyState currentState { get; set; }  //現在の状態
@@ -34,6 +36,7 @@ public class EnemyBase : MonoBehaviour
     protected float attackCoolTimer;  //現在の攻撃クールタイム
     protected float attackTimer;  //現在の攻撃開始タイマー
     protected float damageTimer;  //現在のダメージタイマー
+    protected float stunTimer;  //現在のスタンタイマー
 
     private float specialCoolTimer = 0.0f;  //特殊行動のタイマー
     private float specialInterval = 4.0f;  //特殊行動のクールタイム
@@ -84,6 +87,19 @@ public class EnemyBase : MonoBehaviour
                 else
                 {
                     damageTimer -= Time.deltaTime;
+                }
+                break;
+
+            case enemyState.Stun:  //スタン状態
+                if (stunTimer <= 0f)
+                {
+                    //スタンモーションが終了したら通常状態に戻す
+                    currentState = enemyState.Idle;
+                    stunTimer = 0f;
+                }
+                else
+                {
+                    stunTimer -= Time.deltaTime;
                 }
                 break;
 
@@ -307,7 +323,9 @@ public class EnemyBase : MonoBehaviour
 
         Debug.Log("Enemy hit");
         //ダメージ計算
-        currentHp -= playerPow;
+        int damage = playerPow - enemyDefense;
+        if (damage > 0)
+            currentHp -= damage;
 
         if (currentHp <= 0)
         {
@@ -321,5 +339,17 @@ public class EnemyBase : MonoBehaviour
             currentState = enemyState.Damage;
             Debug.Log("敵がダメージを受けました。残りHP: " + currentHp);
         }
+    }
+
+    //スタン開始処理
+    public virtual void Stun(float stunDuration)
+    {
+        //スタン中はスタンを受けない
+        if (currentState == enemyState.Stun)
+            return;
+        //スタン処理
+        currentState = enemyState.Stun;
+        stunTimer = stunDuration;
+        Debug.Log("敵がスタンしました。スタン時間: " + stunDuration);
     }
 }
