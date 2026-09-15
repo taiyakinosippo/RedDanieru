@@ -77,6 +77,7 @@ public class DungeonUIManager : MonoBehaviour
     public GameObject ScrolView;
 
     public GameObject MatchingRoomCreateWindow;
+    public GameObject MatchingRoomCreateLaycast;
 
     public GameObject RoomCreateObj;
     public Button RoomHostButton;
@@ -164,6 +165,7 @@ public class DungeonUIManager : MonoBehaviour
     {
          ScrolView.SetActive(true);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
         MatchingObj.SetActive(false);
@@ -324,6 +326,7 @@ public class DungeonUIManager : MonoBehaviour
     {
         ScrolView.SetActive(true);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
     }
 
     public void RoomSearchButton()
@@ -367,7 +370,8 @@ public class DungeonUIManager : MonoBehaviour
             "マップ：" + RoomInfo.SelectedDungeonName;
 
         MatchingRoomCreateWindow.SetActive(true);
-      
+        MatchingRoomCreateLaycast.SetActive(true);
+
         RoomCreateObj.SetActive(true);
         RoomJoinObj.SetActive(false);
     }
@@ -428,6 +432,7 @@ public class DungeonUIManager : MonoBehaviour
         CautionObj.SetActive(false);
         ScrolView.SetActive(false);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
         MatchingObj.SetActive(true);
 
         if (GameModeManager.IsMultiplayer)
@@ -839,6 +844,7 @@ public class DungeonUIManager : MonoBehaviour
 
         ScrolView.SetActive(false);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
 
         RoomCreateObj.SetActive(false);
         RoomJoinObj.SetActive(false);
