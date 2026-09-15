@@ -206,7 +206,7 @@ public class RoomListLoader : MonoBehaviour
         if (selectedRoom.is_private == 1)
         {
             string inputPassword =
-                dungeonUIManager.PrivatePassword;
+                dungeonUIManager.RoomSearchPassword;
 
             Debug.Log($"入力PW=[{inputPassword}]");
             Debug.Log($"DB PW=[{selectedRoom.password}]");

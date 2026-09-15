@@ -12,4 +12,5 @@ public class DungeonListItem
     public string dungeonId;
     public string dungeonName;
     public string creatorName;
+    public string tag;
 }

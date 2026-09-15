@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using Fusion;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 //ゲームモード
 public static class GameModeManager
@@ -76,6 +77,7 @@ public class DungeonUIManager : MonoBehaviour
     public GameObject ScrolView;
 
     public GameObject MatchingRoomCreateWindow;
+    public GameObject MatchingRoomCreateLaycast;
 
     public GameObject RoomCreateObj;
     public Button RoomHostButton;
@@ -98,6 +100,18 @@ public class DungeonUIManager : MonoBehaviour
     public GameObject Laycast;
     public GameObject RoomSearchLaycast;
 
+    [Header("ステージ検索")]
+    public GameObject StageSearchObj;
+    [SerializeField] private TMP_InputField stageNameSearchInput;
+    [SerializeField] private TMP_InputField creatorNameSearchInput;
+    [SerializeField] private Button searchButton;
+    public GameObject StageSearchLaycast;
+    [SerializeField] private Button EASYButton;
+    [SerializeField] private Button NORMALButton;
+    [SerializeField] private Button HARDButton;
+    private readonly Color normalColor = new Color32(0x96, 0xCD, 0xFF, 255);
+    private readonly Color selectedColor = new Color32(0x8B, 0xA4, 0xBA, 255);
+
     [Header("Caution")]
     public GameObject CautionObj;
     public GameObject RoomInCautionObj;
@@ -119,7 +133,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
     [SerializeField] private TMP_InputField createRoomIdInput;
-
+  
     [Header("大事な奴ら")]
     [SerializeField] private FusionLauncher fusionLauncher;
     [SerializeField] private RoomDBUploader roomDBUploader;
@@ -132,7 +146,10 @@ public class DungeonUIManager : MonoBehaviour
 
     [SerializeField] private RoomListLoader roomListLoader;
 
-    [SerializeField]private PublicRoomList publicRoomList;
+    [SerializeField] private PublicRoomList publicRoomList;
+    [SerializeField] private LoadUI loadUI;
+
+    private HashSet<string> selectedTags =new HashSet<string>();
 
     [Header("数値")]
     public static int MaxPlayers = 2;
@@ -148,6 +165,7 @@ public class DungeonUIManager : MonoBehaviour
     {
          ScrolView.SetActive(true);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
         MatchingObj.SetActive(false);
@@ -156,16 +174,23 @@ public class DungeonUIManager : MonoBehaviour
         RoomSearchLaycast.SetActive(false);
         RoomInCautionObj.SetActive(false);
         RoomInCautionLayout.SetActive(false);
+        StageSearchLaycast.SetActive(false);
+        StageSearchObj.SetActive(false);
 
         RoomInButton.interactable = false;
         GameStartbutton.interactable = false;
         RoomHostButton.interactable = false;
         JoinButton.interactable = true;
         privateJoinButton.interactable = false;
-
+        searchButton.interactable = false;
+       
         privateRoomIdInput.onValueChanged.AddListener(delegate { CheckPrivateRoom(); });
 
         privatePasswordInput.onValueChanged.AddListener(delegate { CheckPrivateRoom(); });
+
+        stageNameSearchInput.onValueChanged.AddListener(delegate { CheckSearchCondition(); });
+
+        creatorNameSearchInput.onValueChanged.AddListener(delegate { CheckSearchCondition(); });
 
         passwordInputField.onValueChanged.AddListener(OnPasswordChanged);
 
@@ -238,6 +263,22 @@ public class DungeonUIManager : MonoBehaviour
 
     }
 
+    public string UploadTag
+    {
+        get
+        {
+            if (selectedTags.Contains("EASY"))
+                return "EASY";
+
+            if (selectedTags.Contains("NORMAL"))
+                return "NORMAL";
+
+            if (selectedTags.Contains("HARD"))
+                return "HARD";
+
+            return "NORMAL";
+        }
+    }
 
     public void UploadDungeon()
     {
@@ -285,6 +326,7 @@ public class DungeonUIManager : MonoBehaviour
     {
         ScrolView.SetActive(true);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
     }
 
     public void RoomSearchButton()
@@ -328,7 +370,8 @@ public class DungeonUIManager : MonoBehaviour
             "マップ：" + RoomInfo.SelectedDungeonName;
 
         MatchingRoomCreateWindow.SetActive(true);
-      
+        MatchingRoomCreateLaycast.SetActive(true);
+
         RoomCreateObj.SetActive(true);
         RoomJoinObj.SetActive(false);
     }
@@ -389,6 +432,7 @@ public class DungeonUIManager : MonoBehaviour
         CautionObj.SetActive(false);
         ScrolView.SetActive(false);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
         MatchingObj.SetActive(true);
 
         if (GameModeManager.IsMultiplayer)
@@ -488,6 +532,84 @@ public class DungeonUIManager : MonoBehaviour
         roomListLoader.ShowJoinCaution(room);
     }
 
+    public void SearchDungeonButton()
+    {
+        string stageName =
+            stageNameSearchInput.text;
+
+        string creatorName =
+            creatorNameSearchInput.text;
+
+        loadUI.SearchDungeon(
+            stageName,
+            creatorName,
+            selectedTags
+        );
+
+        StageSearchObj.SetActive(false);
+        StageSearchLaycast.SetActive(false);
+    }
+
+    public void StageSearchButton()
+    {
+        StageSearchObj.SetActive(true);
+        StageSearchLaycast.SetActive(true);
+    }
+
+    public void EasyButton()
+    {
+        if (selectedTags.Contains("EASY"))
+        {
+            selectedTags.Remove("EASY");
+        }
+        else
+        {
+            selectedTags.Add("EASY");
+        }
+
+        UpdateTagButtonColor();
+
+        CheckSearchCondition();
+    }
+
+    public void NormalButton()
+    {
+        if (selectedTags.Contains("NORMAL"))
+        {
+            selectedTags.Remove("NORMAL");
+        }
+        else
+        {
+            selectedTags.Add("NORMAL");
+        }
+
+        UpdateTagButtonColor();
+
+        CheckSearchCondition();
+    }
+
+    public void HardButton()
+    {
+        if (selectedTags.Contains("HARD"))
+        {
+            selectedTags.Remove("HARD");
+        }
+        else
+        {
+            selectedTags.Add("HARD");
+        }
+
+        UpdateTagButtonColor();
+
+        CheckSearchCondition();
+    }
+
+    public void StageSearchBackButton()
+    {
+        StageSearchObj.SetActive(false);
+        StageSearchLaycast.SetActive(false);
+    }
+
     private void OnPasswordChanged(string value)
     {
         // 数字以外を除去
@@ -581,6 +703,26 @@ public class DungeonUIManager : MonoBehaviour
 
         Debug.Log(
             $"最大人数 : {MaxPlayers}人"
+        );
+    }
+
+    private void CheckSearchCondition()
+    {
+        bool foundByName =
+            loadUI.ExistsDungeon(
+                stageNameSearchInput.text,
+                creatorNameSearchInput.text,
+                selectedTags
+            );
+
+        bool tagSelected =
+           selectedTags.Count > 0;
+
+        searchButton.interactable =
+            foundByName || tagSelected;
+
+        Debug.Log(
+            $"tag={selectedTags} interactable={searchButton.interactable}"
         );
     }
 
@@ -702,6 +844,7 @@ public class DungeonUIManager : MonoBehaviour
 
         ScrolView.SetActive(false);
         MatchingRoomCreateWindow.SetActive(false);
+        MatchingRoomCreateLaycast.SetActive(false);
 
         RoomCreateObj.SetActive(false);
         RoomJoinObj.SetActive(false);
@@ -716,6 +859,29 @@ public class DungeonUIManager : MonoBehaviour
     {
         ScrolView.SetActive(false);
         RoomSearchObj.SetActive(false);
+    }
+
+    private void UpdateTagButtonColor()
+    {
+        EASYButton.image.color =
+            selectedTags.Contains("EASY")
+                ? selectedColor
+                : normalColor;
+
+        NORMALButton.image.color =
+            selectedTags.Contains("NORMAL")
+                ? selectedColor
+                : normalColor;
+
+        HARDButton.image.color =
+            selectedTags.Contains("HARD")
+                ? selectedColor
+                : normalColor;
+    }
+
+    private IEnumerator SearchDungeon(string stageName,string creatorName)
+    {
+        yield return null;
     }
 
     public string PrivatePassword
