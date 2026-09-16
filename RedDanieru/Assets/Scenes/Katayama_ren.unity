@@ -5288,6 +5288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8368c685937202e47916e78d6d66d3f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dungeonUIManager: {fileID: 0}
 --- !u!1 &714870633252809433
 GameObject:
   m_ObjectHideFlags: 0
@@ -5880,6 +5881,7 @@ MonoBehaviour:
   objectSpacing: 1
   objectYOffset: 1.5
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
+  diagonalWallPrefab: {fileID: 7694599920202442208, guid: 6bd343453c63dba4cb707a65d6fcbea4, type: 3}
   floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
   objectPrefabs:
   - type: 0
@@ -6649,6 +6651,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8368c685937202e47916e78d6d66d3f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dungeonUIManager: {fileID: 0}
 --- !u!114 &2810135121051529331
 MonoBehaviour:
   m_ObjectHideFlags: 0
