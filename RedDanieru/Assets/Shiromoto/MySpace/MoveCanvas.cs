@@ -11,7 +11,6 @@ public class MoveCanvas : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        Debug.Log("参上");
 
         instance = this;
         DontDestroyOnLoad(gameObject);
