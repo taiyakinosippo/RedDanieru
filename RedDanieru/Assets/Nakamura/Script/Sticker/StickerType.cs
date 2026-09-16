@@ -5,4 +5,6 @@ public enum Sticker
     None,
     Big,
     ChargeDash,
+    Curing,
+    Legless,
 }

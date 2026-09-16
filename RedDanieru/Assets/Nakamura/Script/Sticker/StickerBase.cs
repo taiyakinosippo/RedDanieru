@@ -3,9 +3,11 @@ using System.Collections;
 
 public class StickerBase : MonoBehaviour
 {
+    protected EnemyBase enemyScript;
+
     public virtual void OnEnemyApply()
     {
-        //ステッカーが貼られたときの処理
+        //ステッカーが敵に貼られたときの処理
     }
 
     public virtual void OnEnemyUpdate() 
@@ -15,12 +17,12 @@ public class StickerBase : MonoBehaviour
 
     public virtual void OnEnemyRemove()
     {
-        //ステッカーが剥がれたときの処理
+        //ステッカーが敵から剥がれたときの処理
     }
 
     public virtual void OnTrapApply()
     {
-        //ステッカーが貼られたときの処理
+        //ステッカーが物に貼られたときの処理
     }
 
     public virtual void OnTrapUpdate()
@@ -30,8 +32,14 @@ public class StickerBase : MonoBehaviour
 
     public virtual void OnTrapRemove()
     {
-        //ステッカーが剥がれたときの処理
+        //ステッカーが物から剥がれたときの処理
     }
+
+    //敵自分のスクリプトを取得する
+    public void GetEnemyScript() 
+    {
+        enemyScript = GetComponent<EnemyBase>();
+    } 
 }
 
 //public abstract class StickerBase
