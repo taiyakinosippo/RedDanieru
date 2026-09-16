@@ -116,12 +116,27 @@ public class FusionLauncher : MonoBehaviour
 
     public async void ShutdownAndLoadTitle(string sceneName)
     {
-        if (runner != null && runner.IsRunning)
+        if (runner != null)
         {
+            // プレイヤー削除
+            foreach (PlayerRef player in runner.ActivePlayers)
+            {
+                if (runner.TryGetPlayerObject(player, out NetworkObject obj))
+                {
+                    runner.Despawn(obj);
+                }
+            }
+
             await runner.Shutdown();
         }
 
-        Destroy(runner.gameObject);
+        // NetworkRunner削除
+        if (runner != null)
+        {
+            Destroy(runner.gameObject);
+        }
+
+        // FusionLauncher削除
         Destroy(gameObject);
 
         SceneManager.LoadScene(sceneName);

@@ -47,11 +47,14 @@ namespace Player
 
         public float _playerRunSpeed => PlayerRunSpeed;
 
+        public bool _isDead { get; private set; } //プレイヤーが死亡しているかどうかを判定するフラグ
+
         private void Awake()
         {
             CurrentHP = PlayerHP;
             CurrentAttack = PlayerAttack;
             CurrentDefense = PlayerDefense;
+            _isDead = false;
         }
 
         private void Update()
@@ -90,9 +93,19 @@ namespace Player
         }
 
         private void Die()
-        {
-            Debug.Log("死亡");
-        }
+{
+    _isDead = true;
+
+    Debug.Log("死亡");
+
+    GameOverManager gameOverManager =
+        FindObjectOfType<GameOverManager>();
+
+    if (gameOverManager != null)
+    {
+        gameOverManager.GameOver();
+    }
+}
     }
 
 }

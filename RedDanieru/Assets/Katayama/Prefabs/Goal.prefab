@@ -74,7 +74,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4278251519
   m_fontColor: {r: 1, g: 0.9370693, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -537,7 +537,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &4371587225355768794
 RectTransform:
   m_ObjectHideFlags: 0
