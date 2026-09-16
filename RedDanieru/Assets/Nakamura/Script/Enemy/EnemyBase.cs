@@ -30,7 +30,7 @@ public class EnemyBase : MonoBehaviour
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
     protected enemyState currentState { get; set; }  //現在の状態
-    protected float currentHp;  //現在のHP
+    [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     protected float trackingTimer = 0.0f;  //現在の追跡時間
     protected float attackCoolTimer;  //現在の攻撃クールタイム
@@ -351,5 +351,81 @@ public class EnemyBase : MonoBehaviour
         currentState = enemyState.Stun;
         stunTimer = stunDuration;
         Debug.Log("敵がスタンしました。スタン時間: " + stunDuration);
+    }
+
+    //-----敵のステータスを上げる・下げる処理-----
+
+    //敵の攻撃力を変動させる
+    public void AddEnemyPower(int value)
+    {
+        enemyPower += value;
+        if (enemyPower < 0)
+            enemyPower = 0;
+    }
+
+    //敵の防御力を変動させる
+    public void AddEnemyDefense(int value)
+    {
+        enemyDefense += value;
+        if (enemyDefense < 0)
+            enemyDefense = 0;
+    }
+
+    //敵の移動速度を変動させる
+    public float AddEnemyMoveSpeed(float value)
+    {
+        enemyMoveSpeed += value;
+        if (enemyMoveSpeed < 0)
+            enemyMoveSpeed = 0;
+
+        return enemyMoveSpeed - value;
+    }
+
+    //敵の探索範囲を変動させる
+    public void AddEnemySearchArea(float value)
+    {
+        enemySearchArea += value;
+        if (enemySearchArea < 0)
+            enemySearchArea = 0;
+    }
+
+    //敵の追跡時間を変動させる
+    public void AddEnemyTrackingTime(float value)
+    {
+        enemyTrackingTime += value;
+        if (enemyTrackingTime < 0)
+            enemyTrackingTime = 0;
+    }
+
+    //敵の攻撃範囲を変動させる
+    public void AddEnemyAttackArea(float value)
+    {
+        enemyAttackArea += value;
+        if (enemyAttackArea < 0)
+            enemyAttackArea = 0;
+    }
+
+    //敵の攻撃クールタイムを変動させる
+    public void AddEnemyAttackCoolTime(float value)
+    {
+        enemyAttackCoolTime += value;
+        if (enemyAttackCoolTime < 0)
+            enemyAttackCoolTime = 0;
+    }
+
+    //敵の攻撃開始時間を変動させる
+    public void AddEnemyAttackStartTime(float value)
+    {
+        enemyAttackStartTime += value;
+        if (enemyAttackStartTime < 0)
+            enemyAttackStartTime = 0;
+    }
+
+    //敵の攻撃終了時間を変動させる
+    public void AddEnemyAttackEndTime(float value)
+    {
+        enemyAttackEndTime += value;
+        if (enemyAttackEndTime < 0)
+            enemyAttackEndTime = 0;
     }
 }
