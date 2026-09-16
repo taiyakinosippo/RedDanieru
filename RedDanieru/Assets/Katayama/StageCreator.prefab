@@ -893,6 +893,7 @@ MonoBehaviour:
   objectSpacing: 1
   objectYOffset: 1.5
   wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
+  diagonalWallPrefab: {fileID: 0}
   floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
   objectPrefabs:
   - type: 0
@@ -2101,6 +2102,7 @@ MonoBehaviour:
   mapManager: {fileID: 2153949976941881518}
   savePanel: {fileID: 2010277633768818679}
   undoManager: {fileID: 8016843859694989331}
+  reEditUI: {fileID: 0}
 --- !u!1 &4062774676311314997
 GameObject:
   m_ObjectHideFlags: 0
@@ -2503,6 +2505,7 @@ MonoBehaviour:
   saveManager: {fileID: 7755967263560064543}
   uploader: {fileID: 3329469922032564267}
   cautionObj: {fileID: 0}
+  saveLoadUI: {fileID: 0}
 --- !u!114 &3329469922032564267
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2515,6 +2518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8368c685937202e47916e78d6d66d3f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dungeonUIManager: {fileID: 0}
 --- !u!1 &4499827944605276989
 GameObject:
   m_ObjectHideFlags: 0
@@ -2853,7 +2857,7 @@ GameObject:
   - component: {fileID: 8254753771833044796}
   - component: {fileID: 1350456002539862641}
   - component: {fileID: 5193289647442363930}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Start
   m_TagString: Untagged
   m_Icon: {fileID: 0}
