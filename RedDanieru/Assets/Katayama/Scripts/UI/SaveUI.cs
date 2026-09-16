@@ -1,8 +1,6 @@
 using TMPro;
 using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;
-using System.IO;
 
 public class SaveUI : MonoBehaviour
 {
@@ -18,80 +16,149 @@ public class SaveUI : MonoBehaviour
     // 保存管理
     [SerializeField] private SaveManager saveManager;
 
+    // ダンジョン投稿
     [SerializeField] private DungeonUploader uploader;
 
+    // 注意文
     [SerializeField] private GameObject cautionObj;
+
+    // セーブ＆ロード管理
+    [SerializeField] private SaveLoadUI saveLoadUI;
 
     public void Start()
     {
-        cautionObj.SetActive(false);
+        if (cautionObj != null)
+        {
+            cautionObj.SetActive(false);
+        }
+
+        if (savePanel != null)
+        {
+            savePanel.SetActive(false);
+        }
     }
 
-    /// 保存パネルを開く
+    //==================================================
+    // 保存パネルを開く
+    //==================================================
+
     public void OpenSavePanel()
     {
         // 前回入力した文字を消去
-        dungeonNameInput.text = "";
+        if (dungeonNameInput != null)
+        {
+            dungeonNameInput.text = "";
+        }
 
         // 保存パネルを表示
-        savePanel.SetActive(true);
+        if (savePanel != null)
+        {
+            savePanel.SetActive(true);
+        }
     }
 
-    /// ダンジョンを保存する
+    //==================================================
+    // ダンジョンを保存する
+    //==================================================
+
     public void SaveDungeon()
     {
         // 入力されたダンジョン名を取得
-        string dungeonName = dungeonNameInput.text.Trim();
-        string creatorName = creatorNameInput.text.Trim();
+        string dungeonName =
+            dungeonNameInput.text.Trim();
+
+        string creatorName =
+            creatorNameInput.text.Trim();
 
         // ダンジョン名が入力されているか確認
         if (string.IsNullOrEmpty(dungeonName))
         {
-            Debug.Log("ダンジョン名を入力してください。");
+            Debug.Log(
+                "ダンジョン名を入力してください。"
+            );
+
             return;
         }
 
+        // 製作者名が入力されているか確認
         if (string.IsNullOrEmpty(creatorName))
         {
-            Debug.Log("製作者名を入力してください。");
+            Debug.Log(
+                "製作者名を入力してください。"
+            );
+
             return;
         }
 
-        //string path = Path.Combine(Application.persistentDataPath, dungeonName + ".json");
-
-        //if (File.Exists(path))
-        //{
-        //    StartCoroutine(CautionText());
-        //    return;
-        //}
-
         // ダンジョンを保存
-        saveManager.Save(dungeonName);
+        saveManager.Save(
+            dungeonName
+        );
 
+        // ダンジョンを投稿
         uploader.UploadDungeon(
             dungeonName,
-           creatorName
+            creatorName
         );
 
         // 保存パネルを閉じる
         savePanel.SetActive(false);
+
+        // Save / Loadを両方押せる状態に戻す
+        if (saveLoadUI != null)
+        {
+            saveLoadUI.ReturnFromSaveLoad();
+        }
     }
+
+    //==================================================
+    // 戻る
+    //==================================================
+
+    public void Return()
+    {
+        // 保存パネルを閉じる
+        if (savePanel != null)
+        {
+            savePanel.SetActive(false);
+        }
+
+        // Save / Loadを両方押せる状態に戻す
+        if (saveLoadUI != null)
+        {
+            saveLoadUI.ReturnFromSaveLoad();
+        }
+
+        Debug.Log(
+            "Save画面から戻りました。"
+        );
+    }
+
+    //==================================================
+    // 注意文
+    //==================================================
 
     private IEnumerator CautionText()
     {
-       
-
-        cautionObj.SetActive(true);
+        if (cautionObj != null)
+        {
+            cautionObj.SetActive(true);
+        }
 
         yield return new WaitForSeconds(3f);
 
-        cautionObj.SetActive(false);
+        if (cautionObj != null)
+        {
+            cautionObj.SetActive(false);
+        }
     }
 
-    /// 保存をキャンセルする
+    //==================================================
+    // 保存をキャンセル
+    //==================================================
+
     public void Cancel()
     {
-        // 保存パネルを閉じる
-        savePanel.SetActive(false);
+        Return();
     }
 }
