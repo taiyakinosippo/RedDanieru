@@ -165,6 +165,7 @@ GameObject:
   - component: {fileID: 3244406581610145446}
   - component: {fileID: -5874542748976444499}
   - component: {fileID: 8412102540417615573}
+  - component: {fileID: 7101641139856271048}
   m_Layer: 6
   m_Name: PlayerArmature
   m_TagString: Player
@@ -630,6 +631,23 @@ MonoBehaviour:
   _maxMoveSpeed: 5
   _minMoveSpeed: 5
   SpeedChangeRate: 10
+  RotationSmoothTime: 10
+--- !u!114 &7101641139856271048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010391631509636739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be367ab2c1f94b241a41e573feb20761, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  stickerSlotUI: {fileID: 0}
+  holdSticker: 
+  maxHoldCount: 3
 --- !u!1 &1461936469673327131
 GameObject:
   m_ObjectHideFlags: 0

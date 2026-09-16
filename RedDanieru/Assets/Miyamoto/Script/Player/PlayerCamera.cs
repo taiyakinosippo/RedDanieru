@@ -186,6 +186,11 @@ namespace Player
                 // カメラの上下角度を更新する
                 _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
             }
+            // 横は無制限
+            _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
+
+            // 縦は制限あり
+            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
 
             Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 
