@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -32,9 +33,11 @@ public class TestPlayManager : MonoBehaviour
     [Header("ESCメニュー")]
     [SerializeField] private GameObject pauseMenuUI;
 
+    [Header("投稿確認UI")]
+    [SerializeField] private GameObject postConfirmUI;
+
     [Header("カメラ")]
     [SerializeField] private Camera editCamera;
-
     [SerializeField] private Camera playerCamera;
 
     private GameObject playerInstance;
@@ -42,11 +45,11 @@ public class TestPlayManager : MonoBehaviour
     private TestPlayMode currentMode =
         TestPlayMode.Edit;
 
-    private bool testPlayCleared = false;
+    // 編集モードへ戻っている最中か
+    private bool isReturningToEdit = false;
 
-    //==================================================
-    // テストプレイ開始時の敵位置保存
-    //==================================================
+    // クリア済みか
+    private bool isCleared = false;
 
     private class EnemyTransformData
     {
@@ -58,32 +61,26 @@ public class TestPlayManager : MonoBehaviour
     private List<EnemyTransformData> enemyPositions =
         new List<EnemyTransformData>();
 
-    //==================================================
-    // プロパティ
-    //==================================================
-
     public bool IsTestPlay =>
         currentMode == TestPlayMode.TestPlay;
 
-    public bool IsTestPlayCleared =>
-        testPlayCleared;
+    public bool IsPlaying =>
+        currentMode == TestPlayMode.TestPlay;
 
-    //==================================================
-    // Start
-    //==================================================
+    public bool IsReturningToEdit =>
+        isReturningToEdit;
+
+    public bool IsCleared =>
+        isCleared;
 
     private void Start()
     {
         ReturnToEdit();
     }
 
-    //==================================================
-    // Update
-    //==================================================
-
     private void Update()
     {
-        if (!IsTestPlay)
+        if (!IsPlaying)
             return;
 
         if (Keyboard.current != null &&
@@ -98,6 +95,40 @@ public class TestPlayManager : MonoBehaviour
     //==================================================
 
     public void StartTestPlay()
+    {
+        if (mapManager == null)
+        {
+            Debug.LogError(
+                "TestPlayManagerにMapManagerが設定されていません。"
+            );
+
+            return;
+        }
+
+        // Goalがない場合はテストプレイできない
+        if (!mapManager.HasGoal())
+        {
+            Debug.LogWarning(
+                "Goalが配置されていないため、テストプレイを開始できません。"
+            );
+
+            return;
+        }
+
+        isCleared = false;
+
+        StartPlayMode();
+
+        Debug.Log(
+            "テストプレイ開始"
+        );
+    }
+
+    //==================================================
+    // プレイモード開始
+    //==================================================
+
+    private void StartPlayMode()
     {
         if (playerPrefab == null)
         {
@@ -117,18 +148,10 @@ public class TestPlayManager : MonoBehaviour
             return;
         }
 
-        //==================================================
-        // テストプレイ状態
-        //==================================================
+        isReturningToEdit = false;
 
         currentMode =
             TestPlayMode.TestPlay;
-
-        testPlayCleared = false;
-
-        //==================================================
-        // Goalのクリア状態をリセット
-        //==================================================
 
         GoalClear goalClear =
             FindObjectOfType<GoalClear>();
@@ -138,126 +161,158 @@ public class TestPlayManager : MonoBehaviour
             goalClear.ResetClearState();
         }
 
-        //==================================================
-        // 敵の位置を保存
-        //==================================================
-
         SaveEnemyPositions();
-
-        //==================================================
-        // NavMesh生成
-        //==================================================
 
         if (mapManager != null)
         {
             mapManager.BuildNavigation();
         }
-        else
-        {
-            Debug.LogError(
-                "TestPlayManagerにMapManagerが設定されていません。"
-            );
-        }
-
-        //==================================================
-        // 既存Player削除
-        //==================================================
 
         if (playerInstance != null)
         {
             Destroy(playerInstance);
-
             playerInstance = null;
         }
 
-        //==================================================
-        // Player生成
-        //==================================================
-
-        playerInstance =
-            Instantiate(
-                playerPrefab,
-                startPoint.position,
-                startPoint.rotation
-            );
-
-        //==================================================
-        // 敵のNavMeshAgentを有効化
-        //==================================================
+        playerInstance = Instantiate(
+            playerPrefab,
+            startPoint.position,
+            startPoint.rotation
+        );
 
         if (mapManager != null)
         {
             mapManager.EnableEnemyMovement();
         }
 
-        //==================================================
-        // マップクリエイトUI非表示
-        //==================================================
-
+        // 編集UIを非表示
         if (mapCreateUI != null)
         {
             mapCreateUI.SetActive(false);
         }
-
-        //==================================================
-        // その他の編集UI非表示
-        //==================================================
 
         if (otherEditUI != null)
         {
             otherEditUI.SetActive(false);
         }
 
-        //==================================================
-        // テストプレイUI表示
-        //==================================================
-
+        // テストプレイUIを表示
         if (testPlayUI != null)
         {
             testPlayUI.SetActive(true);
         }
 
-        //==================================================
-        // ESCメニュー非表示
-        //==================================================
+        // 投稿確認UIを非表示
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(false);
+        }
 
+        // ESCメニューを非表示
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
         }
 
-        //==================================================
-        // 編集カメラOFF
-        //==================================================
-
+        // 編集カメラをOFF
         if (editCamera != null)
         {
             editCamera.gameObject.SetActive(false);
         }
 
-        //==================================================
-        // PlayerカメラON
-        //==================================================
-
+        // PlayerカメラをON
         if (playerCamera != null)
         {
             playerCamera.gameObject.SetActive(true);
         }
 
-        //==================================================
-        // ゲーム再開
-        //==================================================
-
         Time.timeScale = 1f;
 
         Cursor.visible = false;
-
         Cursor.lockState =
             CursorLockMode.Locked;
+    }
+
+    //==================================================
+    // テストプレイクリア
+    //==================================================
+
+    public void PlayClear()
+    {
+        if (!IsTestPlay)
+            return;
+
+        if (isCleared)
+            return;
+
+        isCleared = true;
 
         Debug.Log(
-            "テストプレイ開始"
+            "テストプレイクリア"
         );
+
+        // 投稿確認を表示
+        ShowPostConfirm();
+    }
+
+    //==================================================
+    // 投稿確認UI表示
+    //==================================================
+
+    private void ShowPostConfirm()
+    {
+        Time.timeScale = 0f;
+
+        Cursor.visible = true;
+        Cursor.lockState =
+            CursorLockMode.None;
+
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "投稿確認UIが設定されていません。"
+            );
+
+            ReturnToEdit();
+        }
+    }
+
+    //==================================================
+    // 投稿する
+    //==================================================
+
+    public void PostDungeon()
+    {
+        if (!isCleared)
+            return;
+
+        Debug.Log(
+            "ダンジョンを投稿します。"
+        );
+
+        // ここに投稿処理を追加する
+
+        ReturnToEdit();
+    }
+
+    //==================================================
+    // 投稿しない
+    //==================================================
+
+    public void CancelPost()
+    {
+        if (!isCleared)
+            return;
+
+        Debug.Log(
+            "ダンジョンを投稿せず編集画面へ戻ります。"
+        );
+
+        ReturnToEdit();
     }
 
     //==================================================
@@ -286,9 +341,9 @@ public class TestPlayManager : MonoBehaviour
         }
 
         Debug.Log(
-            "テストプレイ開始時の敵位置を保存しました : "
-            + enemyPositions.Count
-            + "体"
+            "開始時の敵位置を保存しました : " +
+            enemyPositions.Count +
+            "体"
         );
     }
 
@@ -298,27 +353,22 @@ public class TestPlayManager : MonoBehaviour
 
     private void RestoreEnemyPositions()
     {
-        foreach (
-            EnemyTransformData data
-            in enemyPositions
-        )
+        foreach (EnemyTransformData data in enemyPositions)
         {
             if (data.enemy == null)
                 continue;
 
             NavMeshAgent[] agents =
-                data.enemy.GetComponentsInChildren<
-                    NavMeshAgent
-                >();
+                data.enemy.GetComponentsInChildren<NavMeshAgent>();
 
             foreach (NavMeshAgent agent in agents)
             {
-                if (agent.enabled)
-                {
-                    agent.isStopped = true;
-                    agent.ResetPath();
-                    agent.velocity = Vector3.zero;
-                }
+                if (!agent.enabled)
+                    continue;
+
+                agent.isStopped = true;
+                agent.ResetPath();
+                agent.velocity = Vector3.zero;
             }
 
             data.enemy.transform.SetPositionAndRotation(
@@ -330,7 +380,9 @@ public class TestPlayManager : MonoBehaviour
             {
                 if (agent.enabled)
                 {
-                    agent.Warp(data.position);
+                    agent.Warp(
+                        data.position
+                    );
                 }
             }
         }
@@ -338,7 +390,7 @@ public class TestPlayManager : MonoBehaviour
         enemyPositions.Clear();
 
         Debug.Log(
-            "敵の位置をテストプレイ開始時の状態に戻しました。"
+            "敵の位置を開始時の状態に戻しました。"
         );
     }
 
@@ -363,7 +415,6 @@ public class TestPlayManager : MonoBehaviour
             Time.timeScale = 0f;
 
             Cursor.visible = true;
-
             Cursor.lockState =
                 CursorLockMode.None;
         }
@@ -372,21 +423,18 @@ public class TestPlayManager : MonoBehaviour
             Time.timeScale = 1f;
 
             Cursor.visible = false;
-
             Cursor.lockState =
                 CursorLockMode.Locked;
         }
     }
 
     //==================================================
-    // 制作画面に戻る
+    // 編集モードへ戻る
     //==================================================
 
     public void ReturnToEdit()
     {
-        //==================================================
-        // 敵の位置を元に戻す
-        //==================================================
+        isReturningToEdit = true;
 
         if (currentMode == TestPlayMode.TestPlay)
         {
@@ -396,21 +444,16 @@ public class TestPlayManager : MonoBehaviour
         currentMode =
             TestPlayMode.Edit;
 
-        //==================================================
-        // Player削除
-        //==================================================
+        isCleared = false;
 
+        // Player削除
         if (playerInstance != null)
         {
             Destroy(playerInstance);
-
             playerInstance = null;
         }
 
-        //==================================================
-        // 敵のNavMeshAgentを停止
-        //==================================================
-
+        // 敵の移動停止
         GameObject[] enemies =
             GameObject.FindGameObjectsWithTag(
                 "Enemy"
@@ -419,9 +462,7 @@ public class TestPlayManager : MonoBehaviour
         foreach (GameObject enemy in enemies)
         {
             NavMeshAgent[] agents =
-                enemy.GetComponentsInChildren<
-                    NavMeshAgent
-                >();
+                enemy.GetComponentsInChildren<NavMeshAgent>();
 
             foreach (NavMeshAgent agent in agents)
             {
@@ -435,46 +476,36 @@ public class TestPlayManager : MonoBehaviour
             }
         }
 
-        //==================================================
-        // マップクリエイトUI表示
-        //==================================================
-
+        // 編集UI表示
         if (mapCreateUI != null)
         {
             mapCreateUI.SetActive(true);
         }
-
-        //==================================================
-        // その他の編集UI表示
-        //==================================================
 
         if (otherEditUI != null)
         {
             otherEditUI.SetActive(true);
         }
 
-        //==================================================
         // テストプレイUI非表示
-        //==================================================
-
         if (testPlayUI != null)
         {
             testPlayUI.SetActive(false);
         }
 
-        //==================================================
-        // ESCメニュー非表示
-        //==================================================
+        // 投稿確認UI非表示
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(false);
+        }
 
+        // ESCメニュー非表示
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
         }
 
-        //==================================================
-        // 編集カメラON
-        //==================================================
-
+        // 編集カメラ表示
         if (editCamera != null)
         {
             editCamera.gameObject.SetActive(true);
@@ -487,44 +518,35 @@ public class TestPlayManager : MonoBehaviour
                 );
         }
 
-        //==================================================
-        // PlayerカメラOFF
-        //==================================================
-
+        // Playerカメラ非表示
         if (playerCamera != null)
         {
             playerCamera.gameObject.SetActive(false);
         }
 
-        //==================================================
-        // ゲーム時間を戻す
-        //==================================================
-
         Time.timeScale = 1f;
 
         Cursor.visible = true;
-
         Cursor.lockState =
             CursorLockMode.None;
 
         Debug.Log(
             "マップクリエイトに戻りました"
         );
+
+        StartCoroutine(
+            EnableEditInputNextFrame()
+        );
     }
 
     //==================================================
-    // テストプレイクリア
+    // 編集操作を次のフレームから許可
     //==================================================
 
-    public void TestPlayClear()
+    private IEnumerator EnableEditInputNextFrame()
     {
-        if (!IsTestPlay)
-            return;
+        yield return null;
 
-        testPlayCleared = true;
-
-        Debug.Log(
-            "テストプレイクリア"
-        );
+        isReturningToEdit = false;
     }
 }
