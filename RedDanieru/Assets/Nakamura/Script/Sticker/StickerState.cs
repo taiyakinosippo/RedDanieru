@@ -42,11 +42,22 @@ public class StickerState : MonoBehaviour
             case Sticker.ChargeDash:
                 currentStickerScript = gameObject.AddComponent<ChargeDashSticker>();
                 break;
+
+            case Sticker.Curing:
+                currentStickerScript = gameObject.AddComponent<CuringSticker>();
+                break;
+
+            case Sticker.Legless:
+                currentStickerScript = gameObject.AddComponent<LeglessSticker>();
+                break;
         }
 
         //Apply関数実行
         if (gameObject.CompareTag("Enemy"))
+        {
+            currentStickerScript?.GetEnemyScript();
             currentStickerScript?.OnEnemyApply();
+        }
         else
             currentStickerScript?.OnTrapApply();
     }
