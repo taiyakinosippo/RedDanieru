@@ -35,7 +35,7 @@ namespace Player
         public float _followSpeed = 10.0f;
         [Tooltip("プレイヤーのRayを受け取る高さ")]
         public Vector3 _playerRayOffset = new Vector3(0, 1.0f, 0);
-      
+
 
         // 左右の角度
         private float _cinemachineTargetYaw;
@@ -83,7 +83,7 @@ namespace Player
         //-------------------------------------------------
         public void DisableCamera()
         {
-            if (ThirdPersonPerspective != null) 
+            if (ThirdPersonPerspective != null)
                 ThirdPersonPerspective.SetActive(false);
             if (FirstPersonPerspective != null)
                 FirstPersonPerspective.SetActive(false);
@@ -139,31 +139,31 @@ namespace Player
             Vector3 rotatedDiff = cameraRotation * diff;
 
             Debug.DrawRay(
-    _rayPosition,
-    cameraDirection * _defaultCameraDistance,
-    Color.red
-);
+             _rayPosition,
+             cameraDirection * _defaultCameraDistance,
+             Color.red
+            );
             //==================================================
             // 壁判定
             //==================================================
-            if (Physics.SphereCast(_rayPosition,_sphereSize,cameraDirection,out RaycastHit hit,_defaultCameraDistance,_wallLayer,QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(_rayPosition, _sphereSize, cameraDirection, out RaycastHit hit, _defaultCameraDistance, _wallLayer, QueryTriggerInteraction.Ignore))
             {
-                
+
                 // 壁に接触する位置より少し手前
-                float safeDistance =  hit.distance - _wallDistance;
-                safeDistance =  Mathf.Max(safeDistance, 0.1f);
+                float safeDistance = hit.distance - _wallDistance;
+                safeDistance = Mathf.Max(safeDistance, 0.1f);
 
                 // 現在のカメラ位置から安全位置へゆっくり移動
-                _cameraDistance =Mathf.Lerp(_cameraDistance, safeDistance,_followSpeed * Time.deltaTime);
+                _cameraDistance = Mathf.Lerp(_cameraDistance, safeDistance, _followSpeed * Time.deltaTime);
             }
 
             else
             {
                 // 本来の位置に一瞬で戻す
-                _cameraDistance = Mathf.Lerp(_cameraDistance, _defaultCameraDistance,_followSpeed * Time.deltaTime);
+                _cameraDistance = Mathf.Lerp(_cameraDistance, _defaultCameraDistance, _followSpeed * Time.deltaTime);
             }
 
-            Vector3 targetPosition =_playerPosition + cameraDirection * _cameraDistance;
+            Vector3 targetPosition = _playerPosition + cameraDirection * _cameraDistance;
 
 
             currentCamera.transform.position = targetPosition;
@@ -181,20 +181,27 @@ namespace Player
             if (lfAngle > 360f) lfAngle -= 360f;
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
         }
-    
+
 
         public void PlayerDiedCamera()
         {
-            if (_playerStatus != null && _playerStatus._isDead)
+            if (_playerStatus != null && _playerStatus._isDead && !GameModeManager.IsMultiplayer)
             {
                 Debug.Log("死亡カメラに切り替え");
                 currentCamera.SetActive(false);
 
                 _deadCamera.SetActive(true);
             }
+            else if (_playerStatus != null && !_playerStatus._isDead && !GameModeManager.IsMultiplayer)
+            {
+                Debug.Log("通常カメラに切り替え");
+                _deadCamera.SetActive(false);
+                currentCamera.SetActive(true);
+            }
         }
     }
 }
+
 
     
 

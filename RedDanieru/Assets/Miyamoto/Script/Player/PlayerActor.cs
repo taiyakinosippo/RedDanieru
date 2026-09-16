@@ -24,6 +24,7 @@ namespace Player
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
         private PlayerStatus        _playerStatus;
+        private DeadCameraMulti     _deadMultiCamera;
 
         private bool _debugMode = false;
 
@@ -63,6 +64,8 @@ namespace Player
             _stickerCheck　= GetComponent<StickerCheck>();
 
             _playerStatus = GetComponent<PlayerStatus>();
+
+            _deadMultiCamera = GetComponent<DeadCameraMulti>();
         }
 
         //public override void Spawned()
@@ -129,53 +132,70 @@ namespace Player
 
         public  void FixedUpdate()
         {
-            if(_playerStatus._isDead) return; 
-            //コンポーネントを取得できているか
-            _animation.AnimatorComPonent();
-
-            // 地面にいるかどうかの判定
-            _playerMovement.GroundedCheck();
-
-            // 入力を取得
-            _actionPriority.CheckInput(_input, _playerMovement.Grounded);
-
-
-            Debug.Log(_actionPriority.currentActionType);
-
-            if (_actionPriority.currentActionType == ActionType.Move ||
-                _actionPriority.currentActionType == ActionType.None ||
-                _actionPriority.currentActionType == ActionType.Jump)
+            if (!_playerStatus._isDead)
             {
-                // プレイヤーの移動処理
-                _playerMovement.PlayerMove(_input);
+                //コンポーネントを取得できているか
+                _animation.AnimatorComPonent();
 
-                // ジャンプと重力の処理
-                _playerMovement.PlayerJumpAndGravity(_input);
+                // 地面にいるかどうかの判定
+                _playerMovement.GroundedCheck();
+
+                // 入力を取得
+                _actionPriority.CheckInput(_input, _playerMovement.Grounded);
+
+
+                Debug.Log(_actionPriority.currentActionType);
+
+                if (_actionPriority.currentActionType == ActionType.Move ||
+                    _actionPriority.currentActionType == ActionType.None ||
+                    _actionPriority.currentActionType == ActionType.Jump)
+                {
+                    // プレイヤーの移動処理
+                    _playerMovement.PlayerMove(_input);
+
+                    // ジャンプと重力の処理
+                    _playerMovement.PlayerJumpAndGravity(_input);
+                }
+
+                if (_actionPriority.currentActionType == ActionType.Sticker)
+                {
+                    // プレイヤーのスティッカー使用処理
+                    _stickerCheck.StickerAndWallCheck(_input);
+                }
+
+                if (_actionPriority.currentActionType == ActionType.Attack)
+                {
+                    // プレイヤーの攻撃処理
+                    _playerAttack.Attack(_input);
+                }
+
+                if (_actionPriority.currentActionType == ActionType.CameraChange)
+                {
+                    // カメラ変更処理
+                    _playerCamera.CameraChange(_input);
+                }
             }
-
-            if (_actionPriority.currentActionType == ActionType.Sticker)
+            else if (GameModeManager.IsMultiplayer && _playerStatus._isDead)
             {
-                // プレイヤーのスティッカー使用処理
-                _stickerCheck.StickerAndWallCheck(_input);
+                _actionPriority.CheckInput(_input, _playerMovement.Grounded);   
+
+                // カメラの移動処理
+                _deadMultiCamera.CameraMoveFiexdUpdate(_input);
+                  
             }
-
-            if (_actionPriority.currentActionType == ActionType.Attack)
-            {
-                // プレイヤーの攻撃処理
-                _playerAttack.Attack(_input);
-            }
-
-            if (_actionPriority.currentActionType == ActionType.CameraChange)
-            {
-                // カメラ変更処理
-                _playerCamera.CameraChange(_input);
-            }
-
-            //カメラの動き
-            _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
-
+            
         }
 
-     
+        private void LateUpdate()
+        {
+            CameraContoller();
+        }
+
+        public void CameraContoller()
+        {
+            if (_playerStatus._isDead) return;
+            //カメラの動き
+            _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
+        }
     }
 }
