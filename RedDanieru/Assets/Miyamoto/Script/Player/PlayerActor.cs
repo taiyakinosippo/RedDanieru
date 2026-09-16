@@ -193,9 +193,17 @@ namespace Player
 
         public void CameraContoller()
         {
-            if (_playerStatus._isDead) return;
-            //カメラの動き
-            _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
+            if (!_playerStatus._isDead)
+            {
+                //カメラの動き
+                _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
+            }
+
+            else if (GameModeManager.IsMultiplayer && _playerStatus._isDead)
+            {
+                //カメラの動き
+                _playerCamera.DeadPlayerCameraMove(IsCurrentDeviceMouse, _input);
+            }
         }
     }
 }

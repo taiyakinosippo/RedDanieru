@@ -93,19 +93,19 @@ namespace Player
         }
 
         private void Die()
-{
-    _isDead = true;
+        {
+           _isDead = true;
 
-    Debug.Log("死亡");
+           Debug.Log("死亡");
 
-    GameOverManager gameOverManager =
-        FindObjectOfType<GameOverManager>();
+           //GameOverManager gameOverManager =
+          // //FindObjectOfType<GameOverManager>();
 
-    if (gameOverManager != null)
-    {
-        gameOverManager.GameOver();
-    }
-}
+          //if (gameOverManager != null)
+          //{
+          //    //gameOverManager.GameOver();
+          //}
+        }
     }
 
 }

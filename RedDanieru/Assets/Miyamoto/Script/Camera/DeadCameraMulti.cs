@@ -24,7 +24,7 @@ namespace Player
         private float _targetRotation;
         private float _rotationVelocity;
         [Tooltip("回転の補間時間")]
-        private float RotationSmoothTime;
+        public float RotationSmoothTime = 10.0f;
 
 
         void Start()
@@ -74,7 +74,7 @@ namespace Player
             //指定した回転角度を元に、プレイヤーの移動方向を計算する
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
-            transform.position += targetDirection * _cameraSpeed * Time.deltaTime;
+            _playerCamera.currentCamera.transform.position += targetDirection * _cameraSpeed * Time.deltaTime;
         }
 
         private void LateUpdate()

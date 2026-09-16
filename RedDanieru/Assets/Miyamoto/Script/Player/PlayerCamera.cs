@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 using static UnityEngine.GraphicsBuffer;
 ///<summry>
 ///プレイヤーのカメラを制御するためのスクリプト
@@ -103,6 +104,8 @@ namespace Player
             _cinemachineTargetPitch = currentCamera.transform.rotation.eulerAngles.x;
             _actionPriority.EndAction();
         }
+
+  
         //------------------------------------------------
         //カメラの向きを変更する
         //------------------------------------------------
@@ -171,6 +174,24 @@ namespace Player
 
 
         }
+        public void DeadPlayerCameraMove(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
+        {
+            // カメラが動かせれていないかつロックされていないかどうか
+            if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+            {
+                //マウスで操作している場合は1.0f、コントローラーで操作している場合はTime.deltaTimeを使用する
+                float deltaTimeMultiplier = _IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+                // カメラの左右角度を更新する
+                _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
+                // カメラの上下角度を更新する
+                _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+            }
+
+            Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+
+            currentCamera.transform.rotation = cameraRotation;
+        }
+
         //-----------------------------------------------------------
         // 角度を制限する関数
         //-----------------------------------------------------------
@@ -196,7 +217,6 @@ namespace Player
             {
                 Debug.Log("通常カメラに切り替え");
                 _deadCamera.SetActive(false);
-                currentCamera.SetActive(true);
             }
         }
     }
