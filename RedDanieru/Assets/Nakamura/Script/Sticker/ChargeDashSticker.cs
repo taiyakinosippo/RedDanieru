@@ -19,7 +19,7 @@ public class ChargeDashSticker : StickerBase
 
     private DashState state;
 
-    private float enemyDashSpeed = 10.0f;  //敵の突進速度
+    private float enemyDashSpeed = 13.0f;  //敵の突進速度
     private float trapDashSpeed = 20.0f;  //物の突進速度
     private float dashTime = 5.0f;  //突進時間
     private float chargeTime = 2.0f;  //溜め時間
@@ -128,7 +128,7 @@ public class ChargeDashSticker : StickerBase
         velocity.y = rb.linearVelocity.y;   //重力は維持
         rb.linearVelocity = velocity;
 
-        enemyScript.AttackEffect();
+        //enemyScript.AttackEffect();
 
         timer -= Time.deltaTime;
 
@@ -158,6 +158,15 @@ public class ChargeDashSticker : StickerBase
         if (state != DashState.Dash)
             return;
 
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            //プレイヤーに当たったらダメージ判定出す
+            enemyScript.AttackEffect();
+
+            //プレイヤーが突き飛ばされる
+
+        }
+
         //敵だけ終了
         if (enemyScript != null)
         {
@@ -176,7 +185,9 @@ public class ChargeDashSticker : StickerBase
 
         //敵スクリプト側の初期化とか
         agent.enabled = true;
-
         enemyScript.EndSpecial();
+        
+        //2秒間スタン
+        enemyScript.Stun(2f);  
     }
 }
