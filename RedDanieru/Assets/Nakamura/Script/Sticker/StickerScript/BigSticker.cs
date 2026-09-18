@@ -5,6 +5,7 @@ public class BigSticker : StickerBase
 {
     private float bigScale = 3.0f;  //拡大率
     private float scaleTime = 2.0f;  //拡大縮小時間
+    private int addPower = 100;  //現在の拡大率
     private float addAttackScale = 1.0f;  //現在の拡大率
     private float addAttackCoolTime = 0.5f;  //現在の拡大率
 
@@ -40,7 +41,8 @@ public class BigSticker : StickerBase
         //スケールを拡大
         transform.localScale = new Vector3(bigScale, bigScale, bigScale);
 
-        //敵の攻撃範囲を拡大し、攻撃クールタイムを延長
+        //敵の攻撃力、攻撃範囲、攻撃クールタイムを増加
+        enemyScript.AddEnemyPower(addPower);
         enemyScript.AddEnemyAttackArea(addAttackScale);
         enemyScript.AddEnemyAttackCoolTime(addAttackCoolTime);
     }
@@ -51,7 +53,8 @@ public class BigSticker : StickerBase
         //スケールを元に戻す
         transform.localScale = new Vector3(1f, 1f, 1.0f);
 
-        //敵の攻撃範囲を元に戻し、攻撃クールタイムを元に戻す
+        //敵の攻撃力、攻撃範囲、攻撃クールタイムを元に戻す
+        enemyScript.AddEnemyPower(-addPower);
         enemyScript.AddEnemyAttackArea(-addAttackScale);
         enemyScript.AddEnemyAttackCoolTime(-addAttackCoolTime);
 
