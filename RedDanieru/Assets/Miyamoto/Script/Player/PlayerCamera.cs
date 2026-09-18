@@ -200,6 +200,7 @@ namespace Player
             Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 
             currentCamera.transform.rotation = cameraRotation;
+
         }
 
         //-----------------------------------------------------------
