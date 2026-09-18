@@ -24,6 +24,7 @@ namespace Player
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
         private PlayerStatus        _playerStatus;
+        private DeadCameraMulti     _deadMultiCamera;
 
         private bool _debugMode = false;
 
@@ -63,6 +64,8 @@ namespace Player
             _stickerCheck　= GetComponent<StickerCheck>();
 
             _playerStatus = GetComponent<PlayerStatus>();
+
+            _deadMultiCamera = GetComponent<DeadCameraMulti>();
         }
 
         //public override void Spawned()
@@ -144,18 +147,19 @@ namespace Player
 
         private void UpdatePlayer()
         {
-            float start = Time.realtimeSinceStartup;
-
-            if (_playerStatus._isDead) return;
+            if (_playerStatus._isDead)
+            {
+                if (GameModeManager.IsMultiplayer)
+                {
+                    _actionPriority.CheckInput(_input, _playerMovement.Grounded);
+                    _deadMultiCamera.CameraMoveFiexdUpdate(_input);
+                }
+                return;
+            }
 
             _animation.AnimatorComPonent();
-
             _playerMovement.GroundedCheck();
-
-            _actionPriority.CheckInput(
-                _input,
-                _playerMovement.Grounded
-            );
+            _actionPriority.CheckInput(_input, _playerMovement.Grounded);
 
             if (_actionPriority.currentActionType == ActionType.Move ||
                 _actionPriority.currentActionType == ActionType.None ||
@@ -183,10 +187,22 @@ namespace Player
 
         private void LateUpdate()
         {
-            if (_playerStatus._isDead) return;
-            //カメラの動き
-            _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
-            
+            CameraContoller();
+        }
+
+        public void CameraContoller()
+        {
+            if (!_playerStatus._isDead)
+            {
+                //カメラの動き
+                _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
+            }
+
+            else if (GameModeManager.IsMultiplayer && _playerStatus._isDead)
+            {
+                //カメラの動き
+                _playerCamera.DeadPlayerCameraMove(IsCurrentDeviceMouse, _input);
+            }
         }
     }
 }

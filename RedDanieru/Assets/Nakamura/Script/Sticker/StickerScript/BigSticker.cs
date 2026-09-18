@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class BigSticker : StickerBase
 {
-    private float bigScale = 3.0f; //拡大率
-    private float scaleTime = 2.0f; //拡大縮小時間
+    private float bigScale = 3.0f;  //拡大率
+    private float scaleTime = 2.0f;  //拡大縮小時間
+    private int addPower = 100;  //現在の拡大率
+    private float addAttackScale = 1.0f;  //現在の拡大率
+    private float addAttackCoolTime = 0.5f;  //現在の拡大率
 
     //public override StickerState.State OnEnemyUpdate(GameObject enemy, StickerState.State state)
     //{
@@ -32,15 +35,28 @@ public class BigSticker : StickerBase
     //    return state;
     //}
 
+    //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
     {
-        //ステッカーが貼られたときの処理
+        //スケールを拡大
         transform.localScale = new Vector3(bigScale, bigScale, bigScale);
-    }
 
+        //敵の攻撃力、攻撃範囲、攻撃クールタイムを増加
+        enemyScript.AddEnemyPower(addPower);
+        enemyScript.AddEnemyAttackArea(addAttackScale);
+        enemyScript.AddEnemyAttackCoolTime(addAttackCoolTime);
+    }
+    
+    //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
+        //スケールを元に戻す
         transform.localScale = new Vector3(1f, 1f, 1.0f);
+
+        //敵の攻撃力、攻撃範囲、攻撃クールタイムを元に戻す
+        enemyScript.AddEnemyPower(-addPower);
+        enemyScript.AddEnemyAttackArea(-addAttackScale);
+        enemyScript.AddEnemyAttackCoolTime(-addAttackCoolTime);
 
         //float scale = transform.localScale.x;  //現在の拡大率
 
@@ -50,18 +66,19 @@ public class BigSticker : StickerBase
         //    transform.localScale = new Vector3(scale, scale, scale);
         //    yield return null;
         //}
-
-        //ステッカーを剥がす
-        Destroy(GetComponent<StickerBase>());
     }
 
+    //ステッカーが物に貼られたときの処理
     public override void OnTrapApply()
     {
-        OnEnemyApply();
+        //スケールを拡大
+        transform.localScale = new Vector3(bigScale, bigScale, bigScale);
     }
 
+    //ステッカーが物から剥がれたときの処理
     public override void OnTrapRemove()
     {
-        OnEnemyRemove();
+        //スケールを元に戻す
+        transform.localScale = new Vector3(1f, 1f, 1.0f);
     }
 }

@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 public class ChargeDashSticker : StickerBase
 {
-    private EnemyBase enemyScript;
     private StickerState stickerState;
     private Rigidbody rb;
     protected NavMeshAgent agent;
@@ -26,10 +25,10 @@ public class ChargeDashSticker : StickerBase
     private float timer = 0.0f;  //溜め時間のタイマー
     private Vector3 dashDirection;  //敵の向く方向
 
+    //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
     {
         rb = GetComponent<Rigidbody>();
-        enemyScript = GetComponent<EnemyBase>();
         stickerState = GetComponent<StickerState>();
         agent = GetComponent<NavMeshAgent>();
         stickerState.isSpecialMove = true;  //特殊行動ON
@@ -54,12 +53,14 @@ public class ChargeDashSticker : StickerBase
         }
     }
 
+    //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
         stickerState.isSpecialMove = false;
         agent.enabled = true;
     }
 
+    //ステッカーが物に貼られたときの処理
     public override void OnTrapApply()
     {
         rb = GetComponent<Rigidbody>();
@@ -85,6 +86,7 @@ public class ChargeDashSticker : StickerBase
         }
     }
 
+    //ステッカーが物から剥がれたときの処理
     public override void OnTrapRemove()
     {
         stickerState.isSpecialMove = false;

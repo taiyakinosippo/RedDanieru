@@ -128,6 +128,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99ebd495b4d659644867ba7ae4adacec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyHP: 1000
+  enemyPower: 200
+  enemyDefense: 0
+  enemyMoveSpeed: 3
+  enemySearchArea: 6
+  enemyTrackingTime: 3
+  enemyAttackArea: 1.5
+  enemyAttackCoolTime: 1
+  enemyAttackStartTime: 1.2
+  enemyAttackEndTime: 0.3
   playerLayer:
     serializedVersion: 2
     m_Bits: 64

@@ -32,6 +32,8 @@ public class MapManager : MonoBehaviour
     [Header("Prefab")]
     public GameObject wallPrefab;
 
+    [SerializeField] private GameObject diagonalWallPrefab;
+
     [SerializeField] private GameObject floorPrefab;
 
     [System.Serializable]
@@ -89,10 +91,15 @@ public class MapManager : MonoBehaviour
     private GameObject respawnAreaObject;
 
     private TileType[,,] map;
+
     private GameObject[,,] wallObjects;
     private GameObject[,,] floorObjects;
+
     private GameObject[,,] placedObjects;
     private PlaceObjectType[,,] placedObjectTypes;
+
+    // 斜め壁と床が同じマスに存在しているか
+    private bool[,,] diagonalWallFloor;
 
     private int mapRevision = 0;
 
@@ -223,19 +230,47 @@ public class MapManager : MonoBehaviour
 
     private void GenerateMap()
     {
-        map = new TileType[width, height, depth];
+        map =
+            new TileType[
+                width,
+                height,
+                depth
+            ];
 
         wallObjects =
-            new GameObject[width, height, depth];
+            new GameObject[
+                width,
+                height,
+                depth
+            ];
 
         floorObjects =
-            new GameObject[width, height, depth];
+            new GameObject[
+                width,
+                height,
+                depth
+            ];
 
         placedObjects =
-            new GameObject[width, height, depth];
+            new GameObject[
+                width,
+                height,
+                depth
+            ];
 
         placedObjectTypes =
-            new PlaceObjectType[width, height, depth];
+            new PlaceObjectType[
+                width,
+                height,
+                depth
+            ];
+
+        diagonalWallFloor =
+            new bool[
+                width,
+                height,
+                depth
+            ];
 
         for (int x = 0; x < width; x++)
         {
@@ -244,6 +279,18 @@ public class MapManager : MonoBehaviour
                 for (int z = 0; z < depth; z++)
                 {
                     map[x, y, z] = TileType.Wall;
+
+                    placedObjectTypes[
+                        x,
+                        y,
+                        z
+                    ] = default;
+
+                    diagonalWallFloor[
+                        x,
+                        y,
+                        z
+                    ] = false;
                 }
             }
         }
@@ -268,6 +315,8 @@ public class MapManager : MonoBehaviour
                 }
             }
         }
+
+        UpdateDiagonalWalls();
     }
 
     //==================================================
@@ -290,16 +339,21 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
-        GameObject wall = Instantiate(
-            wallPrefab,
-            GetWallWorldPosition(pos),
-            Quaternion.identity,
-            transform
-        );
+        GameObject wall =
+            Instantiate(
+                wallPrefab,
+                GetWallWorldPosition(pos),
+                Quaternion.identity,
+                transform
+            );
 
         SetWallScale(wall);
 
-        wallObjects[pos.x, pos.y, pos.z] = wall;
+        wallObjects[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = wall;
 
         WallBlock block =
             wall.GetComponent<WallBlock>();
@@ -308,14 +362,604 @@ public class MapManager : MonoBehaviour
         {
             block.GridPosition = pos;
         }
-        else
-        {
-            Debug.LogWarning(
-                "Wall PrefabにWallBlockがありません。"
-            );
-        }
 
         return wall;
+    }
+
+    //==================================================
+    // 斜め壁判定
+    //==================================================
+
+    private void UpdateDiagonalWalls()
+    {
+        if (diagonalWallPrefab == null)
+        {
+            return;
+        }
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    UpdateDiagonalWall(
+                        new Vector3Int(x, y, z)
+                    );
+                }
+            }
+        }
+    }
+
+    private void UpdateDiagonalWall(Vector3Int pos)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return;
+        }
+
+        // このマスが壁として存在しているか
+        bool mapWall =
+            map[pos.x, pos.y, pos.z] ==
+            TileType.Wall;
+
+        bool placedWall =
+            map[pos.x, pos.y, pos.z] ==
+            TileType.Floor &&
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null &&
+            placedObjectTypes[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == PlaceObjectType.Wall;
+
+        if (!mapWall && !placedWall)
+        {
+            return;
+        }
+
+        // このマスの壁オブジェクトを取得
+        GameObject currentWall;
+
+        if (mapWall)
+        {
+            currentWall =
+                wallObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
+        }
+        else
+        {
+            currentWall =
+                placedObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
+        }
+
+        if (currentWall == null)
+        {
+            return;
+        }
+
+        bool north =
+            IsWall(
+                new Vector3Int(
+                    pos.x,
+                    pos.y,
+                    pos.z + 1
+                )
+            );
+
+        bool south =
+            IsWall(
+                new Vector3Int(
+                    pos.x,
+                    pos.y,
+                    pos.z - 1
+                )
+            );
+
+        bool east =
+            IsWall(
+                new Vector3Int(
+                    pos.x + 1,
+                    pos.y,
+                    pos.z
+                )
+            );
+
+        bool west =
+            IsWall(
+                new Vector3Int(
+                    pos.x - 1,
+                    pos.y,
+                    pos.z
+                )
+            );
+
+        Quaternion rotation;
+
+        // 北＋東
+        if (north &&
+            east &&
+            !south &&
+            !west)
+        {
+            rotation =
+                Quaternion.Euler(
+                    0f,
+                    180f,
+                    0f
+                );
+        }
+        // 東＋南
+        else if (east &&
+                 south &&
+                 !north &&
+                 !west)
+        {
+            rotation =
+                Quaternion.Euler(
+                    0f,
+                    270f,
+                    0f
+                );
+        }
+        // 南＋西
+        else if (south &&
+                 west &&
+                 !north &&
+                 !east)
+        {
+            rotation =
+                Quaternion.Euler(
+                    0f,
+                    0f,
+                    0f
+                );
+        }
+        // 西＋北
+        else if (west &&
+                 north &&
+                 !east &&
+                 !south)
+        {
+            rotation =
+                Quaternion.Euler(
+                    0f,
+                    90f,
+                    0f
+                );
+        }
+        else
+        {
+            RestoreNormalWall(pos);
+            return;
+        }
+
+        ReplaceWithDiagonalWall(
+            pos,
+            rotation,
+            mapWall
+        );
+    }
+
+    //==================================================
+    // 壁判定
+    // 通常壁と配置したWallの両方を判定
+    //==================================================
+
+    private bool IsWall(Vector3Int pos)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return false;
+        }
+
+        // 通常のマップ壁
+        if (map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == TileType.Wall)
+        {
+            return true;
+        }
+
+        // 配置したWall
+        if (map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == TileType.Floor)
+        {
+            if (placedObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ] != null &&
+                placedObjectTypes[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ] == PlaceObjectType.Wall)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    //==================================================
+    // 斜め壁判定
+    //==================================================
+
+    private bool IsDiagonalWall(GameObject obj)
+    {
+        if (obj == null ||
+            diagonalWallPrefab == null)
+        {
+            return false;
+        }
+
+        string objectName =
+            obj.name.Replace(
+                "(Clone)",
+                ""
+            ).Trim();
+
+        string diagonalName =
+            diagonalWallPrefab.name.Trim();
+
+        return objectName ==
+               diagonalName;
+    }
+
+    //==================================================
+    // 斜め壁へ変更
+    //==================================================
+
+    private void ReplaceWithDiagonalWall(
+        Vector3Int pos,
+        Quaternion rotation,
+        bool isMapWall)
+    {
+        GameObject currentWall;
+
+        if (isMapWall)
+        {
+            currentWall =
+                wallObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
+        }
+        else
+        {
+            currentWall =
+                placedObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
+        }
+
+        if (currentWall == null)
+        {
+            return;
+        }
+
+        // すでに斜め壁なら回転だけ変更
+        if (IsDiagonalWall(currentWall))
+        {
+            currentWall.transform.rotation =
+                rotation;
+
+            // 通常マップ壁の場合は床を作る
+            if (isMapWall)
+            {
+                CreateDiagonalWallFloor(pos);
+            }
+
+            return;
+        }
+
+        Vector3 worldPosition =
+            currentWall.transform.position;
+
+        Transform parent =
+            currentWall.transform.parent;
+
+        Destroy(currentWall);
+
+        GameObject diagonalWall =
+            Instantiate(
+                diagonalWallPrefab,
+                worldPosition,
+                rotation,
+                parent
+            );
+
+        SetWallScale(diagonalWall);
+
+        if (isMapWall)
+        {
+            WallBlock block =
+                diagonalWall.GetComponent<WallBlock>();
+
+            if (block != null)
+            {
+                block.GridPosition = pos;
+            }
+
+            wallObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = diagonalWall;
+
+            // 斜め壁の下に床を生成
+            CreateDiagonalWallFloor(pos);
+        }
+        else
+        {
+            PlaceObject placeObject =
+                diagonalWall.GetComponent<PlaceObject>();
+
+            if (placeObject != null)
+            {
+                placeObject.GridPosition = pos;
+            }
+
+            WallBlock block =
+                diagonalWall.GetComponent<WallBlock>();
+
+            if (block != null)
+            {
+                block.GridPosition = pos;
+            }
+
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = diagonalWall;
+
+            placedObjectTypes[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = PlaceObjectType.Wall;
+        }
+    }
+
+    //==================================================
+    // 斜め壁の下に床を作る
+    //==================================================
+
+    private void CreateDiagonalWallFloor(
+        Vector3Int pos)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return;
+        }
+
+        if (floorObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == null)
+        {
+            CreateFloor(pos);
+        }
+
+        diagonalWallFloor[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = true;
+    }
+
+    //==================================================
+    // 通常壁へ戻す
+    //==================================================
+
+    private void RestoreNormalWall(
+        Vector3Int pos)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return;
+        }
+
+        // 通常マップ壁
+        if (map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == TileType.Wall)
+        {
+            GameObject currentWall =
+                wallObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
+
+            if (currentWall == null)
+            {
+                return;
+            }
+
+            if (!IsDiagonalWall(currentWall))
+            {
+                return;
+            }
+
+            Vector3 worldPosition =
+                currentWall.transform.position;
+
+            Transform parent =
+                currentWall.transform.parent;
+
+            Destroy(currentWall);
+
+            GameObject normalWall =
+                Instantiate(
+                    wallPrefab,
+                    worldPosition,
+                    Quaternion.identity,
+                    parent
+                );
+
+            SetWallScale(normalWall);
+
+            WallBlock block =
+                normalWall.GetComponent<WallBlock>();
+
+            if (block != null)
+            {
+                block.GridPosition = pos;
+            }
+
+            wallObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = normalWall;
+
+            // 斜め壁専用の床を削除
+            RemoveDiagonalWallFloor(pos);
+
+            return;
+        }
+
+        // 配置したWall
+        if (map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == TileType.Floor &&
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null &&
+            placedObjectTypes[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == PlaceObjectType.Wall)
+        {
+            GameObject currentWall =
+                placedObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
+
+            if (!IsDiagonalWall(currentWall))
+            {
+                return;
+            }
+
+            Vector3 worldPosition =
+                currentWall.transform.position;
+
+            Transform parent =
+                currentWall.transform.parent;
+
+            Destroy(currentWall);
+
+            GameObject normalWall =
+                Instantiate(
+                    wallPrefab,
+                    worldPosition,
+                    Quaternion.identity,
+                    parent
+                );
+
+            SetWallScale(normalWall);
+
+            WallBlock block =
+                normalWall.GetComponent<WallBlock>();
+
+            if (block != null)
+            {
+                block.GridPosition = pos;
+            }
+
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = normalWall;
+
+            placedObjectTypes[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = PlaceObjectType.Wall;
+        }
+    }
+
+    //==================================================
+    // 斜め壁用の床を削除
+    //==================================================
+
+    private void RemoveDiagonalWallFloor(
+        Vector3Int pos)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return;
+        }
+
+        if (!diagonalWallFloor[
+                pos.x,
+                pos.y,
+                pos.z])
+        {
+            return;
+        }
+
+        if (floorObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null)
+        {
+            Destroy(
+                floorObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ]
+            );
+
+            floorObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = null;
+        }
+
+        diagonalWallFloor[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = false;
     }
 
     //==================================================
@@ -326,12 +970,13 @@ public class MapManager : MonoBehaviour
     {
         if (respawnPointPrefab != null)
         {
-            respawnPointObject = Instantiate(
-                respawnPointPrefab,
-                defaultRespawnPointPosition,
-                Quaternion.identity,
-                transform
-            );
+            respawnPointObject =
+                Instantiate(
+                    respawnPointPrefab,
+                    defaultRespawnPointPosition,
+                    Quaternion.identity,
+                    transform
+                );
 
             respawnPointObject.name =
                 "RespawnPoint";
@@ -345,12 +990,13 @@ public class MapManager : MonoBehaviour
 
         if (respawnAreaPrefab != null)
         {
-            respawnAreaObject = Instantiate(
-                respawnAreaPrefab,
-                defaultRespawnAreaPosition,
-                Quaternion.identity,
-                transform
-            );
+            respawnAreaObject =
+                Instantiate(
+                    respawnAreaPrefab,
+                    defaultRespawnAreaPosition,
+                    Quaternion.identity,
+                    transform
+                );
 
             respawnAreaObject.name =
                 "RespawnArea";
@@ -400,11 +1046,16 @@ public class MapManager : MonoBehaviour
 
         if (changed)
         {
+            UpdateDiagonalWalls();
+
+            BuildNavigation();
+
             MarkMapChanged();
         }
     }
 
-    private void DigSingleTile(Vector3Int pos)
+    private void DigSingleTile(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
@@ -412,49 +1063,96 @@ public class MapManager : MonoBehaviour
         }
 
         bool isNormalWall =
-            map[pos.x, pos.y, pos.z] ==
-            TileType.Wall;
+            map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == TileType.Wall;
 
         bool isPlacedWall =
-            map[pos.x, pos.y, pos.z] ==
-            TileType.Floor &&
-            placedObjects[pos.x, pos.y, pos.z] != null &&
-            placedObjectTypes[pos.x, pos.y, pos.z] ==
-            PlaceObjectType.Wall;
+            map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == TileType.Floor &&
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null &&
+            placedObjectTypes[
+                pos.x,
+                pos.y,
+                pos.z
+            ] == PlaceObjectType.Wall;
 
-        if (!isNormalWall && !isPlacedWall)
+        if (!isNormalWall &&
+            !isPlacedWall)
         {
             return;
         }
 
+        // 配置したWallを掘削
         if (isPlacedWall)
         {
             GameObject wall =
-                placedObjects[pos.x, pos.y, pos.z];
+                placedObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ];
 
             Destroy(wall);
 
-            placedObjects[pos.x, pos.y, pos.z] =
-                null;
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = null;
 
-            placedObjectTypes[pos.x, pos.y, pos.z] =
-                default;
+            placedObjectTypes[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = default;
 
             return;
         }
 
-        map[pos.x, pos.y, pos.z] =
-            TileType.Floor;
+        // 通常壁を掘削
+        map[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = TileType.Floor;
 
-        if (wallObjects[pos.x, pos.y, pos.z] != null)
+        if (wallObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null)
         {
             Destroy(
-                wallObjects[pos.x, pos.y, pos.z]
+                wallObjects[
+                    pos.x,
+                    pos.y,
+                    pos.z
+                ]
             );
 
-            wallObjects[pos.x, pos.y, pos.z] =
-                null;
+            wallObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] = null;
         }
+
+        // 斜め壁の下にあった床がそのまま床マスになる
+        diagonalWallFloor[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = false;
 
         CreateFloor(pos);
     }
@@ -463,7 +1161,8 @@ public class MapManager : MonoBehaviour
     // 床
     //==================================================
 
-    private GameObject CreateFloor(Vector3Int pos)
+    private GameObject CreateFloor(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
@@ -479,7 +1178,11 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
-        if (floorObjects[pos.x, pos.y, pos.z] != null)
+        if (floorObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null)
         {
             return floorObjects[
                 pos.x,
@@ -488,17 +1191,21 @@ public class MapManager : MonoBehaviour
             ];
         }
 
-        GameObject floor = Instantiate(
-            floorPrefab,
-            GetFloorWorldPosition(pos),
-            Quaternion.identity,
-            transform
-        );
+        GameObject floor =
+            Instantiate(
+                floorPrefab,
+                GetFloorWorldPosition(pos),
+                Quaternion.identity,
+                transform
+            );
 
         SetFloorScale(floor);
 
-        floorObjects[pos.x, pos.y, pos.z] =
-            floor;
+        floorObjects[
+            pos.x,
+            pos.y,
+            pos.z
+        ] = floor;
 
         FloorBlock block =
             floor.GetComponent<FloorBlock>();
@@ -525,7 +1232,11 @@ public class MapManager : MonoBehaviour
         data.depth = depth;
 
         data.tiles =
-            new byte[width * height * depth];
+            new byte[
+                width *
+                height *
+                depth
+            ];
 
         int index = 0;
 
@@ -536,7 +1247,11 @@ public class MapManager : MonoBehaviour
                 for (int x = 0; x < width; x++)
                 {
                     data.tiles[index++] =
-                        (byte)map[x, y, z];
+                        (byte)map[
+                            x,
+                            y,
+                            z
+                        ];
                 }
             }
         }
@@ -547,7 +1262,11 @@ public class MapManager : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    if (placedObjects[x, y, z] == null)
+                    if (placedObjects[
+                            x,
+                            y,
+                            z
+                        ] == null)
                     {
                         continue;
                     }
@@ -575,14 +1294,22 @@ public class MapManager : MonoBehaviour
             data.hasRespawnPoint = true;
 
             Vector3 position =
-                respawnPointObject.transform.position;
+                respawnPointObject
+                    .transform
+                    .position;
 
-            data.spawnPointX = position.x;
-            data.spawnPointY = position.y;
-            data.spawnPointZ = position.z;
+            data.spawnPointX =
+                position.x;
+
+            data.spawnPointY =
+                position.y;
+
+            data.spawnPointZ =
+                position.z;
 
             data.spawnPointRotY =
-                respawnPointObject.transform
+                respawnPointObject
+                    .transform
                     .eulerAngles.y;
         }
         else
@@ -595,18 +1322,32 @@ public class MapManager : MonoBehaviour
             data.hasRespawnArea = true;
 
             Vector3 position =
-                respawnAreaObject.transform.position;
+                respawnAreaObject
+                    .transform
+                    .position;
 
-            data.respawnAreaX = position.x;
-            data.respawnAreaY = position.y;
-            data.respawnAreaZ = position.z;
+            data.respawnAreaX =
+                position.x;
+
+            data.respawnAreaY =
+                position.y;
+
+            data.respawnAreaZ =
+                position.z;
 
             Vector3 scale =
-                respawnAreaObject.transform.localScale;
+                respawnAreaObject
+                    .transform
+                    .localScale;
 
-            data.respawnAreaScaleX = scale.x;
-            data.respawnAreaScaleY = scale.y;
-            data.respawnAreaScaleZ = scale.z;
+            data.respawnAreaScaleX =
+                scale.x;
+
+            data.respawnAreaScaleY =
+                scale.y;
+
+            data.respawnAreaScaleZ =
+                scale.z;
         }
         else
         {
@@ -638,7 +1379,11 @@ public class MapManager : MonoBehaviour
         depth = data.depth;
 
         map =
-            new TileType[width, height, depth];
+            new TileType[
+                width,
+                height,
+                depth
+            ];
 
         placedObjectTypes =
             new PlaceObjectType[
@@ -663,6 +1408,13 @@ public class MapManager : MonoBehaviour
 
         placedObjects =
             new GameObject[
+                width,
+                height,
+                depth
+            ];
+
+        diagonalWallFloor =
+            new bool[
                 width,
                 height,
                 depth
@@ -696,9 +1448,11 @@ public class MapManager : MonoBehaviour
         }
 
         // 現在のマップを削除
-        for (int i = transform.childCount - 1;
-             i >= 0;
-             i--)
+        for (
+            int i = transform.childCount - 1;
+            i >= 0;
+            i--
+        )
         {
             Destroy(
                 transform.GetChild(i).gameObject
@@ -717,20 +1471,37 @@ public class MapManager : MonoBehaviour
             {
                 for (int x = 0; x < width; x++)
                 {
-                    map[x, y, z] =
+                    map[
+                        x,
+                        y,
+                        z
+                    ] =
                         (TileType)data.tiles[index++];
 
                     Vector3Int pos =
-                        new Vector3Int(x, y, z);
+                        new Vector3Int(
+                            x,
+                            y,
+                            z
+                        );
 
-                    if (map[x, y, z] ==
-                        TileType.Wall)
+                    if (
+                        map[
+                            x,
+                            y,
+                            z
+                        ] == TileType.Wall
+                    )
                     {
                         CreateWall(pos);
                     }
                     else if (
-                        map[x, y, z] ==
-                        TileType.Floor)
+                        map[
+                            x,
+                            y,
+                            z
+                        ] == TileType.Floor
+                    )
                     {
                         CreateFloor(pos);
                     }
@@ -738,11 +1509,17 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        // 斜め壁を再判定
+        // ここで斜め壁の下にも床が作られる
+        UpdateDiagonalWalls();
+
         // 配置オブジェクトを復元
         if (data.objects != null)
         {
-            foreach (ObjectData objData
-                     in data.objects)
+            foreach (
+                ObjectData objData
+                in data.objects
+            )
             {
                 Vector3Int pos =
                     new Vector3Int(
@@ -757,6 +1534,9 @@ public class MapManager : MonoBehaviour
                 );
             }
         }
+
+        // 配置したWallを含めて再判定
+        UpdateDiagonalWalls();
 
         BuildNavigation();
 
@@ -803,8 +1583,13 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        if (map[pos.x, pos.y, pos.z] !=
-            TileType.Floor)
+        if (
+            map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != TileType.Floor
+        )
         {
             Debug.Log(
                 "床以外にはオブジェクトを配置できません。"
@@ -813,14 +1598,21 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        if (placedObjects[pos.x, pos.y, pos.z] !=
-            null)
+        if (
+            placedObjects[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != null
+        )
         {
             return;
         }
 
-        if (type == PlaceObjectType.Goal &&
-            HasGoal())
+        if (
+            type == PlaceObjectType.Goal &&
+            HasGoal()
+        )
         {
             Debug.Log(
                 "Goalは1つしか配置できません。"
@@ -855,14 +1647,14 @@ public class MapManager : MonoBehaviour
                 GetObjectWorldPosition(pos);
         }
 
-        GameObject obj = Instantiate(
-            prefab,
-            spawnPosition,
-            Quaternion.identity,
-            transform
-        );
+        GameObject obj =
+            Instantiate(
+                prefab,
+                spawnPosition,
+                Quaternion.identity,
+                transform
+            );
 
-        // 敵以外は床に合わせる
         if (type != PlaceObjectType.Enemy)
         {
             SetObjectScale(obj);
@@ -945,9 +1737,11 @@ public class MapManager : MonoBehaviour
         {
             bounds = renderers[0].bounds;
 
-            for (int i = 1;
-                 i < renderers.Length;
-                 i++)
+            for (
+                int i = 1;
+                i < renderers.Length;
+                i++
+            )
             {
                 bounds.Encapsulate(
                     renderers[i].bounds
@@ -966,9 +1760,11 @@ public class MapManager : MonoBehaviour
         {
             bounds = colliders[0].bounds;
 
-            for (int i = 1;
-                 i < colliders.Length;
-                 i++)
+            for (
+                int i = 1;
+                i < colliders.Length;
+                i++
+            )
             {
                 bounds.Encapsulate(
                     colliders[i].bounds
@@ -1007,21 +1803,26 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        if (!TryGetBounds(
+        if (
+            !TryGetBounds(
                 floor,
-                out Bounds floorBounds))
+                out Bounds floorBounds
+            )
+        )
         {
             return;
         }
 
-        if (!TryGetBounds(
+        if (
+            !TryGetBounds(
                 obj,
-                out Bounds objectBounds))
+                out Bounds objectBounds
+            )
+        )
         {
             return;
         }
 
-        // ブロックの底面を床の上面に合わせる
         float difference =
             floorBounds.max.y -
             objectBounds.min.y;
@@ -1042,16 +1843,25 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        if (map[pos.x, pos.y, pos.z] !=
-            TileType.Floor)
+        // 配置Wallは床マスに置く
+        if (
+            map[
+                pos.x,
+                pos.y,
+                pos.z
+            ] != TileType.Floor
+        )
         {
             return;
         }
 
-        if (placedObjects[
+        if (
+            placedObjects[
                 pos.x,
                 pos.y,
-                pos.z] != null)
+                pos.z
+            ] != null
+        )
         {
             return;
         }
@@ -1065,12 +1875,13 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        GameObject wall = Instantiate(
-            wallPrefab,
-            GetWallWorldPosition(pos),
-            Quaternion.identity,
-            transform
-        );
+        GameObject wall =
+            Instantiate(
+                wallPrefab,
+                GetWallWorldPosition(pos),
+                Quaternion.identity,
+                transform
+            );
 
         SetWallScale(wall);
 
@@ -1094,6 +1905,11 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = PlaceObjectType.Wall;
 
+        // 配置直後に斜め壁判定
+        UpdateDiagonalWalls();
+
+        BuildNavigation();
+
         MarkMapChanged();
     }
 
@@ -1109,8 +1925,10 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
-        foreach (PlaceObjectPrefab data
-                 in objectPrefabs)
+        foreach (
+            PlaceObjectPrefab data
+            in objectPrefabs
+        )
         {
             if (data.type == type)
             {
@@ -1125,7 +1943,8 @@ public class MapManager : MonoBehaviour
     // オブジェクト削除
     //==================================================
 
-    public void DeleteObject(Vector3Int pos)
+    public void DeleteObject(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
@@ -1158,6 +1977,11 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = default;
 
+        // 周囲の斜め壁も再判定
+        UpdateDiagonalWalls();
+
+        BuildNavigation();
+
         MarkMapChanged();
     }
 
@@ -1178,15 +2002,18 @@ public class MapManager : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    if (placedObjects[
+                    if (
+                        placedObjects[
                             x,
                             y,
-                            z] != null &&
+                            z
+                        ] != null &&
                         placedObjectTypes[
                             x,
                             y,
-                            z] ==
-                        PlaceObjectType.Goal)
+                            z
+                        ] == PlaceObjectType.Goal
+                    )
                     {
                         return true;
                     }
@@ -1219,8 +2046,10 @@ public class MapManager : MonoBehaviour
     private void CreateRespawnObjects(
         DungeonMapData data)
     {
-        if (data.hasRespawnPoint &&
-            respawnPointPrefab != null)
+        if (
+            data.hasRespawnPoint &&
+            respawnPointPrefab != null
+        )
         {
             Vector3 position =
                 new Vector3(
@@ -1250,11 +2079,14 @@ public class MapManager : MonoBehaviour
 
             respawnPointObject
                 .transform
-                .eulerAngles = rotation;
+                .eulerAngles =
+                rotation;
         }
 
-        if (data.hasRespawnArea &&
-            respawnAreaPrefab != null)
+        if (
+            data.hasRespawnArea &&
+            respawnAreaPrefab != null
+        )
         {
             Vector3 position =
                 new Vector3(
@@ -1274,7 +2106,9 @@ public class MapManager : MonoBehaviour
             respawnAreaObject.name =
                 "RespawnArea";
 
-            respawnAreaObject.transform.localScale =
+            respawnAreaObject
+                .transform
+                .localScale =
                 new Vector3(
                     data.respawnAreaScaleX,
                     data.respawnAreaScaleY,
@@ -1306,36 +2140,42 @@ public class MapManager : MonoBehaviour
     // 掘削可能判定
     //==================================================
 
-    public bool IsDiggable(Vector3Int pos)
+    public bool IsDiggable(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
             return false;
         }
 
-        if (map[
+        if (
+            map[
                 pos.x,
                 pos.y,
-                pos.z] ==
-            TileType.Wall)
+                pos.z
+            ] == TileType.Wall
+        )
         {
             return true;
         }
 
-        if (map[
+        if (
+            map[
                 pos.x,
                 pos.y,
-                pos.z] ==
-            TileType.Floor &&
+                pos.z
+            ] == TileType.Floor &&
             placedObjects[
                 pos.x,
                 pos.y,
-                pos.z] != null &&
+                pos.z
+            ] != null &&
             placedObjectTypes[
                 pos.x,
                 pos.y,
-                pos.z] ==
-            PlaceObjectType.Wall)
+                pos.z
+            ] == PlaceObjectType.Wall
+        )
         {
             return true;
         }
@@ -1351,11 +2191,13 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
-        if (map[
+        if (
+            map[
                 pos.x,
                 pos.y,
-                pos.z] ==
-            TileType.Wall)
+                pos.z
+            ] == TileType.Wall
+        )
         {
             return wallObjects[
                 pos.x,
@@ -1364,20 +2206,23 @@ public class MapManager : MonoBehaviour
             ];
         }
 
-        if (map[
+        if (
+            map[
                 pos.x,
                 pos.y,
-                pos.z] ==
-            TileType.Floor &&
+                pos.z
+            ] == TileType.Floor &&
             placedObjects[
                 pos.x,
                 pos.y,
-                pos.z] != null &&
+                pos.z
+            ] != null &&
             placedObjectTypes[
                 pos.x,
                 pos.y,
-                pos.z] ==
-            PlaceObjectType.Wall)
+                pos.z
+            ] == PlaceObjectType.Wall
+        )
         {
             return placedObjects[
                 pos.x,
@@ -1448,26 +2293,33 @@ public class MapManager : MonoBehaviour
         }
 
         float currentMapSize =
-            Mathf.Max(width, depth);
+            Mathf.Max(
+                width,
+                depth
+            );
 
         float scale =
-            currentMapSize / baseMapSize;
+            currentMapSize /
+            baseMapSize;
 
         mapCamera.transform.position =
-            baseCameraPosition * scale;
+            baseCameraPosition *
+            scale;
 
         mapCamera.transform.eulerAngles =
             cameraRotation;
 
         mapCamera.orthographicSize =
-            baseOrthographicSize * scale;
+            baseOrthographicSize *
+            scale;
     }
 
     //==================================================
     // マップ内判定
     //==================================================
 
-    private bool IsInsideMap(Vector3Int pos)
+    private bool IsInsideMap(
+        Vector3Int pos)
     {
         return
             pos.x >= 0 &&
