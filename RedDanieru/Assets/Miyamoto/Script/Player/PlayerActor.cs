@@ -101,7 +101,7 @@ namespace Player
         //    Debug.Log(_actionPriority.currentActionType);
 
         //    if (_actionPriority.currentActionType == ActionType.Move ||
-        //        _actionPriority.currentActionType == ActionType.None || 
+        //        _actionPriority.currentActionType == ActionType.None ||
         //        _actionPriority.currentActionType == ActionType.Jump)
         //    {
         //        // プレイヤーの移動処理

@@ -70,6 +70,7 @@ namespace Player
 
         public void Damage(int damage)
         {
+            Debug.Log(_playerName +"dame-ziを受けました");
             damageTimer = damageInvincibleTime; //ダメージを受けた後の無敵時間をリセット
 
             damage -= PlayerDefense;
