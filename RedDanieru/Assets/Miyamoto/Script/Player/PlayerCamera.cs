@@ -37,6 +37,11 @@ namespace Player
         [Tooltip("プレイヤーのRayを受け取る高さ")]
         public Vector3 _playerRayOffset = new Vector3(0, 1.0f, 0);
 
+        [Tooltip("死んだときのマルチの場合のカメラの上方向の制限")] 
+        public float _deadCameraTopClamp = 90.0f;
+        [Tooltip("死んだときのマルチの場合のカメラの下方向の制限")]
+        public float _deadCameraBottomClamp = -90.0f;
+
 
         // 左右の角度
         private float _cinemachineTargetYaw;
@@ -190,7 +195,7 @@ namespace Player
             _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
 
             // 縦は制限あり
-            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
+            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, _deadCameraBottomClamp, _deadCameraTopClamp);
 
             Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 
