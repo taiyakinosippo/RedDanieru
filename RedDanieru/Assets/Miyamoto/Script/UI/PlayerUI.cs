@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI : MonoBehaviour
+public class PlayerUI : MonoBehaviour
 {
     public TextMeshProUGUI _dieText;
 
