@@ -3,24 +3,45 @@ using UnityEngine.SceneManagement;
 
 public class GoalClear : MonoBehaviour
 {
+    //==================================================
+    // クリアUI
+    //==================================================
+
     [Header("クリアUI")]
     [SerializeField]
     private GameObject clearPanel;
+
+    //==================================================
+    // Clearカメラ
+    //==================================================
 
     [Header("Clear時に召喚するカメラ")]
     [SerializeField]
     private GameObject clearCameraPrefab;
 
+    //==================================================
+    // Clearカメラ設定
+    //==================================================
+
     [Header("Clearカメラ設定")]
+
     [Tooltip("32×32マップ時のカメラ位置")]
     [SerializeField]
     private Vector3 clearCameraPosition =
-        new Vector3(16f, 30f, 16f);
+        new Vector3(
+            16f,
+            30f,
+            16f
+        );
 
     [Tooltip("カメラ角度")]
     [SerializeField]
     private Vector3 clearCameraRotation =
-        new Vector3(90f, 0f, 0f);
+        new Vector3(
+            90f,
+            0f,
+            0f
+        );
 
     [Tooltip("32×32マップ時のField of View")]
     [SerializeField]
@@ -30,26 +51,58 @@ public class GoalClear : MonoBehaviour
     [SerializeField]
     private float baseMapSize = 31f;
 
+    //==================================================
+    // タイトルシーン
+    //==================================================
+
     [Header("タイトルシーン")]
     [SerializeField]
     private string titleSceneName = "Title";
 
+    //==================================================
+    // 内部変数
+    //==================================================
+
     private bool isCleared = false;
+    private bool alreadyShown = false;
+
+    //==================================================
+    // Start
+    //==================================================
 
     private void Start()
     {
         ResetClearState();
     }
 
+    //==================================================
+    // Update
+    //==================================================
+
     private void Update()
     {
+        NetworkGameState state =
+            FindObjectOfType<NetworkGameState>();
+
+        if (state != null &&
+            state.IsCleared &&
+            !alreadyShown)
+        {
+            ShowClear();
+
+            alreadyShown = true;
+        }
+
         if (isCleared)
         {
             Cursor.visible = true;
-            Cursor.lockState =
-                CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
+
+    //==================================================
+    // クリア状態リセット
+    //==================================================
 
     public void ResetClearState()
     {
@@ -63,9 +116,12 @@ public class GoalClear : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = true;
-        Cursor.lockState =
-            CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.None;
     }
+
+    //==================================================
+    // Goalに触れた
+    //==================================================
 
     private void OnTriggerEnter(Collider other)
     {
@@ -75,34 +131,81 @@ public class GoalClear : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
+        //==================================================
+        // クリア状態
+        //==================================================
+
+        isCleared = true;
+        
+        NetworkGameState state =
+            FindObjectOfType<NetworkGameState>();
+
+        if (state != null)
+        {
+            state.IsCleared = true;
+        }
+
+        //==================================================
+        // TestPlayManager確認
+        //==================================================
+
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
 
-        // テストプレイ
+        //==================================================
+        // テストプレイの場合
+        //==================================================
+
         if (testPlayManager != null &&
             testPlayManager.IsTestPlay)
         {
-            isCleared = true;
+            // テストプレイクリアをSaveManagerへ通知
+            SaveManager saveManager =
+                FindObjectOfType<SaveManager>();
+
+            if (saveManager != null)
+            {
+                saveManager.SetTestPlayCleared();
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "SaveManagerが見つかりません。"
+                );
+            }
+
+            // 編集モードへ戻る
+            testPlayManager.ReturnToEdit();
 
             Debug.Log(
-                "テストプレイクリア。"
+                "テストプレイクリア。編集モードへ戻りました。"
             );
-
-            testPlayManager.PlayClear();
 
             return;
         }
 
-        // 通常ゲームプレイ
-        isCleared = true;
+        //==================================================
+        // ゲームプレイの場合
+        //==================================================
 
         Time.timeScale = 0f;
 
+        //==================================================
+        // カーソル表示
+        //==================================================
+
         Cursor.visible = true;
-        Cursor.lockState =
-            CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.None;
+
+        //==================================================
+        // Clearカメラ生成
+        //==================================================
 
         SpawnClearCamera();
+
+        //==================================================
+        // Clear UI表示
+        //==================================================
 
         if (clearPanel != null)
         {
@@ -119,6 +222,10 @@ public class GoalClear : MonoBehaviour
             "GAME CLEAR! Clear UIを表示しました。"
         );
     }
+
+    //==================================================
+    // Clearカメラ生成
+    //==================================================
 
     private void SpawnClearCamera()
     {
@@ -150,6 +257,10 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
+        //==================================================
+        // 通常カメラ停止
+        //==================================================
+
         Camera[] cameras =
             FindObjectsOfType<Camera>();
 
@@ -161,8 +272,16 @@ public class GoalClear : MonoBehaviour
             }
         }
 
+        //==================================================
+        // MapManager取得
+        //==================================================
+
         MapManager mapManager =
             FindObjectOfType<MapManager>();
+
+        //==================================================
+        // マップサイズに合わせる
+        //==================================================
 
         float scale = 1f;
 
@@ -181,16 +300,27 @@ public class GoalClear : MonoBehaviour
                 );
 
             scale =
-                mapSize / baseMapSize;
+                mapSize /
+                baseMapSize;
 
             if (scale <= 0f)
+            {
                 scale = 1f;
+            }
+
+            //==================================================
+            // マップ中央
+            //==================================================
 
             float centerX =
                 mapWidth / 2f;
 
             float centerZ =
                 mapDepth / 2f;
+
+            //==================================================
+            // 基準カメラ中心からのズレ
+            //==================================================
 
             float baseCenterX =
                 baseMapSize / 2f;
@@ -205,6 +335,10 @@ public class GoalClear : MonoBehaviour
             float offsetZ =
                 clearCameraPosition.z -
                 baseCenterZ;
+
+            //==================================================
+            // Clearカメラ位置
+            //==================================================
 
             float cameraX =
                 centerX +
@@ -231,13 +365,25 @@ public class GoalClear : MonoBehaviour
                 clearCameraPosition;
         }
 
+        //==================================================
+        // カメラ角度
+        //==================================================
+
         clearCamera.transform.rotation =
             Quaternion.Euler(
                 clearCameraRotation
             );
 
+        //==================================================
+        // Field of View変更
+        //==================================================
+
         clearCamera.fieldOfView =
             baseFieldOfView * scale;
+
+        //==================================================
+        // Field of View制限
+        //==================================================
 
         clearCamera.fieldOfView =
             Mathf.Clamp(
@@ -245,6 +391,10 @@ public class GoalClear : MonoBehaviour
                 10f,
                 120f
             );
+
+        //==================================================
+        // Clearカメラ有効化
+        //==================================================
 
         clearCamera.gameObject.SetActive(true);
 
@@ -259,13 +409,16 @@ public class GoalClear : MonoBehaviour
         );
     }
 
+    //==================================================
+    // タイトルへ戻る
+    //==================================================
+
     public void ReturnToTitle()
     {
         Time.timeScale = 1f;
 
         Cursor.visible = true;
-        Cursor.lockState =
-            CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.None;
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
@@ -282,5 +435,24 @@ public class GoalClear : MonoBehaviour
                 titleSceneName
             );
         }
+    }
+
+    private void ShowClear()
+    {
+        isCleared = true;
+
+        Time.timeScale = 0f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        SpawnClearCamera();
+
+        if (clearPanel != null)
+        {
+            clearPanel.SetActive(true);
+        }
+
+        Debug.Log("GAME CLEAR!");
     }
 }

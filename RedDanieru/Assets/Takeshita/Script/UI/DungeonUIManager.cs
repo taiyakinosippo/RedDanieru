@@ -256,12 +256,7 @@ public class DungeonUIManager : MonoBehaviour
                 break;
             }
         }
-
-        Debug.Log($"playerCount = {playerCount}");
-        Debug.Log($"displayCount = {displayCount}");
-        Debug.Log($"MaxPlayers = {MaxPlayers}");
-
-    }
+}
 
     public string UploadTag
     {
@@ -472,6 +467,7 @@ public class DungeonUIManager : MonoBehaviour
 
         fusionLauncher.CancelMatch();
 
+        ScrolView.SetActive(true);
         MatchingCautionObj.SetActive(false);
         MatchingObj.SetActive(false);
     }
@@ -491,6 +487,10 @@ public class DungeonUIManager : MonoBehaviour
         importer.ImportDungeon(RoomInfo.SelectedDungeon);
 
         roomListLoader.ShowJoinCaution(roomDBUploader.foundRoom);
+
+        GameModeManager.IsMultiplayer = true;
+
+        fusionLauncher.StartMatch(RoomInfo.RoomId);
 
         RoomInCautionObj.SetActive(true);
         RoomInCautionLayout.SetActive(true);
