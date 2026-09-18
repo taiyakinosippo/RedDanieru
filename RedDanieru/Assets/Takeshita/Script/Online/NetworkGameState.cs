@@ -4,6 +4,7 @@ using UnityEngine;
 public class NetworkGameState : NetworkBehaviour
 {
     public static NetworkGameState Instance;
+    [Networked] public bool IsCleared { get; set; }
 
     public override void Spawned()
     {

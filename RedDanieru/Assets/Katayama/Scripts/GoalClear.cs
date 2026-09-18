@@ -64,6 +64,7 @@ public class GoalClear : MonoBehaviour
     //==================================================
 
     private bool isCleared = false;
+    private bool alreadyShown = false;
 
     //==================================================
     // Start
@@ -80,6 +81,18 @@ public class GoalClear : MonoBehaviour
 
     private void Update()
     {
+        NetworkGameState state =
+            FindObjectOfType<NetworkGameState>();
+
+        if (state != null &&
+            state.IsCleared &&
+            !alreadyShown)
+        {
+            ShowClear();
+
+            alreadyShown = true;
+        }
+
         if (isCleared)
         {
             Cursor.visible = true;
@@ -123,6 +136,14 @@ public class GoalClear : MonoBehaviour
         //==================================================
 
         isCleared = true;
+        
+        NetworkGameState state =
+            FindObjectOfType<NetworkGameState>();
+
+        if (state != null)
+        {
+            state.IsCleared = true;
+        }
 
         //==================================================
         // TestPlayManagerŠm”F
@@ -414,5 +435,24 @@ public class GoalClear : MonoBehaviour
                 titleSceneName
             );
         }
+    }
+
+    private void ShowClear()
+    {
+        isCleared = true;
+
+        Time.timeScale = 0f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        SpawnClearCamera();
+
+        if (clearPanel != null)
+        {
+            clearPanel.SetActive(true);
+        }
+
+        Debug.Log("GAME CLEAR!");
     }
 }

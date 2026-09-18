@@ -10,7 +10,7 @@ namespace Player
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class PlayerActor : MonoBehaviour/*NetworkBehaviour*/
+    public class PlayerActor : /*MonoBehaviour*/NetworkBehaviour
     {
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
@@ -127,47 +127,56 @@ namespace Player
         //    }
         //}
 
-        public  void FixedUpdate()
+        //ソロ用UpDate
+        private void FixedUpdate()
         {
-            if(_playerStatus._isDead) return; 
-            //コンポーネントを取得できているか
+            UpdatePlayer();
+        }
+
+        //マルチ用UpDate
+        public override void FixedUpdateNetwork()
+        {
+            if (!HasInputAuthority)
+                return;
+
+            UpdatePlayer();
+        }
+
+        private void UpdatePlayer()
+        {
+            float start = Time.realtimeSinceStartup;
+
+            if (_playerStatus._isDead) return;
+
             _animation.AnimatorComPonent();
 
-            // 地面にいるかどうかの判定
             _playerMovement.GroundedCheck();
 
-            // 入力を取得
-            _actionPriority.CheckInput(_input, _playerMovement.Grounded);
-
-
-            Debug.Log(_actionPriority.currentActionType);
+            _actionPriority.CheckInput(
+                _input,
+                _playerMovement.Grounded
+            );
 
             if (_actionPriority.currentActionType == ActionType.Move ||
                 _actionPriority.currentActionType == ActionType.None ||
                 _actionPriority.currentActionType == ActionType.Jump)
             {
-                // プレイヤーの移動処理
                 _playerMovement.PlayerMove(_input);
-
-                // ジャンプと重力の処理
                 _playerMovement.PlayerJumpAndGravity(_input);
             }
 
             if (_actionPriority.currentActionType == ActionType.Sticker)
             {
-                // プレイヤーのスティッカー使用処理
                 _stickerCheck.StickerAndWallCheck(_input);
             }
 
             if (_actionPriority.currentActionType == ActionType.Attack)
             {
-                // プレイヤーの攻撃処理
                 _playerAttack.Attack(_input);
             }
 
             if (_actionPriority.currentActionType == ActionType.CameraChange)
             {
-                // カメラ変更処理
                 _playerCamera.CameraChange(_input);
             }
         }
