@@ -492,6 +492,8 @@ MonoBehaviour:
   _wallDistance: 1
   _followSpeed: 10
   _playerRayOffset: {x: 0, y: 1, z: 0}
+  _deadCameraTopClamp: 90
+  _deadCameraBottomClamp: -90
 --- !u!114 &2697843322473174110
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -598,6 +600,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06e619c3861af7149a963395bb42e129, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _playerName: 
   PlayerHP: 100
   PlayerAttack: 20
   PlayerDefense: 5

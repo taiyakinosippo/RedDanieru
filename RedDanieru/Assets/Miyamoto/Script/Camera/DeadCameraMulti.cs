@@ -72,9 +72,11 @@ namespace Player
             }
 
             //指定した回転角度を元に、プレイヤーの移動方向を計算する
-            Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
+            Vector3 moveDirection = _playerCamera.currentCamera.transform.forward;
 
-            _playerCamera.currentCamera.transform.position += targetDirection * _cameraSpeed * Time.deltaTime;
+            moveDirection.y = 0f; moveDirection.Normalize();
+
+            _playerCamera.currentCamera.transform.position += moveDirection * _cameraSpeed * Time.deltaTime;
         }
 
         private void LateUpdate()

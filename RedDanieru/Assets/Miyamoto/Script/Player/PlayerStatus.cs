@@ -9,6 +9,8 @@ namespace Player
     public class PlayerStatus : MonoBehaviour
     {
         [Header("基本ステータス")]
+        [Header("プレイヤーネーム")]
+        [SerializeField] private string _playerName = "";
         [Tooltip("プレイヤーのHP")]
         [SerializeField]private int PlayerHP  = 100;
 
