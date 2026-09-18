@@ -22,6 +22,7 @@ public class RoomListLoader : MonoBehaviour
     public GameObject RoomInfoObj;
     public GameObject MatchingObj;
     public GameObject SelecCanvas;
+    public GameObject MachingRoomCreateText;
 
     [SerializeField]
     private Text JoinCautionRoomText;
@@ -225,6 +226,7 @@ public class RoomListLoader : MonoBehaviour
         LaycastObj.SetActive(false);
         RoomInfoObj.SetActive(false);
         MatchingObj.SetActive(true);
+        MachingRoomCreateText.SetActive(false);
 
         RoomInfo.RoomId =
             selectedRoom.room_id;

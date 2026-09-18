@@ -10,7 +10,7 @@ namespace Player
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class PlayerActor : MonoBehaviour/*NetworkBehaviour*/
+    public class PlayerActor : /*MonoBehaviour*/NetworkBehaviour
     {
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
@@ -130,60 +130,59 @@ namespace Player
         //    }
         //}
 
-        public  void FixedUpdate()
+        //ソロ用UpDate
+        private void FixedUpdate()
         {
-            if (!_playerStatus._isDead)
+            UpdatePlayer();
+        }
+
+        //マルチ用UpDate
+        public override void FixedUpdateNetwork()
+        {
+            if (!HasInputAuthority)
+                return;
+
+            UpdatePlayer();
+        }
+
+        private void UpdatePlayer()
+        {
+            if (_playerStatus._isDead)
             {
-                //コンポーネントを取得できているか
-                _animation.AnimatorComPonent();
-
-                // 地面にいるかどうかの判定
-                _playerMovement.GroundedCheck();
-
-                // 入力を取得
-                _actionPriority.CheckInput(_input, _playerMovement.Grounded);
-
-
-                Debug.Log(_actionPriority.currentActionType);
-
-                if (_actionPriority.currentActionType == ActionType.Move ||
-                    _actionPriority.currentActionType == ActionType.None ||
-                    _actionPriority.currentActionType == ActionType.Jump)
+                if (GameModeManager.IsMultiplayer)
                 {
-                    // プレイヤーの移動処理
-                    _playerMovement.PlayerMove(_input);
-
-                    // ジャンプと重力の処理
-                    _playerMovement.PlayerJumpAndGravity(_input);
+                    _actionPriority.CheckInput(_input, _playerMovement.Grounded);
+                    _deadMultiCamera.CameraMoveFiexdUpdate(_input);
                 }
-
-                if (_actionPriority.currentActionType == ActionType.Sticker)
-                {
-                    // プレイヤーのスティッカー使用処理
-                    _stickerCheck.StickerAndWallCheck(_input);
-                }
-
-                if (_actionPriority.currentActionType == ActionType.Attack)
-                {
-                    // プレイヤーの攻撃処理
-                    _playerAttack.Attack(_input);
-                }
-
-                if (_actionPriority.currentActionType == ActionType.CameraChange)
-                {
-                    // カメラ変更処理
-                    _playerCamera.CameraChange(_input);
-                }
+                return;
             }
-            else if (GameModeManager.IsMultiplayer && _playerStatus._isDead)
+
+            _animation.AnimatorComPonent();
+            _playerMovement.GroundedCheck();
+            _actionPriority.CheckInput(_input, _playerMovement.Grounded);
+
+            if (_actionPriority.currentActionType == ActionType.Move ||
+                _actionPriority.currentActionType == ActionType.None ||
+                _actionPriority.currentActionType == ActionType.Jump)
             {
-                _actionPriority.CheckInput(_input, _playerMovement.Grounded);   
-
-                // カメラの移動処理
-                _deadMultiCamera.CameraMoveFiexdUpdate(_input);
-                  
+                _playerMovement.PlayerMove(_input);
+                _playerMovement.PlayerJumpAndGravity(_input);
             }
-            
+
+            if (_actionPriority.currentActionType == ActionType.Sticker)
+            {
+                _stickerCheck.StickerAndWallCheck(_input);
+            }
+
+            if (_actionPriority.currentActionType == ActionType.Attack)
+            {
+                _playerAttack.Attack(_input);
+            }
+
+            if (_actionPriority.currentActionType == ActionType.CameraChange)
+            {
+                _playerCamera.CameraChange(_input);
+            }
         }
 
         private void LateUpdate()
