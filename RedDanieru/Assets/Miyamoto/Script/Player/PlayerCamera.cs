@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 using static UnityEngine.GraphicsBuffer;
 ///<summry>
 ///プレイヤーのカメラを制御するためのスクリプト
@@ -35,7 +36,12 @@ namespace Player
         public float _followSpeed = 10.0f;
         [Tooltip("プレイヤーのRayを受け取る高さ")]
         public Vector3 _playerRayOffset = new Vector3(0, 1.0f, 0);
-      
+
+        [Tooltip("死んだときのマルチの場合のカメラの上方向の制限")] 
+        public float _deadCameraTopClamp = 90.0f;
+        [Tooltip("死んだときのマルチの場合のカメラの下方向の制限")]
+        public float _deadCameraBottomClamp = -90.0f;
+
 
         // 左右の角度
         private float _cinemachineTargetYaw;
@@ -70,6 +76,7 @@ namespace Player
             // 初期化時にカメラの角度を取得
             _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
             _actionPriority = GetComponent<PlayerInputPriority>();
+            _playerStatus = GetComponent<PlayerStatus>();
             _playerPosition = transform.position + Vector3.up * _playerRayOffset.y;
             _rayPosition = transform.position + _playerRayOffset;
             Vector3 cameraOffset = currentCamera.transform.position - _playerPosition;
@@ -82,7 +89,7 @@ namespace Player
         //-------------------------------------------------
         public void DisableCamera()
         {
-            if (ThirdPersonPerspective != null) 
+            if (ThirdPersonPerspective != null)
                 ThirdPersonPerspective.SetActive(false);
             if (FirstPersonPerspective != null)
                 FirstPersonPerspective.SetActive(false);
@@ -102,6 +109,8 @@ namespace Player
             _cinemachineTargetPitch = currentCamera.transform.rotation.eulerAngles.x;
             _actionPriority.EndAction();
         }
+
+  
         //------------------------------------------------
         //カメラの向きを変更する
         //------------------------------------------------
@@ -138,31 +147,31 @@ namespace Player
             Vector3 rotatedDiff = cameraRotation * diff;
 
             Debug.DrawRay(
-    _rayPosition,
-    cameraDirection * _defaultCameraDistance,
-    Color.red
-);
+             _rayPosition,
+             cameraDirection * _defaultCameraDistance,
+             Color.red
+            );
             //==================================================
             // 壁判定
             //==================================================
-            if (Physics.SphereCast(_rayPosition,_sphereSize,cameraDirection,out RaycastHit hit,_defaultCameraDistance,_wallLayer,QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(_rayPosition, _sphereSize, cameraDirection, out RaycastHit hit, _defaultCameraDistance, _wallLayer, QueryTriggerInteraction.Ignore))
             {
-                
+
                 // 壁に接触する位置より少し手前
-                float safeDistance =  hit.distance - _wallDistance;
-                safeDistance =  Mathf.Max(safeDistance, 0.1f);
+                float safeDistance = hit.distance - _wallDistance;
+                safeDistance = Mathf.Max(safeDistance, 0.1f);
 
                 // 現在のカメラ位置から安全位置へゆっくり移動
-                _cameraDistance =Mathf.Lerp(_cameraDistance, safeDistance,_followSpeed * Time.deltaTime);
+                _cameraDistance = Mathf.Lerp(_cameraDistance, safeDistance, _followSpeed * Time.deltaTime);
             }
 
             else
             {
                 // 本来の位置に一瞬で戻す
-                _cameraDistance = Mathf.Lerp(_cameraDistance, _defaultCameraDistance,_followSpeed * Time.deltaTime);
+                _cameraDistance = Mathf.Lerp(_cameraDistance, _defaultCameraDistance, _followSpeed * Time.deltaTime);
             }
 
-            Vector3 targetPosition =_playerPosition + cameraDirection * _cameraDistance;
+            Vector3 targetPosition = _playerPosition + cameraDirection * _cameraDistance;
 
 
             currentCamera.transform.position = targetPosition;
@@ -170,6 +179,29 @@ namespace Player
 
 
         }
+        public void DeadPlayerCameraMove(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
+        {
+            // カメラが動かせれていないかつロックされていないかどうか
+            if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+            {
+                //マウスで操作している場合は1.0f、コントローラーで操作している場合はTime.deltaTimeを使用する
+                float deltaTimeMultiplier = _IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+                // カメラの左右角度を更新する
+                _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
+                // カメラの上下角度を更新する
+                _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+            }
+            // 横は無制限
+            _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
+
+            // 縦は制限あり
+            _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, _deadCameraBottomClamp, _deadCameraTopClamp);
+
+            Quaternion cameraRotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
+
+            currentCamera.transform.rotation = cameraRotation;
+        }
+
         //-----------------------------------------------------------
         // 角度を制限する関数
         //-----------------------------------------------------------
@@ -180,19 +212,26 @@ namespace Player
             if (lfAngle > 360f) lfAngle -= 360f;
             return Mathf.Clamp(lfAngle, lfMin, lfMax);
         }
-    
+
 
         public void PlayerDiedCamera()
         {
-            if (_playerStatus != null && _playerStatus._isDead)
+            if (_playerStatus != null && _playerStatus._isDead && !GameModeManager.IsMultiplayer)
             {
+                Debug.Log("死亡カメラに切り替え");
                 currentCamera.SetActive(false);
 
                 _deadCamera.SetActive(true);
             }
+            else if (_playerStatus != null && !_playerStatus._isDead && !GameModeManager.IsMultiplayer)
+            {
+                Debug.Log("通常カメラに切り替え");
+                _deadCamera.SetActive(false);
+            }
         }
     }
 }
+
 
     
 

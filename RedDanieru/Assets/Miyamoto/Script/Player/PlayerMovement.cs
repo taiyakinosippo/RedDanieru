@@ -61,10 +61,10 @@ namespace Player
         private bool _wasGrounded;                                 // 前回のフレームで地面にいたかどうかを判定する変数
 
         private CharacterController _controller;         // プレイヤーの移動を制御するためのCharacterControllerコンポーネント
-        private PlayerCamera _playerCamera;              // プレイヤーのカメラを制御するためのコンポーネント
-        private PlayerAnimation _playerAnimation;
+        private PlayerCamera        _playerCamera;       // プレイヤーのカメラを制御するためのコンポーネント
+        private PlayerAnimation     _playerAnimation;    
         private PlayerInputPriority _actionPriority;
-        private PlayerStatus _playerStatus;
+        private PlayerStatus        _playerStatus;
 
         private void Start()
         {
@@ -104,7 +104,7 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerMove(StarterAssetsInputs _input)
         {
-            // Shiftキーを押している場合は歩き、押していない場合は走る
+            // Shiftキーを押している場合は走り、押していない場合は歩く
             float targetSpeed = _input.sprint ? _playerStatus._playerRunSpeed : _playerStatus._playerMoveSpeed;
 
             // 何も入力されていない場合は速度を0にする
