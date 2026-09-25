@@ -16,6 +16,15 @@ public class MapManager : MonoBehaviour
     [SerializeField][Min(0.01f)] private float wallSize = 1f;
     [SerializeField][Min(0.01f)] private float wallSpacing = 1f;
 
+    // 通常の壁の高さ
+    [SerializeField] private float normalWallYOffset = 0f;
+
+    // 配置した壁の高さ
+    [SerializeField] private float placedWallYOffset = 0f;
+
+    // 斜め壁の高さ
+    [SerializeField] private float diagonalWallYOffset = 0f;
+
     [Header("床サイズ設定")]
     [SerializeField][Min(0.01f)] private float floorSize = 1f;
     [SerializeField][Min(0.01f)] private float floorSpacing = 1f;
@@ -124,16 +133,41 @@ public class MapManager : MonoBehaviour
     // 座標
     //==================================================
 
-    private Vector3 GetWallWorldPosition(Vector3Int pos)
+    // 通常の壁用
+    private Vector3 GetNormalWallWorldPosition(
+        Vector3Int pos)
     {
         return new Vector3(
             pos.x * wallSpacing,
-            pos.y * wallSpacing,
+            pos.y * wallSpacing + normalWallYOffset,
             pos.z * wallSpacing
         );
     }
 
-    private Vector3 GetFloorWorldPosition(Vector3Int pos)
+    // 配置した壁用
+    private Vector3 GetPlacedWallWorldPosition(
+        Vector3Int pos)
+    {
+        return new Vector3(
+            pos.x * wallSpacing,
+            pos.y * wallSpacing + placedWallYOffset,
+            pos.z * wallSpacing
+        );
+    }
+
+    // 斜め壁用
+    private Vector3 GetDiagonalWallWorldPosition(
+        Vector3Int pos)
+    {
+        return new Vector3(
+            pos.x * wallSpacing,
+            pos.y * wallSpacing + diagonalWallYOffset,
+            pos.z * wallSpacing
+        );
+    }
+
+    private Vector3 GetFloorWorldPosition(
+        Vector3Int pos)
     {
         return new Vector3(
             pos.x * floorSpacing,
@@ -142,7 +176,8 @@ public class MapManager : MonoBehaviour
         );
     }
 
-    private Vector3 GetEnemyWorldPosition(Vector3Int pos)
+    private Vector3 GetEnemyWorldPosition(
+        Vector3Int pos)
     {
         return new Vector3(
             pos.x * enemySpacing,
@@ -151,7 +186,8 @@ public class MapManager : MonoBehaviour
         );
     }
 
-    private Vector3 GetObjectWorldPosition(Vector3Int pos)
+    private Vector3 GetObjectWorldPosition(
+        Vector3Int pos)
     {
         return new Vector3(
             pos.x * objectSpacing,
@@ -323,7 +359,8 @@ public class MapManager : MonoBehaviour
     // 壁
     //==================================================
 
-    private GameObject CreateWall(Vector3Int pos)
+    private GameObject CreateWall(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
@@ -339,10 +376,11 @@ public class MapManager : MonoBehaviour
             return null;
         }
 
+        // 通常の壁はnormalWallYOffsetを使用
         GameObject wall =
             Instantiate(
                 wallPrefab,
-                GetWallWorldPosition(pos),
+                GetNormalWallWorldPosition(pos),
                 Quaternion.identity,
                 transform
             );
@@ -391,18 +429,20 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    private void UpdateDiagonalWall(Vector3Int pos)
+    private void UpdateDiagonalWall(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
             return;
         }
 
-        // このマスが壁として存在しているか
+        // このマスが通常の壁として存在しているか
         bool mapWall =
             map[pos.x, pos.y, pos.z] ==
             TileType.Wall;
 
+        // このマスが配置したWallか
         bool placedWall =
             map[pos.x, pos.y, pos.z] ==
             TileType.Floor &&
@@ -422,7 +462,6 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // このマスの壁オブジェクトを取得
         GameObject currentWall;
 
         if (mapWall)
@@ -554,17 +593,16 @@ public class MapManager : MonoBehaviour
 
     //==================================================
     // 壁判定
-    // 通常壁と配置したWallの両方を判定
     //==================================================
 
-    private bool IsWall(Vector3Int pos)
+    private bool IsWall(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
             return false;
         }
 
-        // 通常のマップ壁
         if (map[
                 pos.x,
                 pos.y,
@@ -574,7 +612,6 @@ public class MapManager : MonoBehaviour
             return true;
         }
 
-        // 配置したWall
         if (map[
                 pos.x,
                 pos.y,
@@ -603,7 +640,8 @@ public class MapManager : MonoBehaviour
     // 斜め壁判定
     //==================================================
 
-    private bool IsDiagonalWall(GameObject obj)
+    private bool IsDiagonalWall(
+        GameObject obj)
     {
         if (obj == null ||
             diagonalWallPrefab == null)
@@ -659,13 +697,15 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // すでに斜め壁なら回転だけ変更
+        // すでに斜め壁なら回転と高さを更新
         if (IsDiagonalWall(currentWall))
         {
             currentWall.transform.rotation =
                 rotation;
 
-            // 通常マップ壁の場合は床を作る
+            currentWall.transform.position =
+                GetDiagonalWallWorldPosition(pos);
+
             if (isMapWall)
             {
                 CreateDiagonalWallFloor(pos);
@@ -674,18 +714,16 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        Vector3 worldPosition =
-            currentWall.transform.position;
-
         Transform parent =
             currentWall.transform.parent;
 
         Destroy(currentWall);
 
+        // 斜め壁はdiagonalWallYOffsetを使用
         GameObject diagonalWall =
             Instantiate(
                 diagonalWallPrefab,
-                worldPosition,
+                GetDiagonalWallWorldPosition(pos),
                 rotation,
                 parent
             );
@@ -708,7 +746,6 @@ public class MapManager : MonoBehaviour
                 pos.z
             ] = diagonalWall;
 
-            // 斜め壁の下に床を生成
             CreateDiagonalWallFloor(pos);
         }
         else
@@ -807,18 +844,16 @@ public class MapManager : MonoBehaviour
                 return;
             }
 
-            Vector3 worldPosition =
-                currentWall.transform.position;
-
             Transform parent =
                 currentWall.transform.parent;
 
             Destroy(currentWall);
 
+            // 通常壁はnormalWallYOffsetを使用
             GameObject normalWall =
                 Instantiate(
                     wallPrefab,
-                    worldPosition,
+                    GetNormalWallWorldPosition(pos),
                     Quaternion.identity,
                     parent
                 );
@@ -839,7 +874,6 @@ public class MapManager : MonoBehaviour
                 pos.z
             ] = normalWall;
 
-            // 斜め壁専用の床を削除
             RemoveDiagonalWallFloor(pos);
 
             return;
@@ -874,18 +908,16 @@ public class MapManager : MonoBehaviour
                 return;
             }
 
-            Vector3 worldPosition =
-                currentWall.transform.position;
-
             Transform parent =
                 currentWall.transform.parent;
 
             Destroy(currentWall);
 
+            // 配置壁はplacedWallYOffsetを使用
             GameObject normalWall =
                 Instantiate(
                     wallPrefab,
-                    worldPosition,
+                    GetPlacedWallWorldPosition(pos),
                     Quaternion.identity,
                     parent
                 );
@@ -1016,7 +1048,8 @@ public class MapManager : MonoBehaviour
     // 掘削
     //==================================================
 
-    public void Dig(Vector3Int pos)
+    public void Dig(
+        Vector3Int pos)
     {
         if (!IsInsideMap(pos))
         {
@@ -1147,7 +1180,6 @@ public class MapManager : MonoBehaviour
             ] = null;
         }
 
-        // 斜め壁の下にあった床がそのまま床マスになる
         diagonalWallFloor[
             pos.x,
             pos.y,
@@ -1510,7 +1542,6 @@ public class MapManager : MonoBehaviour
         }
 
         // 斜め壁を再判定
-        // ここで斜め壁の下にも床が作られる
         UpdateDiagonalWalls();
 
         // 配置オブジェクトを復元
@@ -1875,10 +1906,11 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // 配置した壁はplacedWallYOffsetを使用
         GameObject wall =
             Instantiate(
                 wallPrefab,
-                GetWallWorldPosition(pos),
+                GetPlacedWallWorldPosition(pos),
                 Quaternion.identity,
                 transform
             );
@@ -1905,7 +1937,6 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = PlaceObjectType.Wall;
 
-        // 配置直後に斜め壁判定
         UpdateDiagonalWalls();
 
         BuildNavigation();
@@ -1977,7 +2008,6 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = default;
 
-        // 周囲の斜め壁も再判定
         UpdateDiagonalWalls();
 
         BuildNavigation();
