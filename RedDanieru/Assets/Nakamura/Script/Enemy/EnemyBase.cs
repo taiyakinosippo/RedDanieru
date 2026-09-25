@@ -38,8 +38,8 @@ public class EnemyBase : MonoBehaviour
     protected float damageTimer;  //現在のダメージタイマー
     protected float stunTimer;  //現在のスタンタイマー
 
-    private float specialCoolTimer = 0.0f;  //特殊行動のタイマー
-    private float specialInterval = 4.0f;  //特殊行動のクールタイム
+    protected private float specialCoolTimer = 0.0f;  //特殊行動のタイマー
+    protected private float specialInterval = 4.0f;  //特殊行動のクールタイム
 
     protected StickerState stickerState;
     protected Rigidbody rb;

@@ -193,7 +193,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3579314766830224434}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
@@ -218,9 +218,9 @@ MonoBehaviour:
   enemyPower: 300
   enemyDefense: 100
   enemyMoveSpeed: 3
-  enemySearchArea: 6
+  enemySearchArea: 15
   enemyTrackingTime: 3
-  enemyAttackArea: 5
+  enemyAttackArea: 15
   enemyAttackCoolTime: 2
   enemyAttackStartTime: 0.9
   enemyAttackEndTime: 0.3
@@ -232,6 +232,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   player: {fileID: 0}
+  arrowPrefab: {fileID: 4780085749130172505, guid: 126ee8135ce66504790673790eee25c1, type: 3}
 --- !u!114 &6172223429900963776
 MonoBehaviour:
   m_ObjectHideFlags: 0
