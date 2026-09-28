@@ -48,15 +48,20 @@ public class EnemyBase : MonoBehaviour
     public Transform player;
     protected NavMeshAgent agent;
 
-    void Start()
+    public virtual void Awake()
     {
         stickerState = GetComponent<StickerState>();
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
+    }
+
+    public virtual void Start()
+    {
         currentHp = enemyHP;
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
         specialCoolTimer = specialInterval;
+        agent.speed = enemyMoveSpeed;
     }
 
     protected void Update()
@@ -183,11 +188,14 @@ public class EnemyBase : MonoBehaviour
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
             if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)
             {
-                //攻撃フラグを立てる
+                //攻撃範囲内なら常に停止
+                agent.isStopped = true;
+                agent.ResetPath();
+
+                //クールタイムが終わっていれば攻撃
                 if (attackCoolTimer <= 0f)
                 {
                     currentState = enemyState.Attack;
-                    agent.isStopped = true;
                 }
             }
             //攻撃範囲じゃない場合は追跡する
@@ -374,11 +382,16 @@ public class EnemyBase : MonoBehaviour
     //敵の移動速度を変動させる
     public float AddEnemyMoveSpeed(float value)
     {
+        float previousSpeed = enemyMoveSpeed;  //変更前の速度を保存
+        Debug.Log(value);
+
         enemyMoveSpeed += value;
         if (enemyMoveSpeed < 0)
             enemyMoveSpeed = 0;
 
-        return enemyMoveSpeed - value;
+        agent.speed = enemyMoveSpeed;  //NavMeshAgentの速度も更新
+
+        return previousSpeed;
     }
 
     //敵の探索範囲を変動させる

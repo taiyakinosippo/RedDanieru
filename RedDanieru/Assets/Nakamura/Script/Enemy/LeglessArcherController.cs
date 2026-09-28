@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class LeglessArcherController : EnemyBase
 {
@@ -10,10 +11,17 @@ public class LeglessArcherController : EnemyBase
     private List<GameObject> activeArrows = new();  //現在アクティブな矢のリスト
     
     private bool shooted = false;  //矢を撃ったかどうかのフラグ
-    private GameObject targetPlayer;  // 現在狙っているプレイヤー
+    private GameObject targetPlayer;  // 現在狙っているプレイヤ
+    private Vector3 lastPlayerPosition;  //最後にプレイヤーを見た位置
+    private bool isTrackingLastPosition = false;  //最後に見た位置を追跡中か
+    private bool wasPlayerVisible = false;
 
-    private void Awake()
+    public override void Awake()
     {
+        stickerState = GetComponent<StickerState>();
+        rb = GetComponent<Rigidbody>();
+        agent = GetComponent<NavMeshAgent>();
+
         //オブジェクトプールの初期化
         waitingArrows = new Queue<GameObject>();
         for (int i = 0; i < poolCount; i++)
@@ -24,12 +32,122 @@ public class LeglessArcherController : EnemyBase
         }
     }
 
+    public override void EnemyMove()
+    {
+        //プレイヤーを探索する
+        Collider[] searchHits = Physics.OverlapSphere(transform.position, enemySearchArea, playerLayer);
+
+        if (searchHits.Length > 0)
+        {
+            player = searchHits[0].transform;
+
+            //プレイヤーが見えるかどうかを判定
+            if (CanSeePlayer(player))
+            {
+                //最後に見た位置を更新
+                lastPlayerPosition = player.position;
+                trackingTimer = enemyTrackingTime;
+                isTrackingLastPosition = false;
+
+                float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+                //攻撃範囲内
+                if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)
+                {
+                    //その場で停止
+                    agent.isStopped = true;
+                    agent.ResetPath();
+
+                    //攻撃クールタイムが終了していれば攻撃
+                    if (attackCoolTimer <= 0f)
+                    {
+                        currentState = enemyState.Attack;
+                    }
+                }
+                else
+                {
+                    //攻撃範囲外なら追跡
+                    currentState = enemyState.Move;
+                    agent.isStopped = false;
+                    agent.SetDestination(player.position);
+                }
+
+                return;
+            }
+
+            //プレイヤーが見えない場合
+            if (!isTrackingLastPosition)
+            {
+                //最後に見た場所へ移動
+                agent.SetDestination(lastPlayerPosition);
+                isTrackingLastPosition = true;
+            }
+
+            trackingTimer -= Time.deltaTime;
+
+            if (trackingTimer <= 0f)
+            {
+                currentState = enemyState.Idle;
+                agent.isStopped = true;
+                agent.ResetPath();
+
+                specialCoolTimer = specialInterval;
+                isTrackingLastPosition = false;
+            }
+            else
+            {
+                currentState = enemyState.Move;
+                agent.isStopped = false;
+            }
+
+            return;
+        }
+
+        //プレイヤーが索敵範囲から外れた場合
+        if (trackingTimer > 0f)
+        {
+            if (!isTrackingLastPosition)
+            {
+                //最後に見た場所へ移動
+                agent.SetDestination(lastPlayerPosition);
+                isTrackingLastPosition = true;
+            }
+
+            trackingTimer -= Time.deltaTime;
+            currentState = enemyState.Move;
+            agent.isStopped = false;
+        }
+        else
+        {
+            currentState = enemyState.Idle;
+            agent.isStopped = true;
+            agent.ResetPath();
+
+            specialCoolTimer = specialInterval;
+            isTrackingLastPosition = false;
+        }
+    }
+
     public override void Attack()
     {
         //攻撃モーション中はプレイヤーの方向を向く
         if (attackTimer > 0f)
         {
-            LookAtPlayer();
+            if (player != null && CanSeePlayer(player))
+            {
+                //最後に見た位置を更新
+                lastPlayerPosition = player.position;
+
+                LookAtPlayer();
+            }
+        }
+
+        //攻撃判定を出す
+        if (attackTimer <= enemyAttackEndTime && !shooted)
+        {
+            AttackEffect();
+            Debug.Log("LeglessArcher Attack!");
+            shooted = true;
         }
 
         //攻撃モーションを終了する
@@ -42,13 +160,6 @@ public class LeglessArcherController : EnemyBase
             shooted = false;
 
             currentState = enemyState.Idle;
-        }
-        else if (attackTimer <= enemyAttackEndTime && !shooted)
-        {
-            //攻撃判定を出す
-            AttackEffect();
-            Debug.Log("LeglessArcher Attack!");
-            shooted = true;
         }
 
         //攻撃推移
@@ -64,6 +175,10 @@ public class LeglessArcherController : EnemyBase
         //一番近いプレイヤーを取得
         foreach (Collider hit in attackHits)
         {
+            //プレイヤーが見えるかどうかを判定
+            if (!CanSeePlayer(hit.transform))
+                continue;
+
             if (targetPlayer == null)
             {
                 //暫定一位
@@ -90,7 +205,6 @@ public class LeglessArcherController : EnemyBase
 
         //上下には向かない
         direction.y = 0f;
-
         if (direction.sqrMagnitude <= 0.001f)
             return;
 
@@ -103,23 +217,25 @@ public class LeglessArcherController : EnemyBase
 
     public override void AttackEffect()
     {
-        //範囲内のプレイヤーがいれば矢を撃つ
-        if (targetPlayer != null)
+        //矢を生成して最後に見た位置へ向ける
+        GameObject arrow = GetArrowFromPool();
+
+        //矢の生成位置を調整（敵の前方1m、上方1m）
+        Vector3 arrowSpawnPosition = transform.position + transform.forward * 1.0f + Vector3.up * 1.0f;
+        arrow.transform.position = arrowSpawnPosition;
+
+        //最後に見た位置へ向ける
+        Vector3 targetPosition = lastPlayerPosition + Vector3.up * 1.0f;  //矢の高さを調整
+        Vector3 direction = targetPosition - arrowSpawnPosition;  //矢の方向を計算
+
+        if (direction.sqrMagnitude > 0.001f)
         {
-            //矢を生成してプレイヤーに向かせる
-            GameObject arrow = GetArrowFromPool();
-
-            //矢の生成位置を調整（敵の前方1m、上方1m）
-            Vector3 arrowSpawnPosition = transform.position + transform.forward * 1.0f + Vector3.up * 1.0f;
-            arrow.transform.position = arrowSpawnPosition;
-
-            //矢の向きをプレイヤーに向ける
-            arrow.transform.rotation = transform.rotation;
-
-            //矢の攻撃力とかを設定
-            arrow.GetComponent<EnemyArrow>().Setting(enemyPower, this);
-            arrow.SetActive(true);
+            arrow.transform.rotation = Quaternion.LookRotation(direction);
         }
+
+        //矢の攻撃力とかを設定
+        arrow.GetComponent<EnemyArrow>().Setting(enemyPower, this);
+        arrow.SetActive(true);
     }
 
     private GameObject GetArrowFromPool()
