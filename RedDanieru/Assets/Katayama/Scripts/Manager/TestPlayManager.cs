@@ -244,6 +244,7 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = false;
+
         Cursor.lockState =
             CursorLockMode.Locked;
     }
@@ -278,6 +279,7 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 0f;
 
         Cursor.visible = true;
+
         Cursor.lockState =
             CursorLockMode.None;
 
@@ -316,13 +318,11 @@ public class TestPlayManager : MonoBehaviour
             return;
         }
 
-        // 投稿確認UIを非表示
         if (postConfirmUI != null)
         {
             postConfirmUI.SetActive(false);
         }
 
-        // 投稿設定UIを表示
         if (postSettingUI == null)
         {
             Debug.LogError(
@@ -342,6 +342,7 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 0f;
 
         Cursor.visible = true;
+
         Cursor.lockState =
             CursorLockMode.None;
     }
@@ -368,7 +369,9 @@ public class TestPlayManager : MonoBehaviour
 
     public void BackFromPostSetting()
     {
-        Debug.Log("投稿設定画面から編集画面へ戻ります。");
+        Debug.Log(
+            "投稿設定画面から編集画面へ戻ります。"
+        );
 
         if (postSettingUI != null)
         {
@@ -390,7 +393,13 @@ public class TestPlayManager : MonoBehaviour
     public void PostDungeon()
     {
         if (!isCleared)
+        {
+            Debug.LogWarning(
+                "まだテストプレイをクリアしていません。"
+            );
+
             return;
+        }
 
         if (dungeonUploader == null)
         {
@@ -444,24 +453,43 @@ public class TestPlayManager : MonoBehaviour
         }
 
         Debug.Log(
-            "ダンジョンを投稿します : " +
+            "ダンジョン投稿開始 : " +
             dungeonName +
             " / " +
             creatorName
         );
 
-        // DungeonUploaderは変更しない
+        //==================================================
+        // ダンジョンを投稿
+        //==================================================
+
+        // DungeonUploader.csは変更しない
         dungeonUploader.UploadDungeon(
             dungeonName,
             creatorName
         );
+
+        //==================================================
+        // 投稿UIを閉じる
+        //==================================================
 
         if (postSettingUI != null)
         {
             postSettingUI.SetActive(false);
         }
 
-        Time.timeScale = 1f;
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(false);
+        }
+
+        //==================================================
+        // 編集画面へ戻る
+        //==================================================
+
+        Debug.Log(
+            "投稿処理を開始したため、編集画面へ戻ります。"
+        );
 
         ReturnToEdit();
     }
@@ -566,6 +594,7 @@ public class TestPlayManager : MonoBehaviour
             Time.timeScale = 0f;
 
             Cursor.visible = true;
+
             Cursor.lockState =
                 CursorLockMode.None;
         }
@@ -574,6 +603,7 @@ public class TestPlayManager : MonoBehaviour
             Time.timeScale = 1f;
 
             Cursor.visible = false;
+
             Cursor.lockState =
                 CursorLockMode.Locked;
         }
@@ -587,7 +617,8 @@ public class TestPlayManager : MonoBehaviour
     {
         isReturningToEdit = true;
 
-        if (currentMode == TestPlayMode.TestPlay)
+        if (currentMode ==
+            TestPlayMode.TestPlay)
         {
             RestoreEnemyPositions();
         }
@@ -600,6 +631,7 @@ public class TestPlayManager : MonoBehaviour
         if (playerInstance != null)
         {
             Destroy(playerInstance);
+
             playerInstance = null;
         }
 
@@ -624,6 +656,10 @@ public class TestPlayManager : MonoBehaviour
                 agent.enabled = false;
             }
         }
+
+        //==================================================
+        // 編集UIを表示
+        //==================================================
 
         if (mapCreateUI != null)
         {
@@ -655,6 +691,10 @@ public class TestPlayManager : MonoBehaviour
             pauseMenuUI.SetActive(false);
         }
 
+        //==================================================
+        // カメラ
+        //==================================================
+
         if (editCamera != null)
         {
             editCamera.gameObject.SetActive(true);
@@ -672,9 +712,14 @@ public class TestPlayManager : MonoBehaviour
             playerCamera.gameObject.SetActive(false);
         }
 
+        //==================================================
+        // 時間・カーソル
+        //==================================================
+
         Time.timeScale = 1f;
 
         Cursor.visible = true;
+
         Cursor.lockState =
             CursorLockMode.None;
 
