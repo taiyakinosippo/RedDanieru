@@ -6492,9 +6492,9 @@ MonoBehaviour:
   depth: 32
   wallSize: 1
   wallSpacing: 1
-  normalWallYOffset: -2
-  placedWallYOffset: 0
-  diagonalWallYOffset: 0
+  normalWallYOffset: -2.5
+  placedWallYOffset: -2.5
+  diagonalWallYOffset: -0.7
   floorSize: 1
   floorSpacing: 1
   floorYOffset: -3
@@ -6504,7 +6504,7 @@ MonoBehaviour:
   objectYOffset: 1.5
   wallPrefab: {fileID: 6935681925559738843, guid: 9090dfe2bb858f8458fb9275a1c6e090, type: 3}
   diagonalWallPrefab: {fileID: 7694599920202442208, guid: 6bd343453c63dba4cb707a65d6fcbea4, type: 3}
-  floorPrefab: {fileID: 6003359014910904823, guid: 0d6cf477b67f18b409e112f3e72186dc, type: 3}
+  floorPrefab: {fileID: 3891908200146587722, guid: 732f901be6361bd45989cb8196f683d2, type: 3}
   objectPrefabs:
   - type: 0
     prefab: {fileID: 8173197566262819081, guid: f44571431ecfdfb4995703cd6797ef84, type: 3}
