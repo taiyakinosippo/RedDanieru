@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.AI;
+using TMPro;
 
 public class TestPlayManager : MonoBehaviour
 {
@@ -36,6 +37,16 @@ public class TestPlayManager : MonoBehaviour
     [Header("投稿確認UI")]
     [SerializeField] private GameObject postConfirmUI;
 
+    [Header("投稿設定UI")]
+    [SerializeField] private GameObject postSettingUI;
+
+    [Header("投稿設定")]
+    [SerializeField] private TMP_InputField dungeonNameInputField;
+    [SerializeField] private TMP_InputField creatorNameInputField;
+
+    [Header("ダンジョン投稿")]
+    [SerializeField] private DungeonUploader dungeonUploader;
+
     [Header("カメラ")]
     [SerializeField] private Camera editCamera;
     [SerializeField] private Camera playerCamera;
@@ -45,10 +56,8 @@ public class TestPlayManager : MonoBehaviour
     private TestPlayMode currentMode =
         TestPlayMode.Edit;
 
-    // 編集モードへ戻っている最中か
     private bool isReturningToEdit = false;
 
-    // クリア済みか
     private bool isCleared = false;
 
     private class EnemyTransformData
@@ -73,10 +82,18 @@ public class TestPlayManager : MonoBehaviour
     public bool IsCleared =>
         isCleared;
 
+    //==================================================
+    // Start
+    //==================================================
+
     private void Start()
     {
         ReturnToEdit();
     }
+
+    //==================================================
+    // Update
+    //==================================================
 
     private void Update()
     {
@@ -105,7 +122,6 @@ public class TestPlayManager : MonoBehaviour
             return;
         }
 
-        // Goalがない場合はテストプレイできない
         if (!mapManager.HasGoal())
         {
             Debug.LogWarning(
@@ -185,7 +201,6 @@ public class TestPlayManager : MonoBehaviour
             mapManager.EnableEnemyMovement();
         }
 
-        // 編集UIを非表示
         if (mapCreateUI != null)
         {
             mapCreateUI.SetActive(false);
@@ -196,31 +211,31 @@ public class TestPlayManager : MonoBehaviour
             otherEditUI.SetActive(false);
         }
 
-        // テストプレイUIを表示
         if (testPlayUI != null)
         {
             testPlayUI.SetActive(true);
         }
 
-        // 投稿確認UIを非表示
         if (postConfirmUI != null)
         {
             postConfirmUI.SetActive(false);
         }
 
-        // ESCメニューを非表示
+        if (postSettingUI != null)
+        {
+            postSettingUI.SetActive(false);
+        }
+
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
         }
 
-        // 編集カメラをOFF
         if (editCamera != null)
         {
             editCamera.gameObject.SetActive(false);
         }
 
-        // PlayerカメラをON
         if (playerCamera != null)
         {
             playerCamera.gameObject.SetActive(true);
@@ -229,6 +244,7 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 1f;
 
         Cursor.visible = false;
+
         Cursor.lockState =
             CursorLockMode.Locked;
     }
@@ -251,7 +267,6 @@ public class TestPlayManager : MonoBehaviour
             "テストプレイクリア"
         );
 
-        // 投稿確認を表示
         ShowPostConfirm();
     }
 
@@ -264,39 +279,72 @@ public class TestPlayManager : MonoBehaviour
         Time.timeScale = 0f;
 
         Cursor.visible = true;
+
         Cursor.lockState =
             CursorLockMode.None;
 
-        if (postConfirmUI != null)
+        if (postConfirmUI == null)
         {
-            postConfirmUI.SetActive(true);
-        }
-        else
-        {
-            Debug.LogWarning(
-                "投稿確認UIが設定されていません。"
+            Debug.LogError(
+                "TestPlayManagerに投稿確認UIが設定されていません。"
             );
 
-            ReturnToEdit();
+            return;
         }
+
+        postConfirmUI.SetActive(true);
+
+        Debug.Log(
+            "投稿確認UIを表示しました。"
+        );
     }
 
     //==================================================
-    // 投稿する
+    // 投稿確認「はい」
     //==================================================
 
-    public void PostDungeon()
+    public void OpenPostSetting()
     {
-        if (!isCleared)
-            return;
-
         Debug.Log(
-            "ダンジョンを投稿します。"
+            "投稿確認の「はい」が押されました。"
         );
 
-        // ここに投稿処理を追加する
+        if (!isCleared)
+        {
+            Debug.LogWarning(
+                "クリア状態ではありません。"
+            );
 
-        ReturnToEdit();
+            return;
+        }
+
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(false);
+        }
+
+        if (postSettingUI == null)
+        {
+            Debug.LogError(
+                "TestPlayManagerに投稿設定UIが設定されていません。"
+            );
+
+            return;
+        }
+
+        postSettingUI.SetActive(true);
+
+        Debug.Log(
+            "投稿Panelを表示しました : " +
+            postSettingUI.name
+        );
+
+        Time.timeScale = 0f;
+
+        Cursor.visible = true;
+
+        Cursor.lockState =
+            CursorLockMode.None;
     }
 
     //==================================================
@@ -310,6 +358,137 @@ public class TestPlayManager : MonoBehaviour
 
         Debug.Log(
             "ダンジョンを投稿せず編集画面へ戻ります。"
+        );
+
+        ReturnToEdit();
+    }
+
+    //==================================================
+    // 投稿設定画面「戻る」
+    //==================================================
+
+    public void BackFromPostSetting()
+    {
+        Debug.Log(
+            "投稿設定画面から編集画面へ戻ります。"
+        );
+
+        if (postSettingUI != null)
+        {
+            postSettingUI.SetActive(false);
+        }
+
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(false);
+        }
+
+        ReturnToEdit();
+    }
+
+    //==================================================
+    // 投稿する
+    //==================================================
+
+    public void PostDungeon()
+    {
+        if (!isCleared)
+        {
+            Debug.LogWarning(
+                "まだテストプレイをクリアしていません。"
+            );
+
+            return;
+        }
+
+        if (dungeonUploader == null)
+        {
+            Debug.LogError(
+                "TestPlayManagerにDungeonUploaderが設定されていません。"
+            );
+
+            return;
+        }
+
+        if (dungeonNameInputField == null)
+        {
+            Debug.LogError(
+                "DungeonNameInputFieldが設定されていません。"
+            );
+
+            return;
+        }
+
+        if (creatorNameInputField == null)
+        {
+            Debug.LogError(
+                "CreatorNameInputFieldが設定されていません。"
+            );
+
+            return;
+        }
+
+        string dungeonName =
+            dungeonNameInputField.text.Trim();
+
+        string creatorName =
+            creatorNameInputField.text.Trim();
+
+        if (string.IsNullOrEmpty(dungeonName))
+        {
+            Debug.LogWarning(
+                "ダンジョン名を入力してください。"
+            );
+
+            return;
+        }
+
+        if (string.IsNullOrEmpty(creatorName))
+        {
+            Debug.LogWarning(
+                "クリエイター名を入力してください。"
+            );
+
+            return;
+        }
+
+        Debug.Log(
+            "ダンジョン投稿開始 : " +
+            dungeonName +
+            " / " +
+            creatorName
+        );
+
+        //==================================================
+        // ダンジョンを投稿
+        //==================================================
+
+        // DungeonUploader.csは変更しない
+        dungeonUploader.UploadDungeon(
+            dungeonName,
+            creatorName
+        );
+
+        //==================================================
+        // 投稿UIを閉じる
+        //==================================================
+
+        if (postSettingUI != null)
+        {
+            postSettingUI.SetActive(false);
+        }
+
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(false);
+        }
+
+        //==================================================
+        // 編集画面へ戻る
+        //==================================================
+
+        Debug.Log(
+            "投稿処理を開始したため、編集画面へ戻ります。"
         );
 
         ReturnToEdit();
@@ -415,6 +594,7 @@ public class TestPlayManager : MonoBehaviour
             Time.timeScale = 0f;
 
             Cursor.visible = true;
+
             Cursor.lockState =
                 CursorLockMode.None;
         }
@@ -423,6 +603,7 @@ public class TestPlayManager : MonoBehaviour
             Time.timeScale = 1f;
 
             Cursor.visible = false;
+
             Cursor.lockState =
                 CursorLockMode.Locked;
         }
@@ -436,7 +617,8 @@ public class TestPlayManager : MonoBehaviour
     {
         isReturningToEdit = true;
 
-        if (currentMode == TestPlayMode.TestPlay)
+        if (currentMode ==
+            TestPlayMode.TestPlay)
         {
             RestoreEnemyPositions();
         }
@@ -446,14 +628,13 @@ public class TestPlayManager : MonoBehaviour
 
         isCleared = false;
 
-        // Player削除
         if (playerInstance != null)
         {
             Destroy(playerInstance);
+
             playerInstance = null;
         }
 
-        // 敵の移動停止
         GameObject[] enemies =
             GameObject.FindGameObjectsWithTag(
                 "Enemy"
@@ -476,7 +657,10 @@ public class TestPlayManager : MonoBehaviour
             }
         }
 
-        // 編集UI表示
+        //==================================================
+        // 編集UIを表示
+        //==================================================
+
         if (mapCreateUI != null)
         {
             mapCreateUI.SetActive(true);
@@ -487,25 +671,30 @@ public class TestPlayManager : MonoBehaviour
             otherEditUI.SetActive(true);
         }
 
-        // テストプレイUI非表示
         if (testPlayUI != null)
         {
             testPlayUI.SetActive(false);
         }
 
-        // 投稿確認UI非表示
         if (postConfirmUI != null)
         {
             postConfirmUI.SetActive(false);
         }
 
-        // ESCメニュー非表示
+        if (postSettingUI != null)
+        {
+            postSettingUI.SetActive(false);
+        }
+
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
         }
 
-        // 編集カメラ表示
+        //==================================================
+        // カメラ
+        //==================================================
+
         if (editCamera != null)
         {
             editCamera.gameObject.SetActive(true);
@@ -518,15 +707,19 @@ public class TestPlayManager : MonoBehaviour
                 );
         }
 
-        // Playerカメラ非表示
         if (playerCamera != null)
         {
             playerCamera.gameObject.SetActive(false);
         }
 
+        //==================================================
+        // 時間・カーソル
+        //==================================================
+
         Time.timeScale = 1f;
 
         Cursor.visible = true;
+
         Cursor.lockState =
             CursorLockMode.None;
 
