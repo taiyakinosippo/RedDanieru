@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fusion;
 
 public class GameOverManager : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class GameOverManager : MonoBehaviour
 
     private bool isGameOver = false;
 
+    private bool gameOverShown;
+
     private void Start()
     {
         ResetGameOverState();
@@ -29,6 +32,32 @@ public class GameOverManager : MonoBehaviour
 
     private void Update()
     {
+        if (!GameModeManager.IsMultiplayer)
+            return;
+
+        if (gameOverShown)
+            return;
+
+        NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+
+        if (runner == null)
+            return;
+
+        if (NetworkGameState.Instance != null)
+        {
+            Debug.Log(
+                $"Dead={NetworkGameState.Instance.DeadPlayerCount} " +
+                $"Start={NetworkGameState.Instance.StartPlayerCount}"
+            );
+
+            if (NetworkGameState.Instance.DeadPlayerCount >=
+                NetworkGameState.Instance.StartPlayerCount)
+            {
+                gameOverShown = true;
+                GameOver();
+            }
+        }
+
         if (isGameOver)
         {
             Cursor.visible = true;
@@ -54,13 +83,34 @@ public class GameOverManager : MonoBehaviour
             return;
 
         isGameOver = true;
+       
+        //ソロの時だけ上空カメラ
+       
+        PlayerUI[] playerUIs =
+    FindObjectsOfType<PlayerUI>(true);
 
-        Time.timeScale = 0f;
+        foreach (PlayerUI ui in playerUIs)
+        {
+            if (ui._dieText != null)
+            {
+                ui._dieText.enabled = false;
+            }
+        }
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
         SpawnGameOverCamera();
+
+        if (!GameModeManager.IsMultiplayer)
+        {
+            GameObject player= GameObject.FindWithTag("Player");
+
+            if (player != null)
+            {
+                Destroy(player);
+            }
+        }
 
         if (gameOverPanel != null)
         {
@@ -98,8 +148,29 @@ public class GameOverManager : MonoBehaviour
             }
         }
 
-        gameOverCamera.transform.position =
-            cameraPosition;
+        MapManager mapManager =
+            FindObjectOfType<MapManager>();
+
+        if (mapManager != null)
+        {
+            float centerX =
+                (mapManager.width - 1) / 2f;
+
+            float centerZ =
+                (mapManager.depth - 1) / 2f;
+
+            gameOverCamera.transform.position =
+                new Vector3(
+                    centerX,
+                    30f,
+                    centerZ
+                );
+        }
+        else
+        {
+            gameOverCamera.transform.position =
+                cameraPosition;
+        }
 
         gameOverCamera.transform.rotation =
             Quaternion.Euler(cameraRotation);

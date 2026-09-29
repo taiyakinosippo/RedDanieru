@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Player
@@ -35,6 +37,12 @@ namespace Player
 
         private PlayerMovement _playerMovement;
 
+        private StickerInteractor _stickerInteractor;
+
+        private GameObject _interactObject = null;  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
+
+   
+
         private void Start()
         {
             _playerAnimation = GetComponent<PlayerAnimation>();
@@ -44,6 +52,8 @@ namespace Player
             _playerCamera = GetComponent<PlayerCamera>();
 
             _playerMovement = GetComponent<PlayerMovement>();
+
+            _stickerInteractor = GetComponent<StickerInteractor>();
         }
 
         //-----------------------------------------
@@ -66,14 +76,14 @@ namespace Player
                                firstPersonWallDistance, stickerLayer,
                                QueryTriggerInteraction.Ignore
                                );
-         
+
                 //あればはがすアニメーションを再生させる
                 if (isStickerDected)
                 {
                     // ステッカー入力を消費
                     input.sticker = false;
 
-                    _playerAnimation.StickerPeelOffAnimation();
+                    //_playerAnimation.StickerPeelOffAnimation();
                 }
 
                 //ないなら壁があるかどうかを判定する
@@ -110,47 +120,163 @@ namespace Player
             //3人称だった場合
             else
             {
+                // 現在一番高いDot値
+                float maxDot = -1.0f;
+
+                isStickerDected = false;
+
+                // 一番カメラの真正面に近いステッカー
+                StickerState targetSticker = null;
+
                 // プレイヤーの前にある球体を使って地面にいるかどうかを判定
                 Vector3 spherePosition =
                 transform.position + transform.forward * thirdPersonWallDistance + Vector3.up * thirdPersonWallCheckHeight;
-                // ステッカーあるかの判定を行う
-                isStickerDected = 
-                Physics.CheckSphere(spherePosition, checkRadius, stickerLayer, QueryTriggerInteraction.Ignore);
 
-                //あればはがすアニメーションを再生させる
-                if (isStickerDected)
+                // ステッカーあるかの判定を行う
+                Collider[] isCollider =
+                Physics.OverlapSphere(spherePosition, checkRadius, ~0, QueryTriggerInteraction.Ignore);
+
+                foreach (Collider collider in isCollider)
                 {
+                    StickerState sticker = collider.GetComponent<StickerState>();
+
+                    if (sticker == null) continue;
+
+                    Debug.Log("StickerState発見 / currentSticker = " + sticker.currentSticker);
+
+                    if (sticker.currentSticker == Sticker.None)
+                        continue;
+
+                    // カメラ → ステッカーの方向
+                    Vector3 direction =
+                        (sticker.transform.position -
+                         _playerCamera.currentCamera.transform.position)
+                         .normalized;
+
+                    // カメラ真正面との一致度
+                    float dot =
+                        Vector3.Dot(
+                            _playerCamera.currentCamera.transform.forward,
+                            direction
+                        );
+
+                    Debug.Log(
+                        "Sticker = "
+                        + sticker.currentSticker
+                        + " / Dot = "
+                        + dot
+                    );
+
+                    // 一番真正面に近いものを記録
+                    if (dot > maxDot)
+                    {
+                        maxDot = dot;
+                        targetSticker = sticker;
+                    }
+
+                }
+
+                // ステッカーが見つかった
+                if (targetSticker != null)
+                {
+                    _interactObject = targetSticker.gameObject;
+
+                    isStickerDected = true;
+
+                    Debug.Log(
+                        "一番正面のステッカー = "
+                        + targetSticker.currentSticker
+                    );
+
+                    input.sticker = false;
+
                     _playerAnimation.StickerPeelOffAnimation();
                 }
 
-                //ないなら壁があるかどうかを判定する
+                // ステッカーがなかった
                 else
                 {
+                    Debug.Log("ステッカーがありません");
 
-                    // 壁があるのかどうかの判定を行う
-                    isWallDetected =
-                    Physics.CheckSphere(spherePosition, checkRadius, wallLayer, QueryTriggerInteraction.Ignore);
+                    // ステッカーあるかの判定を行う
+                    isCollider =
+                    Physics.OverlapSphere(spherePosition, checkRadius, ~0, QueryTriggerInteraction.Ignore);
 
-                    //もし壁があった場合次にステッカーがないのかを確認する
-                    if (isWallDetected)
+                    foreach (Collider collider in isCollider)
                     {
-                        // ステッカー入力を消費
-                        input.sticker = false;
-                        //ステッカーを持っているかの処理をここに書く
-                        _playerAnimation.PlayerStickerPasteAnimator();
-                        Debug.Log("目の前に壁がありまーす");
-                        isWallDetected = false;
-                    }
-                    else
-                    {
-                        Debug.Log("目の前に壁がありませーん");
-                        isWallDetected = false;
-                        // ステッカー入力を消費
-                        input.sticker = false;
-                        _actionPriority.EndAction();
+                        StickerState sticker = collider.GetComponent<StickerState>();
+
+                        if (sticker == null) continue;
+
+                        Debug.Log("StickerState発見 / currentSticker = " + sticker.currentSticker);
+
+                        if (sticker.currentSticker != Sticker.None)
+                            continue;
+
+                        // カメラ → ステッカーの方向
+                        Vector3 direction =
+                            (sticker.transform.position -
+                             _playerCamera.currentCamera.transform.position)
+                             .normalized;
+
+                        // カメラ真正面との一致度
+                        float dot =
+                            Vector3.Dot(
+                                _playerCamera.currentCamera.transform.forward,
+                                direction
+                            );
+
+                        Debug.Log(
+                            "Sticker = "
+                            + sticker.currentSticker
+                            + " / Dot = "
+                            + dot
+                        );
+
+                        // 一番真正面に近いものを記録
+                        if (dot > maxDot)
+                        {
+                            maxDot = dot;
+                            targetSticker = sticker;
+                        }
+
+                        if (targetSticker != null)
+                        {
+                            // ステッカー入力を消費
+                            input.sticker = false;
+                            //ステッカーを持っているかの処理をここに書く
+                            _playerAnimation.PlayerStickerPasteAnimator();
+                        }
+                        else
+                        {
+                            // ステッカー入力を消費
+                            input.sticker = false;
+                            _actionPriority.EndAction();
+                        }
+
 
                     }
+
+                    input.sticker = false;
+                    _actionPriority.EndAction();
                 }
+            }
+        }
+
+
+      
+
+        public void StickerAnimationEnd()
+        {
+            if (isStickerDected)
+            {
+                _stickerInteractor.ReceiptPickup(_interactObject);
+                _actionPriority.EndAction();
+            }
+            else
+            {
+                _stickerInteractor.ReceiptPickup(_interactObject);
+                _actionPriority.EndAction();
             }
            
         }

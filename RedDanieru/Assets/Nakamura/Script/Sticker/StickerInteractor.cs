@@ -29,17 +29,17 @@ public class StickerInteractor : MonoBehaviour
 
     void Update()
     {
-        // インタラクト対象を更新
-        UpdateInteractObjects();
+        //// インタラクト対象を更新
+        //UpdateInteractObjects();
 
         //保持中のステッカーのインデックスを変更
         HoldIndex();
 
-        //右クリックでステッカーを貼る、剥がす
-        if (interactObjects.Count > 0 && Input.GetMouseButtonDown(1))
-        {
-            ReceiptPickup();
-        }
+        ////右クリックでステッカーを貼る、剥がす
+        //if (interactObjects.Count > 0 && Input.GetMouseButtonDown(1))
+        //{
+        //    ReceiptPickup();
+        //}
     }
 
     //インタラクト対象のオブジェクトを更新
@@ -98,9 +98,9 @@ public class StickerInteractor : MonoBehaviour
         stickerSlotUI.SetSelectedSlot(holdIndex);
     }
 
-    private void ReceiptPickup()
+    public void ReceiptPickup(GameObject interactObj)
     {
-        GameObject interactObj = GetInteractObject();  //ステッカーを貼り、剥がすオブジェクト
+
         StickerState target = interactObj.GetComponent<StickerState>();  //インタラクトしているオブジェクトのStickerStateを取得
         if (target == null)
             return;
@@ -152,26 +152,26 @@ public class StickerInteractor : MonoBehaviour
     }
 
     //一番カメラの中央にあるオブジェクトを取得
-    private GameObject GetInteractObject()
-    {
-        GameObject targetObject = null;  //一番カメラの中央にあるオブジェクト
-        float maxDot = -1.0f;  //カメラの中央にあるオブジェクトを取得するためのドット積の最大値
+    //private GameObject GetInteractObject()
+    //{
+    //    GameObject targetObject = null;  //一番カメラの中央にあるオブジェクト
+    //    float maxDot = -1.0f;  //カメラの中央にあるオブジェクトを取得するためのドット積の最大値
 
-        //インタラクト対象のオブジェクトの中で一番カメラの中央にあるオブジェクトを取得
-        foreach (GameObject target in interactObjects)
-        {
-            //プレイヤーの前方ベクトルと対象オブジェクトへの方向ベクトルのドット積を計算
-            Vector3 dir = (target.transform.position - player.position).normalized;
-            float dot = Vector3.Dot(player.forward, dir);
+    //    //インタラクト対象のオブジェクトの中で一番カメラの中央にあるオブジェクトを取得
+    //    foreach (GameObject target in interactObjects)
+    //    {
+    //        //プレイヤーの前方ベクトルと対象オブジェクトへの方向ベクトルのドット積を計算
+    //        Vector3 dir = (target.transform.position - player.position).normalized;
+    //        float dot = Vector3.Dot(player.forward, dir);
 
-            //ドット積が最大のオブジェクトを取得
-            if (dot > maxDot)
-            {
-                maxDot = dot;
-                targetObject = target;
-            }
-        }
+    //        //ドット積が最大のオブジェクトを取得
+    //        if (dot > maxDot)
+    //        {
+    //            maxDot = dot;
+    //            targetObject = target;
+    //        }
+    //    }
 
-        return targetObject;
-    }
+    //    return targetObject;
+    //}
 }
