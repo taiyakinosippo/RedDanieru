@@ -109,7 +109,6 @@ public class LocalSaveUI : MonoBehaviour
 
         savePanel.SetActive(true);
 
-        // 保存画面を最前面にする
         savePanel.transform.SetAsLastSibling();
 
         //==================================================
@@ -125,7 +124,7 @@ public class LocalSaveUI : MonoBehaviour
         CreateSavedDungeonButtons();
 
         //==================================================
-        // 空きボタンを表示
+        // 新規保存ボタンを表示
         //==================================================
 
         CreateEmptyButtons();
@@ -194,7 +193,6 @@ public class LocalSaveUI : MonoBehaviour
                 saveSlotParent
             );
 
-        // サイズ・回転をPrefabの状態に合わせる
         buttonObject.transform.localScale =
             Vector3.one;
 
@@ -260,7 +258,7 @@ public class LocalSaveUI : MonoBehaviour
     }
 
     //==================================================
-    // 空きボタン作成
+    // 新規保存ボタン作成
     //==================================================
 
     private void CreateEmptyButtons()
@@ -276,7 +274,7 @@ public class LocalSaveUI : MonoBehaviour
     }
 
     //==================================================
-    // 空きボタン
+    // 新規保存ボタン
     //==================================================
 
     private void CreateEmptyButton()
@@ -294,7 +292,7 @@ public class LocalSaveUI : MonoBehaviour
             Quaternion.identity;
 
         //==================================================
-        // 文字を空にする
+        // 新規保存の文字
         //==================================================
 
         TMP_Text text =
@@ -304,7 +302,25 @@ public class LocalSaveUI : MonoBehaviour
 
         if (text != null)
         {
-            text.text = "";
+            text.text =
+                "新規保存";
+
+            text.gameObject.SetActive(true);
+
+            text.enabled =
+                true;
+
+            text.color =
+                Color.black;
+
+            text.alignment =
+                TextAlignmentOptions.Center;
+        }
+        else
+        {
+            Debug.LogError(
+                "SaveSlotButtonPrefabにTMP_Textがありません。"
+            );
         }
 
         //==================================================
@@ -364,7 +380,7 @@ public class LocalSaveUI : MonoBehaviour
     }
 
     //==================================================
-    // 空き保存先を選択
+    // 新規保存を選択
     //==================================================
 
     private void SelectEmptySlot()
@@ -378,7 +394,8 @@ public class LocalSaveUI : MonoBehaviour
             return;
         }
 
-        dungeonNameInput.text = "";
+        dungeonNameInput.text =
+            "";
 
         if (savePanel != null)
         {
@@ -391,7 +408,7 @@ public class LocalSaveUI : MonoBehaviour
         }
 
         Debug.Log(
-            "空き保存先を選択しました。"
+            "新規保存を選択しました。"
         );
     }
 
@@ -494,7 +511,8 @@ public class LocalSaveUI : MonoBehaviour
             overwriteDungeonName
         );
 
-        overwriteDungeonName = "";
+        overwriteDungeonName =
+            "";
 
         if (overwritePanel != null)
         {
@@ -510,7 +528,8 @@ public class LocalSaveUI : MonoBehaviour
 
     public void CancelOverwrite()
     {
-        overwriteDungeonName = "";
+        overwriteDungeonName =
+            "";
 
         if (overwritePanel != null)
         {
@@ -542,7 +561,10 @@ public class LocalSaveUI : MonoBehaviour
     {
         CloseAllPanels();
 
+        //==================================================
         // マップ作成画面を戻す
+        //==================================================
+
         if (mapCreateUI != null)
         {
             mapCreateUI.SetActive(true);
