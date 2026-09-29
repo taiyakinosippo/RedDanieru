@@ -120,15 +120,13 @@ public class DungeonUIManager : MonoBehaviour
     [Header("マッチング諸々")]
     public GameObject MatchingObj;
     public GameObject MatchingPlayerObj;
-    public Text MatchingPlayerText;
+    public TextMeshProUGUI MatchingPlayerText;
     public GameObject MatchingCautionObj;
 
     public Button GameStartbutton;
 
     [Header("UI")]
-    [SerializeField]private Text dungeonNameText;
-    [SerializeField] private Text RoomIdText;
-    [SerializeField] private Text RoomKeyText;
+    [SerializeField] private TextMeshProUGUI RoomKeyText;
     [SerializeField] private TextMeshProUGUI CautionText;
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
@@ -360,9 +358,6 @@ public class DungeonUIManager : MonoBehaviour
     {
         Debug.Log("MapSelectButton");
         Debug.Log("DungeonName=" + RoomInfo.SelectedDungeonName);
-
-        dungeonNameText.text =
-            "マップ：" + RoomInfo.SelectedDungeonName;
 
         MatchingRoomCreateWindow.SetActive(true);
         MatchingRoomCreateLaycast.SetActive(true);
