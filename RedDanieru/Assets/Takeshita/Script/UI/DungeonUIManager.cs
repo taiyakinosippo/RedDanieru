@@ -126,7 +126,6 @@ public class DungeonUIManager : MonoBehaviour
     public Button GameStartbutton;
 
     [Header("UI")]
-    [SerializeField]private Text dungeonNameText;
     [SerializeField] private Text RoomIdText;
     [SerializeField] private Text RoomKeyText;
     [SerializeField] private TextMeshProUGUI CautionText;
@@ -360,9 +359,6 @@ public class DungeonUIManager : MonoBehaviour
     {
         Debug.Log("MapSelectButton");
         Debug.Log("DungeonName=" + RoomInfo.SelectedDungeonName);
-
-        dungeonNameText.text =
-            "マップ：" + RoomInfo.SelectedDungeonName;
 
         MatchingRoomCreateWindow.SetActive(true);
         MatchingRoomCreateLaycast.SetActive(true);

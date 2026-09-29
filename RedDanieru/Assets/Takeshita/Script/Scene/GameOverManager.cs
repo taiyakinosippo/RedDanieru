@@ -83,7 +83,9 @@ public class GameOverManager : MonoBehaviour
             return;
 
         isGameOver = true;
-
+       
+        //ソロの時だけ上空カメラ
+       
         PlayerUI[] playerUIs =
     FindObjectsOfType<PlayerUI>(true);
 
@@ -97,6 +99,18 @@ public class GameOverManager : MonoBehaviour
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+
+        if (!GameModeManager.IsMultiplayer)
+        {
+            SpawnGameOverCamera();
+
+            GameObject player= GameObject.FindWithTag("Player");
+
+            if (player != null)
+            {
+                Destroy(player);
+            }
+        }
 
         if (gameOverPanel != null)
         {
