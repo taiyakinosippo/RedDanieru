@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fusion;
 
 public class GameOverManager : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class GameOverManager : MonoBehaviour
 
     private bool isGameOver = false;
 
+    private bool gameOverShown;
+
     private void Start()
     {
         ResetGameOverState();
@@ -29,6 +32,32 @@ public class GameOverManager : MonoBehaviour
 
     private void Update()
     {
+        if (!GameModeManager.IsMultiplayer)
+            return;
+
+        if (gameOverShown)
+            return;
+
+        NetworkRunner runner = FindObjectOfType<NetworkRunner>();
+
+        if (runner == null)
+            return;
+
+        if (NetworkGameState.Instance != null)
+        {
+            Debug.Log(
+                $"Dead={NetworkGameState.Instance.DeadPlayerCount} " +
+                $"Start={NetworkGameState.Instance.StartPlayerCount}"
+            );
+
+            if (NetworkGameState.Instance.DeadPlayerCount >=
+                NetworkGameState.Instance.StartPlayerCount)
+            {
+                gameOverShown = true;
+                GameOver();
+            }
+        }
+
         if (isGameOver)
         {
             Cursor.visible = true;
@@ -55,12 +84,19 @@ public class GameOverManager : MonoBehaviour
 
         isGameOver = true;
 
-        Time.timeScale = 0f;
+        PlayerUI[] playerUIs =
+    FindObjectsOfType<PlayerUI>(true);
+
+        foreach (PlayerUI ui in playerUIs)
+        {
+            if (ui._dieText != null)
+            {
+                ui._dieText.enabled = false;
+            }
+        }
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
-
-        SpawnGameOverCamera();
 
         if (gameOverPanel != null)
         {

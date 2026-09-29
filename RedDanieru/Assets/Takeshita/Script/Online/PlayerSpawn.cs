@@ -10,25 +10,60 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     [SerializeField]
     private Transform[] spawnPoints;
+    private List<int> usedSpawnIndexes = new List<int>();
 
     [SerializeField] private NetworkGameState networkGameState;
 
     public bool CanSpawn = false;
 
-    public void SpawnPlayer(NetworkRunner runner,PlayerRef player)
+    public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
-
-        //Debug.Log($"SpawnPlayer: player={player}");
-
         if (runner.TryGetPlayerObject(player, out _))
             return;
 
         int prefabIndex =
             player.PlayerId % playerPrefabs.Length;
 
+        int spawnIndex;
+
+        // 未使用SpawnPointを優先
+        if (usedSpawnIndexes.Count < spawnPoints.Length)
+        {
+            List<int> candidates =
+                new List<int>();
+
+            for (int i = 0; i < spawnPoints.Length; i++)
+            {
+                if (!usedSpawnIndexes.Contains(i))
+                {
+                    candidates.Add(i);
+                }
+            }
+
+            spawnIndex =
+                candidates[
+                    Random.Range(0, candidates.Count)
+                ];
+
+            usedSpawnIndexes.Add(spawnIndex);
+        }
+        else
+        {
+            spawnIndex =
+                Random.Range(0, spawnPoints.Length);
+        }
+
         Vector3 spawnPos =
-            spawnPoints[player.PlayerId % spawnPoints.Length]
-            .position;
+            spawnPoints[spawnIndex].position;
+
+        Debug.Log(
+            $"Player={player.PlayerId} " +
+            $"SpawnIndex={spawnIndex}"
+        );
+
+        Debug.Log(
+            $"SpawnPos={spawnPos}"
+        );
 
         var obj = runner.Spawn(
             playerPrefabs[prefabIndex],
@@ -38,86 +73,47 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         );
 
         runner.SetPlayerObject(
-          player,
-          obj
-      );
+            player,
+            obj
+        );
 
-        //Debug.Log(
-        //    $"Local={runner.LocalPlayer} " +
-        //    $"Player={player} " +
-        //    $"Obj={obj.name}"
-        //);
-
-        //    Debug.Log(
-        //$"LocalPlayer={runner.LocalPlayer}");
-
-        //    Debug.Log($"SpawnTarget={player}");
-
-        //    Debug.Log($"InputAuthority={obj.InputAuthority}");
-
-        //    Debug.Log($"HasInputAuthority={obj.HasInputAuthority}");
+        Debug.Log(
+            $"ActualPos={obj.transform.position}"
+        );
 
         if (obj.HasInputAuthority)
         {
-            Debug.Log(
-                "これは自分のプレイヤー"
-            );
+            Debug.Log("これは自分のプレイヤー");
         }
         else
         {
-            Debug.Log(
-                "これは相手のプレイヤー"
-            );
+            Debug.Log("これは相手のプレイヤー");
         }
 
-        Debug.Log(
-     $"Player:{player.PlayerId} SpawnPos:{spawnPos}"
- );
-        StartCoroutine(CheckPosition(obj.gameObject));
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(spawnPos + Vector3.up * 10f,Vector3.down,out hit,50f))
-        {
-            //Debug.Log(
-            //    $"Ground Y = {hit.point.y}"
-            //);
-        }
-
+        StartCoroutine(
+            CheckPosition(obj.gameObject)
+        );
 
         DungeonUIManager ui =
-    FindObjectOfType<DungeonUIManager>();
+            FindObjectOfType<DungeonUIManager>();
 
         if (ui != null)
         {
             ui.HideMatchingUI();
         }
-
-        //if (obj.HasInputAuthority == false)
-        //{
-        //    Camera[] cameras =
-        //        obj.GetComponentsInChildren<Camera>(true);
-
-        //    foreach (Camera cam in cameras)
-        //    {
-        //        cam.gameObject.SetActive(false);
-        //    }
-        //}
-
-
     }
 
-    public void SpawnAllPlayers(   NetworkRunner runner)
+    public void SpawnAllPlayers(NetworkRunner runner)
     {
         if (!runner.IsSharedModeMasterClient)
             return;
 
+        usedSpawnIndexes.Clear();
+
         foreach (var player in runner.ActivePlayers)
         {
-            SpawnPlayer(runner,player);
+            SpawnPlayer(runner, player);
         }
-
-
     }
 
     public void OnPlayerJoined(NetworkRunner runner,PlayerRef player)
@@ -145,9 +141,7 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         //    yield return null;
         //}
 
-        Debug.Log($"Start Spawn {runner.LocalPlayer}");
-
-        if (player != runner.LocalPlayer)
+         if (player != runner.LocalPlayer)
             yield break;
 
         SpawnPlayer(runner, player);

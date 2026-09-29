@@ -40,6 +40,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: unitychan
       objectReference: {fileID: 0}
+    - target: {fileID: 2934583692236223393, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5252574830359970969, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_NotificationBehavior
       value: 0
@@ -94,12 +98,26 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6861549660615763227}
+    - targetCorrespondingSourceObject: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1444634832063265644}
   m_SourcePrefab: {fileID: 100100000, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
 --- !u!95 &472262528453075653 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 4508827298624980741, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
   m_PrefabInstance: {fileID: 4044024444695094720}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1520299498407183206 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3244406581610145446, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+  m_PrefabInstance: {fileID: 4044024444695094720}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3898678134712886083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e619c3861af7149a963395bb42e129, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1614026655119289965 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: -5874542748976444499, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
@@ -109,6 +127,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b097b5903026804d87183bb6bb48ef7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2824716209027381525 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2246217195855109333, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+  m_PrefabInstance: {fileID: 4044024444695094720}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &3898678134712886083 stripped
@@ -151,6 +180,21 @@ MonoBehaviour:
   StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f
   TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea
   TotalWords: 3
+--- !u!114 &1444634832063265644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3898678134712886083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67b7bcf43a316f440bb8511fb37daaaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dieText: {fileID: 2824716209027381525}
+  _status: {fileID: 1520299498407183206}
+  _playerCamera: {fileID: 7160462869434332230}
 --- !u!114 &4171447507800504483 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 143191213316447587, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
@@ -160,5 +204,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa62892a9506393469609e47f36467f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7160462869434332230 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+  m_PrefabInstance: {fileID: 4044024444695094720}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3898678134712886083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff7472cbd86ed7340be965a8971d5eb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
