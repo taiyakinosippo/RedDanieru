@@ -1,4 +1,5 @@
 using Fusion;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
@@ -177,7 +178,7 @@ namespace Player
         {
             _animator.ResetTrigger(_animIDStickerPaste);
             Debug.Log("Sticker Paste animation end");
-            _actionPriority.EndAction();
+            _stickerCheck.StickerAnimationEnd();
         }
 
         //----------------------------------------------------------
@@ -189,6 +190,7 @@ namespace Player
             {
                 Debug.Log("はがすアニメーション再生");
                 _animator.SetTrigger(_animIDStickerPeelOff);
+
             }
         }
 
@@ -199,8 +201,7 @@ namespace Player
         {
             _animator.ResetTrigger(_animIDStickerPeelOff);
             Debug.Log("Sticker Peel off animation end");
-            _stickerCheck.isStickerDected = false;
-            _actionPriority.EndAction();
+            _stickerCheck.StickerAnimationEnd();
         }
 
 

@@ -26,6 +26,7 @@ namespace Player
         private PlayerStatus        _playerStatus;
         private DeadCameraMulti     _deadMultiCamera;
 
+
         private bool _debugMode = false;
 
         // 現在の入力デバイスがマウスかどうかを判定するプロパティ
