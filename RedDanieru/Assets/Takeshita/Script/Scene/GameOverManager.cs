@@ -25,6 +25,8 @@ public class GameOverManager : MonoBehaviour
 
     private bool gameOverShown;
 
+    public bool IsGameOver => isGameOver;
+
     private void Start()
     {
         ResetGameOverState();
@@ -83,9 +85,9 @@ public class GameOverManager : MonoBehaviour
             return;
 
         isGameOver = true;
-       
-        //ソロの時だけ上空カメラ
-       
+
+        Time.timeScale = 0f;
+
         PlayerUI[] playerUIs =
     FindObjectsOfType<PlayerUI>(true);
 
@@ -99,6 +101,14 @@ public class GameOverManager : MonoBehaviour
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+
+        PlayerInput[] inputs =
+    FindObjectsOfType<PlayerInput>();
+
+        foreach (PlayerInput input in inputs)
+        {
+            input.enabled = false;
+        }
 
         SpawnGameOverCamera();
 
@@ -176,6 +186,7 @@ public class GameOverManager : MonoBehaviour
             Quaternion.Euler(cameraRotation);
 
         gameOverCamera.gameObject.SetActive(true);
+
     }
 
     public void ReturnToTitle()

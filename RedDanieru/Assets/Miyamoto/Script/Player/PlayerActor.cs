@@ -150,6 +150,13 @@ namespace Player
 
         private void UpdatePlayer()
         {
+            GameOverManager gameOver = FindObjectOfType<GameOverManager>();
+
+            if (gameOver != null && gameOver.IsGameOver)
+            {
+                return;
+            }
+
             if (_playerStatus._isDead && !_deathProcessed)
             {
                 _deathProcessed = true;
