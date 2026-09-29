@@ -129,7 +129,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField]private Text dungeonNameText;
     [SerializeField] private Text RoomIdText;
     [SerializeField] private Text RoomKeyText;
-    [SerializeField] private Text CautionText;
+    [SerializeField] private TextMeshProUGUI CautionText;
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Dropdown playerCountDropdown;
     [SerializeField] private TMP_InputField createRoomIdInput;
@@ -500,6 +500,22 @@ public class DungeonUIManager : MonoBehaviour
     {
         if (NetworkGameState.Instance == null)
             return;
+
+        NetworkRunner runner =
+            FindObjectOfType<NetworkRunner>();
+
+        int count = 0;
+
+        foreach (var player in runner.ActivePlayers)
+        {
+            count++;
+        }
+
+        NetworkGameState.Instance.StartPlayerCount = count;
+
+        Debug.Log(
+            "StartPlayerCount = " + count
+        );
 
         NetworkGameState.Instance.RPC_StartGame();
 
