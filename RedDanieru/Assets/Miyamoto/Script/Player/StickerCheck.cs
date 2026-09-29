@@ -41,7 +41,7 @@ namespace Player
 
         private GameObject _interactObject = null;  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
 
-   
+        private bool isStickerStateFound = false;
 
         private void Start()
         {
@@ -124,6 +124,8 @@ namespace Player
                 float maxDot = -1.0f;
 
                 isStickerDected = false;
+
+                isStickerStateFound = false;
 
                 // 一番カメラの真正面に近いステッカー
                 StickerState targetSticker = null;
@@ -208,6 +210,8 @@ namespace Player
 
                         if (sticker == null) continue;
 
+                        isStickerStateFound = true;
+
                         Debug.Log("StickerState発見 / currentSticker = " + sticker.currentSticker);
 
                         if (sticker.currentSticker != Sticker.None)
@@ -257,14 +261,21 @@ namespace Player
 
                     }
 
-                    input.sticker = false;
-                    _actionPriority.EndAction();
+                    // foreachが全部終わった後に判定する
+                    if (!isStickerStateFound)
+                    {
+                        // StickerStateが1個もなかった
+                        input.sticker = false;
+                        _actionPriority.EndAction();
+
+                        Debug.Log("StickerStateが1個もありません");
+                    }
                 }
             }
         }
 
 
-      
+     
 
         public void StickerAnimationEnd()
         {
