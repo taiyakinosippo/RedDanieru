@@ -102,13 +102,13 @@ public class GameOverManager : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        PlayerInput[] inputs =
-    FindObjectsOfType<PlayerInput>();
+    //    PlayerInput[] inputs =
+    //FindObjectsOfType<PlayerInput>();
 
-        foreach (PlayerInput input in inputs)
-        {
-            input.enabled = false;
-        }
+    //    foreach (PlayerInput input in inputs)
+    //    {
+    //        input.enabled = false;
+    //    }
 
         SpawnGameOverCamera();
 
