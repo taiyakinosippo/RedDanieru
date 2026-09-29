@@ -100,10 +100,10 @@ public class GameOverManager : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
+        SpawnGameOverCamera();
+
         if (!GameModeManager.IsMultiplayer)
         {
-            SpawnGameOverCamera();
-
             GameObject player= GameObject.FindWithTag("Player");
 
             if (player != null)
@@ -148,8 +148,29 @@ public class GameOverManager : MonoBehaviour
             }
         }
 
-        gameOverCamera.transform.position =
-            cameraPosition;
+        MapManager mapManager =
+            FindObjectOfType<MapManager>();
+
+        if (mapManager != null)
+        {
+            float centerX =
+                (mapManager.width - 1) / 2f;
+
+            float centerZ =
+                (mapManager.depth - 1) / 2f;
+
+            gameOverCamera.transform.position =
+                new Vector3(
+                    centerX,
+                    30f,
+                    centerZ
+                );
+        }
+        else
+        {
+            gameOverCamera.transform.position =
+                cameraPosition;
+        }
 
         gameOverCamera.transform.rotation =
             Quaternion.Euler(cameraRotation);
