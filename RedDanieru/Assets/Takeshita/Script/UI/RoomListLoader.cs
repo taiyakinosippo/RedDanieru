@@ -25,7 +25,7 @@ public class RoomListLoader : MonoBehaviour
     public GameObject MachingRoomCreateText;
 
     [SerializeField]
-    private Text JoinCautionRoomText;
+    private TextMeshProUGUI JoinCautionRoomText;
 
     private RoomData selectedRoom;
 

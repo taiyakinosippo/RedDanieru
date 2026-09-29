@@ -6,9 +6,30 @@ public class NetworkGameState : NetworkBehaviour
     public static NetworkGameState Instance;
     [Networked] public bool IsCleared { get; set; }
 
+    [Networked] public int DeadPlayerCount { get; set; }
+
+    [Networked]
+    public int StartPlayerCount { get; set; }
+
     public override void Spawned()
     {
         Instance = this;
+    }
+
+    public void AddDeadPlayer()
+    {
+        Debug.Log(
+            $"AddDeadPlayer State={HasStateAuthority}"
+        );
+
+        if (!HasStateAuthority)
+            return;
+
+        DeadPlayerCount++;
+
+        Debug.Log(
+            $"DeadPlayerCount={DeadPlayerCount}"
+        );
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
@@ -26,6 +47,16 @@ public class NetworkGameState : NetworkBehaviour
         spawner.SpawnPlayer(
             runner,
             runner.LocalPlayer
+        );
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_PlayerDied()
+    {
+        DeadPlayerCount++;
+
+        Debug.Log(
+            $"DeadPlayerCount={DeadPlayerCount}"
         );
     }
 }

@@ -43,16 +43,12 @@ public class FusionLauncher : MonoBehaviour
     {
         Debug.Log("StartSolo");
 
-        Debug.Log(soloPlayerPrefab);
-        Debug.Log(spawnPoint);
-
         Instantiate(
             soloPlayerPrefab,
             spawnPoint.position,
             spawnPoint.rotation
         );
 
-        Debug.Log("ソロプレイヤー生成");
     }
 
     public async void StartMatch(string roomName)
@@ -90,13 +86,17 @@ public class FusionLauncher : MonoBehaviour
                 );
 
                 Debug.Log($"Spawned GameState = {obj}");
-            }
+                
+                int playerCount = 0;
 
-            int playerCount = 0;
+                foreach (var player in runner.ActivePlayers)
+                {
+                    playerCount++;
+                }
 
-            foreach (var player in runner.ActivePlayers)
-            {
-                playerCount++;
+                NetworkGameState state = obj.GetComponent<NetworkGameState>();
+
+                state.StartPlayerCount = playerCount;
             }
         }
     }
