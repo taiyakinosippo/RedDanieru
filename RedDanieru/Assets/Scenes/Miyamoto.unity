@@ -131,29 +131,13 @@ PrefabInstance:
       propertyPath: SortKey
       value: 1841408755
       objectReference: {fileID: 0}
-    - target: {fileID: -7075347287243946155, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: NestedObjects.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -7075347287243946155, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: 'NestedObjects.Array.data[0]'
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_Name
       value: PlayerArmature (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 4848678109406426361, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: Grounded
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4848678109406426361, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: FallTimeout
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 5538748856985837120, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: checkRadius
-      value: 3
+    - target: {fileID: 2697843322473174110, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: _attackPoint
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6363232815336297457, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_LocalPosition.x

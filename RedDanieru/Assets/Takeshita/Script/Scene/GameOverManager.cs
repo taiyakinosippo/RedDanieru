@@ -25,6 +25,8 @@ public class GameOverManager : MonoBehaviour
 
     private bool gameOverShown;
 
+    public bool IsGameOver => isGameOver;
+
     private void Start()
     {
         ResetGameOverState();
@@ -84,6 +86,8 @@ public class GameOverManager : MonoBehaviour
 
         isGameOver = true;
 
+        Time.timeScale = 0f;
+
         PlayerUI[] playerUIs =
     FindObjectsOfType<PlayerUI>(true);
 
@@ -97,6 +101,26 @@ public class GameOverManager : MonoBehaviour
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+
+    //    PlayerInput[] inputs =
+    //FindObjectsOfType<PlayerInput>();
+
+    //    foreach (PlayerInput input in inputs)
+    //    {
+    //        input.enabled = false;
+    //    }
+
+        SpawnGameOverCamera();
+
+        if (!GameModeManager.IsMultiplayer)
+        {
+            GameObject player= GameObject.FindWithTag("Player");
+
+            if (player != null)
+            {
+                Destroy(player);
+            }
+        }
 
         if (gameOverPanel != null)
         {
@@ -134,13 +158,35 @@ public class GameOverManager : MonoBehaviour
             }
         }
 
-        gameOverCamera.transform.position =
-            cameraPosition;
+        MapManager mapManager =
+            FindObjectOfType<MapManager>();
+
+        if (mapManager != null)
+        {
+            float centerX =
+                (mapManager.width - 1) / 2f;
+
+            float centerZ =
+                (mapManager.depth - 1) / 2f;
+
+            gameOverCamera.transform.position =
+                new Vector3(
+                    centerX,
+                    30f,
+                    centerZ
+                );
+        }
+        else
+        {
+            gameOverCamera.transform.position =
+                cameraPosition;
+        }
 
         gameOverCamera.transform.rotation =
             Quaternion.Euler(cameraRotation);
 
         gameOverCamera.gameObject.SetActive(true);
+
     }
 
     public void ReturnToTitle()
