@@ -17,6 +17,9 @@ public class SaveLoadUI : MonoBehaviour
     [Header("Load UI")]
     [SerializeField] private ReEditUI reEditUI;
 
+    [Header("Local Save UI")]
+    [SerializeField] private LocalSaveUI localSaveUI;
+
     //==================================================
     // 初期化
     //==================================================
@@ -47,6 +50,13 @@ public class SaveLoadUI : MonoBehaviour
             loadButtonObject.SetActive(true);
         }
 
+        // LocalSaveUIを閉じる
+        if (localSaveUI != null)
+        {
+            // LocalSaveUI側の画面を閉じる
+            localSaveUI.Return();
+        }
+
         // 最初は両方押せる
         ResetButtons();
     }
@@ -66,6 +76,24 @@ public class SaveLoadUI : MonoBehaviour
         {
             loadButton.interactable = false;
         }
+
+        // Load一覧を閉じる
+        if (reEditUI != null)
+        {
+            reEditUI.CloseLoadList();
+        }
+
+        // LocalSaveUIを開く
+        if (localSaveUI != null)
+        {
+            localSaveUI.OpenSavePanel();
+        }
+        else
+        {
+            Debug.LogError(
+                "LocalSaveUIが設定されていません。"
+            );
+        }
     }
 
     //==================================================
@@ -84,6 +112,13 @@ public class SaveLoadUI : MonoBehaviour
             loadButton.interactable = true;
         }
 
+        // LocalSaveUIを閉じる
+        if (localSaveUI != null)
+        {
+            localSaveUI.Return();
+        }
+
+        // Load一覧を開く
         if (reEditUI != null)
         {
             reEditUI.OpenLoadList();
@@ -96,14 +131,20 @@ public class SaveLoadUI : MonoBehaviour
 
     public void ReturnFromSaveLoad()
     {
-        // 両方押せる状態に戻す
-        ResetButtons();
+        // LocalSaveUIを閉じる
+        if (localSaveUI != null)
+        {
+            localSaveUI.Return();
+        }
 
-        // Load一覧が開いていたら閉じる
+        // Load一覧を閉じる
         if (reEditUI != null)
         {
             reEditUI.CloseLoadList();
         }
+
+        // 両方押せる状態に戻す
+        ResetButtons();
     }
 
     //==================================================
@@ -129,6 +170,13 @@ public class SaveLoadUI : MonoBehaviour
 
     public void CloseSaveLoad()
     {
+        // LocalSaveUIを閉じる
+        if (localSaveUI != null)
+        {
+            localSaveUI.Return();
+        }
+
+        // Load一覧を閉じる
         if (reEditUI != null)
         {
             reEditUI.CloseLoadList();

@@ -107,6 +107,7 @@ public class GoalClear : MonoBehaviour
     public void ResetClearState()
     {
         isCleared = false;
+        alreadyShown = false;
 
         if (clearPanel != null)
         {
@@ -136,7 +137,7 @@ public class GoalClear : MonoBehaviour
         //==================================================
 
         isCleared = true;
-        
+
         NetworkGameState state =
             FindObjectOfType<NetworkGameState>();
 
@@ -159,7 +160,6 @@ public class GoalClear : MonoBehaviour
         if (testPlayManager != null &&
             testPlayManager.IsTestPlay)
         {
-            // テストプレイクリアをSaveManagerへ通知
             SaveManager saveManager =
                 FindObjectOfType<SaveManager>();
 
@@ -174,11 +174,12 @@ public class GoalClear : MonoBehaviour
                 );
             }
 
-            // 編集モードへ戻る
-            testPlayManager.ReturnToEdit();
+            // ここでは編集画面へ戻さない
+            // TestPlayManager側で投稿確認UIを表示する
+            testPlayManager.PlayClear();
 
             Debug.Log(
-                "テストプレイクリア。編集モードへ戻りました。"
+                "テストプレイクリア。投稿確認UIを表示します。"
             );
 
             return;
@@ -190,22 +191,10 @@ public class GoalClear : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        //==================================================
-        // カーソル表示
-        //==================================================
-
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        //==================================================
-        // Clearカメラ生成
-        //==================================================
-
         SpawnClearCamera();
-
-        //==================================================
-        // Clear UI表示
-        //==================================================
 
         if (clearPanel != null)
         {
@@ -257,10 +246,6 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
-        //==================================================
-        // 通常カメラ停止
-        //==================================================
-
         Camera[] cameras =
             FindObjectsOfType<Camera>();
 
@@ -272,16 +257,8 @@ public class GoalClear : MonoBehaviour
             }
         }
 
-        //==================================================
-        // MapManager取得
-        //==================================================
-
         MapManager mapManager =
             FindObjectOfType<MapManager>();
-
-        //==================================================
-        // マップサイズに合わせる
-        //==================================================
 
         float scale = 1f;
 
@@ -308,19 +285,11 @@ public class GoalClear : MonoBehaviour
                 scale = 1f;
             }
 
-            //==================================================
-            // マップ中央
-            //==================================================
-
             float centerX =
                 mapWidth / 2f;
 
             float centerZ =
                 mapDepth / 2f;
-
-            //==================================================
-            // 基準カメラ中心からのズレ
-            //==================================================
 
             float baseCenterX =
                 baseMapSize / 2f;
@@ -335,10 +304,6 @@ public class GoalClear : MonoBehaviour
             float offsetZ =
                 clearCameraPosition.z -
                 baseCenterZ;
-
-            //==================================================
-            // Clearカメラ位置
-            //==================================================
 
             float cameraX =
                 centerX +
@@ -365,25 +330,13 @@ public class GoalClear : MonoBehaviour
                 clearCameraPosition;
         }
 
-        //==================================================
-        // カメラ角度
-        //==================================================
-
         clearCamera.transform.rotation =
             Quaternion.Euler(
                 clearCameraRotation
             );
 
-        //==================================================
-        // Field of View変更
-        //==================================================
-
         clearCamera.fieldOfView =
             baseFieldOfView * scale;
-
-        //==================================================
-        // Field of View制限
-        //==================================================
 
         clearCamera.fieldOfView =
             Mathf.Clamp(
@@ -391,10 +344,6 @@ public class GoalClear : MonoBehaviour
                 10f,
                 120f
             );
-
-        //==================================================
-        // Clearカメラ有効化
-        //==================================================
 
         clearCamera.gameObject.SetActive(true);
 
@@ -436,6 +385,10 @@ public class GoalClear : MonoBehaviour
             );
         }
     }
+
+    //==================================================
+    // ゲームプレイ用クリア表示
+    //==================================================
 
     private void ShowClear()
     {

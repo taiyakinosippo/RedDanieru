@@ -26,6 +26,7 @@ namespace Player
         private PlayerStatus        _playerStatus;
         private DeadCameraMulti     _deadMultiCamera;
 
+
         private bool _debugMode = false;
 
         private bool _deathProcessed;
