@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Fusion;
 
 namespace Player
 {
@@ -37,7 +38,10 @@ namespace Player
 
         [Tooltip("プレイヤーの現在の防御力")]
         public int CurrentDefense { get; private set; }
-        
+
+        [Networked]
+        public bool IsDeadNetwork { get; set; }
+
         private float damageTimer = 0.0f; //ダメージを受けた後の無敵時間のタイマー
         private float damageInvincibleTime = 3.0f; //ダメージを受けた後の無敵時間
         public bool isInvincible => damageTimer > 0.0f; //無敵状態かどうかを判定するプロパティ
@@ -98,6 +102,7 @@ namespace Player
         private void Die()
         {
            _isDead = true;
+            IsDeadNetwork = true;
 
            Debug.Log("死亡");
 

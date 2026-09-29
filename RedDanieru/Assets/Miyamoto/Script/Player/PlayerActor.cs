@@ -29,6 +29,8 @@ namespace Player
 
         private bool _debugMode = false;
 
+        private bool _deathProcessed;
+
         // 現在の入力デバイスがマウスかどうかを判定するプロパティ
         private bool IsCurrentDeviceMouse
         {
@@ -148,6 +150,13 @@ namespace Player
 
         private void UpdatePlayer()
         {
+            if (_playerStatus._isDead && !_deathProcessed)
+            {
+                _deathProcessed = true;
+
+                HidePlayer();
+            }
+
               if (!_playerStatus._isDead)
             {
                 //コンポーネントを取得できているか
@@ -219,6 +228,41 @@ namespace Player
                 //カメラの動き
                 _playerCamera.DeadPlayerCameraMove(IsCurrentDeviceMouse, _input);
             }
+        }
+
+        private void HidePlayer()
+        {
+            RPC_HidePlayer();
+
+            if (NetworkGameState.Instance != null)
+            {
+                NetworkGameState.Instance.RPC_PlayerDied();
+            }
+        }
+
+
+        [Rpc(RpcSources.All, RpcTargets.All)]
+        private void RPC_HidePlayer()
+        {
+            CharacterController cc =
+                GetComponent<CharacterController>();
+
+            if (cc != null)
+            {
+                cc.enabled = false;
+            }
+
+            Renderer[] renderers =
+                GetComponentsInChildren<Renderer>();
+
+            Debug.Log($"RendererCount={renderers.Length}");
+
+            foreach (Renderer r in renderers)
+            {
+                r.enabled = false;
+            }
+
+            Debug.Log($"{name} 非表示");
         }
     }
 }
