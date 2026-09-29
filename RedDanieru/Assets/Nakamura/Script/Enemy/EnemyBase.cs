@@ -60,7 +60,7 @@ public class EnemyBase : MonoBehaviour
         currentHp = enemyHP;
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
-        specialCoolTimer = specialInterval;
+        //specialCoolTimer = specialInterval;
         agent.speed = enemyMoveSpeed;
     }
 
@@ -79,7 +79,7 @@ public class EnemyBase : MonoBehaviour
                 break;
 
             case enemyState.Special:  //特殊行動状態
-                SpecialMove();
+                SpecialAttack();
                 break;
 
             case enemyState.Damage:  //ダメージ状態
@@ -109,7 +109,7 @@ public class EnemyBase : MonoBehaviour
                 break;
 
             case enemyState.Dead:  //死亡状態
-                Destroy(gameObject);
+                Dead();
                 break;
         }
 
@@ -117,6 +117,12 @@ public class EnemyBase : MonoBehaviour
         if (attackCoolTimer > 0f)
         {
             attackCoolTimer -= Time.deltaTime;
+        }
+
+        //特殊行動のクールダウン
+        if (specialCoolTimer > 0f)
+        {
+            specialCoolTimer -= Time.deltaTime;
         }
     }
 
@@ -156,7 +162,7 @@ public class EnemyBase : MonoBehaviour
                 else
                 {
                     currentState = enemyState.Idle;
-                    specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
+                    //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
                     return;
                 }
 
@@ -176,13 +182,13 @@ public class EnemyBase : MonoBehaviour
             //}
 
             //ステッカーによる特殊な行動パターン
-            if (stickerState.isSpecialMove)
-            {
-                CheckSpecialCooldown();
+            //if (stickerState.isSpecialMove)
+            //{
+            //    CheckSpecialCooldown();
 
-                if (currentState == enemyState.Special)
-                    return;
-            }
+            //    if (currentState == enemyState.Special)
+            //        return;
+            //}
 
             //プレイヤーとの距離が攻撃範囲内の場合、攻撃する
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -195,7 +201,8 @@ public class EnemyBase : MonoBehaviour
                 //クールタイムが終わっていれば攻撃
                 if (attackCoolTimer <= 0f)
                 {
-                    currentState = enemyState.Attack;
+                    //攻撃の選択を行う（通常攻撃か特殊攻撃か）
+                    AttackSelect();
                 }
             }
             //攻撃範囲じゃない場合は追跡する
@@ -224,24 +231,50 @@ public class EnemyBase : MonoBehaviour
             else
             {
                 currentState = enemyState.Idle;
-                specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
+                //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
                 return;
             }
         }
     }
 
-    //ステッカーによる特殊行動のクールタイム
-    public virtual void CheckSpecialCooldown()
+    //攻撃の選択を行う関数（通常攻撃か特殊攻撃か）
+    public virtual void AttackSelect()
     {
-        if (specialCoolTimer <= 0f)
+        // 特別攻撃用のステッカーがあるか
+        if (stickerState.currentStickerScript != null && stickerState.isSpecialMove)
         {
-            currentState = enemyState.Special;
-            agent.isStopped = true;
-            agent.enabled = false;
-            return;
+            // 特別攻撃のクールタイムが終わっているか
+            if (specialCoolTimer <= 0f)
+            {
+                // 攻撃確率
+                int randomAttack = Random.Range(1, 101);
+
+                if (randomAttack <= stickerState.currentStickerScript.attackRate)
+                {
+                    currentState = enemyState.Special;
+                    agent.isStopped = true;
+                    agent.enabled = false;
+                    return;
+                }
+            }
         }
-        specialCoolTimer -= Time.deltaTime;
+
+        // 特別攻撃にならなかった場合は通常攻撃
+        currentState = enemyState.Attack;
     }
+
+    //ステッカーによる特殊行動のクールタイム
+    //public virtual void CheckSpecialCooldown()
+    //{
+    //    if (specialCoolTimer <= 0f)
+    //    {
+    //        currentState = enemyState.Special;
+    //        agent.isStopped = true;
+    //        agent.enabled = false;
+    //        return;
+    //    }
+    //    specialCoolTimer -= Time.deltaTime;
+    //}
 
     //攻撃処理
     public virtual void Attack()
@@ -252,7 +285,7 @@ public class EnemyBase : MonoBehaviour
             //クールタイムセット
             attackCoolTimer = enemyAttackCoolTime;
             attackTimer = enemyAttackStartTime + enemyAttackEndTime;
-            specialCoolTimer = specialInterval;
+            //specialCoolTimer = specialInterval;
             currentState = enemyState.Idle;
         }
         else if (attackTimer <= enemyAttackEndTime)  //攻撃判定開始
@@ -280,8 +313,8 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
-    //特殊行動の処理
-    public virtual void SpecialMove()
+    //特殊攻撃の処理
+    public virtual void SpecialAttack()
     {
         if (stickerState.currentStickerScript == null)
         {
@@ -339,7 +372,6 @@ public class EnemyBase : MonoBehaviour
         {
             //死亡処理
             currentState = enemyState.Dead;
-            Debug.Log("敵が死亡しました。");
         }
         else
         {
@@ -361,7 +393,36 @@ public class EnemyBase : MonoBehaviour
         Debug.Log("敵がスタンしました。スタン時間: " + stunDuration);
     }
 
+    public virtual void Dead()
+    {
+        Debug.Log("敵が死亡しました。");
+        Destroy(gameObject);
+    }
+
     //-----敵のステータスを上げる・下げる処理-----
+
+    //敵のHPを変動させる
+    public void AddEnemyCurrentHP(int value)
+    {
+        currentHp += value;
+        if (currentHp < 0)
+            currentHp = 0;
+
+        //現在のHPが最大HPを超えないようにする
+        if (currentHp > enemyHP)
+            currentHp = enemyHP;
+
+        if (currentHp <= 0)
+        {
+            //死亡処理
+            currentState = enemyState.Dead;
+        }
+        else
+        {
+            //ダメージ処理
+            currentState = enemyState.Damage;
+        }
+    }
 
     //敵の攻撃力を変動させる
     public void AddEnemyPower(int value)

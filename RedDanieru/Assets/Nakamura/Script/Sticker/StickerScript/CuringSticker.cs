@@ -29,4 +29,16 @@ public class CuringSticker : StickerBase
     {
         
     }
+
+    //ステッカーが壁に貼られたときの処理
+    public override void OnWallApply()
+    {
+
+    }
+
+    //ステッカーが壁から剥がれたときの処理
+    public override void OnWallRemove()
+    {
+
+    }
 }
