@@ -91,9 +91,28 @@ public class SaveUI : MonoBehaviour
         }
 
         // ƒ_ƒ“ƒWƒ‡ƒ“‚ğ•Û‘¶
-        saveManager.Save(
+        bool saved = saveManager.Save(
             dungeonName
         );
+
+        // “¯‚¶–¼‘O‚ªŠù‚É‚ ‚éê‡‚Íã‘‚«•Û‘¶
+        if (!saved)
+        {
+            saved = saveManager.Overwrite(
+                dungeonName
+            );
+        }
+
+        // •Û‘¶‚É¸”s‚µ‚½ê‡‚Í“Še‚µ‚È‚¢
+        if (!saved)
+        {
+            Debug.LogError(
+                "•Û‘¶‚É¸”s‚µ‚½‚½‚ß“Še‚µ‚Ü‚¹‚ñ : " + dungeonName
+            );
+
+            StartCoroutine(CautionText());
+            return;
+        }
 
         // ƒ_ƒ“ƒWƒ‡ƒ“‚ğ“Še
         uploader.UploadDungeon(
