@@ -7,7 +7,7 @@ public class StickerInteractor : MonoBehaviour
     [SerializeField] private StickerSlotUI stickerSlotUI;
 
     private List<GameObject> interactObjects = new List<GameObject>();  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
-    [SerializeField] private Sticker[] holdSticker;  //保持してるステッカーのタイプ
+    public Sticker[] holdSticker { get; private  set; }  //保持してるステッカーのタイプ
     [SerializeField] private int maxHoldCount = 3;  //保持できるステッカーの数
 
     private float wallCheckDistance = 1.5f;

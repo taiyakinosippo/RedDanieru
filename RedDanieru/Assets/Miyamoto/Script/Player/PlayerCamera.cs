@@ -1,11 +1,5 @@
-using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Windows;
-using static UnityEngine.GraphicsBuffer;
+
 ///<summry>
 ///プレイヤーのカメラを制御するためのスクリプト
 ///</summry>

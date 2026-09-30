@@ -6,7 +6,7 @@ public class DamagePopup : MonoBehaviour
     [SerializeField]private TextMeshProUGUI _text;  //ダメージを表記させるテキスト
     public float _lifeTime = 1f;　　　　　　　　　　//ダメージを表記する時間の長さ
     
-    public void DamegeSetUp(int damage)
+    public void DamageSetUp(int damage)
     {
         _text.text = damage.ToString();
 
