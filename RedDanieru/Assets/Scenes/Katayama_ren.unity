@@ -6519,8 +6519,8 @@ MonoBehaviour:
   outerWallYOffset: -2.5
   enableStartEntrance: 1
   entranceDirection: 0
-  entrancePosition: 16
-  entranceWidth: 1
+  entrancePosition: 4
+  entranceWidth: 9
   objectPrefabs:
   - type: 0
     prefab: {fileID: 8173197566262819081, guid: f44571431ecfdfb4995703cd6797ef84, type: 3}
