@@ -23,11 +23,14 @@ namespace Player
         [Tooltip("ステッカーがあるかどうかを判定するレイヤー")]
         public LayerMask stickerLayer;
 
-        //壁があればtrueになければflase
         private bool isWallDetected = false;
 
         //ステッカーがあればtrueになければfalse
         public bool isStickerDected = false;
+
+        private bool isStickerStateFound = false;
+
+        private bool _playerHasSticker = false;
 
         private PlayerAnimation _playerAnimation;
 
@@ -40,8 +43,6 @@ namespace Player
         private StickerInteractor _stickerInteractor;
 
         private GameObject _interactObject = null;  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
-
-        private bool isStickerStateFound = false;
 
         private void Start()
         {
@@ -198,7 +199,7 @@ namespace Player
                 // ステッカーがなかった
                 else
                 {
-                    Debug.Log("ステッカーがありません");
+                    _playerHasSticker = false;
 
                     // ステッカーあるかの判定を行う
                     isCollider =
@@ -246,10 +247,24 @@ namespace Player
 
                         if (targetSticker != null)
                         {
+                            _interactObject = targetSticker.gameObject;
+
+                            foreach (Sticker stickerhold in _stickerInteractor.holdSticker)
+                            {
+                                if(stickerhold != Sticker.None)
+                                {
+                                    _playerHasSticker = true;
+                                    break;
+                                }
+                            }
                             // ステッカー入力を消費
                             input.sticker = false;
-                            //ステッカーを持っているかの処理をここに書く
-                            _playerAnimation.PlayerStickerPasteAnimator();
+                            if (_playerHasSticker)
+                            {
+                                _playerAnimation.PlayerStickerPasteAnimator();
+                            }
+
+                            else _actionPriority.EndAction();
                         }
                         else
                         {

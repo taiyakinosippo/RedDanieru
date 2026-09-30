@@ -1,8 +1,6 @@
 using Player;
-using System.Drawing;
 using UnityEditor;
 using UnityEngine;
-using static UnityEditor.FilePathAttribute;
 
 /// <summary>
 /// 攻撃の当たり判定などをeditor上で可視化して編集出来るようにするためのスクリプト

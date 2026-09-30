@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5519685777864767638}
   - component: {fileID: -3642629594802712462}
   - component: {fileID: 5658254545706339161}
+  - component: {fileID: 7117611441404332581}
   m_Layer: 9
   m_Name: Cave_Platform_C
   m_TagString: Untagged
@@ -123,3 +124,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 3.25, y: 5.076524, z: 3.25}
   m_Center: {x: -0.03144926, y: 1.6447163, z: -0.022782564}
+--- !u!208 &7117611441404332581
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6935681925559738843}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.748, y: 2.538, z: 1.682}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.031000001, y: 1.6450001, z: -0.023000002}
+  m_TimeToStationary: 0.5

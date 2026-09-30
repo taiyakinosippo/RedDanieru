@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.UIElements;
 using UnityEngine.Windows;
-using static UnityEditor.PlayerSettings;
 
 namespace Player
 {
