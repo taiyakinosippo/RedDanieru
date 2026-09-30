@@ -4,6 +4,7 @@ using UnityEngine.AI;
 
 public class LeglessArcherController : EnemyBase
 {
+    [SerializeField] private float escapeDistance = 3f;  //プレイヤーから逃げる距離  
     [SerializeField] private GameObject arrowPrefab;  //矢のプレハブ
 
     private Queue<GameObject> waitingArrows;  //オブジェクトプール用の待機中の矢のキューリスト
@@ -51,8 +52,16 @@ public class LeglessArcherController : EnemyBase
 
                 float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-                //攻撃範囲内
-                if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)
+                //プレイヤーが近すぎる場合は逃げる
+                if (distanceToPlayer < escapeDistance * transform.localScale.x)
+                {
+                    //プレイヤーから逃げる
+                    Vector3 escapeDirection = (transform.position - player.position).normalized;  //逃げる方向を計算
+                    Vector3 escapePosition = transform.position + escapeDirection * escapeDistance;  //逃げる位置を計算
+                    agent.isStopped = false;
+                    agent.SetDestination(escapePosition);
+                }
+                else if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)  //攻撃範囲内
                 {
                     //その場で停止
                     agent.isStopped = true;
@@ -91,7 +100,7 @@ public class LeglessArcherController : EnemyBase
                 agent.isStopped = true;
                 agent.ResetPath();
 
-                specialCoolTimer = specialInterval;
+                //specialCoolTimer = specialInterval;
                 isTrackingLastPosition = false;
             }
             else
@@ -123,7 +132,7 @@ public class LeglessArcherController : EnemyBase
             agent.isStopped = true;
             agent.ResetPath();
 
-            specialCoolTimer = specialInterval;
+            //specialCoolTimer = specialInterval;
             isTrackingLastPosition = false;
         }
     }
@@ -142,11 +151,10 @@ public class LeglessArcherController : EnemyBase
             }
         }
 
-        //攻撃判定を出す
+        //矢を出す
         if (attackTimer <= enemyAttackEndTime && !shooted)
         {
             AttackEffect();
-            Debug.Log("LeglessArcher Attack!");
             shooted = true;
         }
 
@@ -156,7 +164,7 @@ public class LeglessArcherController : EnemyBase
             //クールタイムセット
             attackCoolTimer = enemyAttackCoolTime;
             attackTimer = enemyAttackStartTime + enemyAttackEndTime;
-            specialCoolTimer = specialInterval;
+            //specialCoolTimer = specialInterval;
             shooted = false;
 
             currentState = enemyState.Idle;

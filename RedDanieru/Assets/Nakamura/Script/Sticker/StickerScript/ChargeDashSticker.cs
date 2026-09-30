@@ -174,6 +174,9 @@ public class ChargeDashSticker : StickerBase
         {
             //一連の行動終了
             EndDash();
+
+            //2秒間スタン
+            enemyScript.Stun(2f);
         }
     }
 
@@ -189,7 +192,5 @@ public class ChargeDashSticker : StickerBase
         agent.enabled = true;
         enemyScript.EndSpecial();
         
-        //2秒間スタン
-        enemyScript.Stun(2f);  
     }
 }

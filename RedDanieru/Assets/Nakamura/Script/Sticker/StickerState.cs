@@ -50,6 +50,9 @@ public class StickerState : MonoBehaviour
             case Sticker.Legless:
                 currentStickerScript = gameObject.AddComponent<LeglessSticker>();
                 break;
+            case Sticker.Poison:
+                currentStickerScript = gameObject.AddComponent<PoisonSticker>();
+                break;
         }
 
         //Apply関数実行
