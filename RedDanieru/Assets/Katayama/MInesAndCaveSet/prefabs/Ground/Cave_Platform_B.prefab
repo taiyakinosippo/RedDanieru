@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4201558386844100473}
   - component: {fileID: 3614922696965975099}
   - component: {fileID: -222385287758929161}
+  - component: {fileID: -9101337351820630767}
   m_Layer: 9
   m_Name: Cave_Platform_B
   m_TagString: Untagged
@@ -146,3 +147,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GridPosition: {x: 0, y: -2, z: 0}
+--- !u!208 &-9101337351820630767
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4674926397749201956}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 1.748, y: 2.538, z: 1.682}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: -0.031000001, y: 1.6450001, z: -0.023000002}
+  m_TimeToStationary: 0.5
