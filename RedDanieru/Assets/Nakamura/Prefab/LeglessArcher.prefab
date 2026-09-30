@@ -232,6 +232,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1
   player: {fileID: 0}
+  escapeDistance: 3
   arrowPrefab: {fileID: 4780085749130172505, guid: 126ee8135ce66504790673790eee25c1, type: 3}
 --- !u!114 &6172223429900963776
 MonoBehaviour:
@@ -332,5 +333,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e3f5edc356f5674b9c892b885492b5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectType: 7
+  objectType: 11
   selectColor: {r: 1, g: 0, b: 0, a: 1}

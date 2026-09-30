@@ -331,5 +331,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e3f5edc356f5674b9c892b885492b5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectType: 11
+  objectType: 8
   selectColor: {r: 1, g: 0, b: 0, a: 1}

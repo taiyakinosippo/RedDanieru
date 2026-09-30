@@ -12,5 +12,5 @@ public enum PlaceObjectType : byte
     ChargeEnemy,    // 8
     Wall,           // 9
     Tortoise,       // 10
-    WildBoar        // 11
+    LeglessArcher        // 11
 }

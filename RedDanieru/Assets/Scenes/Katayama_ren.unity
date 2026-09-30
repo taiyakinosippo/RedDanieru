@@ -1354,7 +1354,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 500, y: 0}
+  m_AnchoredPosition: {x: 500, y: 25}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &599383769
@@ -3385,7 +3385,7 @@ GameObject:
   - component: {fileID: 1252145178}
   - component: {fileID: 1252145177}
   m_Layer: 5
-  m_Name: WildBoarButton
+  m_Name: LeglessArcherButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3574,7 +3574,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: WildBoar
+  m_text: LeglessArcher
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a3991f3216ccfc94c83b66c1915733e5, type: 2}
   m_sharedMaterial: {fileID: 4971866911252378769, guid: a3991f3216ccfc94c83b66c1915733e5, type: 2}
@@ -6826,6 +6826,8 @@ MonoBehaviour:
   - {fileID: 3436000210469693220}
   - {fileID: 3349518043716766593}
   - {fileID: 6847121994274566144}
+  - {fileID: 599383769}
+  - {fileID: 1252145177}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &1805119292202350450
@@ -7095,13 +7097,13 @@ MonoBehaviour:
   - type: 7
     prefab: {fileID: 1986632935637041606, guid: c53becb27deab7143a15fef2fc8c2344, type: 3}
   - type: 8
-    prefab: {fileID: 1986632935637041606, guid: 0b3837c3d701b234e9c2107e5f4ecfc6, type: 3}
+    prefab: {fileID: 5009899248836205637, guid: 0d7d01074918cfc47840da5ae272a982, type: 3}
   - type: 9
     prefab: {fileID: 567445457167960876, guid: ea7df02675465b442b5b26c5e4d405f3, type: 3}
   - type: 10
     prefab: {fileID: 7228817060988096996, guid: e7214bfec4e0ec040808bec80c2376b8, type: 3}
   - type: 11
-    prefab: {fileID: 5009899248836205637, guid: 0d7d01074918cfc47840da5ae272a982, type: 3}
+    prefab: {fileID: 3579314766830224434, guid: 7961808ec5f49664f82576143a146109, type: 3}
   navMeshSurface: {fileID: 6869506002592952411}
   mapCamera: {fileID: 4887041762409014461}
   baseCameraPosition: {x: 5, y: 35, z: 18.5}
