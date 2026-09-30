@@ -6491,9 +6491,9 @@ MonoBehaviour:
   depth: 32
   wallSize: 1
   wallSpacing: 1
-  normalWallYOffset: 1
-  placedWallYOffset: 1
-  diagonalWallYOffset: -1
+  normalWallYOffset: -2.5
+  placedWallYOffset: -2.5
+  diagonalWallYOffset: -3.25
   floorSize: 1
   floorSpacing: 1
   floorYOffset: -3
@@ -6501,9 +6501,26 @@ MonoBehaviour:
   objectSize: 1
   objectSpacing: 1
   objectYOffset: 1.5
-  wallPrefab: {fileID: 567445457167960876, guid: 295bf1a1f185c5741bf88ed5714d55ec, type: 3}
-  diagonalWallPrefab: {fileID: 7694599920202442208, guid: 6bd343453c63dba4cb707a65d6fcbea4, type: 3}
+  wallPrefab: {fileID: 6935681925559738843, guid: 9090dfe2bb858f8458fb9275a1c6e090, type: 3}
+  diagonalWallPrefab: {fileID: 4674926397749201956, guid: a9fb09caddf3d504a859a9c5d2fa80cc, type: 3}
   floorPrefab: {fileID: 6644410685189140245, guid: 109845b2f9372fa4595fcfb23069f441, type: 3}
+  floorDecorationPrefabs:
+  - {fileID: 3891908200146587722, guid: 732f901be6361bd45989cb8196f683d2, type: 3}
+  - {fileID: 1502038320044356790, guid: dd67638cac61f0241b71c5e56e9738c8, type: 3}
+  - {fileID: 5719728741475608059, guid: e479aa5cee22ae74b96a11c61f704355, type: 3}
+  - {fileID: 6355657796977707938, guid: d9a0b42eac1e85945b5365f098bfa41c, type: 3}
+  - {fileID: 6681368186709870648, guid: 5a681486c498eaf48bd25594270c0bc6, type: 3}
+  - {fileID: 1012808275931989928, guid: 48194ce1a2c35a84b8b35241c94b9d4b, type: 3}
+  floorDecorationSpawnChance: 0.75
+  floorDecorationYOffset: 0
+  randomDecorationRotation: 1
+  createOuterBoundaryWalls: 1
+  outerWallPrefab: {fileID: 6935681925559738843, guid: 8add28464b3a57547bb331d03d424f94, type: 3}
+  outerWallYOffset: -2.5
+  enableStartEntrance: 1
+  entranceDirection: 0
+  entrancePosition: 16
+  entranceWidth: 1
   objectPrefabs:
   - type: 0
     prefab: {fileID: 8173197566262819081, guid: f44571431ecfdfb4995703cd6797ef84, type: 3}
