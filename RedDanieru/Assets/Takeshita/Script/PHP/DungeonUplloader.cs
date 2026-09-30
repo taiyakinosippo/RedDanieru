@@ -20,6 +20,12 @@ public class DungeonUploader : MonoBehaviour
 
     private IEnumerator UploadCoroutine(string dungeonName,  string creatorName)
     {
+        if (string.IsNullOrEmpty(SaveManager.LastDungeonId))
+        {
+            Debug.LogError("保存済みのダンジョンIDがありません");
+            yield break;
+        }
+
         string[]files=Directory.GetFiles(
             Application.persistentDataPath,
             "*.json"
@@ -35,7 +41,7 @@ public class DungeonUploader : MonoBehaviour
 
             DungeonMapData data = JsonUtility.FromJson<DungeonMapData>(json);
 
-            if (data.dungeonId == SaveManager.LastDungeonId)
+            if (data != null && data.dungeonId == SaveManager.LastDungeonId)
             {
                 targetData = data;
                 targetPath = file;
@@ -61,7 +67,15 @@ public class DungeonUploader : MonoBehaviour
 
         form.AddField("jsonData", jsonData);
 
-        form.AddField("tag", dungeonUIManager.UploadTag);
+        // タグ未設定の場合はNORMAL
+        string tag = "NORMAL";
+
+        if (dungeonUIManager != null)
+        {
+            tag = dungeonUIManager.UploadTag;
+        }
+
+        form.AddField("tag", tag);
 
         UnityWebRequest request =
             UnityWebRequest.Post(
@@ -71,8 +85,10 @@ public class DungeonUploader : MonoBehaviour
 
         yield return request.SendWebRequest();
 
+        // 通信成功でもPHPが"success"を返さなければ失敗扱い
         if (request.result ==
-            UnityWebRequest.Result.Success)
+            UnityWebRequest.Result.Success &&
+            request.downloadHandler.text.Trim() == "success")
         {
             Debug.Log(
                 "アップロード成功 : " +
@@ -83,7 +99,8 @@ public class DungeonUploader : MonoBehaviour
         {
             Debug.LogError(
                 "アップロード失敗 : " +
-                request.error
+                request.error + " / " +
+                request.downloadHandler.text
             );
         }
     }
