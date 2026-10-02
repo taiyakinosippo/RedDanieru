@@ -27,6 +27,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
     [SerializeField] protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
+    [SerializeField] protected UIManager _uiManager;               //UI関係を制御しているスクリプトここで何を表示させるか決める
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
     protected enemyState currentState { get; set; }  //現在の状態
@@ -328,7 +329,7 @@ public class EnemyBase : MonoBehaviour
         //ダメージ中はダメージを受けない
         if (currentState == enemyState.Damage)
             return;
-
+        _uiManager.ShowDamage(playerPow, transform.position);
         Debug.Log("Enemy hit");
         //ダメージ計算
         int damage = playerPow - enemyDefense;

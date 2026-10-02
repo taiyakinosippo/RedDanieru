@@ -1100,6 +1100,7 @@ MonoBehaviour:
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
+  _uiManager: {fileID: 0}
   currentHp: 0
   playerLayer:
     serializedVersion: 2
@@ -2276,6 +2277,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3244406581610145446, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: PlayerDefense
+      value: 5000
+      objectReference: {fileID: 0}
     - target: {fileID: 5430622058021284881, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_Layer
       value: 0
@@ -2679,7 +2684,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   stickerSlotUI: {fileID: 1140077433}
-  holdSticker: 
   maxHoldCount: 3
 --- !u!1001 &1405993819081635270
 PrefabInstance:
