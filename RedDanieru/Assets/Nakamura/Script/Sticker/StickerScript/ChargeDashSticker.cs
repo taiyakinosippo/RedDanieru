@@ -5,7 +5,6 @@ using UnityEngine.AI;
 
 public class ChargeDashSticker : StickerBase
 {
-    private StickerState stickerState;
     private Rigidbody rb;
     protected NavMeshAgent agent;
     private Transform target;

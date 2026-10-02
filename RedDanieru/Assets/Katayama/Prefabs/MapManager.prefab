@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6324050047287330535
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2170924399791435939}
+  - component: {fileID: 1735006584476019472}
+  - component: {fileID: 6193073721833458505}
+  m_Layer: 0
+  m_Name: MapManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2170924399791435939
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6324050047287330535}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1735006584476019472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6324050047287330535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cf97d239fdd66e45abbb58867caaba1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  createOnStart: 1
+  width: 32
+  height: 1
+  depth: 32
+  wallSize: 1
+  wallSpacing: 1
+  normalWallYOffset: -2.5
+  placedWallYOffset: -2.5
+  diagonalWallYOffset: -3.25
+  floorSize: 1
+  floorSpacing: 1
+  floorYOffset: -3
+  enemySpacing: 1
+  objectSize: 1
+  objectSpacing: 1
+  objectYOffset: 1.5
+  wallPrefab: {fileID: 6935681925559738843, guid: 9090dfe2bb858f8458fb9275a1c6e090, type: 3}
+  diagonalWallPrefab: {fileID: 4674926397749201956, guid: a9fb09caddf3d504a859a9c5d2fa80cc, type: 3}
+  floorPrefab: {fileID: 6644410685189140245, guid: 109845b2f9372fa4595fcfb23069f441, type: 3}
+  floorDecorationPrefabs:
+  - {fileID: 3891908200146587722, guid: 732f901be6361bd45989cb8196f683d2, type: 3}
+  - {fileID: 1502038320044356790, guid: dd67638cac61f0241b71c5e56e9738c8, type: 3}
+  - {fileID: 5719728741475608059, guid: e479aa5cee22ae74b96a11c61f704355, type: 3}
+  - {fileID: 6355657796977707938, guid: d9a0b42eac1e85945b5365f098bfa41c, type: 3}
+  - {fileID: 6681368186709870648, guid: 5a681486c498eaf48bd25594270c0bc6, type: 3}
+  - {fileID: 1012808275931989928, guid: 48194ce1a2c35a84b8b35241c94b9d4b, type: 3}
+  floorDecorationSpawnChance: 0.75
+  floorDecorationYOffset: 0
+  randomDecorationRotation: 1
+  createOuterBoundaryWalls: 1
+  outerWallPrefab: {fileID: 6935681925559738843, guid: 8add28464b3a57547bb331d03d424f94, type: 3}
+  outerWallYOffset: -2.5
+  enableStartEntrance: 1
+  entranceDirection: 0
+  entrancePosition: 4
+  entranceWidth: 9
+  objectPrefabs:
+  - type: 0
+    prefab: {fileID: 8173197566262819081, guid: f44571431ecfdfb4995703cd6797ef84, type: 3}
+  - type: 3
+    prefab: {fileID: 6372522022111549087, guid: 446ca1027bafc454ba455320d0956e23, type: 3}
+  - type: 6
+    prefab: {fileID: 5839628444456617438, guid: 80bcce026605a1f42b896cdf032c27f9, type: 3}
+  - type: 7
+    prefab: {fileID: 1986632935637041606, guid: c53becb27deab7143a15fef2fc8c2344, type: 3}
+  - type: 8
+    prefab: {fileID: 5009899248836205637, guid: 0d7d01074918cfc47840da5ae272a982, type: 3}
+  - type: 9
+    prefab: {fileID: 567445457167960876, guid: ea7df02675465b442b5b26c5e4d405f3, type: 3}
+  - type: 10
+    prefab: {fileID: 7228817060988096996, guid: e7214bfec4e0ec040808bec80c2376b8, type: 3}
+  - type: 11
+    prefab: {fileID: 3579314766830224434, guid: 7961808ec5f49664f82576143a146109, type: 3}
+  navMeshSurface: {fileID: 6193073721833458505}
+  mapCamera: {fileID: 0}
+  baseCameraPosition: {x: 5, y: 35, z: 18.5}
+  cameraRotation: {x: 90, y: 0, z: 0}
+  baseOrthographicSize: 20
+  baseMapSize: 32
+  respawnPointPrefab: {fileID: 1416731327575110247, guid: 70df3e21df036f04596219f240419c92, type: 3}
+  respawnAreaPrefab: {fileID: 75136431443110141, guid: 8eb4dfa1cb83ff245ad221c1333df8d9, type: 3}
+  defaultRespawnPointPosition: {x: -3, y: 1.2, z: 4.5}
+  defaultRespawnAreaPosition: {x: 11, y: -7, z: 16}
+  defaultRespawnAreaScale: {x: 100, y: 1, z: 100}
+--- !u!114 &6193073721833458505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6324050047287330535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 2
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 1
+  m_VoxelSize: 0.1
+  m_MinRegionArea: 0
+  m_NavMeshData: {fileID: 0}
+  m_BuildHeightMesh: 0

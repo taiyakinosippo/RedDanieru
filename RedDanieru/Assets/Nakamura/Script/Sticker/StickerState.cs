@@ -43,8 +43,8 @@ public class StickerState : MonoBehaviour
                 currentStickerScript = gameObject.AddComponent<ChargeDashSticker>();
                 break;
 
-            case Sticker.Curing:
-                currentStickerScript = gameObject.AddComponent<CuringSticker>();
+            case Sticker.Hardening:
+                currentStickerScript = gameObject.AddComponent<HardeningSticker>();
                 break;
 
             case Sticker.Legless:

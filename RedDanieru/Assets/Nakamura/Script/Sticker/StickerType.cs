@@ -5,7 +5,7 @@ public enum Sticker
     None,
     Big,
     ChargeDash,
-    Curing,
+    Hardening,
     Legless,
     Poison,
 }

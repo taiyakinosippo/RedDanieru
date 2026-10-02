@@ -326,6 +326,13 @@ public class SaveManager : MonoBehaviour
         newData.dungeonId =
             oldData.dungeonId;
 
+        // 古いデータでIDが無い場合は新しく作成
+        if (string.IsNullOrEmpty(newData.dungeonId))
+        {
+            newData.dungeonId =
+                System.Guid.NewGuid().ToString();
+        }
+
         newData.dungeonName =
             dungeonName;
 
