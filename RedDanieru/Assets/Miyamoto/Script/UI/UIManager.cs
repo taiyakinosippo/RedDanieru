@@ -7,13 +7,14 @@ public class UIManager : MonoBehaviour
 {
     [Header("ダメージ関係のUI")]
     [SerializeField] private GameObject _damageUI;
-    [SerializeField] private GameObject _canvas;
     [SerializeField] private Camera _mainCamera;
+    private GameObject _canvas;
     private PlayerUI _playerUI;
 
     private void Awake()
     {
         _playerUI = GetComponent<PlayerUI>();
+        _canvas = GetComponent<Canvas>().gameObject;
     }
 
     public void ShowDamage(int damage, Vector3 position)
@@ -36,6 +37,6 @@ public class UIManager : MonoBehaviour
         ui.GetComponent<RectTransform>().position = screenPosition;
 
         // ダメージ値を設定
-        ui.GetComponent<DamagePopup>().DamageSetUp(damage);
+        ui.GetComponent<DamagePopup>().DamageSetUp(damage, position, _mainCamera);
     }
 }
