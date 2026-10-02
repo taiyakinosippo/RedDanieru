@@ -8,4 +8,5 @@ public enum Sticker
     Hardening,
     Legless,
     Poison,
+    Explosion,
 }
