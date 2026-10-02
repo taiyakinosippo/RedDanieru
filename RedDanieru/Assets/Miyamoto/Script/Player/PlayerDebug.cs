@@ -58,10 +58,10 @@ namespace Player
         }
         private void Update()
         {
-            hpText.text = $"HP : {_playerStatus.CurrentHP}/{_playerStatus._playerHP}";
-            attackText.text = $"ATK : {_playerStatus.CurrentAttack}";
-            defenseText.text = $"DEF : {_playerStatus.CurrentDefense}";
-            speedText.text = $"Speed : {_playerMovement._speed}";
+            //hpText.text = $"HP : {_playerStatus.CurrentHP}/{_playerStatus._playerHP}";
+            //attackText.text = $"ATK : {_playerStatus.CurrentAttack}";
+            //defenseText.text = $"DEF : {_playerStatus.CurrentDefense}";
+            //speedText.text = $"Speed : {_playerMovement._speed}";
         }
 
 

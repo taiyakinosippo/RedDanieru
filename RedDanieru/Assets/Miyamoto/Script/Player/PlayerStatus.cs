@@ -42,6 +42,8 @@ namespace Player
         [Networked]
         public bool IsDeadNetwork { get; set; }
 
+        [SerializeField] private PlayerUI _playerUI;
+
         private float damageTimer = 0.0f; //ダメージを受けた後の無敵時間のタイマー
         private float damageInvincibleTime = 3.0f; //ダメージを受けた後の無敵時間
         public bool isInvincible => damageTimer > 0.0f; //無敵状態かどうかを判定するプロパティ
@@ -61,6 +63,7 @@ namespace Player
             CurrentAttack = PlayerAttack;
             CurrentDefense = PlayerDefense;
             _isDead = false;
+            _playerUI.initializePlayerState(CurrentHP);
         }
 
         private void Update()
@@ -83,7 +86,7 @@ namespace Player
                 damage = 0;
 
             CurrentHP -= damage;
-
+            _playerUI.ChangeHp(CurrentHP);
             if (CurrentHP <= 0)
             {
                 CurrentHP = 0;
@@ -105,14 +108,7 @@ namespace Player
             IsDeadNetwork = true;
 
            Debug.Log("死亡");
-
-           //GameOverManager gameOverManager =
-          // //FindObjectOfType<GameOverManager>();
-
-          //if (gameOverManager != null)
-          //{
-          //    //gameOverManager.GameOver();
-          //}
+           _playerUI.GameOver();
         }
     }
 

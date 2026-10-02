@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Fusion;
+using Unity.VisualScripting;
 
 public class PlayerUI : MonoBehaviour
 {
@@ -12,42 +13,47 @@ public class PlayerUI : MonoBehaviour
 
     public PlayerCamera _playerCamera;
 
-    private bool _isProcessed;
-
-    private bool _gameOverShown = false;
+    public Slider _hpBar;
 
     private void Start()
     {
         _dieText.enabled = false;
-
         Debug.Log("PlayerUI Object = " +gameObject.name);
         Debug.Log("Root=" + transform.root.name);
     }
 
-   private void Update()
-{
-    if (_isProcessed)
-        return;
-
-    if (_status._isDead)
+    public void initializePlayerState(int maxHp)
     {
-        _isProcessed = true;
-
-            NetworkObject obj= GetComponentInParent<NetworkObject>();
-
-            if (obj != null && obj.HasInputAuthority)
-            {
-                _dieText.enabled = true;
-            }
-
-        Debug.Log("死亡UI表示");
-
-        if (!GameModeManager.IsMultiplayer)
+        if (_hpBar != null)
         {
-            FindObjectOfType<GameOverManager>()
-                ?.GameOver();
+            _hpBar.maxValue = maxHp;
+            _hpBar.value = maxHp;
         }
     }
-}
+
+    public void ChangeHp(int CurrentHp)
+    {
+       _hpBar.value = CurrentHp;
+    }
+
+    public void GameOver()
+    {
+
+       NetworkObject obj = GetComponentInParent<NetworkObject>();
+
+       if (obj != null && obj.HasInputAuthority)
+       {
+                _dieText.enabled = true;
+       }
+
+       Debug.Log("死亡UI表示");
+
+       if (!GameModeManager.IsMultiplayer)
+       {
+                FindObjectOfType<GameOverManager>()
+                    ?.GameOver();
+       }
+        
+    }
 }
 

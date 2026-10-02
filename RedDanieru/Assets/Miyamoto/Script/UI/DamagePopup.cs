@@ -3,11 +3,17 @@ using UnityEngine;
 
 public class DamagePopup : MonoBehaviour
 {
-    [SerializeField]private TextMeshProUGUI _text;  //ダメージを表記させるテキスト
-    public float _lifeTime = 1f;　　　　　　　　　　//ダメージを表記する時間の長さ
-    
+    private TextMeshProUGUI _text;  //ダメージを表記させるテキスト
+    public float _lifeTime = 4f;          //ダメージを表記する時間の長さ
+
+    private void Awake()
+    {
+        _text = GetComponent<TextMeshProUGUI>();
+    }
+
     public void DamageSetUp(int damage)
     {
+
         _text.text = damage.ToString();
 
         //ダメージの強さによって色を変える
@@ -24,7 +30,8 @@ public class DamagePopup : MonoBehaviour
             _text.color = Color.red;
         }
 
-        //時間になったら表示を消す
+        //時間になったら表示を消すd
         Destroy(gameObject, _lifeTime);
+
     }
 }
