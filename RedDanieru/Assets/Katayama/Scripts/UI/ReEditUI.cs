@@ -291,14 +291,16 @@ public class ReEditUI : MonoBehaviour
             false
         );
 
+        // 再編集するダンジョンを
+        // SaveManagerの現在のダンジョンとして設定
+        SaveManager.LastDungeonId =
+            data.dungeonId;
+
+        SaveManager.LastDungeonName =
+            dungeonName;
+
         // 読み込み一覧を閉じる
         CloseLoadList();
-
-        // 編集モードへ戻す
-        if (testPlayManager != null)
-        {
-            testPlayManager.ReturnToEdit();
-        }
 
         Debug.Log(
             "ダンジョンを読み込みました : " +

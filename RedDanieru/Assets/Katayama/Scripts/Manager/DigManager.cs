@@ -4,10 +4,14 @@ using UnityEngine.InputSystem;
 
 public class DigManager : MonoBehaviour
 {
+    [Header("メインカメラ")]
     public Camera mainCamera;
+
+    [Header("マップ管理")]
     public MapManager mapManager;
 
-    private WallBlock[] currentWalls = new WallBlock[9];
+    private WallBlock[] currentWalls =
+        new WallBlock[9];
 
     private Vector3Int lastDigPosition =
         new Vector3Int(
@@ -18,9 +22,11 @@ public class DigManager : MonoBehaviour
 
     private Vector3 lastMousePosition;
 
+    [Header("保存パネル")]
     [SerializeField]
     private GameObject savePanel;
 
+    [Header("Undo")]
     [SerializeField]
     private UndoManager undoManager;
 
@@ -30,32 +36,24 @@ public class DigManager : MonoBehaviour
     [SerializeField]
     private ReEditUI reEditUI;
 
+    //==================================================
+    // Update
+    //==================================================
+
     private void Update()
     {
-        TestPlayManager testPlayManager =
-            FindObjectOfType<TestPlayManager>();
-
+        //==================================================
         // テストプレイ中は掘削しない
-        if (
-            testPlayManager != null &&
-            testPlayManager.IsPlaying
-        )
+        //==================================================
+        if (IsTestPlayScene())
         {
             StopDigging();
             return;
         }
 
-        // 編集モードへ戻る途中は掘削しない
-        if (
-            testPlayManager != null &&
-            testPlayManager.IsReturningToEdit
-        )
-        {
-            StopDigging();
-            return;
-        }
-
+        //==================================================
         // 読み込み一覧を開いている間は掘削しない
+        //==================================================
         if (
             reEditUI != null &&
             reEditUI.IsSelectingDungeon
@@ -65,7 +63,9 @@ public class DigManager : MonoBehaviour
             return;
         }
 
+        //==================================================
         // UIの上では掘削しない
+        //==================================================
         if (
             EventSystem.current != null &&
             EventSystem.current.IsPointerOverGameObject()
@@ -75,7 +75,9 @@ public class DigManager : MonoBehaviour
             return;
         }
 
+        //==================================================
         // 保存パネル表示中は掘削しない
+        //==================================================
         if (
             savePanel != null &&
             savePanel.activeSelf
@@ -85,10 +87,13 @@ public class DigManager : MonoBehaviour
             return;
         }
 
+        //==================================================
         // 掘削モード以外では掘削しない
+        //==================================================
         if (
             EditModeManager.Instance == null ||
-            EditModeManager.Instance.CurrentMode != EditMode.Dig
+            EditModeManager.Instance.CurrentMode !=
+            EditMode.Dig
         )
         {
             ClearHighlight();
@@ -105,7 +110,9 @@ public class DigManager : MonoBehaviour
 
         HighlightWalls(gridPosition);
 
+        //==================================================
         // マウスを押した瞬間
+        //==================================================
         if (
             Mouse.current != null &&
             Mouse.current.leftButton.wasPressedThisFrame
@@ -116,10 +123,13 @@ public class DigManager : MonoBehaviour
             lastMousePosition =
                 Mouse.current.position.ReadValue();
 
+            // 同じ場所でも最初のクリックは掘削できるようにする
             Dig(gridPosition);
         }
 
+        //==================================================
         // マウスを押している間
+        //==================================================
         if (
             Mouse.current != null &&
             Mouse.current.leftButton.isPressed
@@ -138,36 +148,63 @@ public class DigManager : MonoBehaviour
                 lastMousePosition =
                     currentMousePosition;
 
-                if (gridPosition != lastDigPosition)
+                if (
+                    gridPosition !=
+                    lastDigPosition
+                )
                 {
                     Dig(gridPosition);
                 }
             }
         }
 
+        //==================================================
         // マウスを離した瞬間
+        //==================================================
         if (
             Mouse.current != null &&
             Mouse.current.leftButton.wasReleasedThisFrame
         )
         {
-            if (isEditing)
-            {
-                if (undoManager != null)
-                {
-                    undoManager.EndEdit();
-                }
+            EndEdit();
+        }
+    }
 
-                isEditing = false;
+    //==================================================
+    // テストプレイシーン判定
+    //==================================================
+
+    private bool IsTestPlayScene()
+    {
+        return UnityEngine.SceneManagement
+            .SceneManager.GetActiveScene().name
+            == "TestPlayScene";
+    }
+
+    //==================================================
+    // 編集終了
+    //==================================================
+
+    private void EndEdit()
+    {
+        if (isEditing)
+        {
+            if (undoManager != null)
+            {
+                undoManager.EndEdit();
             }
 
-            lastDigPosition =
-                new Vector3Int(
-                    int.MinValue,
-                    int.MinValue,
-                    int.MinValue
-                );
+            isEditing = false;
         }
+
+        lastDigPosition =
+            new Vector3Int(
+                int.MinValue,
+                int.MinValue,
+                int.MinValue
+            );
+
+        ClearHighlight();
     }
 
     //==================================================
@@ -206,7 +243,7 @@ public class DigManager : MonoBehaviour
     // マウス位置からマス取得
     //==================================================
 
-    bool GetMouseGridPosition(
+    private bool GetMouseGridPosition(
         out Vector3Int gridPosition
     )
     {
@@ -225,7 +262,9 @@ public class DigManager : MonoBehaviour
 
         Ray ray =
             mainCamera.ScreenPointToRay(
-                Input.mousePosition
+                Mouse.current != null
+                    ? Mouse.current.position.ReadValue()
+                    : Vector2.zero
             );
 
         Plane mapPlane =
@@ -277,7 +316,7 @@ public class DigManager : MonoBehaviour
     // 壁のハイライト
     //==================================================
 
-    void HighlightWalls(
+    private void HighlightWalls(
         Vector3Int center
     )
     {
@@ -322,7 +361,7 @@ public class DigManager : MonoBehaviour
     // 壁取得
     //==================================================
 
-    WallBlock GetWallBlock(
+    private WallBlock GetWallBlock(
         Vector3Int pos
     )
     {
@@ -375,7 +414,7 @@ public class DigManager : MonoBehaviour
     // 掘削
     //==================================================
 
-    void Dig(
+    private void Dig(
         Vector3Int center
     )
     {
@@ -446,7 +485,7 @@ public class DigManager : MonoBehaviour
     // ハイライト解除
     //==================================================
 
-    void ClearHighlight()
+    private void ClearHighlight()
     {
         for (
             int i = 0;

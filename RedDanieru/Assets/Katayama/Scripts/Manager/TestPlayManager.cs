@@ -1,8 +1,8 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class TestPlayManager : MonoBehaviour
@@ -13,25 +13,25 @@ public class TestPlayManager : MonoBehaviour
         TestPlay
     }
 
+    [Header("シーン名")]
+    [SerializeField] private string mapCreateSceneName = "Katayama_ren";
+    [SerializeField] private string testPlaySceneName = "Testplay";
+
     [Header("プレイヤー")]
     [SerializeField] private GameObject playerPrefab;
-
-    [Header("スタート地点")]
     [SerializeField] private Transform startPoint;
 
-    [Header("マップ管理")]
+    [Header("マップ")]
     [SerializeField] private MapManager mapManager;
 
-    [Header("マップクリエイトUI")]
+    [Header("編集UI")]
     [SerializeField] private GameObject mapCreateUI;
-
-    [Header("その他の編集UI")]
     [SerializeField] private GameObject otherEditUI;
 
-    [Header("テストプレイ用UI")]
+    [Header("テストプレイUI")]
     [SerializeField] private GameObject testPlayUI;
 
-    [Header("ESCメニュー")]
+    [Header("ポーズUI")]
     [SerializeField] private GameObject pauseMenuUI;
 
     [Header("投稿確認UI")]
@@ -40,70 +40,131 @@ public class TestPlayManager : MonoBehaviour
     [Header("投稿設定UI")]
     [SerializeField] private GameObject postSettingUI;
 
-    [Header("投稿設定")]
+    [Header("投稿情報")]
     [SerializeField] private TMP_InputField dungeonNameInputField;
     [SerializeField] private TMP_InputField creatorNameInputField;
 
-    [Header("ダンジョン投稿")]
+    [Header("投稿")]
     [SerializeField] private DungeonUploader dungeonUploader;
 
     [Header("カメラ")]
     [SerializeField] private Camera editCamera;
     [SerializeField] private Camera playerCamera;
 
-    private GameObject playerInstance;
+    //==================================================
+    // テストプレイ用データ
+    //==================================================
 
-    private TestPlayMode currentMode =
-        TestPlayMode.Edit;
+    private static DungeonMapData pendingTestPlayData;
 
-    private bool isReturningToEdit = false;
+    // テストプレイ開始前の編集マップ
+    private static DungeonMapData pendingEditData;
 
-    private bool isCleared = false;
+    // MapCreateSceneへ戻って編集マップを復元するか
+    private static bool returnToEdit = false;
 
-    private class EnemyTransformData
+    // 初期化中か
+    private bool isInitializing = false;
+
+    // テストプレイをクリアしたか
+    private bool isTestPlayCleared = false;
+
+    //==================================================
+    // プロパティ
+    //==================================================
+
+    public bool IsTestPlay
     {
-        public GameObject enemy;
-        public Vector3 position;
-        public Quaternion rotation;
+        get
+        {
+            return string.Equals(
+                SceneManager.GetActiveScene().name,
+                testPlaySceneName,
+                StringComparison.OrdinalIgnoreCase
+            );
+        }
     }
 
-    private List<EnemyTransformData> enemyPositions =
-        new List<EnemyTransformData>();
-
-    public bool IsTestPlay =>
-        currentMode == TestPlayMode.TestPlay;
-
-    public bool IsPlaying =>
-        currentMode == TestPlayMode.TestPlay;
-
-    public bool IsReturningToEdit =>
-        isReturningToEdit;
-
-    public bool IsCleared =>
-        isCleared;
+    public bool IsPlaying
+    {
+        get
+        {
+            return IsTestPlay && !isTestPlayCleared;
+        }
+    }
 
     //==================================================
-    // Start
+    // 初期化
     //==================================================
+
+    private void Awake()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
 
     private void Start()
     {
-        ReturnToEdit();
+        if (mapManager == null)
+        {
+            mapManager = FindObjectOfType<MapManager>();
+        }
+
+        if (IsTestPlay)
+        {
+            if (!isInitializing)
+            {
+                StartCoroutine(InitializeTestPlayScene());
+            }
+        }
+        else
+        {
+            if (returnToEdit)
+            {
+                StartCoroutine(RestoreEditMap());
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     //==================================================
-    // Update
+    // シーン読み込み完了
     //==================================================
 
-    private void Update()
+    private void OnSceneLoaded(
+        Scene scene,
+        LoadSceneMode mode
+    )
     {
-        if (!IsPlaying)
-            return;
-
-        if (Keyboard.current != null &&
-            Keyboard.current.escapeKey.wasPressedThisFrame)
+        if (string.Equals(
+            scene.name,
+            testPlaySceneName,
+            StringComparison.OrdinalIgnoreCase))
         {
-            TogglePauseMenu();
+            if (!isInitializing)
+            {
+                StartCoroutine(
+                    InitializeTestPlayScene()
+                );
+            }
+
+            return;
+        }
+
+        if (string.Equals(
+            scene.name,
+            mapCreateSceneName,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            if (returnToEdit)
+            {
+                StartCoroutine(
+                    RestoreEditMap()
+                );
+            }
         }
     }
 
@@ -113,94 +174,189 @@ public class TestPlayManager : MonoBehaviour
 
     public void StartTestPlay()
     {
+        Debug.Log("================================");
+        Debug.Log("テストプレイ開始チェック");
+        Debug.Log("================================");
+
+        if (mapManager == null)
+        {
+            mapManager = FindObjectOfType<MapManager>();
+        }
+
         if (mapManager == null)
         {
             Debug.LogError(
-                "TestPlayManagerにMapManagerが設定されていません。"
+                "MapManagerが見つかりません。"
             );
 
             return;
         }
+
+        //==================================================
+        // Goalチェック
+        //==================================================
 
         if (!mapManager.HasGoal())
         {
             Debug.LogWarning(
-                "Goalが配置されていないため、テストプレイを開始できません。"
+                "Goalが配置されていないため、" +
+                "テストプレイを開始できません。"
             );
 
             return;
         }
 
-        isCleared = false;
+        Debug.Log(
+            "Goalを確認しました。"
+        );
 
-        StartPlayMode();
+        //==================================================
+        // 現在のマップを保存
+        //==================================================
+
+        pendingEditData =
+            mapManager.CreateSaveData();
+
+        pendingTestPlayData =
+            mapManager.CreateSaveData();
+
+        returnToEdit = false;
+
+        isTestPlayCleared = false;
+
+        Time.timeScale = 1f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
 
         Debug.Log(
-            "テストプレイ開始"
+            "テストプレイを開始します。"
+        );
+
+        SceneManager.LoadScene(
+            testPlaySceneName
         );
     }
 
     //==================================================
-    // プレイモード開始
+    // テストプレイシーン初期化
     //==================================================
 
-    private void StartPlayMode()
+    private IEnumerator InitializeTestPlayScene()
     {
+        isInitializing = true;
+
+        Debug.Log("================================");
+        Debug.Log("TestPlayScene初期化");
+        Debug.Log("================================");
+
+        yield return null;
+
+        mapManager =
+            FindObjectOfType<MapManager>();
+
+        if (mapManager == null)
+        {
+            Debug.LogError(
+                "TestPlaySceneのMapManagerが見つかりません。"
+            );
+
+            isInitializing = false;
+
+            yield break;
+        }
+
+        //==================================================
+        // テストプレイ用マップを復元
+        //==================================================
+
+        if (pendingTestPlayData == null)
+        {
+            Debug.LogError(
+                "テストプレイ用マップデータがありません。"
+            );
+
+            isInitializing = false;
+
+            yield break;
+        }
+
+        mapManager.LoadDungeon(
+            pendingTestPlayData,
+            false
+        );
+
+        yield return null;
+
+        //==================================================
+        // NavMesh作成
+        //==================================================
+
+        mapManager.BuildNavigation();
+
+        yield return null;
+
+        //==================================================
+        // プレイヤー生成
+        //==================================================
+
         if (playerPrefab == null)
         {
             Debug.LogError(
                 "Player Prefabが設定されていません。"
             );
-
-            return;
         }
-
-        if (startPoint == null)
+        else if (startPoint == null)
         {
             Debug.LogError(
                 "Start Pointが設定されていません。"
             );
-
-            return;
         }
-
-        isReturningToEdit = false;
-
-        currentMode =
-            TestPlayMode.TestPlay;
-
-        GoalClear goalClear =
-            FindObjectOfType<GoalClear>();
-
-        if (goalClear != null)
+        else
         {
-            goalClear.ResetClearState();
+            GameObject player =
+                Instantiate(
+                    playerPrefab,
+                    startPoint.position,
+                    startPoint.rotation
+                );
+
+            Debug.Log(
+                "Playerを生成しました : " +
+                player.name
+            );
         }
 
-        SaveEnemyPositions();
+        //==================================================
+        // 敵の移動を有効化
+        //==================================================
 
-        if (mapManager != null)
-        {
-            mapManager.BuildNavigation();
-        }
+        mapManager.EnableEnemyMovement();
 
-        if (playerInstance != null)
-        {
-            Destroy(playerInstance);
-            playerInstance = null;
-        }
+        //==================================================
+        // UI設定
+        //==================================================
 
-        playerInstance = Instantiate(
-            playerPrefab,
-            startPoint.position,
-            startPoint.rotation
+        SetupTestPlayUI();
+
+        Time.timeScale = 1f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        isInitializing = false;
+
+        Debug.Log(
+            "TestPlayScene初期化完了"
         );
+    }
 
-        if (mapManager != null)
-        {
-            mapManager.EnableEnemyMovement();
-        }
+    //==================================================
+    // テストプレイUI設定
+    //==================================================
 
+    private void SetupTestPlayUI()
+    {
         if (mapCreateUI != null)
         {
             mapCreateUI.SetActive(false);
@@ -216,6 +372,11 @@ public class TestPlayManager : MonoBehaviour
             testPlayUI.SetActive(true);
         }
 
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(false);
+        }
+
         if (postConfirmUI != null)
         {
             postConfirmUI.SetActive(false);
@@ -224,11 +385,6 @@ public class TestPlayManager : MonoBehaviour
         if (postSettingUI != null)
         {
             postSettingUI.SetActive(false);
-        }
-
-        if (pauseMenuUI != null)
-        {
-            pauseMenuUI.SetActive(false);
         }
 
         if (editCamera != null)
@@ -240,138 +396,112 @@ public class TestPlayManager : MonoBehaviour
         {
             playerCamera.gameObject.SetActive(true);
         }
+    }
+
+    //==================================================
+    // Update
+    //==================================================
+
+    private void Update()
+    {
+        if (!IsTestPlay)
+        {
+            return;
+        }
+
+        if (isTestPlayCleared)
+        {
+            return;
+        }
+
+        if (Keyboard.current != null &&
+            Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            TogglePauseMenu();
+        }
+    }
+
+    //==================================================
+    // ポーズメニュー切り替え
+    //==================================================
+
+    private void TogglePauseMenu()
+    {
+        if (pauseMenuUI == null)
+        {
+            return;
+        }
+
+        if (pauseMenuUI.activeSelf)
+        {
+            ClosePauseMenu();
+        }
+        else
+        {
+            OpenPauseMenu();
+        }
+    }
+
+    //==================================================
+    // ポーズメニューを開く
+    //==================================================
+
+    public void OpenPauseMenu()
+    {
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(true);
+        }
+
+        Time.timeScale = 0f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    //==================================================
+    // ポーズメニューを閉じる
+    //==================================================
+
+    public void ClosePauseMenu()
+    {
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(false);
+        }
 
         Time.timeScale = 1f;
 
-        Cursor.visible = false;
-
-        Cursor.lockState =
-            CursorLockMode.Locked;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     //==================================================
     // テストプレイクリア
     //==================================================
 
-    public void PlayClear()
+    public void ClearTestPlay()
     {
-        if (!IsTestPlay)
-            return;
+        Debug.Log("================================");
+        Debug.Log("テストプレイクリア");
+        Debug.Log("================================");
 
-        if (isCleared)
-            return;
-
-        isCleared = true;
-
-        Debug.Log(
-            "テストプレイクリア"
-        );
-
-        ShowPostConfirm();
-    }
-
-    //==================================================
-    // 投稿確認UI表示
-    //==================================================
-
-    private void ShowPostConfirm()
-    {
-        Time.timeScale = 0f;
-
-        Cursor.visible = true;
-
-        Cursor.lockState =
-            CursorLockMode.None;
-
-        if (postConfirmUI == null)
-        {
-            Debug.LogError(
-                "TestPlayManagerに投稿確認UIが設定されていません。"
-            );
-
-            return;
-        }
-
-        postConfirmUI.SetActive(true);
-
-        Debug.Log(
-            "投稿確認UIを表示しました。"
-        );
-    }
-
-    //==================================================
-    // 投稿確認「はい」
-    //==================================================
-
-    public void OpenPostSetting()
-    {
-        Debug.Log(
-            "投稿確認の「はい」が押されました。"
-        );
-
-        if (!isCleared)
-        {
-            Debug.LogWarning(
-                "クリア状態ではありません。"
-            );
-
-            return;
-        }
-
-        if (postConfirmUI != null)
-        {
-            postConfirmUI.SetActive(false);
-        }
-
-        if (postSettingUI == null)
-        {
-            Debug.LogError(
-                "TestPlayManagerに投稿設定UIが設定されていません。"
-            );
-
-            return;
-        }
-
-        postSettingUI.SetActive(true);
-
-        Debug.Log(
-            "投稿Panelを表示しました : " +
-            postSettingUI.name
-        );
+        isTestPlayCleared = true;
 
         Time.timeScale = 0f;
 
         Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
 
-        Cursor.lockState =
-            CursorLockMode.None;
-    }
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(false);
+        }
 
-    //==================================================
-    // 投稿しない
-    //==================================================
-
-    public void CancelPost()
-    {
-        if (!isCleared)
-            return;
-
-        Debug.Log(
-            "ダンジョンを投稿せず編集画面へ戻ります。"
-        );
-
-        ReturnToEdit();
-    }
-
-    //==================================================
-    // 投稿設定画面「戻る」
-    //==================================================
-
-    public void BackFromPostSetting()
-    {
-        Debug.Log(
-            "投稿設定画面から編集画面へ戻ります。"
-        );
+        if (testPlayUI != null)
+        {
+            testPlayUI.SetActive(false);
+        }
 
         if (postSettingUI != null)
         {
@@ -380,10 +510,75 @@ public class TestPlayManager : MonoBehaviour
 
         if (postConfirmUI != null)
         {
+            postConfirmUI.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError(
+                "Post Confirm UIが設定されていません。"
+            );
+        }
+    }
+
+    //==================================================
+    // 投稿設定を開く
+    //==================================================
+
+    public void OpenPostSetting()
+    {
+        if (postConfirmUI != null)
+        {
             postConfirmUI.SetActive(false);
         }
 
-        ReturnToEdit();
+        if (postSettingUI != null)
+        {
+            postSettingUI.SetActive(true);
+        }
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    //==================================================
+    // 投稿設定を閉じる
+    //==================================================
+
+    public void ClosePostSetting()
+    {
+        if (postSettingUI != null)
+        {
+            postSettingUI.SetActive(false);
+        }
+
+        if (postConfirmUI != null)
+        {
+            postConfirmUI.SetActive(true);
+        }
+    }
+
+    //==================================================
+    // 投稿しない
+    //==================================================
+
+    public void CancelPost()
+    {
+        Debug.Log("================================");
+        Debug.Log("投稿しない");
+        Debug.Log("MapCreateSceneへ戻ります");
+        Debug.Log("編集マップを復元します");
+        Debug.Log("================================");
+
+        Time.timeScale = 1f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        returnToEdit = true;
+
+        SceneManager.LoadScene(
+            mapCreateSceneName
+        );
     }
 
     //==================================================
@@ -392,19 +587,10 @@ public class TestPlayManager : MonoBehaviour
 
     public void PostDungeon()
     {
-        if (!isCleared)
-        {
-            Debug.LogWarning(
-                "まだテストプレイをクリアしていません。"
-            );
-
-            return;
-        }
-
         if (dungeonUploader == null)
         {
             Debug.LogError(
-                "TestPlayManagerにDungeonUploaderが設定されていません。"
+                "DungeonUploaderが設定されていません。"
             );
 
             return;
@@ -413,7 +599,7 @@ public class TestPlayManager : MonoBehaviour
         if (dungeonNameInputField == null)
         {
             Debug.LogError(
-                "DungeonNameInputFieldが設定されていません。"
+                "Dungeon Name Input Fieldが設定されていません。"
             );
 
             return;
@@ -422,7 +608,7 @@ public class TestPlayManager : MonoBehaviour
         if (creatorNameInputField == null)
         {
             Debug.LogError(
-                "CreatorNameInputFieldが設定されていません。"
+                "Creator Name Input Fieldが設定されていません。"
             );
 
             return;
@@ -446,220 +632,84 @@ public class TestPlayManager : MonoBehaviour
         if (string.IsNullOrEmpty(creatorName))
         {
             Debug.LogWarning(
-                "クリエイター名を入力してください。"
+                "製作者名を入力してください。"
             );
 
             return;
         }
 
         Debug.Log(
-            "ダンジョン投稿開始 : " +
-            dungeonName +
-            " / " +
-            creatorName
+            "ダンジョンを投稿します : " +
+            dungeonName
         );
 
-        //==================================================
-        // ダンジョンを投稿
-        //==================================================
-
-        // DungeonUploader.csは変更しない
         dungeonUploader.UploadDungeon(
             dungeonName,
             creatorName
         );
-
-        //==================================================
-        // 投稿UIを閉じる
-        //==================================================
-
-        if (postSettingUI != null)
-        {
-            postSettingUI.SetActive(false);
-        }
-
-        if (postConfirmUI != null)
-        {
-            postConfirmUI.SetActive(false);
-        }
-
-        //==================================================
-        // 編集画面へ戻る
-        //==================================================
-
-        Debug.Log(
-            "投稿処理を開始したため、編集画面へ戻ります。"
-        );
-
-        ReturnToEdit();
     }
 
     //==================================================
-    // 敵の位置を保存
-    //==================================================
-
-    private void SaveEnemyPositions()
-    {
-        enemyPositions.Clear();
-
-        GameObject[] enemies =
-            GameObject.FindGameObjectsWithTag(
-                "Enemy"
-            );
-
-        foreach (GameObject enemy in enemies)
-        {
-            enemyPositions.Add(
-                new EnemyTransformData()
-                {
-                    enemy = enemy,
-                    position = enemy.transform.position,
-                    rotation = enemy.transform.rotation
-                }
-            );
-        }
-
-        Debug.Log(
-            "開始時の敵位置を保存しました : " +
-            enemyPositions.Count +
-            "体"
-        );
-    }
-
-    //==================================================
-    // 敵の位置を復元
-    //==================================================
-
-    private void RestoreEnemyPositions()
-    {
-        foreach (EnemyTransformData data in enemyPositions)
-        {
-            if (data.enemy == null)
-                continue;
-
-            NavMeshAgent[] agents =
-                data.enemy.GetComponentsInChildren<NavMeshAgent>();
-
-            foreach (NavMeshAgent agent in agents)
-            {
-                if (!agent.enabled)
-                    continue;
-
-                agent.isStopped = true;
-                agent.ResetPath();
-                agent.velocity = Vector3.zero;
-            }
-
-            data.enemy.transform.SetPositionAndRotation(
-                data.position,
-                data.rotation
-            );
-
-            foreach (NavMeshAgent agent in agents)
-            {
-                if (agent.enabled)
-                {
-                    agent.Warp(
-                        data.position
-                    );
-                }
-            }
-        }
-
-        enemyPositions.Clear();
-
-        Debug.Log(
-            "敵の位置を開始時の状態に戻しました。"
-        );
-    }
-
-    //==================================================
-    // ESCメニュー
-    //==================================================
-
-    private void TogglePauseMenu()
-    {
-        if (pauseMenuUI == null)
-            return;
-
-        bool isPaused =
-            pauseMenuUI.activeSelf;
-
-        pauseMenuUI.SetActive(
-            !isPaused
-        );
-
-        if (!isPaused)
-        {
-            Time.timeScale = 0f;
-
-            Cursor.visible = true;
-
-            Cursor.lockState =
-                CursorLockMode.None;
-        }
-        else
-        {
-            Time.timeScale = 1f;
-
-            Cursor.visible = false;
-
-            Cursor.lockState =
-                CursorLockMode.Locked;
-        }
-    }
-
-    //==================================================
-    // 編集モードへ戻る
+    // 編集画面へ戻る
     //==================================================
 
     public void ReturnToEdit()
     {
-        isReturningToEdit = true;
+        Debug.Log("================================");
+        Debug.Log("編集画面へ戻ります");
+        Debug.Log("================================");
 
-        if (currentMode ==
-            TestPlayMode.TestPlay)
+        Time.timeScale = 1f;
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        returnToEdit = true;
+
+        SceneManager.LoadScene(
+            mapCreateSceneName
+        );
+    }
+
+    //==================================================
+    // 編集マップを復元
+    //==================================================
+
+    private IEnumerator RestoreEditMap()
+    {
+        Debug.Log("================================");
+        Debug.Log("編集マップ復元開始");
+        Debug.Log("================================");
+
+        yield return null;
+
+        mapManager =
+            FindObjectOfType<MapManager>();
+
+        if (mapManager == null)
         {
-            RestoreEnemyPositions();
-        }
-
-        currentMode =
-            TestPlayMode.Edit;
-
-        isCleared = false;
-
-        if (playerInstance != null)
-        {
-            Destroy(playerInstance);
-
-            playerInstance = null;
-        }
-
-        GameObject[] enemies =
-            GameObject.FindGameObjectsWithTag(
-                "Enemy"
+            Debug.LogError(
+                "MapCreateSceneのMapManagerが見つかりません。"
             );
 
-        foreach (GameObject enemy in enemies)
-        {
-            NavMeshAgent[] agents =
-                enemy.GetComponentsInChildren<NavMeshAgent>();
-
-            foreach (NavMeshAgent agent in agents)
-            {
-                if (!agent.enabled)
-                    continue;
-
-                agent.isStopped = true;
-                agent.ResetPath();
-                agent.velocity = Vector3.zero;
-                agent.enabled = false;
-            }
+            yield break;
         }
 
-        //==================================================
-        // 編集UIを表示
-        //==================================================
+        if (pendingEditData == null)
+        {
+            Debug.LogError(
+                "復元する編集マップデータがありません。"
+            );
+
+            yield break;
+        }
+
+        mapManager.LoadDungeon(
+            pendingEditData,
+            false
+        );
+
+        yield return null;
 
         if (mapCreateUI != null)
         {
@@ -686,25 +736,9 @@ public class TestPlayManager : MonoBehaviour
             postSettingUI.SetActive(false);
         }
 
-        if (pauseMenuUI != null)
-        {
-            pauseMenuUI.SetActive(false);
-        }
-
-        //==================================================
-        // カメラ
-        //==================================================
-
         if (editCamera != null)
         {
             editCamera.gameObject.SetActive(true);
-
-            editCamera.transform.rotation =
-                Quaternion.Euler(
-                    90f,
-                    0f,
-                    0f
-                );
         }
 
         if (playerCamera != null)
@@ -712,34 +746,10 @@ public class TestPlayManager : MonoBehaviour
             playerCamera.gameObject.SetActive(false);
         }
 
-        //==================================================
-        // 時間・カーソル
-        //==================================================
-
-        Time.timeScale = 1f;
-
-        Cursor.visible = true;
-
-        Cursor.lockState =
-            CursorLockMode.None;
+        returnToEdit = false;
 
         Debug.Log(
-            "マップクリエイトに戻りました"
+            "編集画面への復帰完了"
         );
-
-        StartCoroutine(
-            EnableEditInputNextFrame()
-        );
-    }
-
-    //==================================================
-    // 編集操作を次のフレームから許可
-    //==================================================
-
-    private IEnumerator EnableEditInputNextFrame()
-    {
-        yield return null;
-
-        isReturningToEdit = false;
     }
 }

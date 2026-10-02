@@ -10585,6 +10585,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f772022f18ef8db4fb4db53777297813, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapCreateSceneName: Katayama_ren
+  testPlaySceneName: Testplay
   playerPrefab: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
   startPoint: {fileID: 5138874543841464434}
   mapManager: {fileID: 2089892387724033268}
@@ -15498,6 +15500,7 @@ MonoBehaviour:
   mapManager: {fileID: 2089892387724033268}
   undoManager: {fileID: 8410757127297276586}
   savePanel: {fileID: 7420946853701431355}
+  reEditUI: {fileID: 0}
 --- !u!114 &9058358252237145682
 MonoBehaviour:
   m_ObjectHideFlags: 0
