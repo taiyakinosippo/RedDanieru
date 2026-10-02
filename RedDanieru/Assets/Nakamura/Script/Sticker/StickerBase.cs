@@ -4,6 +4,7 @@ using System.Collections;
 public class StickerBase : MonoBehaviour
 {
     protected EnemyBase enemyScript;
+    public int attackRate = 30; //ステッカーが貼られる確率
 
     public virtual void OnEnemyApply()
     {
@@ -39,7 +40,22 @@ public class StickerBase : MonoBehaviour
     public void GetEnemyScript() 
     {
         enemyScript = GetComponent<EnemyBase>();
-    } 
+    }
+
+    public virtual void OnWallApply()
+    {
+        //ステッカーが壁に貼られたときの処理
+    }
+
+    public virtual void OnWallUpdate()
+    {
+
+    }
+
+    public virtual void OnWallRemove()
+    {
+        //ステッカーが壁から剥がれたときの処理
+    }
 }
 
 //public abstract class StickerBase

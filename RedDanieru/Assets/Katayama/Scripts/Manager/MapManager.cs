@@ -4,6 +4,13 @@ using UnityEngine.AI;
 
 public class MapManager : MonoBehaviour
 {
+    public enum EntranceDirection
+    {
+        Left,
+        Right,
+        Top,
+        Bottom
+    }
     [Header("新規マップを生成する（EditorSceneのみON）")]
     [SerializeField] private bool createOnStart = true;
 
@@ -44,6 +51,23 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject diagonalWallPrefab;
 
     [SerializeField] private GameObject floorPrefab;
+
+    [Header("床上ランダム装飾")]
+    [SerializeField] private GameObject[] floorDecorationPrefabs;
+    [SerializeField][Range(0f, 1f)] private float floorDecorationSpawnChance = 0.25f;
+    [SerializeField] private float floorDecorationYOffset = 0f;
+    [SerializeField] private bool randomDecorationRotation = true;
+
+    [Header("外周壁")]
+    [SerializeField] private bool createOuterBoundaryWalls = true;
+    [SerializeField] private GameObject outerWallPrefab;
+    [SerializeField] private float outerWallYOffset = 0f;
+
+    [Header("スタート地点の入口")]
+    [SerializeField] private bool enableStartEntrance = true;
+    [SerializeField] private EntranceDirection entranceDirection = EntranceDirection.Bottom;
+    [SerializeField][Min(0)] private int entrancePosition = 0;
+    [SerializeField][Min(1)] private int entranceWidth = 1;
 
     [System.Serializable]
     public class PlaceObjectPrefab
@@ -250,6 +274,7 @@ public class MapManager : MonoBehaviour
         GenerateMap();
         CreateMap();
         CreateDefaultRespawnObjects();
+        CreateOuterBoundaryWalls();
 
         AdjustCamera();
 
@@ -535,7 +560,7 @@ public class MapManager : MonoBehaviour
             rotation =
                 Quaternion.Euler(
                     0f,
-                    180f,
+                    225f,
                     0f
                 );
         }
@@ -548,7 +573,7 @@ public class MapManager : MonoBehaviour
             rotation =
                 Quaternion.Euler(
                     0f,
-                    270f,
+                    315f,
                     0f
                 );
         }
@@ -561,7 +586,7 @@ public class MapManager : MonoBehaviour
             rotation =
                 Quaternion.Euler(
                     0f,
-                    0f,
+                    45f,
                     0f
                 );
         }
@@ -574,7 +599,7 @@ public class MapManager : MonoBehaviour
             rotation =
                 Quaternion.Euler(
                     0f,
-                    90f,
+                    135f,
                     0f
                 );
         }
@@ -1247,7 +1272,370 @@ public class MapManager : MonoBehaviour
             block.GridPosition = pos;
         }
 
+        CreateRandomFloorDecoration(pos, floor);
+
         return floor;
+    }
+
+    //==================================================
+    // 床上ランダム装飾
+    //==================================================
+
+    private void CreateRandomFloorDecoration(
+        Vector3Int pos,
+        GameObject floor)
+    {
+        if (floor == null)
+        {
+            return;
+        }
+
+        if (floorDecorationPrefabs == null ||
+            floorDecorationPrefabs.Length == 0)
+        {
+            return;
+        }
+
+        if (Random.value > floorDecorationSpawnChance)
+        {
+            return;
+        }
+
+        GameObject prefab = null;
+
+        int startIndex =
+            Random.Range(
+                0,
+                floorDecorationPrefabs.Length
+            );
+
+        for (
+            int i = 0;
+            i < floorDecorationPrefabs.Length;
+            i++
+        )
+        {
+            int index =
+                (startIndex + i) %
+                floorDecorationPrefabs.Length;
+
+            if (floorDecorationPrefabs[index] != null)
+            {
+                prefab = floorDecorationPrefabs[index];
+                break;
+            }
+        }
+
+        if (prefab == null)
+        {
+            return;
+        }
+
+        GameObject decoration =
+            Instantiate(
+                prefab,
+                GetFloorWorldPosition(pos),
+                Quaternion.identity,
+                transform
+            );
+
+        decoration.name = "FloorDecoration";
+
+        if (randomDecorationRotation)
+        {
+            decoration.transform.rotation =
+                Quaternion.Euler(
+                    0f,
+                    Random.Range(0f, 360f),
+                    0f
+                );
+        }
+
+        Collider[] colliders =
+            decoration.GetComponentsInChildren<Collider>(true);
+
+        foreach (Collider collider in colliders)
+        {
+            collider.enabled = false;
+        }
+
+        Rigidbody[] rigidbodies =
+            decoration.GetComponentsInChildren<Rigidbody>(true);
+
+        foreach (Rigidbody rb in rigidbodies)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+
+        NavMeshAgent[] agents =
+            decoration.GetComponentsInChildren<NavMeshAgent>(true);
+
+        foreach (NavMeshAgent agent in agents)
+        {
+            agent.enabled = false;
+        }
+
+        NavMeshObstacle[] obstacles =
+            decoration.GetComponentsInChildren<NavMeshObstacle>(true);
+
+        foreach (NavMeshObstacle obstacle in obstacles)
+        {
+            obstacle.enabled = false;
+        }
+
+        if (TryGetBounds(decoration, out Bounds decorationBounds) &&
+            TryGetBounds(floor, out Bounds floorBounds))
+        {
+            float difference =
+                floorBounds.max.y -
+                decorationBounds.min.y;
+
+            decoration.transform.position +=
+                Vector3.up *
+                (difference + floorDecorationYOffset);
+        }
+        else
+        {
+            decoration.transform.position +=
+                Vector3.up *
+                floorDecorationYOffset;
+        }
+    }
+
+    //==================================================
+    // 外周壁
+    //==================================================
+
+    private void CreateOuterBoundaryWalls()
+    {
+        if (!createOuterBoundaryWalls)
+        {
+            return;
+        }
+
+        GameObject prefab =
+            outerWallPrefab != null
+                ? outerWallPrefab
+                : wallPrefab;
+
+        if (prefab == null)
+        {
+            Debug.LogError(
+                "外周壁Prefabが設定されていません。"
+            );
+
+            return;
+        }
+
+        // 下側
+        for (int x = 0; x < width; x++)
+        {
+            if (IsEntranceCell(EntranceDirection.Bottom, x))
+            {
+                continue;
+            }
+
+            CreateOuterWall(
+                new Vector3(
+                    x * wallSpacing,
+                    outerWallYOffset,
+                    -wallSpacing
+                ),
+                Quaternion.identity
+            );
+        }
+
+        // 上側
+        for (int x = 0; x < width; x++)
+        {
+            if (IsEntranceCell(EntranceDirection.Top, x))
+            {
+                continue;
+            }
+
+            CreateOuterWall(
+                new Vector3(
+                    x * wallSpacing,
+                    outerWallYOffset,
+                    depth * wallSpacing
+                ),
+                Quaternion.identity
+            );
+        }
+
+        // 左側
+        for (int z = 0; z < depth; z++)
+        {
+            if (IsEntranceCell(EntranceDirection.Left, z))
+            {
+                continue;
+            }
+
+            CreateOuterWall(
+                new Vector3(
+                    -wallSpacing,
+                    outerWallYOffset,
+                    z * wallSpacing
+                ),
+                Quaternion.identity
+            );
+        }
+
+        // 右側
+        for (int z = 0; z < depth; z++)
+        {
+            if (IsEntranceCell(EntranceDirection.Right, z))
+            {
+                continue;
+            }
+
+            CreateOuterWall(
+                new Vector3(
+                    width * wallSpacing,
+                    outerWallYOffset,
+                    z * wallSpacing
+                ),
+                Quaternion.identity
+            );
+        }
+
+        // 四隅は必ず作成する。
+        // 入口が角にあっても、角の外側まで壁が途切れないようにする。
+        CreateOuterWall(
+            new Vector3(
+                -wallSpacing,
+                outerWallYOffset,
+                -wallSpacing
+            ),
+            Quaternion.identity
+        );
+
+        CreateOuterWall(
+            new Vector3(
+                width * wallSpacing,
+                outerWallYOffset,
+                -wallSpacing
+            ),
+            Quaternion.identity
+        );
+
+        CreateOuterWall(
+            new Vector3(
+                -wallSpacing,
+                outerWallYOffset,
+                depth * wallSpacing
+            ),
+            Quaternion.identity
+        );
+
+        CreateOuterWall(
+            new Vector3(
+                width * wallSpacing,
+                outerWallYOffset,
+                depth * wallSpacing
+            ),
+            Quaternion.identity
+        );
+    }
+
+    private bool IsEntranceCell(
+    EntranceDirection direction,
+    int position)
+    {
+        if (!enableStartEntrance)
+        {
+            return false;
+        }
+
+        // 設定した方向以外には入口を作らない
+        if (direction != entranceDirection)
+        {
+            return false;
+        }
+
+        int max =
+            direction == EntranceDirection.Left ||
+            direction == EntranceDirection.Right
+                ? depth - 1
+                : width - 1;
+
+        if (max < 0)
+        {
+            return false;
+        }
+
+        // 入口幅をマップサイズ以内に制限
+        int widthClamped = Mathf.Clamp(
+            entranceWidth,
+            1,
+            max + 1
+        );
+
+        // 入口位置をマップ内に収める
+        int center = Mathf.Clamp(
+            entrancePosition,
+            0,
+            max
+        );
+
+        // 入口幅を維持したまま開始位置を計算
+        int start =
+            center - Mathf.FloorToInt(
+                widthClamped / 2f
+            );
+
+        start = Mathf.Clamp(
+            start,
+            0,
+            max - widthClamped + 1
+        );
+
+        int end =
+            start + widthClamped - 1;
+
+        return position >= start &&
+               position <= end;
+    }
+
+    private GameObject CreateOuterWall(
+        Vector3 position,
+        Quaternion rotation)
+    {
+        GameObject prefab =
+            outerWallPrefab != null
+                ? outerWallPrefab
+                : wallPrefab;
+
+        if (prefab == null)
+        {
+            return null;
+        }
+
+        GameObject wall =
+            Instantiate(
+                prefab,
+                position,
+                rotation,
+                transform
+            );
+
+        SetWallScale(wall);
+
+        WallBlock wallBlock =
+            wall.GetComponent<WallBlock>();
+
+        if (wallBlock != null)
+        {
+            Destroy(wallBlock);
+        }
+
+        wall.name = "OuterBoundaryWall";
+
+        return wall;
     }
 
     //==================================================
@@ -1577,6 +1965,7 @@ public class MapManager : MonoBehaviour
         }
 
         CreateRespawnObjects(data);
+        CreateOuterBoundaryWalls();
 
         AdjustCamera();
 
@@ -2359,4 +2748,5 @@ public class MapManager : MonoBehaviour
             pos.z >= 0 &&
             pos.z < depth;
     }
+
 }

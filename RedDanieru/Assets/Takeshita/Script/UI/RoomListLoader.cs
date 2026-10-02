@@ -19,7 +19,6 @@ public class RoomListLoader : MonoBehaviour
     public GameObject PSWCautionObj;
     public GameObject MaxPlayerCautionObj;
 
-    public GameObject RoomInfoObj;
     public GameObject MatchingObj;
     public GameObject SelecCanvas;
     public GameObject MachingRoomCreateText;
@@ -224,7 +223,6 @@ public class RoomListLoader : MonoBehaviour
 
         JoinCautionObj.SetActive(false);
         LaycastObj.SetActive(false);
-        RoomInfoObj.SetActive(false);
         MatchingObj.SetActive(true);
         MachingRoomCreateText.SetActive(false);
 

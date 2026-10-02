@@ -7,4 +7,5 @@ public enum Sticker
     ChargeDash,
     Curing,
     Legless,
+    Poison,
 }
