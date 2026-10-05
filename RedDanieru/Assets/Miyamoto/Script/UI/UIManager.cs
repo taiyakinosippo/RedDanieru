@@ -10,9 +10,20 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Camera _mainCamera;
     private GameObject _canvas;
     private PlayerUI _playerUI;
+    public static UIManager Instance { get; private set; }
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        else
+        {
+            Instance = this;
+        }
+
         _playerUI = GetComponent<PlayerUI>();
         _canvas = GetComponent<Canvas>().gameObject;
     }
