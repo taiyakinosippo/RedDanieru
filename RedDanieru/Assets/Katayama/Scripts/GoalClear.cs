@@ -3,81 +3,39 @@ using UnityEngine.SceneManagement;
 
 public class GoalClear : MonoBehaviour
 {
-    //==================================================
-    // クリアUI
-    //==================================================
-
     [Header("クリアUI")]
-    [SerializeField]
-    private GameObject clearPanel;
-
-    //==================================================
-    // Clearカメラ
-    //==================================================
+    [SerializeField] private GameObject clearPanel;
 
     [Header("Clear時に召喚するカメラ")]
-    [SerializeField]
-    private GameObject clearCameraPrefab;
-
-    //==================================================
-    // Clearカメラ設定
-    //==================================================
+    [SerializeField] private GameObject clearCameraPrefab;
 
     [Header("Clearカメラ設定")]
-
     [Tooltip("32×32マップ時のカメラ位置")]
     [SerializeField]
     private Vector3 clearCameraPosition =
-        new Vector3(
-            16f,
-            30f,
-            16f
-        );
+        new Vector3(16f, 30f, 16f);
 
     [Tooltip("カメラ角度")]
     [SerializeField]
     private Vector3 clearCameraRotation =
-        new Vector3(
-            90f,
-            0f,
-            0f
-        );
+        new Vector3(90f, 0f, 0f);
 
     [Tooltip("32×32マップ時のField of View")]
-    [SerializeField]
-    private float baseFieldOfView = 60f;
+    [SerializeField] private float baseFieldOfView = 60f;
 
     [Tooltip("基準となるマップサイズ")]
-    [SerializeField]
-    private float baseMapSize = 31f;
-
-    //==================================================
-    // タイトルシーン
-    //==================================================
+    [SerializeField] private float baseMapSize = 31f;
 
     [Header("タイトルシーン")]
-    [SerializeField]
-    private string titleSceneName = "Title";
-
-    //==================================================
-    // 内部変数
-    //==================================================
+    [SerializeField] private string titleSceneName = "Title";
 
     private bool isCleared = false;
     private bool alreadyShown = false;
-
-    //==================================================
-    // Start
-    //==================================================
 
     private void Start()
     {
         ResetClearState();
     }
-
-    //==================================================
-    // Update
-    //==================================================
 
     private void Update()
     {
@@ -89,7 +47,6 @@ public class GoalClear : MonoBehaviour
             !alreadyShown)
         {
             ShowClear();
-
             alreadyShown = true;
         }
 
@@ -121,20 +78,20 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // Goalに触れた
+    // Goal接触
     //==================================================
 
     private void OnTriggerEnter(Collider other)
     {
         if (isCleared)
+        {
             return;
+        }
 
         if (!other.CompareTag("Player"))
+        {
             return;
-
-        //==================================================
-        // クリア状態
-        //==================================================
+        }
 
         isCleared = true;
 
@@ -146,15 +103,11 @@ public class GoalClear : MonoBehaviour
             state.IsCleared = true;
         }
 
-        //==================================================
-        // TestPlayManager確認
-        //==================================================
-
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
 
         //==================================================
-        // テストプレイの場合
+        // テストプレイ中
         //==================================================
 
         if (testPlayManager != null &&
@@ -167,26 +120,20 @@ public class GoalClear : MonoBehaviour
             {
                 saveManager.SetTestPlayCleared();
             }
-            else
-            {
-                Debug.LogWarning(
-                    "SaveManagerが見つかりません。"
-                );
-            }
-
-            // ここでは編集画面へ戻さない
-            // TestPlayManager側で投稿確認UIを表示する
-            testPlayManager.PlayClear();
 
             Debug.Log(
-                "テストプレイクリア。投稿確認UIを表示します。"
+                "テストプレイでGoalに到達しました"
             );
+
+            // シーン移動しない
+            // TestPlayManager側で投稿確認を表示する
+            testPlayManager.ClearTestPlay();
 
             return;
         }
 
         //==================================================
-        // ゲームプレイの場合
+        // 通常プレイ
         //==================================================
 
         Time.timeScale = 0f;
@@ -203,7 +150,7 @@ public class GoalClear : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Clear Panelが設定されていません。"
+                "Clear Panelが設定されていません"
             );
         }
 
@@ -213,7 +160,7 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // Clearカメラ生成
+    // クリアカメラ生成
     //==================================================
 
     private void SpawnClearCamera()
@@ -228,9 +175,7 @@ public class GoalClear : MonoBehaviour
         }
 
         GameObject cameraObject =
-            Instantiate(
-                clearCameraPrefab
-            );
+            Instantiate(clearCameraPrefab);
 
         Camera clearCamera =
             cameraObject.GetComponentInChildren<Camera>();
@@ -336,11 +281,8 @@ public class GoalClear : MonoBehaviour
             );
 
         clearCamera.fieldOfView =
-            baseFieldOfView * scale;
-
-        clearCamera.fieldOfView =
             Mathf.Clamp(
-                clearCamera.fieldOfView,
+                baseFieldOfView * scale,
                 10f,
                 120f
             );
@@ -359,7 +301,7 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // タイトルへ戻る
+    // タイトルへ
     //==================================================
 
     public void ReturnToTitle()
@@ -387,7 +329,7 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // ゲームプレイ用クリア表示
+    // 通常クリア表示
     //==================================================
 
     private void ShowClear()

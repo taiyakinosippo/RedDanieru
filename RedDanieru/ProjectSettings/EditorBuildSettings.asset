@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Katayama_ren.unity
     guid: 343848cfe4835e04eb40836030c53a96
+  - enabled: 1
+    path: Assets/Scenes/Testplay.unity
+    guid: c9469bdc62f32e540b38c669f39702c6
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
