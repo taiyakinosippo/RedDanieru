@@ -1,12 +1,23 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public class PlaceManager : MonoBehaviour
 {
+    [Header("カメラ")]
     [SerializeField] private Camera mainCamera;
+
+    [Header("マップ")]
     [SerializeField] private MapManager mapManager;
+
+    [Header("Undo")]
     [SerializeField] private UndoManager undoManager;
+
+    [Header("保存パネル")]
     [SerializeField] private GameObject savePanel;
+
+    [Header("再編集・読み込みUI")]
+    [SerializeField] private ReEditUI reEditUI;
 
     private FloorBlock currentFloor;
     private FloorBlock lastPlaceFloor;
@@ -15,75 +26,71 @@ public class PlaceManager : MonoBehaviour
 
     private void Update()
     {
-        // テストプレイ中は配置処理を完全に停止
-        TestPlayManager testPlayManager =
-            FindObjectOfType<TestPlayManager>();
+        if (mainCamera == null)
+            return;
 
-        if (testPlayManager != null &&
-            testPlayManager.IsTestPlay)
+        if (mapManager == null)
+            return;
+
+        if (Mouse.current == null)
+            return;
+
+        // 読み込み一覧を開いている間は配置しない
+        if (reEditUI != null &&
+            reEditUI.IsSelectingDungeon)
         {
-            ClearSelection();
-
-            if (isEditing)
-            {
-                if (undoManager != null)
-                {
-                    undoManager.EndEdit();
-                }
-
-                isEditing = false;
-            }
-
-            lastPlaceFloor = null;
-
+            StopPlacing();
             return;
         }
 
-        // セーブ画面を開いている場合
-        if (savePanel != null && savePanel.activeSelf)
+        // セーブ画面を開いている場合は配置しない
+        if (savePanel != null &&
+            savePanel.activeSelf)
         {
-            ClearSelection();
+            StopPlacing();
             return;
         }
 
         // EditModeManagerが存在しない場合
         if (EditModeManager.Instance == null)
+        {
+            StopPlacing();
             return;
+        }
 
         // 配置モード以外では処理しない
         if (EditModeManager.Instance.CurrentMode != EditMode.Place)
         {
-            ClearSelection();
-            lastPlaceFloor = null;
+            StopPlacing();
             return;
         }
 
-        // UIボタンの上にマウスがある場合は配置しない
+        // UIの上では配置しない
         if (EventSystem.current != null &&
             EventSystem.current.IsPointerOverGameObject())
         {
-            ClearSelection();
+            StopPlacing();
             return;
         }
 
         HighlightFloor();
 
-        // マウスを押している間は配置
-        if (Input.GetMouseButton(0))
+        // マウスを押した瞬間
+        if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             Place();
         }
 
-        // マウスを離したら編集終了
-        if (Input.GetMouseButtonUp(0))
+        // マウスを押している間
+        if (Mouse.current.leftButton.isPressed)
         {
-            if (isEditing)
-            {
-                undoManager.EndEdit();
-                isEditing = false;
-            }
+            Place();
+        }
 
-            lastPlaceFloor = null;
+        // マウスを離した瞬間
+        if (Mouse.current.leftButton.wasReleasedThisFrame)
+        {
+            EndEdit();
         }
     }
 
@@ -92,8 +99,11 @@ public class PlaceManager : MonoBehaviour
     /// </summary>
     private void HighlightFloor()
     {
+        Vector2 mousePosition =
+            Mouse.current.position.ReadValue();
+
         Ray ray =
-            mainCamera.ScreenPointToRay(Input.mousePosition);
+            mainCamera.ScreenPointToRay(mousePosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
@@ -132,14 +142,18 @@ public class PlaceManager : MonoBehaviour
         if (ObjectPaletteManager.Instance == null)
             return;
 
-        // 同じ場所には連続配置しない
+        // 同じ床には連続配置しない
         if (currentFloor == lastPlaceFloor)
             return;
 
-        // 最初の配置時だけUndo用の編集開始
+        // 最初の配置時だけUndo編集開始
         if (!isEditing)
         {
-            undoManager.BeginEdit();
+            if (undoManager != null)
+            {
+                undoManager.BeginEdit();
+            }
+
             isEditing = true;
         }
 
@@ -149,6 +163,44 @@ public class PlaceManager : MonoBehaviour
             currentFloor.GridPosition,
             ObjectPaletteManager.Instance.CurrentObject
         );
+    }
+
+    /// <summary>
+    /// 配置終了
+    /// </summary>
+    private void EndEdit()
+    {
+        if (isEditing)
+        {
+            if (undoManager != null)
+            {
+                undoManager.EndEdit();
+            }
+
+            isEditing = false;
+        }
+
+        lastPlaceFloor = null;
+    }
+
+    /// <summary>
+    /// 配置処理を停止
+    /// </summary>
+    private void StopPlacing()
+    {
+        ClearSelection();
+
+        if (isEditing)
+        {
+            if (undoManager != null)
+            {
+                undoManager.EndEdit();
+            }
+
+            isEditing = false;
+        }
+
+        lastPlaceFloor = null;
     }
 
     /// <summary>

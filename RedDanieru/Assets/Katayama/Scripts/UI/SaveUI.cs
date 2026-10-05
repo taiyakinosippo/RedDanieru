@@ -25,7 +25,7 @@ public class SaveUI : MonoBehaviour
     // セーブ＆ロード管理
     [SerializeField] private SaveLoadUI saveLoadUI;
 
-    public void Start()
+    private void Start()
     {
         if (cautionObj != null)
         {
@@ -36,6 +36,27 @@ public class SaveUI : MonoBehaviour
         {
             savePanel.SetActive(false);
         }
+
+        // Inspector設定確認
+        if (dungeonNameInput == null)
+        {
+            Debug.LogError("SaveUI：dungeonNameInput が設定されていません。");
+        }
+
+        if (creatorNameInput == null)
+        {
+            Debug.LogError("SaveUI：creatorNameInput が設定されていません。");
+        }
+
+        if (saveManager == null)
+        {
+            Debug.LogError("SaveUI：saveManager が設定されていません。");
+        }
+
+        if (uploader == null)
+        {
+            Debug.LogError("SaveUI：uploader が設定されていません。");
+        }
     }
 
     //==================================================
@@ -44,13 +65,16 @@ public class SaveUI : MonoBehaviour
 
     public void OpenSavePanel()
     {
-        // 前回入力した文字を消去
         if (dungeonNameInput != null)
         {
             dungeonNameInput.text = "";
         }
 
-        // 保存パネルを表示
+        if (creatorNameInput != null)
+        {
+            creatorNameInput.text = "";
+        }
+
         if (savePanel != null)
         {
             savePanel.SetActive(true);
@@ -63,10 +87,44 @@ public class SaveUI : MonoBehaviour
 
     public void SaveDungeon()
     {
+        // 必要な参照を確認
+        if (dungeonNameInput == null)
+        {
+            Debug.LogError(
+                "SaveUI：dungeonNameInput が設定されていません。"
+            );
+            return;
+        }
+
+        if (creatorNameInput == null)
+        {
+            Debug.LogError(
+                "SaveUI：creatorNameInput が設定されていません。"
+            );
+            return;
+        }
+
+        if (saveManager == null)
+        {
+            Debug.LogError(
+                "SaveUI：saveManager が設定されていません。"
+            );
+            return;
+        }
+
+        if (uploader == null)
+        {
+            Debug.LogError(
+                "SaveUI：uploader が設定されていません。"
+            );
+            return;
+        }
+
         // 入力されたダンジョン名を取得
         string dungeonName =
             dungeonNameInput.text.Trim();
 
+        // 製作者名を取得
         string creatorName =
             creatorNameInput.text.Trim();
 
@@ -107,10 +165,12 @@ public class SaveUI : MonoBehaviour
         if (!saved)
         {
             Debug.LogError(
-                "保存に失敗したため投稿しません : " + dungeonName
+                "保存に失敗したため投稿しません : " +
+                dungeonName
             );
 
             StartCoroutine(CautionText());
+
             return;
         }
 
@@ -121,7 +181,10 @@ public class SaveUI : MonoBehaviour
         );
 
         // 保存パネルを閉じる
-        savePanel.SetActive(false);
+        if (savePanel != null)
+        {
+            savePanel.SetActive(false);
+        }
 
         // Save / Loadを両方押せる状態に戻す
         if (saveLoadUI != null)
@@ -136,13 +199,11 @@ public class SaveUI : MonoBehaviour
 
     public void Return()
     {
-        // 保存パネルを閉じる
         if (savePanel != null)
         {
             savePanel.SetActive(false);
         }
 
-        // Save / Loadを両方押せる状態に戻す
         if (saveLoadUI != null)
         {
             saveLoadUI.ReturnFromSaveLoad();
