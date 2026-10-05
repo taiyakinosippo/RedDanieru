@@ -124,9 +124,12 @@ public class ChargeDashSticker : StickerBase
     //敵の突進
     private void EnemyDash()
     {
+        rb.constraints &= ~RigidbodyConstraints.FreezePosition;
+        rb.isKinematic = false;
         //ここで突進
         Vector3 velocity = dashDirection * enemyDashSpeed;
         velocity.y = rb.linearVelocity.y;   //重力は維持
+
         rb.linearVelocity = velocity;
 
         //enemyScript.AttackEffect();
@@ -157,6 +160,8 @@ public class ChargeDashSticker : StickerBase
     private void EndDash()
     {
         rb.linearVelocity = Vector3.zero;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+        rb.isKinematic = true;
 
         state = DashState.Charge;
         timer = chargeTime;
@@ -164,7 +169,6 @@ public class ChargeDashSticker : StickerBase
         //敵スクリプト側の初期化とか
         agent.enabled = true;
         enemyScript.EndSpecial();
-
     }
 
     private void OnCollisionEnter(Collision collision)
