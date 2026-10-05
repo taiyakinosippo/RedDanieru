@@ -4,8 +4,15 @@ public class StickerState : MonoBehaviour
 {
     public Sticker currentSticker = Sticker.None;
     public StickerBase currentStickerScript;
+    private StickerDisplay stickerDisplay;
 
     public bool isSpecialMove = false;  //ステッカーによる特殊行動の有無
+
+    private void Awake()
+    {
+        //ステッカー表示用コンポーネント取得
+        stickerDisplay = transform.Find("StickerDisplay").GetComponent<StickerDisplay>();
+    }
 
     private void Start()
     {
@@ -32,6 +39,9 @@ public class StickerState : MonoBehaviour
 
         currentSticker = sticker;
 
+        //ステッカー表示
+        stickerDisplay.ShowSticker(sticker);
+
         //ステッカーコンポーネント追加
         switch (sticker)
         {
@@ -52,6 +62,9 @@ public class StickerState : MonoBehaviour
                 break;
             case Sticker.Poison:
                 currentStickerScript = gameObject.AddComponent<PoisonSticker>();
+                break;
+            case Sticker.Explosion:
+                currentStickerScript = gameObject.AddComponent<ExplosionSticker>();
                 break;
         }
 
@@ -83,11 +96,20 @@ public class StickerState : MonoBehaviour
         //貼られていたステッカーを回収
         Sticker old = currentSticker;
 
+        //ステッカー非表示
+        stickerDisplay.HideSticker();
+
         //ステッカー情報初期化
         currentSticker = Sticker.None;
         currentStickerScript = null;
 
         return old;
+    }
+
+    public void OnHit()
+    {
+        //ダメージを反応させる
+        currentStickerScript.OnDamageHit();
     }
 }
 
