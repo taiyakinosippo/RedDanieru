@@ -1,11 +1,32 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
+using System.Text;
 
-public class SceneManager_Takeshita: MonoBehaviour
+public class SceneManager_Takeshita : MonoBehaviour
 {
-    public void GameStartButton()
+    [SerializeField]
+    private TMP_InputField userNameInput;
+
+    private string GenerateRandomUserName()
     {
-        SceneManager.LoadScene("Test_Load");
+        const string chars =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        StringBuilder sb =
+            new StringBuilder();
+
+        for (int i = 0; i < 4; i++)
+        {
+            sb.Append(
+                chars[Random.Range(0, chars.Length)]
+            );
+        }
+
+        int number =
+            Random.Range(1000, 10000);
+
+        return $"{sb}_{number}";
     }
 
     public void DungeonCreateButton()
@@ -15,7 +36,19 @@ public class SceneManager_Takeshita: MonoBehaviour
 
     public void DungeonDownloadButton()
     {
+        string userName = userNameInput.text.Trim();
+
+        if (string.IsNullOrEmpty(userName))
+        {
+            userName = GenerateRandomUserName();
+        }
+
+        UserData.UserName = userName;
+
+        Debug.Log(
+            $"UserName:{UserData.UserName}"
+        );
+
         SceneManager.LoadScene("Takeshita_Matching");
     }
-
 }
