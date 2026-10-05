@@ -7,9 +7,14 @@ using UnityEngine.SceneManagement;
 public class CreateStick : MonoBehaviour
 {
     [SerializeField] Stick stickPrefab;
+
     private EffectPermission myMode = EffectPermission.OK;
 
     [SerializeField] private LayerMask effectArea;
+
+    // ポーズ中のクリックEffectモード
+    private bool pauseEffectMode = false;
+
     public enum EffectPermission
     {
         OK,
@@ -23,9 +28,17 @@ public class CreateStick : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if(myMode != EffectPermission.OK)
+            // ポーズ中
+            if (pauseEffectMode)
             {
-                GameObject player = GameObject.Find("PlayerArmature(Clone)");
+                Inster();
+                return;
+            }
+
+            if (myMode != EffectPermission.OK)
+            {
+                GameObject player =
+                    GameObject.Find("PlayerArmature(Clone)");
 
                 if (player != null)
                 {
@@ -47,16 +60,23 @@ public class CreateStick : MonoBehaviour
                 {
                     case EffectPermission.OK:
                         break;
+
                     case EffectPermission.depends:
-                        RaycastHit[] hits = Physics.RaycastAll(ray);
+
+                        RaycastHit[] hits =
+                            Physics.RaycastAll(ray);
+
                         foreach (RaycastHit hit in hits)
                         {
-                            if ((effectArea.value & (1 << hit.collider.gameObject.layer)) == 0)
+                            if ((effectArea.value &
+                                (1 << hit.collider.gameObject.layer)) == 0)
                             {
                                 return;
                             }
                         }
+
                         break;
+
                     case EffectPermission.NG:
                         return;
                 }
@@ -70,9 +90,14 @@ public class CreateStick : MonoBehaviour
     {
         int rotate = 0;
 
-        while(rotate < 360){
-            Stick stick = Instantiate(stickPrefab, transform);
-            stick.transform.position = Input.mousePosition;
+        while (rotate < 360)
+        {
+            Stick stick =
+                Instantiate(stickPrefab, transform);
+
+            stick.transform.position =
+                Input.mousePosition;
+
             stick.Initialize(
                 rotate,
                 Random.Range(50f, 60f),
@@ -81,6 +106,7 @@ public class CreateStick : MonoBehaviour
             );
 
             int x = Random.Range(25, 40);
+
             rotate += x;
         }
     }
@@ -88,5 +114,20 @@ public class CreateStick : MonoBehaviour
     public void ChangeMode(EffectPermission mode)
     {
         myMode = mode;
+    }
+
+    //==================================================
+    // ポーズ中のクリックEffectモード
+    //==================================================
+
+    public void SetPauseEffectMode(bool enabled)
+    {
+        pauseEffectMode = enabled;
+
+        if (enabled)
+        {
+            // ポーズ中は強制的にEffectを許可
+            myMode = EffectPermission.OK;
+        }
     }
 }
