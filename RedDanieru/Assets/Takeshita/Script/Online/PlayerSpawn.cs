@@ -71,16 +71,25 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             Quaternion.identity,
             player
         );
+       
+        Debug.Log(
+            $"Spawned Player={player}"
+        );
+
+        Debug.Log(
+            $"InputAuthority={obj.InputAuthority}"
+        );
+
+        Debug.Log(
+            $"HasInputAuthority={obj.HasInputAuthority}"
+        );
 
         runner.SetPlayerObject(
             player,
             obj
         );
 
-        Debug.Log(
-            $"ActualPos={obj.transform.position}"
-        );
-
+     
         if (obj.HasInputAuthority)
         {
             Debug.Log("これは自分のプレイヤー");
