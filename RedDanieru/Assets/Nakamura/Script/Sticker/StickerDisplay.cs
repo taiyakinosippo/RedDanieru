@@ -14,7 +14,7 @@ public class StickerDisplay : MonoBehaviour
 
     private Renderer stickerRenderer;  //ステッカーの表示に使用するRenderer
 
-    void Start()
+    void Awake()
     {
         stickerRenderer = GetComponent<Renderer>();
         stickerRenderer.enabled = false;
