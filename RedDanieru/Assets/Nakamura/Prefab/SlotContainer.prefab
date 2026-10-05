@@ -87,3 +87,5 @@ MonoBehaviour:
     icon: {fileID: 21300000, guid: f0b1c60b0227e4e1fa89a56252ded127, type: 3}
   - stickerType: 5
     icon: {fileID: 21300000, guid: 1cb1b1bf7bfc6574a95f9a2bc7421c60, type: 3}
+  - stickerType: 6
+    icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
