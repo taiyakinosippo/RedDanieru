@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class DustEffect : MonoBehaviour
 {
@@ -10,7 +12,23 @@ public class DustEffect : MonoBehaviour
 
     void Start()
     {
+        mainCamera = Camera.main;
         emission = dustParticle.emission;
+    }
+
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        mainCamera = Camera.main;
     }
 
     void Update()
@@ -18,12 +36,18 @@ public class DustEffect : MonoBehaviour
         // 左クリックを押している間
         if (Input.GetMouseButton(0))
         {
+            if (EventSystem.current.IsPointerOverGameObject()) return;
+
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out RaycastHit hit, 100f, targetLayer))
             {
+                //高さを固定
+                Vector3 pos = hit.point;
+                pos.y = 2.5f;
+
                 // マウスが当たった場所へ砂埃を移動
-                dustParticle.transform.position = hit.point;
+                dustParticle.transform.position = pos;
 
                 // 新しい砂埃を発生させる
                 emission.enabled = true;
