@@ -3,14 +3,22 @@ using UnityEngine;
 
 public class DamagePopup : MonoBehaviour
 {
-    private TextMeshProUGUI _text;  //ダメージを表記させるテキスト
-    [SerializeField] private Vector2 offset = Vector2.zero;
+    private TextMeshProUGUI _text;
 
-    public float _lifeTime = 4f;          //ダメージを表記する時間の長さ
-    private RectTransform _rectTransform; //ダメージの表記をするテキストのRectTransform
-    private Vector3 _transform;           //ダメージの表記をするテキストのTransform
-    private Camera _mainCamera;          //メインカメラのTransform
+    [SerializeField]
+    private Vector2 offset = Vector2.zero;
 
+    public float _lifeTime = 4f;
+
+    private RectTransform _rectTransform;
+    private Vector3 _transform;
+    private Camera _mainCamera;
+
+    // DamageSetUpが呼ばれたか
+    private bool _initialized = false;
+
+    // 残り時間
+    private float _timer;
 
     private void Awake()
     {
@@ -18,34 +26,65 @@ public class DamagePopup : MonoBehaviour
         _rectTransform = GetComponent<RectTransform>();
     }
 
-    public void Update()
+    private void Update()
     {
-        _rectTransform.position = RectTransformUtility.WorldToScreenPoint(_mainCamera, _transform + (Vector3)offset);
-    }
-    
+        // DamageSetUp前は何もしない
+        if (!_initialized)
+        {
+            return;
+        }
 
-    public void DamageSetUp(int damage, Vector3 position, Camera main)
+        // ダメージ表示の位置を敵の位置に合わせる
+        if (_mainCamera != null)
+        {
+            _rectTransform.position =
+                RectTransformUtility.WorldToScreenPoint(
+                    _mainCamera,
+                    _transform + (Vector3)offset
+                );
+        }
+
+        // Time.timeScaleが0でも時間を進める
+        _timer -= Time.unscaledDeltaTime;
+
+        if (_timer <= 0f)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void DamageSetUp(
+        int damage,
+        Vector3 position,
+        Camera main
+    )
     {
         _transform = position;
         _mainCamera = main;
-        _text.text = damage.ToString();
 
-        //ダメージの強さによって色を変える
-        if(damage < 10)
+        if (_text != null)
         {
-            _text.color = Color.white;
-        }
-        else if (damage < 20)
-        {
-            _text.color = Color.yellow;
-        }
-        else
-        {
-            _text.color = Color.red;
+            _text.text = damage.ToString();
+
+            // ダメージの強さによって色を変える
+            if (damage < 10)
+            {
+                _text.color = Color.white;
+            }
+            else if (damage < 20)
+            {
+                _text.color = Color.yellow;
+            }
+            else
+            {
+                _text.color = Color.red;
+            }
         }
 
-        //時間になったら表示を消すd
-        Destroy(gameObject, _lifeTime);
+        // 表示時間を設定
+        _timer = _lifeTime;
 
+        // 初期化完了
+        _initialized = true;
     }
 }
