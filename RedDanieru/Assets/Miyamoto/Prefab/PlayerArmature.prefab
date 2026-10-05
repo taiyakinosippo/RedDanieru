@@ -339,6 +339,7 @@ GameObject:
   - component: {fileID: -5874542748976444499}
   - component: {fileID: 8412102540417615573}
   - component: {fileID: 7101641139856271048}
+  - component: {fileID: 5788886363797241258}
   m_Layer: 6
   m_Name: PlayerArmature
   m_TagString: Player
@@ -825,6 +826,22 @@ MonoBehaviour:
   player: {fileID: 0}
   stickerSlotUI: {fileID: 3447192315749076638}
   maxHoldCount: 3
+--- !u!208 &5788886363797241258
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010391631509636739}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &1461936469673327131
 GameObject:
   m_ObjectHideFlags: 0
