@@ -1,9 +1,6 @@
 using Fusion;
-using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.XR;
-using UnityEngine.Windows;
+
 
 /// <summary>
 /// アニメーションを管理するためのスクリプト

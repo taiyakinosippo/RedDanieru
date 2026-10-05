@@ -1,8 +1,6 @@
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
-using System.Collections.Generic;
-using static UnityEngine.Rendering.DebugUI;
 using Fusion;
 #endif
 namespace Player
@@ -10,16 +8,19 @@ namespace Player
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
+    /// <summary>
+    /// プレイヤーに関係する各スクリプトをまとめて管理するためのスクリプト
+    ///</summary>
     public class PlayerActor : /*MonoBehaviour*/NetworkBehaviour
     {
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
 #endif
-        private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのフィールド
-        private PlayerInputPriority _actionPriority;      // プレイヤーのアクションの優先度を制御するためのフィールド
-        private PlayerAnimation     _animation;　　　　　// プレイヤーのアニメーションを制御するためのフィールド
-        private PlayerAttack        _playerAttack;
-        private PlayerCamera        _playerCamera;
+        private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのシステム
+        private PlayerInputPriority _actionPriority;     // プレイヤーのアクションの優先度を制御するためのもの
+        private PlayerAnimation     _animation;　　　　　// プレイヤーのアニメーションを再生させたり、制御するためのもの
+        private PlayerAttack        _playerAttack;　　　 // プレイヤーの攻撃の当たり判定やダメージを与えたりするためのもの
+        private PlayerCamera        _playerCamera;       // プレイヤーのカメ
         private PlayerMovement      _playerMovement;
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
