@@ -4,7 +4,7 @@ using UnityEngine;
 public class BigSticker : StickerBase
 {
     private float bigScale = 3.0f;  //拡大率
-    private float scaleTime = 2.0f;  //拡大縮小時間
+    //private float scaleTime = 2.0f;  //拡大縮小時間
     private int addPower = 100;  //現在の拡大率
     private float addAttackScale = 1.0f;  //現在の拡大率
     private float addAttackCoolTime = 0.5f;  //現在の拡大率

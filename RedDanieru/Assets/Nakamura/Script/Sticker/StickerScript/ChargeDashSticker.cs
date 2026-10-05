@@ -150,12 +150,26 @@ public class ChargeDashSticker : StickerBase
         rb.AddForce(dir * trapDashSpeed, ForceMode.Impulse);
 
         //一連の行動終了（ので消える）
-        OnTrapRemove();
-        Destroy(this);
+        stickerState.Remove();
+    }
+
+    //終了時の初期化とか
+    private void EndDash()
+    {
+        rb.linearVelocity = Vector3.zero;
+
+        state = DashState.Charge;
+        timer = chargeTime;
+
+        //敵スクリプト側の初期化とか
+        agent.enabled = true;
+        enemyScript.EndSpecial();
+
     }
 
     private void OnCollisionEnter(Collision collision)
     {
+        Debug.Log("衝突：" + collision.gameObject.name);
         if (state != DashState.Dash)
             return;
 
@@ -174,22 +188,8 @@ public class ChargeDashSticker : StickerBase
             //一連の行動終了
             EndDash();
 
-            //2秒間スタン
-            enemyScript.Stun(2f);
+            //6秒間スタン
+            enemyScript.Stun(6f);
         }
-    }
-
-    //終了時の初期化とか
-    private void EndDash()
-    {
-        rb.linearVelocity = Vector3.zero;
-
-        state = DashState.Charge;
-        timer = chargeTime;
-
-        //敵スクリプト側の初期化とか
-        agent.enabled = true;
-        enemyScript.EndSpecial();
-        
     }
 }
