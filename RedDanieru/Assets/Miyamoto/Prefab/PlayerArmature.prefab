@@ -403,6 +403,7 @@ GameObject:
   - component: {fileID: 8412102540417615573}
   - component: {fileID: 7101641139856271048}
   - component: {fileID: 5788886363797241258}
+  - component: {fileID: 1790086913376040861}
   m_Layer: 6
   m_Name: PlayerArmature
   m_TagString: Player
@@ -510,10 +511,10 @@ MonoBehaviour:
   move: {x: 0, y: 0}
   look: {x: 0, y: 0}
   jump: 0
-  sprint: 0
+  evade: 0
   cameraChange: 0
   sticker: 0
-  debuger: 0
+  debug: 0
   analogMovement: 1
   cursorLocked: 1
   cursorInputForLook: 1
@@ -679,8 +680,8 @@ MonoBehaviour:
   Animator: {fileID: 4508827298624980741}
   ApplyTiming: 2
   SyncSettings: 79
-  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f
-  TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea
+  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f773a94f8f575d87d
+  TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea0745396d
   TotalWords: 3
 --- !u!114 &4848678109406426361
 MonoBehaviour:
@@ -844,8 +845,8 @@ MonoBehaviour:
   PlayerHP: 1500
   PlayerAttack: 300
   PlayerDefense: 0
-  PlayerMoveSpeed: 2
-  PlayerEvadeSpeed: 5
+  PlayerMoveSpeed: 5
+  PlayerEvadeSpeed: 10
   PlayerSticker: 
   _playerUI: {fileID: 2934583692236223393}
 --- !u!114 &-5874542748976444499
@@ -872,8 +873,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 916dd762a216f7443b54c64d02983459, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxMoveSpeed: 5
-  _minMoveSpeed: 5
+  _MoveSpeed: 5
   SpeedChangeRate: 10
   RotationSmoothTime: 10
 --- !u!114 &7101641139856271048
@@ -901,12 +901,26 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_Extents: {x: 0.5, y: 0.15, z: 0.5}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
+--- !u!114 &1790086913376040861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010391631509636739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392aee2ef617a45478ea9573d3b68fe6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _evadeTime: 0.2
+  _decelerationTime: 0.2
 --- !u!1 &1461936469673327131
 GameObject:
   m_ObjectHideFlags: 0
@@ -2148,7 +2162,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6539102056021299873
 Transform:
   m_ObjectHideFlags: 0

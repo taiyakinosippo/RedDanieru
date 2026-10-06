@@ -80,6 +80,9 @@ namespace Player
             }
             _animationBlend = _playerStatus._playerEvadeSpeed;
 
+            // プレイヤーの回避アニメーションを再生する(今は仮実装のなので走るモーションで代用する)
+            _playerAnimation.PlayerEvadeAnimation();
+
         }
 
         //----------------------------------------------------------
@@ -90,9 +93,6 @@ namespace Player
            
             // 一定速度で回避
             _controller.Move( _evadeDirection * _evadeSpeed * Time.deltaTime);
-
-            // プレイヤーの回避アニメーションを再生する(今は仮実装のなので走るモーションで代用する)
-            _playerAnimation.PlayerMoveAnimatior(_animationBlend, _inputMagnitude);
 
             // 回避出来る時間を減らす
             _evadeTimer -= Time.deltaTime;
@@ -130,10 +130,9 @@ namespace Player
             if (_decelerationTimer <= 0.0f)
             {
                 _decelerationTimer = 0.0f;
-
+                _playerAnimation.PlayerEvadeAnimationEnd();
                 _input.evade = false;
                 _actionPriority.EndAction();
-
                 Debug.Log("回避終了");
             }
         }
