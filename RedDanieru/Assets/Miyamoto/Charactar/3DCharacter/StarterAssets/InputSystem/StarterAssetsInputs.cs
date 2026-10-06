@@ -15,7 +15,7 @@ namespace Player
 		public bool sprint;
 		public bool cameraChange;
 		public bool sticker;
-		public bool debuger;
+		public bool evade;
 
         [Header("Movement Settings")]
 		public bool analogMovement;
@@ -68,7 +68,7 @@ namespace Player
         public void OnDebug(InputValue value)
         {
             Debug.Log("Debug");
-            DebugInput(value.isPressed);
+            EvadeInput(value.isPressed);
         }
 #endif
 
@@ -107,9 +107,9 @@ namespace Player
             cameraChange = newCameraChangeState;
         }
 
-		public void DebugInput(bool newDebugState)
+		public void EvadeInput(bool newEvadeState)
 		{
-			debuger = newDebugState;
+			evade = newEvadeState;
 		}
 
         private void OnApplicationFocus(bool hasFocus)

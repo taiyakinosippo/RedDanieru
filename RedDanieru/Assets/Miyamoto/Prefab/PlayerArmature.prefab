@@ -780,7 +780,7 @@ MonoBehaviour:
   PlayerAttack: 300
   PlayerDefense: 0
   PlayerMoveSpeed: 2
-  PlayerRunSpeed: 5
+  PlayerEvadeSpeed: 5
   PlayerSticker: 
   _playerUI: {fileID: 2934583692236223393}
 --- !u!114 &-5874542748976444499
@@ -1921,7 +1921,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7483272926751802392}
-  - {fileID: 6406679884895225922}
   m_Father: {fileID: 6363232815336297457}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6769300355240050387
@@ -2156,7 +2155,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5331063185139974966}
-  m_Father: {fileID: 6539102056021299873}
+  m_Father: {fileID: 9056627886569442442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2502,6 +2501,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6711181187332917897}
+  - {fileID: 6406679884895225922}
   m_Father: {fileID: 6363232815336297457}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2015721304042475271
