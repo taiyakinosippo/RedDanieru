@@ -211,6 +211,10 @@ public class DungeonUIManager : MonoBehaviour
 
         NetworkRunner runner = FindObjectOfType<NetworkRunner>();
 
+        string roomId = string.IsNullOrEmpty(RoomInfo.RoomId) ? "未設定" : RoomInfo.RoomId;
+
+        string password = string.IsNullOrEmpty(DungeonUIManager.Password) ? "ナシ" : DungeonUIManager.Password;
+
         if (runner == null)
         {
             GameStartbutton.interactable = false;
@@ -233,12 +237,16 @@ public class DungeonUIManager : MonoBehaviour
         if (displayCount >= MaxPlayers)
         {
             MatchingPlayerText.text =
-                $"マッチング完了！ ({displayCount}/{MaxPlayers})";
+                 $"マッチング完了！ ({displayCount}/{MaxPlayers})\n" +
+                 $"ルームID : {roomId}\n" +
+                 $"パスワード : {password}";
         }
         else
         {
             MatchingPlayerText.text =
-                $"待機中... ({displayCount}/{MaxPlayers})";
+                 $"待機中... ({displayCount}/{MaxPlayers})\n" +
+                 $"ルームID : {roomId}\n" +
+                 $"パスワード : {password}";
         }
 
         GameStartbutton.interactable =
@@ -498,7 +506,7 @@ public class DungeonUIManager : MonoBehaviour
 
     public void GameStartButton()
     {
-        BGMManager_Takeshita.Instance.PlayBGM();
+        //BGMManager_Takeshita.Instance.PlayBGM();
 
         if (NetworkGameState.Instance == null)
             return;

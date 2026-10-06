@@ -43,17 +43,11 @@ public class PlayerName : NetworkBehaviour
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_SetName(string userName)
     {
-        Debug.Log($"RPC SET {Object.InputAuthority} => {userName}");
-
         PlayerNameText = userName;
     }
 
     public override void Render()
     {
-        Debug.Log(
-            $"SHOW {Object.InputAuthority} => {PlayerNameText}"
-        );
-
         if (nameText != null)
         {
             nameText.text =
