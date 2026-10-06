@@ -23,11 +23,11 @@ namespace Player
         [Tooltip("プレイヤーの防御力")]
         [SerializeField] private int PlayerDefense = 5;
 
-        [Tooltip("プレイヤーの歩くスピード")]
+        [Tooltip("プレイヤーの動くスピード")]
         [SerializeField] private float PlayerMoveSpeed = 2f;
 
-        [Tooltip("プレイヤーの走るスピード")]
-        [SerializeField] private float PlayerRunSpeed = 5f;
+        [Tooltip("プレイヤーの回避のスピード")]
+        [SerializeField] private float PlayerEvadeSpeed = 5f;
 
         [Tooltip("ステッカーの所持数")]
         [SerializeField] private List<int> PlayerSticker;
@@ -59,7 +59,7 @@ namespace Player
         public int _playerAttack => PlayerAttack;
 
         public float _playerMoveSpeed => PlayerMoveSpeed;
-        public float _playerRunSpeed => PlayerRunSpeed;
+        public float _playerEvadeSpeed => PlayerEvadeSpeed;
 
         // プレイヤーが死亡しているか
         public bool _isDead { get; private set; }
@@ -180,10 +180,6 @@ namespace Player
 
             Debug.Log("プレイヤー死亡");
 
-            //==================================================
-            // テストプレイ中の場合
-            //==================================================
-
             TestPlayManager testPlayManager =
                 FindObjectOfType<TestPlayManager>();
 
@@ -202,10 +198,6 @@ namespace Player
 
                 return;
             }
-
-            //==================================================
-            // 通常ゲームの場合
-            //==================================================
 
             if (_playerUI != null)
             {

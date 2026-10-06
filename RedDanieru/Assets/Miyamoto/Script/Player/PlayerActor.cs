@@ -26,6 +26,7 @@ namespace Player
         private NetworkMecanimAnimator _networkAnimator;
         private PlayerStatus        _playerStatus;
         private DeadCameraMulti     _deadMultiCamera;
+        private PlayerEvade         _playerEvade;
 
 
         private bool _debugMode = false;
@@ -71,6 +72,8 @@ namespace Player
             _playerStatus = GetComponent<PlayerStatus>();
 
             _deadMultiCamera = GetComponent<DeadCameraMulti>();
+
+            _playerEvade = GetComponent<PlayerEvade>();
         }
 
         //public override void Spawned()
@@ -189,6 +192,12 @@ namespace Player
 
                     // ジャンプと重力の処理
                     _playerMovement.PlayerJumpAndGravity(_input);
+                }
+
+                if (_actionPriority.currentActionType == ActionType.Evade)
+                {
+                    // プレイヤーの回避処理
+                    _playerEvade.Evade(_input);
                 }
 
                 if (_actionPriority.currentActionType == ActionType.Sticker)

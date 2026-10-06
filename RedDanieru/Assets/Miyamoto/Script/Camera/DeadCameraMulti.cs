@@ -13,10 +13,8 @@ namespace Player
         private PlayerStatus _playerStatus;
         private PlayerCamera _playerCamera;
         
-        [Tooltip("最大移動速度")]
-        public float _maxMoveSpeed = 5.0f;
-        [Tooltip("最小移動速度")]
-        public float _minMoveSpeed = 5.0f;
+        [Tooltip("移動速度")]
+        public float _MoveSpeed = 5.0f;
         [Tooltip("速度の変化率")]
         public float SpeedChangeRate = 10.0f;
         private float _cameraSpeed; 
@@ -37,7 +35,7 @@ namespace Player
         {
             if (!_playerStatus._isDead) return;
             // Shiftキーを押している場合は早く移動し、押していない場合はゆっくり移動する
-            float targetSpeed = _input.sprint ? _maxMoveSpeed : _minMoveSpeed;
+            float targetSpeed = _MoveSpeed;
 
             // 何も入力されていない場合は速度を0にする
             if (_input.move == Vector2.zero) targetSpeed = 0.0f;

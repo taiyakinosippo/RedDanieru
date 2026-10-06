@@ -36,6 +36,7 @@ namespace Player
             {
                 _input.attack = false;
                 _input.sticker = false;
+                _input.evade = false;
             }
 
             if (_input.attack && Grounded)
@@ -51,6 +52,11 @@ namespace Player
             if (_input.move != Vector2.zero)
             {
                 AddAction(ActionType.Move);
+            }
+
+            if (_input.evade && Grounded)
+            {
+                AddAction(ActionType.Evade);
             }
 
             if (_input.cameraChange)
@@ -75,6 +81,9 @@ namespace Player
             {
                 case ActionType.Sticker:
                     return 100;
+
+                case ActionType.Evade:
+                    return 90;
 
                 case ActionType.Jump:
                     return 80;

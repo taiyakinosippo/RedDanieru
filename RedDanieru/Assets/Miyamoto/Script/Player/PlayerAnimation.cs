@@ -18,6 +18,7 @@ namespace Player
         private int _animIDAttack;
         private int _animIDStickerPaste;
         private int _animIDStickerPeelOff;
+        private int _animIDEvade;
 
         private Animator _animator;                      // アニメーションを制御するためのAnimatorコンポーネント
 
@@ -26,6 +27,7 @@ namespace Player
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
         private PlayerAttack _playerAttack;
+        private PlayerEvade _playerEvade;
 
         //----------------------------------------------------------
         //初期化
@@ -45,6 +47,8 @@ namespace Player
             _networkAnimator = GetComponent<NetworkMecanimAnimator>();
 
             _playerAttack = GetComponent<PlayerAttack>();
+
+            _playerEvade = GetComponent<PlayerEvade>();
 
             //アニメーションをIDに変換
             AssignAnimationIDs();
@@ -71,6 +75,7 @@ namespace Player
             _animIDAttack = Animator.StringToHash("Attack");
             _animIDStickerPaste = Animator.StringToHash("StickerPaste");
             _animIDStickerPeelOff = Animator.StringToHash("StickerPeelOff");
+            _animIDEvade = Animator.StringToHash("Evade");
 
         }
 
@@ -199,6 +204,25 @@ namespace Player
             _animator.ResetTrigger(_animIDStickerPeelOff);
             Debug.Log("Sticker Peel off animation end");
             _stickerCheck.StickerAnimationEnd();
+        }
+
+        //----------------------------------------------------------
+        //回避のアニメーションを再生させる
+        //---------------------------------------------------------   
+        public void PlayerEvadeAnimation()
+        {
+            if (_hasAnimator)
+            {
+                _animator.SetTrigger(_animIDEvade);
+            }
+        }
+
+        //----------------------------------------------------------
+        //回避のアニメーションが終了したときに呼ばれる
+        //^---------------------------------------------------------
+        public void PlayerEvadeAnimationEnd()
+        {
+            _animator.ResetTrigger(_animIDEvade);
         }
 
 
