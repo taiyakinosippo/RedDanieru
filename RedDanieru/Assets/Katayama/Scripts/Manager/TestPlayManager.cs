@@ -664,6 +664,9 @@ public class TestPlayManager : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
+        //マップ上のオブジェクトのRigidBodyをすべて凍結
+        mapManager.ObjectsAllFreeze();
+
         returnToEdit = true;
 
         SceneManager.LoadScene(
