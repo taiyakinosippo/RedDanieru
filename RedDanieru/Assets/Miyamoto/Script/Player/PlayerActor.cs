@@ -32,6 +32,7 @@ namespace Player
         private bool _debugMode = false;
 
         private bool _deathProcessed;
+        private bool _clearProcessed;
 
         // 現在の入力デバイスがマウスかどうかを判定するプロパティ
         private bool IsCurrentDeviceMouse
