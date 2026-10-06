@@ -1117,7 +1117,6 @@ MonoBehaviour:
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
-  _uiManager: {fileID: 0}
   currentHp: 0
   playerLayer:
     serializedVersion: 2
@@ -2373,7 +2372,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6224012741235196918, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
 --- !u!1 &1470914196
 GameObject:

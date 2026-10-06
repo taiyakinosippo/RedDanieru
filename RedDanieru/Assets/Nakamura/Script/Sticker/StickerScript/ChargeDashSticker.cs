@@ -178,6 +178,7 @@ public class ChargeDashSticker : StickerBase
         enemyScript.EndSpecial();
     }
 
+    //Rigidbodyの制約を解除して動けるようにする
     private void CanMove()
     {
         rb.useGravity = true;
