@@ -27,15 +27,15 @@ PrefabInstance:
     - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[2]'
       value: 
-      objectReference: {fileID: 2372346536855544842}
+      objectReference: {fileID: 3873388935660617896}
     - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[3]'
       value: 
-      objectReference: {fileID: 3873388935660617896}
+      objectReference: {fileID: -4442747001464199512}
     - target: {fileID: 2724699693392142997, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: 'NetworkedBehaviours.Array.data[4]'
       value: 
-      objectReference: {fileID: -4442747001464199512}
+      objectReference: {fileID: 7544711987311360204}
     - target: {fileID: 3898678134712886083, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
       propertyPath: m_Name
       value: unitychan_backup
@@ -89,17 +89,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: -4442747001464199512}
   m_SourcePrefab: {fileID: 100100000, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
---- !u!114 &2372346536855544842 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5337980672699630009, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
-  m_PrefabInstance: {fileID: 7707934646344787379}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6693183178085648112}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2952bb594c569e4f86d54d5dee9fbe1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &3873388935660617896 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6861549660615763227, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
@@ -146,6 +135,17 @@ MonoBehaviour:
   braking: 10
   maxSpeed: 2
   rotationSpeed: 15
+--- !u!114 &7544711987311360204 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 165549259999780223, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}
+  m_PrefabInstance: {fileID: 7707934646344787379}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2952bb594c569e4f86d54d5dee9fbe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &8979677413800348638 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1614026655119289965, guid: ecbd0c7ad4784ae469d37950d35cc600, type: 3}

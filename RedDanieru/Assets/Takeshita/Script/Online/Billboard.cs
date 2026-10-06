@@ -1,20 +1,31 @@
 using UnityEngine;
+using Player;
 
-public class Billboard : MonoBehaviour
+public class NameBillboard : MonoBehaviour
 {
-    private Camera targetCamera;
+    private PlayerCamera playerCamera;
+
+    private void Start()
+    {
+        playerCamera =
+            GetComponentInParent<PlayerCamera>();
+    }
 
     private void LateUpdate()
     {
-        if (targetCamera == null)
-        {
-            targetCamera = Camera.main;
-        }
-
-        if (targetCamera == null)
+        if (playerCamera == null ||
+            playerCamera.currentCamera == null)
             return;
 
-        transform.forward =
-            targetCamera.transform.forward;
+        Transform cam =
+            playerCamera.currentCamera.transform;
+
+        Vector3 dir =
+            transform.position - cam.position;
+
+        transform.rotation =
+            Quaternion.LookRotation(dir);
+
+        transform.Rotate(0f, 180f, 0f);
     }
 }
