@@ -27,6 +27,9 @@ public class SaveManager : MonoBehaviour
     // クリア時のマップRevision
     private int clearedMapRevision = -1;
 
+    // セーブ後にマップが変更されたか
+    private bool hasUnsavedChanges = false;
+
     private Image saveButtonImage;
 
 
@@ -42,7 +45,20 @@ public class SaveManager : MonoBehaviour
                 saveButton.GetComponent<Image>();
         }
 
+        // 起動直後は未保存変更なし
+        hasUnsavedChanges = false;
+
         UpdateSaveButton();
+    }
+
+
+    //==================================================
+    // 未保存変更があるか
+    //==================================================
+
+    public bool HasUnsavedChanges()
+    {
+        return hasUnsavedChanges;
     }
 
 
@@ -82,6 +98,9 @@ public class SaveManager : MonoBehaviour
     {
         testPlayCleared = false;
         clearedMapRevision = -1;
+
+        // セーブ後に変更された
+        hasUnsavedChanges = true;
 
         UpdateSaveButton();
 
@@ -236,6 +255,9 @@ public class SaveManager : MonoBehaviour
             json
         );
 
+        // セーブ成功
+        hasUnsavedChanges = false;
+
         Debug.Log(
             "ローカル保存完了 : "
             + dungeonName
@@ -354,6 +376,9 @@ public class SaveManager : MonoBehaviour
             path,
             json
         );
+
+        // セーブ成功
+        hasUnsavedChanges = false;
 
         Debug.Log(
             "ローカル上書き保存完了 : "
