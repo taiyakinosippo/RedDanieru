@@ -102,6 +102,13 @@ namespace Player
             _cinemachineTargetYaw = currentCamera.transform.rotation.eulerAngles.y;
             _cinemachineTargetPitch = currentCamera.transform.rotation.eulerAngles.x;
             _actionPriority.EndAction();
+
+            currentCamera = isFirstPerson
+    ? FirstPersonPerspective
+    : ThirdPersonPerspective;
+
+            LocalCameraManager.CameraTransform =
+                currentCamera.transform;
         }
 
   

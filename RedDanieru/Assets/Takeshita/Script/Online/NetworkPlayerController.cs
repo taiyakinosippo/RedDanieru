@@ -31,6 +31,16 @@ public class NetworkAuthorityController : NetworkBehaviour
                 playerCamera.DisableCamera();
                 playerCamera.enabled = false;
             }
+
+            return;
+        }
+
+        // 自分のカメラを登録
+        if (playerCamera != null &&
+            playerCamera.currentCamera != null)
+        {
+            LocalCameraManager.CameraTransform =
+                playerCamera.currentCamera.transform;
         }
     }
 }
