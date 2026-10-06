@@ -9,7 +9,63 @@ public class ReturnToTitleConfirm : MonoBehaviour
     [Header("タイトルシーン名")]
     [SerializeField] private string titleSceneName = "Title";
 
+    [Header("セーブ管理")]
+    [SerializeField] private SaveManager saveManager;
+
     private void Start()
+    {
+        if (saveManager == null)
+        {
+            saveManager =
+                FindObjectOfType<SaveManager>();
+        }
+
+        if (confirmPanel != null)
+        {
+            confirmPanel.SetActive(false);
+        }
+    }
+
+    //==================================================
+    // Titleボタン
+    //==================================================
+
+    public void OpenConfirm()
+    {
+        // 未保存の変更がある場合だけ確認画面を表示
+        if (
+            saveManager != null &&
+            saveManager.HasUnsavedChanges()
+        )
+        {
+            if (confirmPanel != null)
+            {
+                confirmPanel.SetActive(true);
+            }
+
+            return;
+        }
+
+        // 変更がない場合はそのままタイトルへ
+        GoToTitle();
+    }
+
+
+    //==================================================
+    // 「はい」ボタン
+    //==================================================
+
+    public void Yes()
+    {
+        GoToTitle();
+    }
+
+
+    //==================================================
+    // 「いいえ」ボタン
+    //==================================================
+
+    public void No()
     {
         if (confirmPanel != null)
         {
@@ -17,17 +73,12 @@ public class ReturnToTitleConfirm : MonoBehaviour
         }
     }
 
-    // Titleボタンから呼び出す
-    public void OpenConfirm()
-    {
-        if (confirmPanel != null)
-        {
-            confirmPanel.SetActive(true);
-        }
-    }
 
-    // 「はい」ボタン
-    public void Yes()
+    //==================================================
+    // タイトルへ
+    //==================================================
+
+    private void GoToTitle()
     {
         Time.timeScale = 1f;
 
@@ -48,15 +99,6 @@ public class ReturnToTitleConfirm : MonoBehaviour
             SceneManager.LoadScene(
                 titleSceneName
             );
-        }
-    }
-
-    // 「いいえ」ボタン
-    public void No()
-    {
-        if (confirmPanel != null)
-        {
-            confirmPanel.SetActive(false);
         }
     }
 }
