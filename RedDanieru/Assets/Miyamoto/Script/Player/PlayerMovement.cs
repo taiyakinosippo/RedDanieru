@@ -105,7 +105,7 @@ namespace Player
         public void PlayerMove(StarterAssetsInputs _input)
         {
             // Shiftキーを押している場合は走り、押していない場合は歩く
-            float targetSpeed = _input.sprint ? _playerStatus._playerRunSpeed : _playerStatus._playerMoveSpeed;
+            float targetSpeed =  _playerStatus._playerMoveSpeed;
 
             // 何も入力されていない場合は速度を0にする
             if (_input.move == Vector2.zero) targetSpeed = 0.0f;
