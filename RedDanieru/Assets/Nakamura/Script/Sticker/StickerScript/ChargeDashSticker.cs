@@ -23,6 +23,7 @@ public class ChargeDashSticker : StickerBase
     private float chargeTime = 2.0f;  //溜め時間
     private float timer = 0.0f;  //溜め時間のタイマー
     private Vector3 dashDirection;  //敵の向く方向
+    private GameObject lastEnteredObject;  //最後に衝突したオブジェクト
 
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
@@ -115,6 +116,9 @@ public class ChargeDashSticker : StickerBase
             dashDirection.y = 0;
             dashDirection.Normalize();
 
+            //動けるようにする
+            CanMove();
+
             //突進へ
             state = DashState.Dash;
             timer = dashTime;
@@ -124,8 +128,6 @@ public class ChargeDashSticker : StickerBase
     //敵の突進
     private void EnemyDash()
     {
-        rb.constraints &= ~RigidbodyConstraints.FreezePosition;
-        rb.isKinematic = false;
         //ここで突進
         Vector3 velocity = dashDirection * enemyDashSpeed;
         velocity.y = rb.linearVelocity.y;   //重力は維持
@@ -146,6 +148,9 @@ public class ChargeDashSticker : StickerBase
     //物の突進
     private void TrapDash()
     {
+        //動けるようにする
+        CanMove();
+
         //突進（吹き飛ぶ感じ）
         Vector3 dir = dashDirection;
         dir.y = 0.2f;
@@ -159,6 +164,8 @@ public class ChargeDashSticker : StickerBase
     //終了時の初期化とか
     private void EndDash()
     {
+        //動かないようにする
+        rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
         rb.constraints = RigidbodyConstraints.FreezeAll;
         rb.isKinematic = true;
@@ -171,11 +178,22 @@ public class ChargeDashSticker : StickerBase
         enemyScript.EndSpecial();
     }
 
+    //Rigidbodyの制約を解除して動けるようにする
+    private void CanMove()
+    {
+        rb.useGravity = true;
+        rb.constraints &= ~RigidbodyConstraints.FreezePosition;
+        rb.isKinematic = false;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("衝突：" + collision.gameObject.name);
-        if (state != DashState.Dash)
+        //Debug.Log("衝突：" + collision.gameObject.name);
+        if (state != DashState.Dash || collision.gameObject.CompareTag("Enemy") || collision.gameObject.layer == LayerMask.NameToLayer("Floor") || collision.gameObject == lastEnteredObject)
             return;
+
+        //最後に衝突したオブジェクトを保存
+        lastEnteredObject = collision.gameObject;
 
         if (collision.gameObject.CompareTag("Player"))
         {
@@ -185,7 +203,7 @@ public class ChargeDashSticker : StickerBase
             //プレイヤーが突き飛ばされる
 
         }
-
+        
         //敵だけ終了
         if (enemyScript != null)
         {
