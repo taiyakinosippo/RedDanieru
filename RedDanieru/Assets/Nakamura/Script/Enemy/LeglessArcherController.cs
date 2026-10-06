@@ -70,7 +70,8 @@ public class LeglessArcherController : EnemyBase
                     //攻撃クールタイムが終了していれば攻撃
                     if (attackCoolTimer <= 0f)
                     {
-                        currentState = enemyState.Attack;
+                        AttackSelect();
+                        //currentState = enemyState.Attack;
                     }
                 }
                 else
