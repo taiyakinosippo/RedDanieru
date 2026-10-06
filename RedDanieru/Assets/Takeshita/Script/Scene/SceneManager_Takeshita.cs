@@ -8,6 +8,48 @@ public class SceneManager_Takeshita : MonoBehaviour
     [SerializeField]
     private TMP_InputField userNameInput;
 
+    private void Start()
+    {
+        BGMManager_Takeshita.Instance.PlayBGM();
+
+        if (userNameInput != null)
+        {
+            userNameInput.text =
+                UserData.UserName;
+
+            userNameInput.onValueChanged.AddListener(
+                (value) =>
+                {
+                    UserData.UserName = value;
+                });
+        }
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene,LoadSceneMode mode)
+    {
+        GameObject obj =
+            GameObject.Find("UserName");
+
+        if (obj != null)
+        {
+            userNameInput =
+                obj.GetComponent<TMP_InputField>();
+
+            userNameInput.text =
+                UserData.UserName;
+        }
+    }
+
     private string GenerateRandomUserName()
     {
         const string chars =
@@ -31,6 +73,8 @@ public class SceneManager_Takeshita : MonoBehaviour
 
     public void DungeonCreateButton()
     {
+        BGMManager_Takeshita.Instance.StopBGM();
+
         SceneManager.LoadScene("Katayama_ren");
     }
 
@@ -48,6 +92,8 @@ public class SceneManager_Takeshita : MonoBehaviour
         Debug.Log(
             $"UserName:{UserData.UserName}"
         );
+
+        BGMManager_Takeshita.Instance.StopBGM();
 
         SceneManager.LoadScene("Takeshita_Matching");
     }
