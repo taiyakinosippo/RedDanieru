@@ -19,12 +19,7 @@ public class PlayerName : NetworkBehaviour
     {
         if (!GameModeManager.IsMultiplayer)
         {
-            string userName =
-                string.IsNullOrEmpty(UserData.UserName)
-                ? "Guest"
-                : UserData.UserName;
-
-            nameText.text = userName;
+            nameText.gameObject.SetActive(false);
         }
     }
 
@@ -43,17 +38,11 @@ public class PlayerName : NetworkBehaviour
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
     private void RPC_SetName(string userName)
     {
-        Debug.Log($"RPC SET {Object.InputAuthority} => {userName}");
-
         PlayerNameText = userName;
     }
 
     public override void Render()
     {
-        Debug.Log(
-            $"SHOW {Object.InputAuthority} => {PlayerNameText}"
-        );
-
         if (nameText != null)
         {
             nameText.text =

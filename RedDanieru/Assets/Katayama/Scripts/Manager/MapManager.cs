@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.AI;
+using TMPro;
 
 public class MapManager : MonoBehaviour
 {
@@ -51,6 +52,11 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject diagonalWallPrefab;
 
     [SerializeField] private GameObject floorPrefab;
+
+    [Header("ゴール警告UI")]
+    [SerializeField] private GameObject goalWarningUI;
+    [SerializeField] private TMP_Text goalWarningText;
+    [SerializeField] private float goalWarningDuration = 2f;
 
     [Header("床上ランダム装飾")]
     [SerializeField] private GameObject[] floorDecorationPrefabs;
@@ -2034,8 +2040,8 @@ public class MapManager : MonoBehaviour
             HasGoal()
         )
         {
-            Debug.Log(
-                "Goalは1つしか配置できません。"
+            ShowGoalWarning(
+                "すでにゴールは置いてあります。"
             );
 
             return;
@@ -2777,6 +2783,36 @@ public class MapManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    private void ShowGoalWarning(string message)
+    {
+        if (goalWarningUI == null)
+        {
+            return;
+        }
+
+        if (goalWarningText != null)
+        {
+            goalWarningText.text = message;
+            goalWarningText.color = Color.red;
+        }
+
+        goalWarningUI.SetActive(true);
+
+        CancelInvoke(nameof(HideGoalWarning));
+        Invoke(
+            nameof(HideGoalWarning),
+            goalWarningDuration
+        );
+    }
+
+    private void HideGoalWarning()
+    {
+        if (goalWarningUI != null)
+        {
+            goalWarningUI.SetActive(false);
         }
     }
 }
