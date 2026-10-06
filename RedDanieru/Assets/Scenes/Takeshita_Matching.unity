@@ -302,9 +302,9 @@ MonoBehaviour:
   - RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
   - RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
   spawnPoints:
-  - {fileID: 285340711}
   - {fileID: 49885551}
-  - {fileID: 1754347884}
+  - {fileID: 49885551}
+  - {fileID: 49885551}
   networkGameState: {fileID: 3805771293113062858, guid: 3d8e31cc28db5004faf643c58c5494c8, type: 3}
   CanSpawn: 0
 --- !u!4 &44870708

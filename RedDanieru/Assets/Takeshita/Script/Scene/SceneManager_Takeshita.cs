@@ -71,14 +71,14 @@ public class SceneManager_Takeshita : MonoBehaviour
         return $"{sb}_{number}";
     }
 
-    public void DungeonCreateButton()
-    {
-        BGMManager_Takeshita.Instance.StopBGM();
-
-        SceneManager.LoadScene("Katayama_ren");
-    }
+  
 
     public void DungeonDownloadButton()
+    {
+        DungeonDownload();
+    }
+
+    public void DungeonDownload()
     {
         string userName = userNameInput.text.Trim();
 
@@ -94,7 +94,5 @@ public class SceneManager_Takeshita : MonoBehaviour
         );
 
         BGMManager_Takeshita.Instance.StopBGM();
-
-        SceneManager.LoadScene("Takeshita_Matching");
     }
 }
