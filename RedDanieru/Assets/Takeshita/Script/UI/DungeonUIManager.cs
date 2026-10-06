@@ -290,6 +290,11 @@ public class DungeonUIManager : MonoBehaviour
 
     public void SoloMode()
     {
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayBGM();
+        }
+
         GameModeManager.IsMultiplayer = false;
 
         Debug.Log("Solo");
@@ -493,6 +498,8 @@ public class DungeonUIManager : MonoBehaviour
 
     public void GameStartButton()
     {
+        BGMManager_Takeshita.Instance.PlayBGM();
+
         if (NetworkGameState.Instance == null)
             return;
 

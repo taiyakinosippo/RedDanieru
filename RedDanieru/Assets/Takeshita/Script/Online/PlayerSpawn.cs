@@ -18,40 +18,17 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
+        // 既に生成済みなら何もしない
         if (runner.TryGetPlayerObject(player, out _))
             return;
 
+        // プレハブ選択
         int prefabIndex =
             player.PlayerId % playerPrefabs.Length;
 
-        int spawnIndex;
-
-        // 未使用SpawnPointを優先
-        if (usedSpawnIndexes.Count < spawnPoints.Length)
-        {
-            List<int> candidates =
-                new List<int>();
-
-            for (int i = 0; i < spawnPoints.Length; i++)
-            {
-                if (!usedSpawnIndexes.Contains(i))
-                {
-                    candidates.Add(i);
-                }
-            }
-
-            spawnIndex =
-                candidates[
-                    Random.Range(0, candidates.Count)
-                ];
-
-            usedSpawnIndexes.Add(spawnIndex);
-        }
-        else
-        {
-            spawnIndex =
-                Random.Range(0, spawnPoints.Length);
-        }
+        // スポーン地点固定
+        int spawnIndex =
+            (player.PlayerId - 1) % spawnPoints.Length;
 
         Vector3 spawnPos =
             spawnPoints[spawnIndex].position;
@@ -65,13 +42,13 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             $"SpawnPos={spawnPos}"
         );
 
-        var obj = runner.Spawn(
+        NetworkObject obj = runner.Spawn(
             playerPrefabs[prefabIndex],
             spawnPos,
             Quaternion.identity,
             player
         );
-       
+
         Debug.Log(
             $"Spawned Player={player}"
         );
@@ -89,7 +66,6 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             obj
         );
 
-     
         if (obj.HasInputAuthority)
         {
             Debug.Log("これは自分のプレイヤー");
