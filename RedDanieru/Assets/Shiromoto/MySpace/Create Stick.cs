@@ -23,6 +23,20 @@ public class CreateStick : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
+            if(myMode != EffectPermission.OK)
+            {
+                GameObject player = GameObject.Find("PlayerArmature(Clone)");
+
+                if (player != null)
+                {
+                    myMode = EffectPermission.NG;
+                }
+                else
+                {
+                    myMode = EffectPermission.depends;
+                }
+            }
+
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 Inster();
