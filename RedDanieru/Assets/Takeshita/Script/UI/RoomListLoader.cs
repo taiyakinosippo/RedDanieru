@@ -22,6 +22,7 @@ public class RoomListLoader : MonoBehaviour
     public GameObject MatchingObj;
     public GameObject SelecCanvas;
     public GameObject MachingRoomCreateText;
+    public GameObject SclollView;
 
     [SerializeField]
     private TextMeshProUGUI JoinCautionRoomText;
@@ -287,7 +288,7 @@ public class RoomListLoader : MonoBehaviour
         JoinCautionObj.SetActive(false);
         LaycastObj.SetActive(false);
 
-        SelecCanvas.SetActive(true);
+        SclollView.SetActive(true);
     }
 
 }
