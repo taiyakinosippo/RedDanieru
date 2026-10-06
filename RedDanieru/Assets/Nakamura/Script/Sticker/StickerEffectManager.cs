@@ -8,6 +8,10 @@ public class StickerEffectManager : MonoBehaviour
 
     public GameObject ExplosionEffect => explosionEffect;
 
+    [SerializeField] private GameObject chargeEffect;
+
+    public GameObject ChargeEffect => chargeEffect;
+
     private void Awake()
     {
         Instance = this;
