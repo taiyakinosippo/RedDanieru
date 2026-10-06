@@ -19,12 +19,7 @@ public class PlayerName : NetworkBehaviour
     {
         if (!GameModeManager.IsMultiplayer)
         {
-            string userName =
-                string.IsNullOrEmpty(UserData.UserName)
-                ? "Guest"
-                : UserData.UserName;
-
-            nameText.text = userName;
+            nameText.gameObject.SetActive(false);
         }
     }
 
