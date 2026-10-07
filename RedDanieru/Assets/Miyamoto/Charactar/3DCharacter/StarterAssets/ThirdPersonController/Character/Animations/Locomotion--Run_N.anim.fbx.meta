@@ -73,7 +73,7 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.8077375
+      - time: 0.80609816
         functionName: OnFootstep
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 6fb0f831c7d602545973be8e26325a30, type: 3}

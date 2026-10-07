@@ -12,10 +12,10 @@ namespace Player
 		public Vector2 move;
 		public Vector2 look;
 		public bool jump;
-		public bool sprint;
+		public bool evade;
 		public bool cameraChange;
 		public bool sticker;
-		public bool debuger;
+		public bool debug;
 
         [Header("Movement Settings")]
 		public bool analogMovement;
@@ -44,9 +44,9 @@ namespace Player
 			JumpInput(value.isPressed);
 		}
 
-		public void OnSprint(InputValue value)
+		public void OnEvade(InputValue value)
 		{
-			SprintInput(value.isPressed);
+			EvadeInput(value.isPressed);
 		}
 
 		public void OnAttack(InputValue value)
@@ -88,9 +88,9 @@ namespace Player
 			jump = newJumpState;
 		}
 
-		public void SprintInput(bool newSprintState)
+		public void EvadeInput(bool newEvadeState)
 		{
-			sprint = newSprintState;
+			evade = newEvadeState;
 		}
 
 		public void AttackInput(bool newAttackState)
@@ -109,7 +109,7 @@ namespace Player
 
 		public void DebugInput(bool newDebugState)
 		{
-			debuger = newDebugState;
+			debug = newDebugState;
 		}
 
         private void OnApplicationFocus(bool hasFocus)

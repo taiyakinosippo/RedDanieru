@@ -7,9 +7,19 @@ public class TitleButton: MonoBehaviour
 {
     [SerializeField] SceneManager_Takeshita sceneManager_Takeshita;
 
+    // ダンジョンクリエイト画面で流すBGM（未設定ならBGMを止める）
+    [SerializeField] AudioClip createSceneBGM;
+
     public void DungeonCreateButton()
     {
-        BGMManager_Takeshita.Instance.StopBGM();
+        if (createSceneBGM != null)
+        {
+            BGMManager_Takeshita.Instance.ChangeBGM(createSceneBGM);
+        }
+        else
+        {
+            BGMManager_Takeshita.Instance.StopBGM();
+        }
 
         SceneManager.LoadScene("Katayama_ren");
     }
