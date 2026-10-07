@@ -7047,15 +7047,15 @@ RectTransform:
   m_GameObject: {fileID: 1259372289}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 687823587}
-  m_Father: {fileID: 1606225238}
+  m_Father: {fileID: 1290532381}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -263, y: 0}
+  m_AnchoredPosition: {x: -263, y: -4}
   m_SizeDelta: {x: 450, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1259372292
@@ -7323,6 +7323,7 @@ RectTransform:
   - {fileID: 375711903}
   - {fileID: 549241658}
   - {fileID: 1772699964}
+  - {fileID: 1259372290}
   m_Father: {fileID: 1606225238}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -12789,7 +12790,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneManager_Takeshita: {fileID: 1213261954}
-  createSceneBGM: {fileID: 0}
+  createSceneBGM: {fileID: 8300000, guid: d660b8184bae55f4393168ac0bfc2b5b, type: 3}
 --- !u!4 &1462508785
 Transform:
   m_ObjectHideFlags: 0
@@ -13583,7 +13584,6 @@ RectTransform:
   - {fileID: 455478934}
   - {fileID: 636954284}
   - {fileID: 1846548761}
-  - {fileID: 1259372290}
   - {fileID: 1290532381}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
