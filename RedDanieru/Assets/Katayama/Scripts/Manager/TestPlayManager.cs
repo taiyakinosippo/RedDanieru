@@ -69,6 +69,7 @@ public class TestPlayManager : MonoBehaviour
     // テストプレイをクリアしたか
     private bool isTestPlayCleared = false;
 
+    private CursorController _cursorController;
     //==================================================
     // プロパティ
     //==================================================
@@ -100,6 +101,7 @@ public class TestPlayManager : MonoBehaviour
     private void Awake()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        _cursorController = GetComponent<CursorController>();
     }
 
     private void Start()
@@ -192,6 +194,8 @@ public class TestPlayManager : MonoBehaviour
             return;
         }
 
+ 
+
         //==================================================
         // Goalチェック
         //==================================================
@@ -226,8 +230,8 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        // マウスカーソルを表示
+        _cursorController.ShowCursor();
 
         Debug.Log(
             "テストプレイを開始します。"
@@ -341,8 +345,8 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        //マースカーソルを非表示にする
+        _cursorController.HideCursor();
 
         isInitializing = false;
 
@@ -455,8 +459,8 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        //マウスカーソルを表示する
+        _cursorController.ShowCursor();
     }
 
     //==================================================
@@ -472,8 +476,8 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        //マウスカーソルを非表示にする
+        _cursorController.HideCursor();
     }
 
     //==================================================
@@ -490,8 +494,8 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        //マウスカーソルを表示する
+        _cursorController.ShowCursor();
 
         if (pauseMenuUI != null)
         {
@@ -536,8 +540,8 @@ public class TestPlayManager : MonoBehaviour
             postSettingUI.SetActive(true);
         }
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        //カーソルを表示する
+        _cursorController.ShowCursor();
     }
 
     //==================================================
@@ -555,6 +559,9 @@ public class TestPlayManager : MonoBehaviour
         {
             postConfirmUI.SetActive(true);
         }
+
+        //カーソルを非表示にする
+        _cursorController.HideCursor();
     }
 
     //==================================================
@@ -571,8 +578,8 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        // マウスカーソルを表示
+        _cursorController.ShowCursor();
 
         returnToEdit = true;
 
@@ -613,6 +620,9 @@ public class TestPlayManager : MonoBehaviour
 
             return;
         }
+
+        // マウスカーソルを表示
+        _cursorController.ShowCursor();
 
         string dungeonName =
             dungeonNameInputField.text.Trim();
@@ -661,8 +671,7 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        _cursorController.ShowCursor();
 
         //マップ上のオブジェクトのRigidBodyをすべて凍結
         mapManager.ObjectsAllFreeze();
