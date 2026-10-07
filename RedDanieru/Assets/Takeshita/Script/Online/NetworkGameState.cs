@@ -59,4 +59,18 @@ public class NetworkGameState : NetworkBehaviour
             $"DeadPlayerCount={DeadPlayerCount}"
         );
     }
+
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_HideAllPlayers()
+    {
+        GameObject[] players =
+            GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in players)
+        {
+            Debug.Log($"消す:{player.name}");
+
+            player.SetActive(false);
+        }
+    }
 }
