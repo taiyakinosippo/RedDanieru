@@ -100,6 +100,8 @@ public class StickerInteractor : MonoBehaviour
 
     public void ReceiptPickup(GameObject interactObj)
     {
+        if (interactObj == null)
+            return;
 
         StickerState target = interactObj.GetComponent<StickerState>();  //インタラクトしているオブジェクトのStickerStateを取得
         if (target == null)
@@ -108,47 +110,71 @@ public class StickerInteractor : MonoBehaviour
         //既に貼られているなら剥がして保持
         if (target.currentSticker != Sticker.None)
         {
-            //選択中のスロットが空なら剥がしたステッカーを保持
-            if (holdSticker[holdIndex] == Sticker.None)
-            {
-                //ステッカーUIの更新
-                stickerSlotUI.SetStickerUI(holdIndex, target.currentSticker);
+            //選択中のスロットが空ならそこ、埋まっていたら他の空いているスロット、全部埋まっていたら選択中のスロットに上書き
+            int slot = holdIndex;
 
-                holdSticker[holdIndex] = target.Remove();
-            }
-            else
+            if (holdSticker[holdIndex] != Sticker.None)
             {
-                //選択中のスロットが埋まってたなら他の空いているスロットに剥がしたステッカーを保持
-                for (int i = 0; i < maxHoldCount; i++)
+                int emptySlot = System.Array.IndexOf(holdSticker, Sticker.None);
+
+                if (emptySlot >= 0)
                 {
-                    if (holdSticker[i] == Sticker.None)
-                    {
-                        //ステッカーUIの更新
-                        stickerSlotUI.SetStickerUI(i, target.currentSticker);
-
-                        holdSticker[i] = target.Remove();
-                        return;
-                    }
+                    slot = emptySlot;
                 }
-
-                //保持中のステッカーが全て埋まっている場合は選択中のスロットのステッカーを剥がしたステッカーに上書き
-                stickerSlotUI.SetStickerUI(holdIndex, target.currentSticker);
-                holdSticker[holdIndex] = target.Remove();
             }
+
+            //マルチでは他の人と取り合いになるのでホストに剥がしてもらう（結果はReceiveStickerで届く）
+            if (NetworkGameState.RequestPeelSticker(target, slot))
+                return;
+
+            //ステッカーUIの更新
+            stickerSlotUI.SetStickerUI(slot, target.currentSticker);
+
+            holdSticker[slot] = target.Remove();
         }
         //何も貼られていないなら保持中のステッカーを貼り、保持中のステッカーを空にする
         else if (holdSticker[holdIndex] != Sticker.None)
         {
-            target.Apply(holdSticker[holdIndex]);
+            Sticker sticker = holdSticker[holdIndex];
+
             holdSticker[holdIndex] = Sticker.None;
             //ステッカーUIのスロットを空にする
             stickerSlotUI.SetStickerUI(holdIndex, Sticker.None);
+
+            //マルチではホストに貼ってもらう（先に他の人が貼っていたらReceiveStickerで戻ってくる）
+            if (NetworkGameState.RequestApplySticker(target, sticker, holdIndex))
+                return;
+
+            target.Apply(sticker);
         }
         //ステッカーを持っていない
         else
         {
             Debug.Log("ステッカーを持ってないよ");
         }
+    }
+
+    //マルチでホストから届いたステッカーを保持する
+    public void ReceiveSticker(int slot, Sticker sticker)
+    {
+        if (sticker == Sticker.None)
+        {
+            Debug.Log("先に他の人がステッカーを剥がしました");
+            return;
+        }
+
+        //届くまでの間にスロットが埋まっていたら空いているスロットへ
+        if (slot < 0 || slot >= holdSticker.Length || holdSticker[slot] != Sticker.None)
+        {
+            int emptySlot = System.Array.IndexOf(holdSticker, Sticker.None);
+
+            slot = emptySlot >= 0 ? emptySlot : Mathf.Clamp(slot, 0, holdSticker.Length - 1);
+        }
+
+        holdSticker[slot] = sticker;
+
+        //ステッカーUIの更新
+        stickerSlotUI.SetStickerUI(slot, sticker);
     }
 
     //一番カメラの中央にあるオブジェクトを取得

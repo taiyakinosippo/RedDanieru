@@ -146,6 +146,10 @@ public class ChargeDashSticker : StickerBase
 
         //enemyScript.AttackEffect();
 
+        //プレイヤーとは物理的にぶつからない設定（敵の上に乗らないようにするため）なので、重なりで当たりを判定する
+        if (CheckDashHitPlayer())
+            return;
+
         timer -= Time.deltaTime;
 
         if (timer <= 0)
@@ -196,16 +200,42 @@ public class ChargeDashSticker : StickerBase
         rb.isKinematic = false;
     }
 
+    private bool CheckDashHitPlayer()
+    {
+        Collider body = GetComponent<Collider>();
+
+        Vector3 center = body != null ? body.bounds.center : transform.position;
+        float radius = (body != null ? body.bounds.extents.x : 0.5f) + 0.3f;
+
+        Collider[] hits = Physics.OverlapSphere(center, radius, LayerMask.GetMask("Player"), QueryTriggerInteraction.Ignore);
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.CompareTag("Player") && hit.gameObject != lastEnteredObject)
+            {
+                OnDashHit(hit.gameObject);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         //Debug.Log("衝突：" + collision.gameObject.name);
         if (state != DashState.Dash || collision.gameObject.CompareTag("Enemy") || collision.gameObject.layer == LayerMask.NameToLayer("Floor") || collision.gameObject == lastEnteredObject)
             return;
 
-        //最後に衝突したオブジェクトを保存
-        lastEnteredObject = collision.gameObject;
+        OnDashHit(collision.gameObject);
+    }
 
-        if (collision.gameObject.CompareTag("Player"))
+    private void OnDashHit(GameObject hitObject)
+    {
+        //最後に衝突したオブジェクトを保存
+        lastEnteredObject = hitObject;
+
+        if (hitObject.CompareTag("Player"))
         {
             //プレイヤーに当たったらダメージ判定出す
             enemyScript.AttackEffect();

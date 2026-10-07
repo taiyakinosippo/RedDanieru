@@ -79,32 +79,41 @@ public class LoadUI : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        UnityWebRequest request =
-            UnityWebRequest.Get(
-                "http://10.219.32.66/RedDaniel/get_dungeon_names.php"
-            );
-
-        yield return request.SendWebRequest();
-
-        if (request.result != UnityWebRequest.Result.Success)
+        if (OnlineTestMode.Enabled)
         {
-            Debug.LogError(request.error);
-            yield break;
+            // テストモードはサーバーではなく、ローカル保存したマップを並べる
+            cachedDungeons = LocalTestServer.GetStages();
+
+            Debug.Log("ローカルのステージ数 : " + cachedDungeons.Length);
         }
-
-        string json =
-            request.downloadHandler.text;
-
-     
-        DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
-
-        if (data == null || data.dungeons == null)
+        else
         {
-            Debug.LogError("ダンジョン一覧の読み込み失敗");
-            yield break;
-        }
+            UnityWebRequest request =
+                UnityWebRequest.Get(
+                    ServerApi.Url("get_dungeon_names.php")
+                );
 
-        cachedDungeons = data.dungeons;
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(request.error);
+                yield break;
+            }
+
+            string json =
+                request.downloadHandler.text;
+
+            DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
+
+            if (data == null || data.dungeons == null)
+            {
+                Debug.LogError("ダンジョン一覧の読み込み失敗");
+                yield break;
+            }
+
+            cachedDungeons = data.dungeons;
+        }
 
         foreach (var dungeon in cachedDungeons)
         {

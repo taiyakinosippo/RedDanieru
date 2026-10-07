@@ -244,6 +244,20 @@ public class LeglessArcherController : EnemyBase
         //矢の攻撃力とかを設定
         arrow.GetComponent<EnemyArrow>().Setting(enemyPower, this);
         arrow.SetActive(true);
+
+        //マルチでは他の人の画面にも矢を飛ばす（見た目だけ。当たり判定はこの画面の矢で行う）
+        NetworkGameState.NotifyArrowFired(this, arrow.transform.position, arrow.transform.rotation);
+    }
+
+    //マルチで他の人の画面に出す矢（ダメージは与えない）
+    public void FireVisualArrow(Vector3 position, Quaternion rotation)
+    {
+        GameObject arrow = GetArrowFromPool();
+
+        arrow.transform.SetPositionAndRotation(position, rotation);
+
+        arrow.GetComponent<EnemyArrow>().Setting(0, this, true);
+        arrow.SetActive(true);
     }
 
     private GameObject GetArrowFromPool()

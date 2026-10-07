@@ -2141,6 +2141,9 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = type;
 
+        // マルチプレイで全員の画面の同じ敵・オブジェクトを対応付けるためのID
+        NetworkSyncId.Assign(obj, pos);
+
         PlaceObject placeObject =
             obj.GetComponent<PlaceObject>();
 

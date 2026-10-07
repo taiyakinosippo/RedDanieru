@@ -14,18 +14,30 @@ public class UIManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        else
+        // プレイヤーごとに1つずつあるので、2つ目以降をDestroyしてはいけない
+        // （マルチで他の人のキャラが先に出てくると、自分のHPバーごと消えてしまっていた）
+        if (Instance == null)
         {
             Instance = this;
         }
 
         _playerUI = GetComponent<PlayerUI>();
         _canvas = GetComponent<Canvas>().gameObject;
+    }
+
+    // マルチで自分が操作するキャラのUIを使うようにする（NetworkAuthorityControllerから呼ぶ）
+    public static void SetLocal(UIManager uiManager)
+    {
+        Instance = uiManager;
+    }
+
+    private void OnDisable()
+    {
+        // 他の人のキャラのUIは無効化されるので、そちらを使わないようにする
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     public void ShowDamage(int damage, Vector3 position)

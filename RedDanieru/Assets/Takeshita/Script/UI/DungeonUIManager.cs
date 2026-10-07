@@ -22,6 +22,15 @@ public static class RoomInfo
     public static string Password;
     public static bool IsPrivate;
     public static int MaxPlayers;
+
+    // 部屋を出たら前の部屋の情報を残さない（次の部屋で使い回されるのを防ぐ）
+    public static void ClearRoom()
+    {
+        RoomId = null;
+        Password = null;
+        IsPrivate = false;
+        MaxPlayers = 0;
+    }
 }
 
 public static class RoomIdGenerator
@@ -158,6 +167,21 @@ public class DungeonUIManager : MonoBehaviour
     [Header("コルーチン")]
     private Coroutine aliveCoroutine;
     private Coroutine searchCoroutine;
+    private Coroutine hostCoroutine;
+
+    // ホスト（ルームを作った人）か
+    private bool isRoomHost;
+
+    // 接続に失敗したときなどに人数表示の代わりに出す文
+    private string matchingMessage;
+
+    // ルームIDを手入力したか（自動生成なら使用中のとき作り直せる）
+    private bool isManualRoomId;
+
+    // マルチのゲームが始まっているか
+    private bool isInGame;
+
+    private const float AliveInterval = 3f;
 
     public void Start()
     {
@@ -207,67 +231,64 @@ public class DungeonUIManager : MonoBehaviour
         {
             BGMManager_Takeshita.Instance.PlayNormalBGM();
         }
+
+        fusionLauncher.MatchFailed += OnMatchFailed;
+        fusionLauncher.GameStarted += OnGameStarted;
+    }
+
+    private void OnDestroy()
+    {
+        if (fusionLauncher != null)
+        {
+            fusionLauncher.MatchFailed -= OnMatchFailed;
+            fusionLauncher.GameStarted -= OnGameStarted;
+        }
     }
 
     private void Update()
     {
-        if (!GameModeManager.IsMultiplayer)
+        if (!GameModeManager.IsMultiplayer || !MatchingObj.activeSelf)
             return;
-
-        NetworkRunner runner = FindObjectOfType<NetworkRunner>();
 
         string roomId = string.IsNullOrEmpty(RoomInfo.RoomId) ? "未設定" : RoomInfo.RoomId;
 
-        string password = string.IsNullOrEmpty(DungeonUIManager.Password) ? "ナシ" : DungeonUIManager.Password;
+        string password = string.IsNullOrEmpty(RoomInfo.Password) ? "ナシ" : RoomInfo.Password;
 
-        if (runner == null)
+        // 人数は実際に接続している数（Fusion）を表示する
+        int playerCount = fusionLauncher.PlayerCount;
+        int maxPlayers = fusionLauncher.MaxPlayers;
+
+        string status;
+
+        if (!string.IsNullOrEmpty(matchingMessage))
         {
-            GameStartbutton.interactable = false;
-
-            MatchingPlayerText.text =
-                $"待機中... (0/{MaxPlayers})";
-
-            return;
+            status = matchingMessage;
         }
-
-        int playerCount = 0;
-
-        foreach (var player in runner.ActivePlayers)
+        else if (fusionLauncher.Runner == null)
         {
-            playerCount++;
+            status = "接続中...";
         }
-
-        int displayCount = playerCount;
-
-        if (displayCount >= MaxPlayers)
+        else if (playerCount >= maxPlayers)
         {
-            MatchingPlayerText.text =
-                 $"マッチング完了！ ({displayCount}/{MaxPlayers})\n" +
-                 $"ルームID : {roomId}\n" +
-                 $"パスワード : {password}";
+            status = $"マッチング完了！ ({playerCount}/{maxPlayers})";
         }
         else
         {
-            MatchingPlayerText.text =
-                 $"待機中... ({displayCount}/{MaxPlayers})\n" +
-                 $"ルームID : {roomId}\n" +
-                 $"パスワード : {password}";
+            status = $"待機中... ({playerCount}/{maxPlayers})";
         }
 
+        MatchingPlayerText.text =
+             $"{status}\n" +
+             $"ルームID : {roomId}\n" +
+             $"パスワード : {password}";
+
+        // 開始できるのは部屋の代表（マスタークライアント）だけ。2人以上で押せる
         GameStartbutton.interactable =
-            displayCount >= 2;
-
-        foreach(var player in runner.ActivePlayers)
-        {
-            if(runner.TryGetPlayerObject(
-                player,
-                out NetworkObject obj))
-            {
-                HideMatchingUI();
-                break;
-            }
-        }
-}
+            fusionLauncher.IsMasterClient &&
+            playerCount >= 2 &&
+            NetworkGameState.Instance != null &&
+            !NetworkGameState.Instance.GameStarted;
+    }
 
     public string UploadTag
     {
@@ -390,17 +411,16 @@ public class DungeonUIManager : MonoBehaviour
 
     public void CreateButton()
     {
-        // RoomID決定
-        if (string.IsNullOrEmpty(createRoomIdInput.text))
-        {
-            RoomInfo.RoomId =
-                RoomIdGenerator.GenerateRoomId();
-        }
-        else
-        {
-            RoomInfo.RoomId =
-                createRoomIdInput.text;
-        }
+        // RoomID決定（空欄なら自動生成）
+        isManualRoomId = !string.IsNullOrEmpty(createRoomIdInput.text);
+
+        RoomInfo.RoomId = isManualRoomId
+            ? createRoomIdInput.text
+            : RoomIdGenerator.GenerateRoomId();
+
+        RoomInfo.Password = Password;
+        RoomInfo.IsPrivate = IsPrivateRoom;
+        RoomInfo.MaxPlayers = MaxPlayers;
 
         Debug.Log("RoomID = " + RoomInfo.RoomId);
 
@@ -431,37 +451,120 @@ public class DungeonUIManager : MonoBehaviour
 
     public void YesButton()
     {
-        StartCoroutine(
-            roomDBUploader.UploadRoom()
-        );
-
-        aliveCoroutine =
-            StartCoroutine(
-                SendAliveLoop()
-            );
-
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
         ScrolView.SetActive(false);
         MatchingRoomCreateWindow.SetActive(false);
         MatchingRoomCreateLaycast.SetActive(false);
-        MatchingObj.SetActive(true);
 
-        if (GameModeManager.IsMultiplayer)
-        {
-            fusionLauncher.StartMatch(
-                RoomInfo.RoomId
-            );
-        }
-        else
+        if (!GameModeManager.IsMultiplayer)
         {
             fusionLauncher.StartSolo();
+            return;
         }
+
+        MatchingObj.SetActive(true);
+
+        matchingMessage = null;
+        isRoomHost = true;
+
+        hostCoroutine = StartCoroutine(HostRoomFlow());
+    }
+
+    /// <summary>
+    /// ルームを作る（ID重複チェック → 接続 → ルーム一覧に登録 → 生存通知）
+    /// </summary>
+    private IEnumerator HostRoomFlow()
+    {
+        for (int attempt = 0; attempt < 5; attempt++)
+        {
+            // ルーム一覧に同じIDがあれば使わない
+            yield return roomDBUploader.SearchRoom(RoomInfo.RoomId);
+
+            if (roomDBUploader.foundRoom != null)
+            {
+                if (isManualRoomId)
+                {
+                    FailHosting("そのルームIDは使用中です");
+                    yield break;
+                }
+
+                RoomInfo.RoomId = RoomIdGenerator.GenerateRoomId();
+                continue;
+            }
+
+            Debug.Log("RoomID = " + RoomInfo.RoomId);
+
+            fusionLauncher.StartMatch(RoomInfo.RoomId, RoomInfo.MaxPlayers, true);
+
+            while (fusionLauncher.IsStarting)
+            {
+                yield return null;
+            }
+
+            if (fusionLauncher.Runner != null)
+            {
+                // 接続できてからルーム一覧に載せる
+                yield return roomDBUploader.UploadRoom();
+
+                aliveCoroutine = StartCoroutine(SendAliveLoop(RoomInfo.RoomId));
+                hostCoroutine = null;
+                yield break;
+            }
+
+            // 自動生成のIDが通信側で使われていたときだけ作り直して再挑戦
+            if (isManualRoomId ||
+                fusionLauncher.LastFailure != FusionLauncher.MatchFailure.RoomInUse)
+            {
+                FailHosting(fusionLauncher.LastFailMessage);
+                yield break;
+            }
+
+            RoomInfo.RoomId = RoomIdGenerator.GenerateRoomId();
+        }
+
+        FailHosting("ルームを作成できませんでした");
+    }
+
+    private void FailHosting(string message)
+    {
+        hostCoroutine = null;
+
+        StopHosting();
+
+        matchingMessage = message + "\n戻るボタンで戻ってください";
+    }
+
+    /// <summary>
+    /// ルーム一覧から消して生存通知を止める
+    /// </summary>
+    private void StopHosting()
+    {
+        if (hostCoroutine != null)
+        {
+            StopCoroutine(hostCoroutine);
+            hostCoroutine = null;
+        }
+
+        if (aliveCoroutine != null)
+        {
+            StopCoroutine(aliveCoroutine);
+            aliveCoroutine = null;
+        }
+
+        if (isRoomHost)
+        {
+            StartCoroutine(
+                roomDBUploader.DeleteRoom(RoomInfo.RoomId)
+            );
+        }
+
+        isRoomHost = false;
     }
 
     public void NoButton()
     {
-      
+
         Laycast.SetActive(false);
         CautionObj.SetActive(false);
     }
@@ -473,16 +576,14 @@ public class DungeonUIManager : MonoBehaviour
 
     public void MatchingLeaveButton()
     {
-        if (aliveCoroutine != null)
-        {
-            StopCoroutine(aliveCoroutine);
-        }
-
-        StartCoroutine(
-            roomDBUploader.DeleteRoom()
-        );
+        StopHosting();
 
         fusionLauncher.CancelMatch();
+
+        // 前の部屋のIDやメッセージを次に持ち越さない
+        RoomInfo.ClearRoom();
+        createRoomIdInput.text = "";
+        matchingMessage = null;
 
         ScrolView.SetActive(true);
         MatchingCautionObj.SetActive(false);
@@ -499,15 +600,8 @@ public class DungeonUIManager : MonoBehaviour
         if (roomDBUploader.foundRoom == null)
             return;
 
-        RoomInfo.SelectedDungeon = roomDBUploader.foundRoom.map_name;
-
-        importer.ImportDungeon(RoomInfo.SelectedDungeon);
-
-        roomListLoader.ShowJoinCaution(roomDBUploader.foundRoom);
-
-        GameModeManager.IsMultiplayer = true;
-
-        fusionLauncher.StartMatch(RoomInfo.RoomId);
+        // ここではまだ接続しない（確認画面の「はい」で、検索したルームに接続する）
+        roomListLoader.ShowJoinCaution(roomDBUploader.foundRoom, RoomSearchPassword);
 
         RoomInCautionObj.SetActive(true);
         RoomInCautionLayout.SetActive(true);
@@ -515,40 +609,42 @@ public class DungeonUIManager : MonoBehaviour
 
     public void GameStartButton()
     {
-        if (BGMManager_Takeshita.Instance != null)
-        {
-            BGMManager_Takeshita.Instance.PlayBattleBGM();
-        }
-
-        GameStopManager gameStopManager =FindObjectOfType<GameStopManager>();
-
-        if (gameStopManager != null)
-        {
-            gameStopManager.EnablePauseMenu();
-        }
-
         if (NetworkGameState.Instance == null)
             return;
 
-        NetworkRunner runner =
-            FindObjectOfType<NetworkRunner>();
+        GameStartbutton.interactable = false;
 
-        int count = 0;
+        // BGMやプレイヤー生成は、開始が確定したあと全員の画面でFusionLauncher.HandleGameStartedが行う
+        NetworkGameState.Instance.RequestStartGame();
+    }
 
-        foreach (var player in runner.ActivePlayers)
-        {
-            count++;
-        }
-
-        NetworkGameState.Instance.StartPlayerCount = count;
-
-        Debug.Log(
-            "StartPlayerCount = " + count
-        );
-
-        NetworkGameState.Instance.RPC_StartGame();
+    private void OnGameStarted()
+    {
+        isInGame = true;
 
         HideMatchingUI();
+
+        // 始まったルームは一覧から消す（途中参加させない）
+        StopHosting();
+    }
+
+    private void OnMatchFailed(string message)
+    {
+        // 接続中の失敗はHostRoomFlowが処理する
+        if (hostCoroutine != null)
+            return;
+
+        // ゲーム中に切断されたらタイトルへ戻る
+        if (isInGame)
+        {
+            fusionLauncher.ShutdownAndLoadTitle("TitleScene");
+            return;
+        }
+
+        if (MatchingObj.activeSelf)
+        {
+            FailHosting(message);
+        }
     }
 
     public void PrivateRoomJoinButton()
@@ -574,7 +670,7 @@ public class DungeonUIManager : MonoBehaviour
             yield break;
         }
 
-        roomListLoader.ShowJoinCaution(room);
+        roomListLoader.ShowJoinCaution(room, privatePasswordInput.text);
     }
 
     public void SearchDungeonButton()
@@ -771,13 +867,18 @@ public class DungeonUIManager : MonoBehaviour
         );
     }
 
-    private IEnumerator SendAliveLoop()
+    private IEnumerator SendAliveLoop(string roomId)
     {
         while (true)
         {
-            yield return roomDBUploader.UpdateAlive();
+            // 生存通知と一緒に、ルーム一覧の人数を実際の接続数に合わせる
+            yield return roomDBUploader.UpdateAlive(
+                roomId,
+                Mathf.Max(1, fusionLauncher.PlayerCount)
+            );
 
-            //yield return new WaitForSeconds(5f);
+            // 間を空けないとサーバーに休みなくリクエストを送り続けてしまう
+            yield return new WaitForSecondsRealtime(AliveInterval);
         }
     }
 

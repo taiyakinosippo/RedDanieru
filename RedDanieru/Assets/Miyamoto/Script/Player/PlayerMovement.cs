@@ -46,6 +46,12 @@ namespace Player
         [Tooltip("どのレイヤーを地面として使用するか")]
         public LayerMask GroundLayers;
 
+        [Tooltip("敵のレイヤー（未設定ならEnemy）。敵とは物理的にぶつからず、重なった分だけ横に押し出す")]
+        public LayerMask EnemyLayers;
+
+        [Tooltip("敵から押し出される最大の速さ")]
+        public float EnemyPushOutSpeed = 6.0f;
+
         // プレイヤーの基礎設定を格納する変数
         public float _speed { get; private set; }        // プレイヤーの現在の速度
         private float _animationBlend;                   // アニメーションへのブレンド値
@@ -66,6 +72,9 @@ namespace Player
         private PlayerInputPriority _actionPriority;
         private PlayerStatus        _playerStatus;
 
+        // 押し出し判定用（毎回配列を作らないように使い回す）
+        private readonly Collider[] _enemyHits = new Collider[16];
+
         private void Start()
         {
             //プレイヤーのカメラを制御するためのコンポーネント
@@ -83,6 +92,15 @@ namespace Player
             _jumpTimeoutDelta = JumpTimeout;　　　　　// ジャンプできるようになるまでの時間を初期化
             _fallTimeoutDelta = FallTimeout;          // 落下アニメーションに入るまでの時間を初期化
             _wasGrounded = Grounded;
+
+            if (EnemyLayers.value == 0)
+            {
+                EnemyLayers = LayerMask.GetMask("Enemy");
+            }
+
+            // 敵と物理的にぶつかると、敵に囲まれたときに上へ押し出されて敵の上に乗ってしまう
+            // そのため敵とはぶつからないようにし、重なった分はGetEnemyPushOutで横方向にだけ押し出す
+            _controller.excludeLayers |= EnemyLayers;
         }
 
 
@@ -169,13 +187,67 @@ namespace Player
             //指定した回転角度を元に、プレイヤーの移動方向を計算する
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
-            // プレイヤーを移動させる＋プレイヤーのジャンプ(落下)も考慮する
+            // プレイヤーを移動させる＋プレイヤーのジャンプ(落下)も考慮する＋敵と重なっていたら横に押し出す
             _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime +
+                             GetEnemyPushOut());
 
             _playerAnimation.PlayerMoveAnimatior(_animationBlend, inputMagnitude);
         }
 
+
+        //-----------------------------------------------------
+        //敵と重なっている分だけ、横方向（水平）にだけ押し出す
+        //上には押し出さないので、敵に囲まれても地面に立ったままになる
+        //-----------------------------------------------------
+        private Vector3 GetEnemyPushOut()
+        {
+            float radius = _controller.radius + _controller.skinWidth;
+
+            Vector3 center = transform.TransformPoint(_controller.center);
+
+            float halfHeight = Mathf.Max(0.0f, _controller.height * 0.5f - _controller.radius);
+
+            int count = Physics.OverlapCapsuleNonAlloc(
+                center + Vector3.up * halfHeight,
+                center - Vector3.up * halfHeight,
+                radius,
+                _enemyHits,
+                EnemyLayers,
+                QueryTriggerInteraction.Ignore);
+
+            Vector3 push = Vector3.zero;
+
+            for (int i = 0; i < count; i++)
+            {
+                Collider enemy = _enemyHits[i];
+
+                // 敵の表面のうち、プレイヤーの中心に一番近い点から離れる向き
+                Vector3 away = center - enemy.ClosestPoint(center);
+                away.y = 0.0f;
+
+                float distance = away.magnitude;
+
+                // 中心が敵の中に入っているときは、敵の中心から離れる向き
+                if (distance < 0.001f)
+                {
+                    away = center - enemy.bounds.center;
+                    away.y = 0.0f;
+                    distance = 0.0f;
+
+                    if (away.sqrMagnitude < 0.0001f)
+                    {
+                        away = -transform.forward;
+                    }
+                }
+
+                push += away.normalized * Mathf.Max(0.0f, radius - distance);
+            }
+
+            push.y = 0.0f;
+
+            return Vector3.ClampMagnitude(push, EnemyPushOutSpeed * Time.deltaTime);
+        }
 
         //-----------------------------------------------------
         //プレイヤーのジャンプや重力、落下などの処理

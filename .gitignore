@@ -1,0 +1,10 @@
+# Unityプロジェクトは RedDanieru/ フォルダ（Unity Hubでは RedDanieru/RedDanieru を開く）
+# リポジトリの一番上をUnityで開くと、ここに空のプロジェクトが作られてしまうので無視する
+/[Ll]ibrary/
+/[Ll]ogs/
+/[Tt]emp/
+/[Oo]bj/
+/[Uu]ser[Ss]ettings/
+/[Pp]ackages/
+/[Pp]roject[Ss]ettings/
+/[Aa]ssets/

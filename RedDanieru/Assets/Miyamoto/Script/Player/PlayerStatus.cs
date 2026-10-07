@@ -108,6 +108,29 @@ namespace Player
                 return;
             }
 
+            // マルチで他の人のキャラに当たったときは、そのキャラを操作している人に届ける
+            // （敵はホストの画面で動いているので、ホストの画面の他人のキャラに当たることがある）
+            if (!NetworkAuthorityController.IsLocallyControlled(gameObject))
+            {
+                if (isInvincible)
+                {
+                    return;
+                }
+
+                // 何度も送らないように、こちらでも無敵時間を数える
+                damageTimer = damageInvincibleTime;
+
+                NetworkAuthorityController authority =
+                    GetComponent<NetworkAuthorityController>();
+
+                if (authority != null)
+                {
+                    authority.SendDamageToOwner(damage);
+                }
+
+                return;
+            }
+
             Debug.Log(
                 _playerName + " dame-ziを受けました"
             );

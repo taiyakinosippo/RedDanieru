@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class PublicRoomList : MonoBehaviour
@@ -14,57 +13,31 @@ public class PublicRoomList : MonoBehaviour
     [SerializeField]
     private RoomListLoader roomListLoader;
 
-    //private void OnEnable()
-    //{
-    //    StartCoroutine(LoadRooms());
-    //}
+    [SerializeField]
+    private RoomDBUploader roomDBUploader;
+
+    private void Awake()
+    {
+        if (roomDBUploader == null)
+        {
+            roomDBUploader = GetComponent<RoomDBUploader>();
+        }
+    }
 
     IEnumerator LoadRooms()
     {
-             UnityWebRequest request =
-            UnityWebRequest.Get(
-                "http://10.219.32.66/RedDaniel/GetRooms.php"
-            );
+        RoomData[] rooms = null;
 
-        yield return request.SendWebRequest();
-
-        if (request.result !=
-            UnityWebRequest.Result.Success)
-        {
-            Debug.LogError(request.error);
-            yield break;
-        }
-
-        string json =
-            "{\"rooms\":"
-            + request.downloadHandler.text
-            + "}";
-
-        Debug.Log(json);
-
-        RoomList list =
-            JsonUtility.FromJson<RoomList>(
-                json
-            );
+        // テストモードならローカル、通常はPHPサーバーから取得
+        yield return roomDBUploader.GetRooms(result => rooms = result);
 
         foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
 
-        foreach (RoomData room in list.rooms)
+        foreach (RoomData room in rooms)
         {
-            Debug.Log(
-                $"取得部屋：{room.room_id} " +
-                $"map={room.map_name} " +
-                $"selected={RoomInfo.SelectedDungeonName}"
-            );
-        }
-
-        foreach (RoomData room in list.rooms)
-        {
-            Debug.Log($"取得部屋：{room.room_id}/{room.map_name}");
-
             // 公開ルームのみ
             if (room.is_private == 1)
                 continue;

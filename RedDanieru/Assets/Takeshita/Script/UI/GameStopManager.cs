@@ -37,6 +37,17 @@ public class GameStopManager: MonoBehaviour
         CanOpenPauseMenu = true;
     }
 
+    // staticなのでシーンを移動しても残る。残ったままだと次のゲームで動けなくなる
+    public static void ResetPauseState()
+    {
+        IsPaused = false;
+    }
+
+    private void OnDestroy()
+    {
+        ResetPauseState();
+    }
+
     public void DisablePauseMenu()
     {
         CanOpenPauseMenu = false;
@@ -93,7 +104,17 @@ public class GameStopManager: MonoBehaviour
     {
         Time.timeScale = 1f;
 
-        SceneManager.LoadScene("TitleScene");
+        ResetPauseState();
+
+        // 接続を切らずにシーンを移動すると、ルームに自分が残ったままになる
+        if (FusionLauncher.Instance != null)
+        {
+            FusionLauncher.Instance.ShutdownAndLoadTitle("TitleScene");
+        }
+        else
+        {
+            SceneManager.LoadScene("TitleScene");
+        }
     }
 
     public void NoButton()

@@ -38,22 +38,6 @@ public class GoalClear : MonoBehaviour
         ResetClearState();
     }
 
-    private void Update()
-    {
-        NetworkGameState state =
-            FindObjectOfType<NetworkGameState>();
-
-        if (state != null &&
-            state.IsCleared &&
-            !alreadyShown)
-        {
-            Debug.Log("ShowClear呼ぶよ");
-            ShowClear();
-            alreadyShown = true;
-        }
-
-    }
-
     //==================================================
     // クリア状態リセット
     //==================================================
@@ -87,25 +71,35 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
+        // 他の人のキャラ（同期で動いているだけのもの）がゴールに入ったときは、
+        // そのキャラを操作している人の画面で判定するので何もしない
+        if (!NetworkAuthorityController.IsLocallyControlled(other.gameObject))
+        {
+            return;
+        }
+
         isCleared = true;
 
-        NetworkGameState state =
-            FindObjectOfType<NetworkGameState>();
+        //==================================================
+        // マルチプレイ
+        //==================================================
+
+        // [Networked]の値はState Authority（ホスト）しか書き換えられないので、
+        // クリアをお願いする。確定したら全員の画面でShowClearが呼ばれる
+        NetworkGameState state = NetworkGameState.Instance;
 
         if (state != null)
         {
-            state.IsCleared = true;
-            state.RPC_HideAllPlayers();
+            state.RequestClear();
+            return;
         }
-        else
-        {
-            GameObject[] players =
-                GameObject.FindGameObjectsWithTag("Player");
 
-            foreach (GameObject player in players)
-            {
-                player.SetActive(false);
-            }
+        GameObject[] players =
+            GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in players)
+        {
+            player.SetActive(false);
         }
 
         TestPlayManager testPlayManager =
@@ -141,38 +135,7 @@ public class GoalClear : MonoBehaviour
         // 通常プレイ
         //==================================================
 
-        BGMManager_Takeshita.Instance.PlayNormalBGM();
-
-        Time.timeScale = 0f;
-
-        //    GameObject[] players =
-        //GameObject.FindGameObjectsWithTag("Player");
-
-        //    Debug.Log($"Player数={players.Length}");
-
-        //    foreach (GameObject player in players)
-        //    {
-        //        Debug.Log($"消す:{player.name}");
-
-        //        player.SetActive(false);
-        //    }
-
-        SpawnClearCamera();
-
-        if (clearPanel != null)
-        {
-            clearPanel.SetActive(true);
-        }
-        else
-        {
-            Debug.LogWarning(
-                "Clear Panelが設定されていません"
-            );
-        }
-
-        Debug.Log(
-            "GAME CLEAR! Clear UIを表示しました。"
-        );
+        ShowClear();
     }
 
     //==================================================
@@ -326,7 +289,7 @@ public class GoalClear : MonoBehaviour
 
 
         FusionLauncher launcher =
-            FindObjectOfType<FusionLauncher>();
+            FusionLauncher.Instance;
 
         if (launcher != null)
         {
@@ -343,20 +306,53 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // 通常クリア表示
+    // クリア表示（マルチでは全員の画面でNetworkGameStateから呼ばれる）
     //==================================================
 
-    private void ShowClear()
+    public void ShowClear()
     {
-        isCleared = true;
+        if (alreadyShown)
+        {
+            return;
+        }
 
-        Time.timeScale = 0f;
+        isCleared = true;
+        alreadyShown = true;
+
+        GameObject[] players =
+            GameObject.FindGameObjectsWithTag("Player");
+
+        foreach (GameObject player in players)
+        {
+            player.SetActive(false);
+        }
+
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayNormalBGM();
+        }
+
+        // マルチで止めると通信で動いている物まで止まるので、ソロのときだけ止める
+        if (!GameModeManager.IsMultiplayer)
+        {
+            Time.timeScale = 0f;
+        }
+
+        SpawnClearCamera();
 
         if (clearPanel != null)
         {
             clearPanel.SetActive(true);
         }
+        else
+        {
+            Debug.LogWarning(
+                "Clear Panelが設定されていません"
+            );
+        }
 
-        Debug.Log("GAME CLEAR!");
+        Debug.Log(
+            "GAME CLEAR! Clear UIを表示しました。"
+        );
     }
 }

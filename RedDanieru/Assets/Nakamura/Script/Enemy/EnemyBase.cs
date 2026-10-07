@@ -48,6 +48,18 @@ public class EnemyBase : MonoBehaviour
     public Transform player;
     protected NavMeshAgent agent;
 
+    //-----マルチプレイ用-----
+    //マルチではホスト（マスタークライアント）の画面の敵だけAIを動かし、
+    //他の人の画面の敵はホストから届いた位置やHPを表示するだけにする（NetworkGameState.Enemy.cs）
+    public bool IsNetworkProxy { get; private set; }
+    private bool networkHpApplied;
+    private bool networkDead;
+
+    public float CurrentHp => currentHp;
+
+    //ダメージ中・死亡中はダメージを受けない
+    public bool CanTakeDamage => currentState != enemyState.Damage && currentState != enemyState.Dead;
+
     public virtual void Awake()
     {
         stickerState = GetComponent<StickerState>();
@@ -57,7 +69,9 @@ public class EnemyBase : MonoBehaviour
 
     public virtual void Start()
     {
-        currentHp = enemyHP;
+        //マルチで先にホストからHPが届いていたら上書きしない
+        if (!networkHpApplied)
+            currentHp = enemyHP;
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
         //specialCoolTimer = specialInterval;
@@ -361,7 +375,8 @@ public class EnemyBase : MonoBehaviour
         //ダメージ中はダメージを受けない
         if (currentState == enemyState.Damage)
             return;
-        UIManager.Instance.ShowDamage(playerPow, transform.position);
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowDamage(playerPow, transform.position);
         Debug.Log("Enemy hit");
         //ダメージ計算
         int damage = playerPow - enemyDefense;
@@ -399,6 +414,93 @@ public class EnemyBase : MonoBehaviour
     public virtual void Dead()
     {
         Debug.Log("敵が死亡しました。");
+        Destroy(gameObject);
+    }
+
+    //-----マルチプレイ（他の人の画面の敵）-----
+
+    //trueにするとAIを止め、ホストから届いた状態を表示するだけにする
+    public void SetNetworkProxy(bool proxy)
+    {
+        if (IsNetworkProxy == proxy)
+            return;
+
+        IsNetworkProxy = proxy;
+
+        //Update（AI）を止める／動かす
+        enabled = !proxy;
+
+        if (agent != null)
+        {
+            if (proxy)
+            {
+                agent.enabled = false;
+            }
+            else
+            {
+                //ホストを引き継いだので、今いる位置からAIを再開する
+                agent.enabled = true;
+
+                if (agent.isOnNavMesh)
+                {
+                    agent.Warp(transform.position);
+                    agent.isStopped = false;
+                }
+
+                currentState = enemyState.Idle;
+            }
+        }
+
+        if (rb != null && proxy)
+        {
+            rb.isKinematic = true;
+        }
+
+        //ステッカーの効果もホストの画面だけで動かす
+        if (stickerState != null)
+        {
+            stickerState.SetVisualOnly(proxy);
+        }
+    }
+
+    //ホストから届いた状態を反映する
+    public void ApplyNetworkState(Vector3 position, float yaw, Vector3 scale, int hp, Sticker sticker)
+    {
+        //少し遅れて届くので滑らかに追いかける。離れすぎていたら瞬間移動
+        float t = 1.0f - Mathf.Exp(-15.0f * Time.deltaTime);
+
+        transform.position = (transform.position - position).sqrMagnitude > 9.0f
+            ? position
+            : Vector3.Lerp(transform.position, position, t);
+
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0.0f, yaw, 0.0f), t);
+        transform.localScale = Vector3.Lerp(transform.localScale, scale, t);
+
+        currentHp = hp;
+        networkHpApplied = true;
+
+        if (stickerState != null && stickerState.currentSticker != sticker)
+        {
+            stickerState.ApplyVisual(sticker);
+        }
+    }
+
+    //ホストの画面で倒された
+    public void DieByNetwork(Sticker lastSticker)
+    {
+        if (networkDead)
+            return;
+
+        networkDead = true;
+
+        //爆発ステッカーで倒れたときは爆発エフェクトも出す
+        if (lastSticker == Sticker.Explosion &&
+            StickerEffectManager.Instance != null &&
+            StickerEffectManager.Instance.ExplosionEffect != null)
+        {
+            Instantiate(StickerEffectManager.Instance.ExplosionEffect, transform.position, Quaternion.identity);
+        }
+
         Destroy(gameObject);
     }
 
