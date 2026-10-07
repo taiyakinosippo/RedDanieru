@@ -126,3 +126,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionEffect: {fileID: 100008, guid: 06736895ea0a4ff408d25e6684dce797, type: 3}
+  chargeEffect: {fileID: 1400834752714809453, guid: 859e5b2d8431a7c429fc653031724a95, type: 3}
