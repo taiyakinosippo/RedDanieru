@@ -6,9 +6,12 @@ public class BGMManager_Takeshita : MonoBehaviour
     public static BGMManager_Takeshita Instance;
 
     [SerializeField]
-    private AudioSource bgmSource;
+    private AudioSource normalBgmSource;
 
-    // タイトルで流す元のBGM
+    [SerializeField]
+    private AudioSource battleBgmSource;
+
+    // タイトルで流す元の通常BGM
     private AudioClip defaultClip;
 
     // 直前にいたシーン名
@@ -26,7 +29,11 @@ public class BGMManager_Takeshita : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
 
-        defaultClip = bgmSource.clip;
+        if (normalBgmSource != null)
+        {
+            defaultClip = normalBgmSource.clip;
+        }
+
         currentSceneName = SceneManager.GetActiveScene().name;
     }
 
@@ -59,35 +66,64 @@ public class BGMManager_Takeshita : MonoBehaviour
         }
     }
 
-    public void PlayBGM()
-    {
-        if (!bgmSource.isPlaying)
-        {
-            bgmSource.Play();
-        }
-    }
-
-    public void StopBGM()
-    {
-        bgmSource.Stop();
-    }
-
-    // BGMを差し替えて再生する
+    // 通常BGMを差し替えて最初から再生する
     public void ChangeBGM(AudioClip clip)
     {
-        if (clip == null)
+        if (normalBgmSource == null || clip == null)
         {
             return;
         }
 
-        bgmSource.Stop();
-        bgmSource.clip = clip;
-        bgmSource.Play();
+        StopBattleBGM();
+
+        normalBgmSource.Stop();
+        normalBgmSource.clip = clip;
+        normalBgmSource.Play();
     }
 
-    // タイトルのBGMに戻して最初から再生する
+    // タイトルの通常BGMに戻して最初から再生する
     public void ResetBGM()
     {
         ChangeBGM(defaultClip);
+    }
+
+    public void PlayNormalBGM()
+    {
+        StopBattleBGM();
+
+        if (normalBgmSource != null &&
+            !normalBgmSource.isPlaying)
+        {
+            normalBgmSource.Play();
+        }
+    }
+
+    public void PlayBattleBGM()
+    {
+        if (normalBgmSource != null)
+        {
+            normalBgmSource.Stop();
+        }
+
+        if (battleBgmSource != null)
+        {
+            battleBgmSource.Play();
+        }
+    }
+
+    public void StopNormalBGM()
+    {
+        if (normalBgmSource != null)
+        {
+            normalBgmSource.Stop();
+        }
+    }
+
+    public void StopBattleBGM()
+    {
+        if (battleBgmSource != null)
+        {
+            battleBgmSource.Stop();
+        }
     }
 }
