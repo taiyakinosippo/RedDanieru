@@ -5,9 +5,10 @@ public class BigSticker : StickerBase
 {
     private float bigScale = 3.0f;  //拡大率
     //private float scaleTime = 2.0f;  //拡大縮小時間
-    private int addPower = 100;  //現在の拡大率
-    private float addAttackScale = 1.0f;  //現在の拡大率
-    private float addAttackCoolTime = 0.5f;  //現在の拡大率
+    private int addPower = 100;  //攻撃力の拡大率
+    private float addSearchScale = 1.5f;  //索敵範囲の拡大率
+    private float addAttackScale = 1.0f;  //攻撃範囲の拡大率
+    private float addAttackCoolTime = 0.5f;  //攻撃クールタイムの拡大率
 
     //public override StickerState.State OnEnemyUpdate(GameObject enemy, StickerState.State state)
     //{
@@ -43,6 +44,7 @@ public class BigSticker : StickerBase
 
         //敵の攻撃力、攻撃範囲、攻撃クールタイムを増加
         enemyScript.AddEnemyPower(addPower);
+        enemyScript.AddEnemySearchArea(addSearchScale);
         enemyScript.AddEnemyAttackArea(addAttackScale);
         enemyScript.AddEnemyAttackCoolTime(addAttackCoolTime);
     }
@@ -55,6 +57,7 @@ public class BigSticker : StickerBase
 
         //敵の攻撃力、攻撃範囲、攻撃クールタイムを元に戻す
         enemyScript.AddEnemyPower(-addPower);
+        enemyScript.AddEnemySearchArea(-addSearchScale);
         enemyScript.AddEnemyAttackArea(-addAttackScale);
         enemyScript.AddEnemyAttackCoolTime(-addAttackCoolTime);
 
