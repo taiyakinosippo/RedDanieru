@@ -117,6 +117,9 @@ namespace Player
         //------------------------------------------------
         public void CameraLateUpdate(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
         {
+            if (GameStopManager.IsPaused)
+                return;
+
             // カメラが動かせれていないかつロックされていないかどうか
             if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
             {
@@ -182,6 +185,9 @@ namespace Player
         }
         public void DeadPlayerCameraMove(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
         {
+            if (GameStopManager.IsPaused)
+                return;
+
             // カメラが動かせれていないかつロックされていないかどうか
             if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
             {

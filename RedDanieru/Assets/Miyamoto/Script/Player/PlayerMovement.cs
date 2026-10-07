@@ -104,6 +104,9 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerMove(StarterAssetsInputs _input)
         {
+            if (GameStopManager.IsPaused)
+                return;
+
             // Shiftキーを押している場合は走り、押していない場合は歩く
             float targetSpeed =  _playerStatus._playerMoveSpeed;
 
@@ -179,6 +182,9 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerJumpAndGravity(StarterAssetsInputs _input)
         {
+            if (GameStopManager.IsPaused)
+                return;
+
             // 空中から地面に戻った瞬間
             if (Grounded && !_wasGrounded)
             {
