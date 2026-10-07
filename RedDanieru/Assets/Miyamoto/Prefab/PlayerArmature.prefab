@@ -402,7 +402,6 @@ GameObject:
   - component: {fileID: -5874542748976444499}
   - component: {fileID: 8412102540417615573}
   - component: {fileID: 7101641139856271048}
-  - component: {fileID: 5788886363797241258}
   - component: {fileID: 1790086913376040861}
   m_Layer: 6
   m_Name: PlayerArmature
@@ -891,22 +890,6 @@ MonoBehaviour:
   player: {fileID: 0}
   stickerSlotUI: {fileID: 3447192315749076638}
   maxHoldCount: 3
---- !u!208 &5788886363797241258
-NavMeshObstacle:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1010391631509636739}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Shape: 1
-  m_Extents: {x: 0.5, y: 0.15, z: 0.5}
-  m_MoveThreshold: 0.1
-  m_Carve: 1
-  m_CarveOnlyStationary: 1
-  m_Center: {x: 0, y: 0, z: 0}
-  m_TimeToStationary: 0.5
 --- !u!114 &1790086913376040861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2689,6 +2672,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7204779245392813011}
   - component: {fileID: 2934583692236223393}
+  - component: {fileID: 6923020234413020939}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -2727,6 +2711,18 @@ MonoBehaviour:
   _status: {fileID: 3244406581610145446}
   _playerCamera: {fileID: 6575345361052619142}
   _hpBar: {fileID: 2281987106317684216}
+--- !u!114 &6923020234413020939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8545883797294140595}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad599aec06ef18d429d34cfe5adbd4b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &9181228333720154282
 GameObject:
   m_ObjectHideFlags: 0

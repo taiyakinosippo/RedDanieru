@@ -59,12 +59,6 @@ public class GameOverManager : MonoBehaviour
                 GameOver();
             }
         }
-
-        if (isGameOver)
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
 
     public void ResetGameOverState()
@@ -83,6 +77,11 @@ public class GameOverManager : MonoBehaviour
     {
         if (isGameOver)
             return;
+
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayNormalBGM();
+        }
 
         isGameOver = true;
 
@@ -116,9 +115,6 @@ public class GameOverManager : MonoBehaviour
                 player.SetActive(false);
             }
         }
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
     //    PlayerInput[] inputs =
     //FindObjectsOfType<PlayerInput>();
@@ -210,9 +206,6 @@ public class GameOverManager : MonoBehaviour
     public void ReturnToTitle()
     {
         Time.timeScale = 1f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();

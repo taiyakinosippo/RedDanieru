@@ -202,6 +202,11 @@ public class DungeonUIManager : MonoBehaviour
         roomIdInput.onValueChanged.AddListener(OnRoomIdChanged);
 
         createRoomIdInput.onValueChanged.AddListener(OnCreateRoomIdChanged);
+
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayNormalBGM();
+        }
     }
 
     private void Update()
@@ -298,10 +303,7 @@ public class DungeonUIManager : MonoBehaviour
 
     public void SoloMode()
     {
-        if (BGMManager_Takeshita.Instance != null)
-        {
-            BGMManager_Takeshita.Instance.PlayBGM();
-        }
+        BGMManager_Takeshita.Instance.PlayBattleBGM();
 
         GameModeManager.IsMultiplayer = false;
 
@@ -506,7 +508,10 @@ public class DungeonUIManager : MonoBehaviour
 
     public void GameStartButton()
     {
-        //BGMManager_Takeshita.Instance.PlayBGM();
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayBattleBGM();
+        }
 
         if (NetworkGameState.Instance == null)
             return;
