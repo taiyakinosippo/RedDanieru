@@ -15,7 +15,6 @@ public class LeglessArcherController : EnemyBase
     private GameObject targetPlayer;  // 現在狙っているプレイヤ
     private Vector3 lastPlayerPosition;  //最後にプレイヤーを見た位置
     private bool isTrackingLastPosition = false;  //最後に見た位置を追跡中か
-    private bool wasPlayerVisible = false;
 
     public override void Awake()
     {
