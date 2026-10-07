@@ -19,6 +19,7 @@ public class FusionLauncher : MonoBehaviour
     [SerializeField]
     private NetworkGameState networkGameStatePrefab;
 
+    private CursorController _cursorController;
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -37,6 +38,8 @@ public class FusionLauncher : MonoBehaviour
 
             runner.AddCallbacks(playerSpawner);
         }
+
+        _cursorController = GetComponent<CursorController>();
     }
 
     public void StartSolo()
@@ -48,6 +51,8 @@ public class FusionLauncher : MonoBehaviour
             spawnPoint.position,
             spawnPoint.rotation
         );
+        // カーソルを非表示にする
+        _cursorController.HideCursor();
 
     }
 

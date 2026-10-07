@@ -3,6 +3,7 @@ using Fusion.Sockets;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -26,8 +27,16 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     private Vector3 lastSpawnPos;
 
+    private CursorController _cursorController;
+
+    void Start()
+    {
+        _cursorController = GetComponent<CursorController>();
+    }
+
     public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
+        Debug.Log("プレイヤーを生成します");
         // 既に生成済みなら何もしない
         if (runner.TryGetPlayerObject(player, out _))
             return;
@@ -87,6 +96,8 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             ui.HideMatchingUI();
         }
+        _cursorController.HideCursor();
+        Debug.Log("カーソル非表示");
     }
 
     public void SpawnAllPlayers(NetworkRunner runner)

@@ -479,12 +479,13 @@ public class TestPlayManager : MonoBehaviour
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
+            //マウスカーソルを非表示にする
+            _cursorController.HideCursor();
         }
 
         Time.timeScale = 1f;
 
-        //マウスカーソルを非表示にする
-        _cursorController.HideCursor();
+        Debug.Log("ポーズメニューを閉じました。ゲームを再開します。");
     }
 
     //==================================================
