@@ -226,14 +226,13 @@ MonoBehaviour:
   enemyAttackCoolTime: 2
   enemyAttackStartTime: 0.9
   enemyAttackEndTime: 0.3
-  _uiManager: {fileID: 0}
   currentHp: 0
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 513
   player: {fileID: 0}
   escapeDistance: 3
   arrowPrefab: {fileID: 4780085749130172505, guid: 126ee8135ce66504790673790eee25c1, type: 3}

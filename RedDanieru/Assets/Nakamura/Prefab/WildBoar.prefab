@@ -226,14 +226,13 @@ MonoBehaviour:
   enemyAttackCoolTime: 1.5
   enemyAttackStartTime: 0.9
   enemyAttackEndTime: 0.3
-  _uiManager: {fileID: 0}
   currentHp: 0
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 513
   player: {fileID: 0}
 --- !u!114 &4781873944287144338
 MonoBehaviour:
