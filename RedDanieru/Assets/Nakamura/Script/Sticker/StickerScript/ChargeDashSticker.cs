@@ -22,6 +22,8 @@ public class ChargeDashSticker : StickerBase
     private float dashTime = 5.0f;  //突進時間
     private float chargeTime = 2.0f;  //溜め時間
     private float timer = 0.0f;  //溜め時間のタイマー
+    private bool chargeEffectPlayed = false;  //溜めエフェクトが再生されたかどうかのフラグ
+    private Vector3 effectOffset = Vector3.zero;  //エフェクトの位置補正
     private Vector3 dashDirection;  //敵の向く方向
     private GameObject lastEnteredObject;  //最後に衝突したオブジェクト
 
@@ -96,6 +98,13 @@ public class ChargeDashSticker : StickerBase
     //溜め
     private void Charge()
     {
+        if(!chargeEffectPlayed)
+        {
+            //溜めエフェクト再生
+            Instantiate(StickerEffectManager.Instance.ChargeEffect, transform.position + effectOffset, Quaternion.identity, transform);
+            chargeEffectPlayed = true;
+        }
+
         //プレイヤーの方を向く
         Vector3 dir = target.position - transform.position;
         dir.y = 0;
@@ -122,6 +131,7 @@ public class ChargeDashSticker : StickerBase
             //突進へ
             state = DashState.Dash;
             timer = dashTime;
+            chargeEffectPlayed = false;
         }
     }
 
