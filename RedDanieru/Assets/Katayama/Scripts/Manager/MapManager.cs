@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class MapManager : MonoBehaviour
@@ -2091,6 +2092,18 @@ public class MapManager : MonoBehaviour
             );
         }
 
+        // MapエディターではGoalを横に倒す
+        if (
+            type == PlaceObjectType.Goal &&
+            SceneManager.GetActiveScene().name == "Katayama_ren"
+        )
+        {
+            obj.transform.rotation =
+                Quaternion.Euler(90f, 0f, 0f);
+
+            obj.transform.position += Vector3.forward * 1f;
+        }
+
         Rigidbody[] rigidbodies =
             obj.GetComponentsInChildren<
                 Rigidbody
@@ -2786,10 +2799,18 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    //==================================================
+    // ゴール警告表示
+    //==================================================
+
     private void ShowGoalWarning(string message)
     {
         if (goalWarningUI == null)
         {
+            Debug.LogError(
+                "Goal Warning UIが設定されていません。"
+            );
+
             return;
         }
 
@@ -2802,6 +2823,7 @@ public class MapManager : MonoBehaviour
         goalWarningUI.SetActive(true);
 
         CancelInvoke(nameof(HideGoalWarning));
+
         Invoke(
             nameof(HideGoalWarning),
             goalWarningDuration
