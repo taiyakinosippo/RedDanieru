@@ -82,9 +82,6 @@ public class ReturnToTitleConfirm : MonoBehaviour
     {
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
 

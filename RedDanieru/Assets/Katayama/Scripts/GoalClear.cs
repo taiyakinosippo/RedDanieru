@@ -31,9 +31,10 @@ public class GoalClear : MonoBehaviour
 
     private bool isCleared = false;
     private bool alreadyShown = false;
-
+    private CursorController _cursorController;
     private void Start()
     {
+        _cursorController = GetComponent<CursorController>();
         ResetClearState();
     }
 
@@ -51,11 +52,6 @@ public class GoalClear : MonoBehaviour
             alreadyShown = true;
         }
 
-        if (isCleared)
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
 
     //==================================================
@@ -73,9 +69,6 @@ public class GoalClear : MonoBehaviour
         }
 
         Time.timeScale = 1f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
     }
 
     //==================================================
@@ -163,9 +156,6 @@ public class GoalClear : MonoBehaviour
 
         //        player.SetActive(false);
         //    }
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         SpawnClearCamera();
 
@@ -314,7 +304,7 @@ public class GoalClear : MonoBehaviour
             );
 
         clearCamera.gameObject.SetActive(true);
-
+        _cursorController.ShowCursor();
         Debug.Log(
             "Clear Camera Position : " +
             clearCamera.transform.position
@@ -334,8 +324,6 @@ public class GoalClear : MonoBehaviour
     {
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
@@ -363,11 +351,6 @@ public class GoalClear : MonoBehaviour
         isCleared = true;
 
         Time.timeScale = 0f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
-        SpawnClearCamera();
 
         if (clearPanel != null)
         {
