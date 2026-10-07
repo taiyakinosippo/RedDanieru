@@ -51,6 +51,11 @@ public class TestPlayManager : MonoBehaviour
     [SerializeField] private Camera editCamera;
     [SerializeField] private Camera playerCamera;
 
+    [Header("ゴール警告UI")]
+    [SerializeField] private GameObject goalWarningUI;
+    [SerializeField] private TMP_Text goalWarningText;
+    [SerializeField] private float goalWarningDuration = 2f;
+
     //==================================================
     // テストプレイ用データ
     //==================================================
@@ -206,6 +211,8 @@ public class TestPlayManager : MonoBehaviour
                 "Goalが配置されていないため、" +
                 "テストプレイを開始できません。"
             );
+
+            ShowGoalWarning();
 
             return;
         }
@@ -763,5 +770,45 @@ public class TestPlayManager : MonoBehaviour
         Debug.Log(
             "編集画面への復帰完了"
         );
+    }
+
+    //==================================================
+    // ゴール警告表示
+    //==================================================
+
+    private void ShowGoalWarning()
+    {
+        if (goalWarningUI == null)
+        {
+            Debug.LogError(
+                "Goal Warning UIが設定されていません。"
+            );
+
+            return;
+        }
+
+        if (goalWarningText != null)
+        {
+            goalWarningText.text =
+                "ゴールが置かれていません";
+
+            goalWarningText.color = Color.red;
+        }
+
+        goalWarningUI.SetActive(true);
+
+        CancelInvoke(nameof(HideGoalWarning));
+        Invoke(
+            nameof(HideGoalWarning),
+            goalWarningDuration
+        );
+    }
+
+    private void HideGoalWarning()
+    {
+        if (goalWarningUI != null)
+        {
+            goalWarningUI.SetActive(false);
+        }
     }
 }
