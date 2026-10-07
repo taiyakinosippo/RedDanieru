@@ -78,6 +78,11 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver)
             return;
 
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayNormalBGM();
+        }
+
         isGameOver = true;
 
         Time.timeScale = 0f;

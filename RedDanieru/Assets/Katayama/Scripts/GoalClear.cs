@@ -141,19 +141,21 @@ public class GoalClear : MonoBehaviour
         // í èÌÉvÉåÉC
         //==================================================
 
+        BGMManager_Takeshita.Instance.PlayNormalBGM();
+
         Time.timeScale = 0f;
 
-    //    GameObject[] players =
-    //GameObject.FindGameObjectsWithTag("Player");
+        //    GameObject[] players =
+        //GameObject.FindGameObjectsWithTag("Player");
 
-    //    Debug.Log($"Playerêî={players.Length}");
+        //    Debug.Log($"Playerêî={players.Length}");
 
-    //    foreach (GameObject player in players)
-    //    {
-    //        Debug.Log($"è¡Ç∑:{player.name}");
+        //    foreach (GameObject player in players)
+        //    {
+        //        Debug.Log($"è¡Ç∑:{player.name}");
 
-    //        player.SetActive(false);
-    //    }
+        //        player.SetActive(false);
+        //    }
 
         SpawnClearCamera();
 
