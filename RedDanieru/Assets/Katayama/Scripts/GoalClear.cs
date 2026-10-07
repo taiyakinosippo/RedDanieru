@@ -46,6 +46,7 @@ public class GoalClear : MonoBehaviour
             state.IsCleared &&
             !alreadyShown)
         {
+            Debug.Log("ShowClearåƒÇ‘ÇÊ");
             ShowClear();
             alreadyShown = true;
         }
@@ -101,6 +102,7 @@ public class GoalClear : MonoBehaviour
         if (state != null)
         {
             state.IsCleared = true;
+            state.RPC_HideAllPlayers();
         }
 
         TestPlayManager testPlayManager =
@@ -137,6 +139,18 @@ public class GoalClear : MonoBehaviour
         //==================================================
 
         Time.timeScale = 0f;
+
+    //    GameObject[] players =
+    //GameObject.FindGameObjectsWithTag("Player");
+
+    //    Debug.Log($"Playerêî={players.Length}");
+
+    //    foreach (GameObject player in players)
+    //    {
+    //        Debug.Log($"è¡Ç∑:{player.name}");
+
+    //        player.SetActive(false);
+    //    }
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;

@@ -1910,7 +1910,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soloPlayerPrefab: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-  spawnPoint: {fileID: 0}
+  spawnPoint: {fileID: 2385698833403189835}
   runner: {fileID: 0}
   playerSpawner: {fileID: 44870706}
   networkGameStatePrefab: {fileID: 3805771293113062858, guid: 3d8e31cc28db5004faf643c58c5494c8, type: 3}
