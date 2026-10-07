@@ -15,11 +15,14 @@ public class PlayerUI : MonoBehaviour
 
     public Slider _hpBar;
 
+    private CursorController _cursorController;
+
     private void Start()
     {
         _dieText.enabled = false;
         Debug.Log("PlayerUI Object = " +gameObject.name);
         Debug.Log("Root=" + transform.root.name);
+        _cursorController = GetComponent<CursorController>();
     }
 
     public void initializePlayerState(int maxHp)
@@ -46,7 +49,9 @@ public class PlayerUI : MonoBehaviour
                 _dieText.enabled = true;
        }
 
-       Debug.Log("死亡UI表示");
+        // カーソルを表示する
+        _cursorController.ShowCursor();
+        Debug.Log("死亡UI表示");
 
        if (!GameModeManager.IsMultiplayer)
        {
