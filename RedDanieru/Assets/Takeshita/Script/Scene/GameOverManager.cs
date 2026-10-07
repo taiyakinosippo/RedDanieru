@@ -99,6 +99,24 @@ public class GameOverManager : MonoBehaviour
             }
         }
 
+        if (GameModeManager.IsMultiplayer)
+        {
+            if (NetworkGameState.Instance != null)
+            {
+                NetworkGameState.Instance.RPC_HideAllPlayers();
+            }
+        }
+        else
+        {
+            GameObject[] players =
+            GameObject.FindGameObjectsWithTag("Player");
+
+            foreach (GameObject player in players)
+            {
+                player.SetActive(false);
+            }
+        }
+
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
