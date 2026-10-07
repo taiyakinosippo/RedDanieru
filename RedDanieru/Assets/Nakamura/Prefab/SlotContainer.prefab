@@ -78,12 +78,14 @@ MonoBehaviour:
   stickerSlotPrefab: {fileID: 4642752263540535924, guid: 932b66f86e34a2742acd14ea783f6a4d, type: 3}
   stickerIcons:
   - stickerType: 1
-    icon: {fileID: 21300000, guid: ff7bfa7addf40784d86f62b8e4a034a6, type: 3}
+    icon: {fileID: 21300000, guid: 253f3a639b889ae4fb0dd60ab477496e, type: 3}
   - stickerType: 2
     icon: {fileID: 21300000, guid: b0fa70abd2a79904cb00b175dfd8ec7e, type: 3}
   - stickerType: 3
-    icon: {fileID: 21300000, guid: 90ded0611e490aa4ba6961afbfc2280d, type: 3}
+    icon: {fileID: 21300000, guid: 876e47aad023e2245ba302669f7b6cad, type: 3}
   - stickerType: 4
-    icon: {fileID: 21300000, guid: f0b1c60b0227e4e1fa89a56252ded127, type: 3}
+    icon: {fileID: 21300000, guid: 1574f04a7985994429982abd09ed8c91, type: 3}
   - stickerType: 5
-    icon: {fileID: 21300000, guid: 1cb1b1bf7bfc6574a95f9a2bc7421c60, type: 3}
+    icon: {fileID: 21300000, guid: f0b1c60b0227e4e1fa89a56252ded127, type: 3}
+  - stickerType: 6
+    icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}

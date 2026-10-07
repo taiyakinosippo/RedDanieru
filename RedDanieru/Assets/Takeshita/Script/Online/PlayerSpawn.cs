@@ -3,92 +3,87 @@ using Fusion.Sockets;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     public NetworkPrefabRef[] playerPrefabs;
 
     [SerializeField]
-    private Transform[] spawnPoints;
-    private List<int> usedSpawnIndexes = new List<int>();
+    private Transform spawnAreaCenter;
+
+    [SerializeField]
+    private float areaWidth = 7f;
+
+    [SerializeField]
+    private float areaDepth = 15f;
+
+    private List<Vector3> usedPositions =
+     new List<Vector3>();
 
     [SerializeField] private NetworkGameState networkGameState;
 
     public bool CanSpawn = false;
 
+    private Vector3 lastSpawnPos;
+
+    private CursorController _cursorController;
+
+    void Start()
+    {
+        _cursorController = GetComponent<CursorController>();
+    }
+
     public void SpawnPlayer(NetworkRunner runner, PlayerRef player)
     {
+        Debug.Log("プレイヤーを生成します");
+        // 既に生成済みなら何もしない
         if (runner.TryGetPlayerObject(player, out _))
             return;
 
+        // プレハブ選択
         int prefabIndex =
             player.PlayerId % playerPrefabs.Length;
 
-        int spawnIndex;
-
-        // 未使用SpawnPointを優先
-        if (usedSpawnIndexes.Count < spawnPoints.Length)
-        {
-            List<int> candidates =
-                new List<int>();
-
-            for (int i = 0; i < spawnPoints.Length; i++)
-            {
-                if (!usedSpawnIndexes.Contains(i))
-                {
-                    candidates.Add(i);
-                }
-            }
-
-            spawnIndex =
-                candidates[
-                    Random.Range(0, candidates.Count)
-                ];
-
-            usedSpawnIndexes.Add(spawnIndex);
-        }
-        else
-        {
-            spawnIndex =
-                Random.Range(0, spawnPoints.Length);
-        }
-
         Vector3 spawnPos =
-            spawnPoints[spawnIndex].position;
+      GetRandomSpawnPosition();
+
+        lastSpawnPos = spawnPos;
+
+        bool insideArea = IsInsideSpawnArea(spawnPos);
 
         Debug.Log(
-            $"Player={player.PlayerId} " +
-            $"SpawnIndex={spawnIndex}"
+            $"SpawnPos = {spawnPos} " +
+            $"InsideArea = {insideArea}"
         );
 
-        Debug.Log(
-            $"SpawnPos={spawnPos}"
-        );
-
-        var obj = runner.Spawn(
+        NetworkObject obj = runner.Spawn(
             playerPrefabs[prefabIndex],
             spawnPos,
             Quaternion.identity,
             player
         );
 
+        StartCoroutine(
+      ForceRespawnPosition(
+          obj,
+          spawnPos
+      )
+  );
+
         runner.SetPlayerObject(
             player,
             obj
         );
 
-        Debug.Log(
-            $"ActualPos={obj.transform.position}"
-        );
-
-        if (obj.HasInputAuthority)
-        {
-            Debug.Log("これは自分のプレイヤー");
-        }
-        else
-        {
-            Debug.Log("これは相手のプレイヤー");
-        }
+        //if (obj.HasInputAuthority)
+        //{
+        //    Debug.Log("これは自分のプレイヤー");
+        //}
+        //else
+        //{
+        //    Debug.Log("これは相手のプレイヤー");
+        //}
 
         StartCoroutine(
             CheckPosition(obj.gameObject)
@@ -101,14 +96,14 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         {
             ui.HideMatchingUI();
         }
+        _cursorController.HideCursor();
+        Debug.Log("カーソル非表示");
     }
 
     public void SpawnAllPlayers(NetworkRunner runner)
     {
         if (!runner.IsSharedModeMasterClient)
             return;
-
-        usedSpawnIndexes.Clear();
 
         foreach (var player in runner.ActivePlayers)
         {
@@ -118,19 +113,26 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner,PlayerRef player)
     {
-        Debug.Log($"Join:{player}");
+        //Debug.Log($"Join:{player}");
 
         //StartCoroutine(WaitGameStartAndSpawn(runner, player));
     }
 
-    private System.Collections.IEnumerator CheckPosition(GameObject player)
+    private IEnumerator CheckPosition(GameObject player)
     {
-        yield return new WaitForSeconds(3f);
+        Debug.Log($"Spawn直後 = {player.transform.position}");
 
-        Debug.Log(
-            $"{player.name} Position = " +
-            player.transform.position
-        );
+        yield return null;
+
+        Debug.Log($"次フレーム = {player.transform.position}");
+
+        yield return new WaitForSeconds(0.1f);
+
+        Debug.Log($"0.1秒後 = {player.transform.position}");
+
+        yield return new WaitForSeconds(0.9f);
+
+        Debug.Log($"1秒後 = {player.transform.position}");
     }
 
     private IEnumerator WaitGameStartAndSpawn(NetworkRunner runner,PlayerRef player)
@@ -145,6 +147,89 @@ public class PlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             yield break;
 
         SpawnPlayer(runner, player);
+    }
+
+    private Vector3 GetRandomSpawnPosition()
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            float x = Random.Range(
+                -areaWidth * 0.5f,
+                 areaWidth * 0.5f
+            );
+
+            float z = Random.Range(
+                -areaDepth * 0.5f,
+                 areaDepth * 0.5f
+            );
+
+            Vector3 pos =
+                spawnAreaCenter.position +
+                new Vector3(x, 0f, z);
+
+            // 地面がある場所だけ許可
+            if (Physics.Raycast(
+                pos + Vector3.up * 5f,
+                Vector3.down,
+                out RaycastHit hit,
+                20f))
+            {
+                return hit.point;
+            }
+        }
+
+        return spawnAreaCenter.position;
+    }
+
+    private bool IsInsideSpawnArea(Vector3 pos)
+    {
+        Vector3 local =
+            pos - spawnAreaCenter.position;
+
+        bool inside =
+            Mathf.Abs(local.x) <= areaWidth * 0.5f &&
+            Mathf.Abs(local.z) <= areaDepth * 0.5f;
+
+        return inside;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (spawnAreaCenter == null)
+            return;
+
+        Gizmos.color = Color.green;
+
+        Gizmos.DrawWireCube(
+            spawnAreaCenter.position,
+            new Vector3(
+                areaWidth,
+                1f,
+                areaDepth
+            )
+        );
+
+        Gizmos.color = Color.red;
+
+        Gizmos.DrawSphere(
+            lastSpawnPos,
+            0.5f
+        );
+    
+}
+
+    private IEnumerator ForceRespawnPosition(
+    NetworkObject obj,
+    Vector3 spawnPos
+)
+    {
+        yield return null;
+
+        obj.transform.position = spawnPos;
+
+        Debug.Log(
+            $"位置補正: {spawnPos}"
+        );
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }

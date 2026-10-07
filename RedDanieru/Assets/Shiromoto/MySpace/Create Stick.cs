@@ -1,15 +1,25 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class CreateStick : MonoBehaviour
 {
     [SerializeField] Stick stickPrefab;
-    private bool can = false;
 
-    [SerializeField]private List<string> NGScene = new List<string>()
+    private EffectPermission myMode = EffectPermission.OK;
+
+    [SerializeField] private LayerMask effectArea;
+
+    // ポーズ中のクリックEffectモード
+    private bool pauseEffectMode = false;
+
+    public enum EffectPermission
     {
-        
+        OK,
+        depends,
+        NG
     };
 
     void Update()
@@ -18,15 +28,61 @@ public class CreateStick : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (NGScene.Contains(SceneManager.GetActiveScene().name))
+            // ポーズ中
+            if (pauseEffectMode)
             {
-                if (Physics.Raycast(ray, out RaycastHit hit))
+                Inster();
+                return;
+            }
+
+            if (myMode != EffectPermission.OK)
+            {
+                GameObject player =
+                    GameObject.Find("PlayerArmature(Clone)");
+
+                if (player != null)
                 {
-                    if (can == false) return;
+                    myMode = EffectPermission.NG;
+                }
+                else
+                {
+                    myMode = EffectPermission.depends;
                 }
             }
 
-            Inster();
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                Inster();
+            }
+            else
+            {
+                switch (myMode)
+                {
+                    case EffectPermission.OK:
+                        break;
+
+                    case EffectPermission.depends:
+
+                        RaycastHit[] hits =
+                            Physics.RaycastAll(ray);
+
+                        foreach (RaycastHit hit in hits)
+                        {
+                            if ((effectArea.value &
+                                (1 << hit.collider.gameObject.layer)) == 0)
+                            {
+                                return;
+                            }
+                        }
+
+                        break;
+
+                    case EffectPermission.NG:
+                        return;
+                }
+
+                Inster();
+            }
         }
     }
 
@@ -34,9 +90,14 @@ public class CreateStick : MonoBehaviour
     {
         int rotate = 0;
 
-        while(rotate < 360){
-            Stick stick = Instantiate(stickPrefab, transform);
-            stick.transform.position = Input.mousePosition;
+        while (rotate < 360)
+        {
+            Stick stick =
+                Instantiate(stickPrefab, transform);
+
+            stick.transform.position =
+                Input.mousePosition;
+
             stick.Initialize(
                 rotate,
                 Random.Range(50f, 60f),
@@ -45,17 +106,28 @@ public class CreateStick : MonoBehaviour
             );
 
             int x = Random.Range(25, 40);
+
             rotate += x;
         }
     }
 
-    public void EffectTrue()
+    public void ChangeMode(EffectPermission mode)
     {
-        can = true;
+        myMode = mode;
     }
 
-    public void EffectFalse()
+    //==================================================
+    // ポーズ中のクリックEffectモード
+    //==================================================
+
+    public void SetPauseEffectMode(bool enabled)
     {
-        can = false;
+        pauseEffectMode = enabled;
+
+        if (enabled)
+        {
+            // ポーズ中は強制的にEffectを許可
+            myMode = EffectPermission.OK;
+        }
     }
 }

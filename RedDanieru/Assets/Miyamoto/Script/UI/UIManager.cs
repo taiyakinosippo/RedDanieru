@@ -1,17 +1,53 @@
+using Player;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
 public class UIManager : MonoBehaviour
 {
     [Header("ダメージ関係のUI")]
-    [SerializeField] private DamagePopup _damagePopupPrefab;
-    [SerializeField] private Transform damagePopupParent;
+    [SerializeField] private GameObject _damageUI;
+    [SerializeField] private Camera _mainCamera;
+    private GameObject _canvas;
+    private PlayerUI _playerUI;
+    public static UIManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        else
+        {
+            Instance = this;
+        }
+
+        _playerUI = GetComponent<PlayerUI>();
+        _canvas = GetComponent<Canvas>().gameObject;
+    }
 
     public void ShowDamage(int damage, Vector3 position)
     {
-        DamagePopup popup = 
-            Instantiate(_damagePopupPrefab,position,Quaternion.identity,damagePopupParent);
+        // ダメージUIを生成
+        GameObject ui = Instantiate(_damageUI, _canvas.transform);
 
-        popup.DamageSetUp(damage);
+        // UIを表示
+        ui.SetActive(true);
+
+        // 敵の周辺に少しランダムな位置を作る
+        Vector2 circlePos = Random.insideUnitCircle * 0.5f;
+
+        Vector3 damagePosition = position + Vector3.up * Random.Range(1f, 2f) + new Vector3(circlePos.x, 0f, circlePos.y);
+
+        // ワールド座標 → スクリーン座標
+        Vector2 screenPosition =RectTransformUtility.WorldToScreenPoint(_mainCamera,damagePosition);
+
+        // UIの位置に設定
+        ui.GetComponent<RectTransform>().position = screenPosition;
+
+        // ダメージ値を設定
+        ui.GetComponent<DamagePopup>().DamageSetUp(damage, position, _mainCamera);
     }
 }

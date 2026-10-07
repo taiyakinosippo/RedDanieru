@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.AI;
+using TMPro;
 
 public class MapManager : MonoBehaviour
 {
@@ -51,6 +52,11 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject diagonalWallPrefab;
 
     [SerializeField] private GameObject floorPrefab;
+
+    [Header("ゴール警告UI")]
+    [SerializeField] private GameObject goalWarningUI;
+    [SerializeField] private TMP_Text goalWarningText;
+    [SerializeField] private float goalWarningDuration = 2f;
 
     [Header("床上ランダム装飾")]
     [SerializeField] private GameObject[] floorDecorationPrefabs;
@@ -2034,8 +2040,8 @@ public class MapManager : MonoBehaviour
             HasGoal()
         )
         {
-            Debug.Log(
-                "Goalは1つしか配置できません。"
+            ShowGoalWarning(
+                "すでにゴールは置いてあります。"
             );
 
             return;
@@ -2749,4 +2755,64 @@ public class MapManager : MonoBehaviour
             pos.z < depth;
     }
 
+    //設置されている敵とトラップのRigidbodyを全て停止する
+    public void ObjectsAllFreeze()
+    {
+        for (int x = 0; x < placedObjects.GetLength(0); x++)
+        {
+            for (int y = 0; y < placedObjects.GetLength(1); y++)
+            {
+                for (int z = 0; z < placedObjects.GetLength(2); z++)
+                {
+                    //設置されているオブジェクトを取得
+                    GameObject obj = placedObjects[x, y, z];
+
+                    //敵とトラップ以外はスキップ
+                    if (obj == null || (obj.tag != "Enemy" && obj.tag != "Trap"))
+                        continue;
+
+                    Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();  //Rigidbodyを持つ全ての子オブジェクトを取得
+
+                    //Rigidbodyを停止
+                    foreach (Rigidbody rb in rigidbodies)
+                    {
+                        rb.linearVelocity = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                        rb.isKinematic = true;
+                        rb.constraints = RigidbodyConstraints.FreezeAll;
+                    }
+                }
+            }
+        }
+    }
+
+    private void ShowGoalWarning(string message)
+    {
+        if (goalWarningUI == null)
+        {
+            return;
+        }
+
+        if (goalWarningText != null)
+        {
+            goalWarningText.text = message;
+            goalWarningText.color = Color.red;
+        }
+
+        goalWarningUI.SetActive(true);
+
+        CancelInvoke(nameof(HideGoalWarning));
+        Invoke(
+            nameof(HideGoalWarning),
+            goalWarningDuration
+        );
+    }
+
+    private void HideGoalWarning()
+    {
+        if (goalWarningUI != null)
+        {
+            goalWarningUI.SetActive(false);
+        }
+    }
 }

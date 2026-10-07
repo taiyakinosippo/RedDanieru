@@ -1,8 +1,6 @@
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
-using System.Collections.Generic;
-using static UnityEngine.Rendering.DebugUI;
 using Fusion;
 #endif
 namespace Player
@@ -10,26 +8,31 @@ namespace Player
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
+    /// <summary>
+    /// プレイヤーに関係する各スクリプトをまとめて管理するためのスクリプト
+    ///</summary>
     public class PlayerActor : /*MonoBehaviour*/NetworkBehaviour
     {
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
 #endif
-        private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのフィールド
-        private PlayerInputPriority _actionPriority;      // プレイヤーのアクションの優先度を制御するためのフィールド
-        private PlayerAnimation     _animation;　　　　　// プレイヤーのアニメーションを制御するためのフィールド
-        private PlayerAttack        _playerAttack;
-        private PlayerCamera        _playerCamera;
+        private StarterAssetsInputs _input;              // プレイヤーの入力を制御するためのシステム
+        private PlayerInputPriority _actionPriority;     // プレイヤーのアクションの優先度を制御するためのもの
+        private PlayerAnimation     _animation;　　　　　// プレイヤーのアニメーションを再生させたり、制御するためのもの
+        private PlayerAttack        _playerAttack;　　　 // プレイヤーの攻撃の当たり判定やダメージを与えたりするためのもの
+        private PlayerCamera        _playerCamera;       // プレイヤーのカメ
         private PlayerMovement      _playerMovement;
         private StickerCheck        _stickerCheck;
         private NetworkMecanimAnimator _networkAnimator;
         private PlayerStatus        _playerStatus;
         private DeadCameraMulti     _deadMultiCamera;
+        private PlayerEvade         _playerEvade;
 
 
         private bool _debugMode = false;
 
         private bool _deathProcessed;
+        private bool _clearProcessed;
 
         // 現在の入力デバイスがマウスかどうかを判定するプロパティ
         private bool IsCurrentDeviceMouse
@@ -69,6 +72,8 @@ namespace Player
             _playerStatus = GetComponent<PlayerStatus>();
 
             _deadMultiCamera = GetComponent<DeadCameraMulti>();
+
+            _playerEvade = GetComponent<PlayerEvade>();
         }
 
         //public override void Spawned()
@@ -187,6 +192,12 @@ namespace Player
 
                     // ジャンプと重力の処理
                     _playerMovement.PlayerJumpAndGravity(_input);
+                }
+
+                if (_actionPriority.currentActionType == ActionType.Evade)
+                {
+                    // プレイヤーの回避処理
+                    _playerEvade.Evade(_input);
                 }
 
                 if (_actionPriority.currentActionType == ActionType.Sticker)

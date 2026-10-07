@@ -3,81 +3,40 @@ using UnityEngine.SceneManagement;
 
 public class GoalClear : MonoBehaviour
 {
-    //==================================================
-    // クリアUI
-    //==================================================
-
     [Header("クリアUI")]
-    [SerializeField]
-    private GameObject clearPanel;
-
-    //==================================================
-    // Clearカメラ
-    //==================================================
+    [SerializeField] private GameObject clearPanel;
 
     [Header("Clear時に召喚するカメラ")]
-    [SerializeField]
-    private GameObject clearCameraPrefab;
-
-    //==================================================
-    // Clearカメラ設定
-    //==================================================
+    [SerializeField] private GameObject clearCameraPrefab;
 
     [Header("Clearカメラ設定")]
-
     [Tooltip("32×32マップ時のカメラ位置")]
     [SerializeField]
     private Vector3 clearCameraPosition =
-        new Vector3(
-            16f,
-            30f,
-            16f
-        );
+        new Vector3(16f, 30f, 16f);
 
     [Tooltip("カメラ角度")]
     [SerializeField]
     private Vector3 clearCameraRotation =
-        new Vector3(
-            90f,
-            0f,
-            0f
-        );
+        new Vector3(90f, 0f, 0f);
 
     [Tooltip("32×32マップ時のField of View")]
-    [SerializeField]
-    private float baseFieldOfView = 60f;
+    [SerializeField] private float baseFieldOfView = 60f;
 
     [Tooltip("基準となるマップサイズ")]
-    [SerializeField]
-    private float baseMapSize = 31f;
-
-    //==================================================
-    // タイトルシーン
-    //==================================================
+    [SerializeField] private float baseMapSize = 31f;
 
     [Header("タイトルシーン")]
-    [SerializeField]
-    private string titleSceneName = "Title";
-
-    //==================================================
-    // 内部変数
-    //==================================================
+    [SerializeField] private string titleSceneName = "Title";
 
     private bool isCleared = false;
     private bool alreadyShown = false;
-
-    //==================================================
-    // Start
-    //==================================================
-
+    private CursorController _cursorController;
     private void Start()
     {
+        _cursorController = GetComponent<CursorController>();
         ResetClearState();
     }
-
-    //==================================================
-    // Update
-    //==================================================
 
     private void Update()
     {
@@ -88,16 +47,11 @@ public class GoalClear : MonoBehaviour
             state.IsCleared &&
             !alreadyShown)
         {
+            Debug.Log("ShowClear呼ぶよ");
             ShowClear();
-
             alreadyShown = true;
         }
 
-        if (isCleared)
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
 
     //==================================================
@@ -115,26 +69,23 @@ public class GoalClear : MonoBehaviour
         }
 
         Time.timeScale = 1f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
     }
 
     //==================================================
-    // Goalに触れた
+    // Goal接触
     //==================================================
 
     private void OnTriggerEnter(Collider other)
     {
         if (isCleared)
+        {
             return;
+        }
 
         if (!other.CompareTag("Player"))
+        {
             return;
-
-        //==================================================
-        // クリア状態
-        //==================================================
+        }
 
         isCleared = true;
 
@@ -144,17 +95,24 @@ public class GoalClear : MonoBehaviour
         if (state != null)
         {
             state.IsCleared = true;
+            state.RPC_HideAllPlayers();
         }
+        else
+        {
+            GameObject[] players =
+                GameObject.FindGameObjectsWithTag("Player");
 
-        //==================================================
-        // TestPlayManager確認
-        //==================================================
+            foreach (GameObject player in players)
+            {
+                player.SetActive(false);
+            }
+        }
 
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
 
         //==================================================
-        // テストプレイの場合
+        // テストプレイ中
         //==================================================
 
         if (testPlayManager != null &&
@@ -167,32 +125,37 @@ public class GoalClear : MonoBehaviour
             {
                 saveManager.SetTestPlayCleared();
             }
-            else
-            {
-                Debug.LogWarning(
-                    "SaveManagerが見つかりません。"
-                );
-            }
-
-            // ここでは編集画面へ戻さない
-            // TestPlayManager側で投稿確認UIを表示する
-            testPlayManager.PlayClear();
 
             Debug.Log(
-                "テストプレイクリア。投稿確認UIを表示します。"
+                "テストプレイでGoalに到達しました"
             );
+
+            // シーン移動しない
+            // TestPlayManager側で投稿確認を表示する
+            testPlayManager.ClearTestPlay();
 
             return;
         }
 
         //==================================================
-        // ゲームプレイの場合
+        // 通常プレイ
         //==================================================
+
+        BGMManager_Takeshita.Instance.PlayNormalBGM();
 
         Time.timeScale = 0f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        //    GameObject[] players =
+        //GameObject.FindGameObjectsWithTag("Player");
+
+        //    Debug.Log($"Player数={players.Length}");
+
+        //    foreach (GameObject player in players)
+        //    {
+        //        Debug.Log($"消す:{player.name}");
+
+        //        player.SetActive(false);
+        //    }
 
         SpawnClearCamera();
 
@@ -203,7 +166,7 @@ public class GoalClear : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Clear Panelが設定されていません。"
+                "Clear Panelが設定されていません"
             );
         }
 
@@ -213,7 +176,7 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // Clearカメラ生成
+    // クリアカメラ生成
     //==================================================
 
     private void SpawnClearCamera()
@@ -228,9 +191,7 @@ public class GoalClear : MonoBehaviour
         }
 
         GameObject cameraObject =
-            Instantiate(
-                clearCameraPrefab
-            );
+            Instantiate(clearCameraPrefab);
 
         Camera clearCamera =
             cameraObject.GetComponentInChildren<Camera>();
@@ -336,17 +297,14 @@ public class GoalClear : MonoBehaviour
             );
 
         clearCamera.fieldOfView =
-            baseFieldOfView * scale;
-
-        clearCamera.fieldOfView =
             Mathf.Clamp(
-                clearCamera.fieldOfView,
+                baseFieldOfView * scale,
                 10f,
                 120f
             );
 
         clearCamera.gameObject.SetActive(true);
-
+        _cursorController.ShowCursor();
         Debug.Log(
             "Clear Camera Position : " +
             clearCamera.transform.position
@@ -359,15 +317,13 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // タイトルへ戻る
+    // タイトルへ
     //==================================================
 
     public void ReturnToTitle()
     {
         Time.timeScale = 1f;
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
@@ -387,7 +343,7 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // ゲームプレイ用クリア表示
+    // 通常クリア表示
     //==================================================
 
     private void ShowClear()
@@ -395,11 +351,6 @@ public class GoalClear : MonoBehaviour
         isCleared = true;
 
         Time.timeScale = 0f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
-        SpawnClearCamera();
 
         if (clearPanel != null)
         {

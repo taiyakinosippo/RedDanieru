@@ -22,7 +22,10 @@ public class ChargeDashSticker : StickerBase
     private float dashTime = 5.0f;  //突進時間
     private float chargeTime = 2.0f;  //溜め時間
     private float timer = 0.0f;  //溜め時間のタイマー
+    private bool chargeEffectPlayed = false;  //溜めエフェクトが再生されたかどうかのフラグ
+    private Vector3 effectOffset = Vector3.zero;  //エフェクトの位置補正
     private Vector3 dashDirection;  //敵の向く方向
+    private GameObject lastEnteredObject;  //最後に衝突したオブジェクト
 
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
@@ -95,6 +98,13 @@ public class ChargeDashSticker : StickerBase
     //溜め
     private void Charge()
     {
+        if(!chargeEffectPlayed)
+        {
+            //溜めエフェクト再生
+            Instantiate(StickerEffectManager.Instance.ChargeEffect, transform.position + effectOffset, Quaternion.identity, transform);
+            chargeEffectPlayed = true;
+        }
+
         //プレイヤーの方を向く
         Vector3 dir = target.position - transform.position;
         dir.y = 0;
@@ -115,9 +125,13 @@ public class ChargeDashSticker : StickerBase
             dashDirection.y = 0;
             dashDirection.Normalize();
 
+            //動けるようにする
+            CanMove();
+
             //突進へ
             state = DashState.Dash;
             timer = dashTime;
+            chargeEffectPlayed = false;
         }
     }
 
@@ -127,6 +141,7 @@ public class ChargeDashSticker : StickerBase
         //ここで突進
         Vector3 velocity = dashDirection * enemyDashSpeed;
         velocity.y = rb.linearVelocity.y;   //重力は維持
+
         rb.linearVelocity = velocity;
 
         //enemyScript.AttackEffect();
@@ -143,6 +158,9 @@ public class ChargeDashSticker : StickerBase
     //物の突進
     private void TrapDash()
     {
+        //動けるようにする
+        CanMove();
+
         //突進（吹き飛ぶ感じ）
         Vector3 dir = dashDirection;
         dir.y = 0.2f;
@@ -150,14 +168,42 @@ public class ChargeDashSticker : StickerBase
         rb.AddForce(dir * trapDashSpeed, ForceMode.Impulse);
 
         //一連の行動終了（ので消える）
-        OnTrapRemove();
-        Destroy(this);
+        stickerState.Remove();
+    }
+
+    //終了時の初期化とか
+    private void EndDash()
+    {
+        //動かないようにする
+        rb.useGravity = false;
+        rb.linearVelocity = Vector3.zero;
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+        rb.isKinematic = true;
+
+        state = DashState.Charge;
+        timer = chargeTime;
+
+        //敵スクリプト側の初期化とか
+        agent.enabled = true;
+        enemyScript.EndSpecial();
+    }
+
+    //Rigidbodyの制約を解除して動けるようにする
+    private void CanMove()
+    {
+        rb.useGravity = true;
+        rb.constraints &= ~RigidbodyConstraints.FreezePosition;
+        rb.isKinematic = false;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (state != DashState.Dash)
+        //Debug.Log("衝突：" + collision.gameObject.name);
+        if (state != DashState.Dash || collision.gameObject.CompareTag("Enemy") || collision.gameObject.layer == LayerMask.NameToLayer("Floor") || collision.gameObject == lastEnteredObject)
             return;
+
+        //最後に衝突したオブジェクトを保存
+        lastEnteredObject = collision.gameObject;
 
         if (collision.gameObject.CompareTag("Player"))
         {
@@ -167,29 +213,15 @@ public class ChargeDashSticker : StickerBase
             //プレイヤーが突き飛ばされる
 
         }
-
+        
         //敵だけ終了
         if (enemyScript != null)
         {
             //一連の行動終了
             EndDash();
 
-            //2秒間スタン
-            enemyScript.Stun(2f);
+            //6秒間スタン
+            enemyScript.Stun(6f);
         }
-    }
-
-    //終了時の初期化とか
-    private void EndDash()
-    {
-        rb.linearVelocity = Vector3.zero;
-
-        state = DashState.Charge;
-        timer = chargeTime;
-
-        //敵スクリプト側の初期化とか
-        agent.enabled = true;
-        enemyScript.EndSpecial();
-        
     }
 }

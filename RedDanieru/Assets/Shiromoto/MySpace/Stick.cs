@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 public class Stick : MonoBehaviour
 {
     float speed;
@@ -16,7 +15,8 @@ public class Stick : MonoBehaviour
         float speed,
         float life,
         float size
-    ) {
+    )
+    {
         transform.rotation = Quaternion.Euler(0, 0, rotate);
         this.speed = speed;
         this.life = life;
@@ -35,28 +35,39 @@ public class Stick : MonoBehaviour
 
     void Update()
     {
-        time += Time.deltaTime;
+        // Time.timeScale‚ª0‚Å‚àEffect‚ð“®‚©‚·
+        time += Time.unscaledDeltaTime;
+
         float t = Mathf.Clamp01(time / life);
 
-        //Position(1);
-        //Size_x(t);
+        // Position(1);
+        // Size_x(t);
         Size_y(t);
 
-        if(life <= time) Destroy(gameObject);
+        if (life <= time)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Position(float n)
     {
-        transform.position += transform.right * speed * n * Time.deltaTime;
+        transform.position +=
+            transform.right *
+            speed *
+            n *
+            Time.unscaledDeltaTime;
     }
 
     private void Size_x(float t)
     {
-        
     }
 
     private void Size_y(float t)
     {
-        rect.sizeDelta = new Vector2(rect.sizeDelta.x, Mathf.Lerp(startSize, 0f, t));
+        rect.sizeDelta = new Vector2(
+            rect.sizeDelta.x,
+            Mathf.Lerp(startSize, 0f, t)
+        );
     }
 }

@@ -240,26 +240,26 @@ public class EnemyBase : MonoBehaviour
     //攻撃の選択を行う関数（通常攻撃か特殊攻撃か）
     public virtual void AttackSelect()
     {
-        // 特別攻撃用のステッカーがあるか
+        //特別攻撃用のステッカーがあるか
         if (stickerState.currentStickerScript != null && stickerState.isSpecialMove)
         {
-            // 特別攻撃のクールタイムが終わっているか
+            //特別攻撃のクールタイムが終わっているか
             if (specialCoolTimer <= 0f)
             {
-                // 攻撃確率
+                //攻撃確率
                 int randomAttack = Random.Range(1, 101);
 
                 if (randomAttack <= stickerState.currentStickerScript.attackRate)
                 {
                     currentState = enemyState.Special;
                     agent.isStopped = true;
-                    agent.enabled = false;
+                    //agent.enabled = false;
                     return;
                 }
             }
         }
 
-        // 特別攻撃にならなかった場合は通常攻撃
+        //特別攻撃にならなかった場合は通常攻撃
         currentState = enemyState.Attack;
     }
 
@@ -361,7 +361,7 @@ public class EnemyBase : MonoBehaviour
         //ダメージ中はダメージを受けない
         if (currentState == enemyState.Damage)
             return;
-
+        UIManager.Instance.ShowDamage(playerPow, transform.position);
         Debug.Log("Enemy hit");
         //ダメージ計算
         int damage = playerPow - enemyDefense;
@@ -377,6 +377,9 @@ public class EnemyBase : MonoBehaviour
         {
             //ダメージ処理
             currentState = enemyState.Damage;
+            //ステッカーにダメージを感知
+            if (stickerState.currentSticker != Sticker.None)
+                stickerState.OnHit();
             Debug.Log("敵がダメージを受けました。残りHP: " + currentHp);
         }
     }
@@ -400,6 +403,11 @@ public class EnemyBase : MonoBehaviour
     }
 
     //-----敵のステータスを上げる・下げる処理-----
+
+    public void SetAttackState()
+    {
+        currentState = enemyState.Attack;
+    }
 
     //敵のHPを変動させる
     public void AddEnemyCurrentHP(int value)

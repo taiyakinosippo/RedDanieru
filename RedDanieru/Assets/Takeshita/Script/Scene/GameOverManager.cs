@@ -59,12 +59,6 @@ public class GameOverManager : MonoBehaviour
                 GameOver();
             }
         }
-
-        if (isGameOver)
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
 
     public void ResetGameOverState()
@@ -84,6 +78,11 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver)
             return;
 
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayNormalBGM();
+        }
+
         isGameOver = true;
 
         Time.timeScale = 0f;
@@ -99,8 +98,23 @@ public class GameOverManager : MonoBehaviour
             }
         }
 
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        if (GameModeManager.IsMultiplayer)
+        {
+            if (NetworkGameState.Instance != null)
+            {
+                NetworkGameState.Instance.RPC_HideAllPlayers();
+            }
+        }
+        else
+        {
+            GameObject[] players =
+            GameObject.FindGameObjectsWithTag("Player");
+
+            foreach (GameObject player in players)
+            {
+                player.SetActive(false);
+            }
+        }
 
     //    PlayerInput[] inputs =
     //FindObjectsOfType<PlayerInput>();
@@ -192,9 +206,6 @@ public class GameOverManager : MonoBehaviour
     public void ReturnToTitle()
     {
         Time.timeScale = 1f;
-
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
 
         FusionLauncher launcher =
             FindObjectOfType<FusionLauncher>();
