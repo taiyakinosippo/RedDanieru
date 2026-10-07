@@ -501,6 +501,8 @@ public class TestPlayManager : MonoBehaviour
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
+            //マウスカーソルを非表示にする
+            _cursorController.HideCursor();
         }
 
         Time.timeScale = 1f;
