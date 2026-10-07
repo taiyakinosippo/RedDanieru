@@ -48,6 +48,14 @@ public class NetworkGameState : NetworkBehaviour
             runner,
             runner.LocalPlayer
         );
+
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+        }
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]

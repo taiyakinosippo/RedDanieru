@@ -307,6 +307,13 @@ public class DungeonUIManager : MonoBehaviour
 
         GameModeManager.IsMultiplayer = false;
 
+        GameStopManager gameStopManager =FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+        }
+
         Debug.Log("Solo");
 
         ScrolView.SetActive(false);
@@ -511,6 +518,13 @@ public class DungeonUIManager : MonoBehaviour
         if (BGMManager_Takeshita.Instance != null)
         {
             BGMManager_Takeshita.Instance.PlayBattleBGM();
+        }
+
+        GameStopManager gameStopManager =FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
         }
 
         if (NetworkGameState.Instance == null)
