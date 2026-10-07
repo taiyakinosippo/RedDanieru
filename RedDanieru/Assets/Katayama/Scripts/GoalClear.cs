@@ -104,6 +104,16 @@ public class GoalClear : MonoBehaviour
             state.IsCleared = true;
             state.RPC_HideAllPlayers();
         }
+        else
+        {
+            GameObject[] players =
+                GameObject.FindGameObjectsWithTag("Player");
+
+            foreach (GameObject player in players)
+            {
+                player.SetActive(false);
+            }
+        }
 
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
