@@ -12,7 +12,18 @@ public class TitleButton: MonoBehaviour
 
     public void DungeonCreateButton()
     {
-        
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            if (createSceneBGM != null)
+            {
+                BGMManager_Takeshita.Instance.ChangeBGM(createSceneBGM);
+            }
+            else
+            {
+                BGMManager_Takeshita.Instance.StopNormalBGM();
+            }
+        }
+
         SceneManager.LoadScene("Katayama_ren");
     }
 
