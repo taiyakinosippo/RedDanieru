@@ -74,7 +74,14 @@ public class TestPlayManager : MonoBehaviour
     // テストプレイをクリアしたか
     private bool isTestPlayCleared = false;
 
+    // 現在生成しているプレイヤー
+    private GameObject _currentPlayer;
+
+    // プレイヤーのPlayerInput
+    private PlayerInput _playerInput;
+
     private CursorController _cursorController;
+
     //==================================================
     // プロパティ
     //==================================================
@@ -198,8 +205,6 @@ public class TestPlayManager : MonoBehaviour
 
             return;
         }
-
- 
 
         //==================================================
         // Goalチェック
@@ -325,17 +330,27 @@ public class TestPlayManager : MonoBehaviour
         }
         else
         {
-            GameObject player =
+            _currentPlayer =
                 Instantiate(
                     playerPrefab,
                     startPoint.position,
                     startPoint.rotation
                 );
 
+            _playerInput =
+                _currentPlayer.GetComponent<PlayerInput>();
+
             Debug.Log(
                 "Playerを生成しました : " +
-                player.name
+                _currentPlayer.name
             );
+
+            if (_playerInput == null)
+            {
+                Debug.LogWarning(
+                    "PlayerにPlayerInputがありません。"
+                );
+            }
         }
 
         //==================================================
@@ -352,7 +367,7 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        //マースカーソルを非表示にする
+        // マウスカーソルを非表示にする
         _cursorController.HideCursor();
 
         isInitializing = false;
@@ -459,6 +474,11 @@ public class TestPlayManager : MonoBehaviour
 
     public void OpenPauseMenu()
     {
+        Debug.Log("ポーズ開始");
+
+        // プレイヤーの入力を停止
+        DisablePlayerInput();
+
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(true);
@@ -466,7 +486,7 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        //マウスカーソルを表示する
+        // マウスカーソルを表示する
         _cursorController.ShowCursor();
     }
 
@@ -476,6 +496,8 @@ public class TestPlayManager : MonoBehaviour
 
     public void ClosePauseMenu()
     {
+        Debug.Log("ポーズ解除");
+
         if (pauseMenuUI != null)
         {
             pauseMenuUI.SetActive(false);
@@ -483,8 +505,53 @@ public class TestPlayManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        //マウスカーソルを非表示にする
+        // プレイヤーの入力を再開
+        EnablePlayerInput();
+
+        // マウスカーソルを非表示にする
         _cursorController.HideCursor();
+    }
+
+    //==================================================
+    // プレイヤー入力停止
+    //==================================================
+
+    private void DisablePlayerInput()
+    {
+        if (_playerInput == null)
+        {
+            return;
+        }
+
+        if (_playerInput.enabled)
+        {
+            _playerInput.enabled = false;
+
+            Debug.Log(
+                "ポーズ中のPlayerInputを無効化しました"
+            );
+        }
+    }
+
+    //==================================================
+    // プレイヤー入力再開
+    //==================================================
+
+    private void EnablePlayerInput()
+    {
+        if (_playerInput == null)
+        {
+            return;
+        }
+
+        if (!_playerInput.enabled)
+        {
+            _playerInput.enabled = true;
+
+            Debug.Log(
+                "PlayerInputを再有効化しました"
+            );
+        }
     }
 
     //==================================================
@@ -499,9 +566,12 @@ public class TestPlayManager : MonoBehaviour
 
         isTestPlayCleared = true;
 
+        // クリア時もプレイヤー入力を停止
+        DisablePlayerInput();
+
         Time.timeScale = 0f;
 
-        //マウスカーソルを表示する
+        // マウスカーソルを表示する
         _cursorController.ShowCursor();
 
         if (pauseMenuUI != null)
@@ -547,7 +617,7 @@ public class TestPlayManager : MonoBehaviour
             postSettingUI.SetActive(true);
         }
 
-        //カーソルを表示する
+        // カーソルを表示する
         _cursorController.ShowCursor();
     }
 
@@ -567,7 +637,7 @@ public class TestPlayManager : MonoBehaviour
             postConfirmUI.SetActive(true);
         }
 
-        //カーソルを非表示にする
+        // カーソルを非表示にする
         _cursorController.HideCursor();
     }
 
@@ -680,7 +750,7 @@ public class TestPlayManager : MonoBehaviour
 
         _cursorController.ShowCursor();
 
-        //マップ上のオブジェクトのRigidBodyをすべて凍結
+        // マップ上のオブジェクトのRigidBodyをすべて凍結
         mapManager.ObjectsAllFreeze();
 
         returnToEdit = true;
@@ -798,6 +868,7 @@ public class TestPlayManager : MonoBehaviour
         goalWarningUI.SetActive(true);
 
         CancelInvoke(nameof(HideGoalWarning));
+
         Invoke(
             nameof(HideGoalWarning),
             goalWarningDuration
