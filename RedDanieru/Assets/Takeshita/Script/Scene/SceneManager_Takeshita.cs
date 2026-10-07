@@ -10,7 +10,10 @@ public class SceneManager_Takeshita : MonoBehaviour
 
     private void Start()
     {
-        BGMManager_Takeshita.Instance.PlayBGM();
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayNormalBGM();
+        }
 
         if (userNameInput != null)
         {
@@ -35,7 +38,9 @@ public class SceneManager_Takeshita : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void OnSceneLoaded(Scene scene,LoadSceneMode mode)
+    private void OnSceneLoaded(
+        Scene scene,
+        LoadSceneMode mode)
     {
         GameObject obj =
             GameObject.Find("UserName");
@@ -71,8 +76,6 @@ public class SceneManager_Takeshita : MonoBehaviour
         return $"{sb}_{number}";
     }
 
-  
-
     public void DungeonDownloadButton()
     {
         DungeonDownload();
@@ -80,11 +83,13 @@ public class SceneManager_Takeshita : MonoBehaviour
 
     public void DungeonDownload()
     {
-        string userName = userNameInput.text.Trim();
+        string userName =
+            userNameInput.text.Trim();
 
         if (string.IsNullOrEmpty(userName))
         {
-            userName = GenerateRandomUserName();
+            userName =
+                GenerateRandomUserName();
         }
 
         UserData.UserName = userName;
@@ -92,7 +97,5 @@ public class SceneManager_Takeshita : MonoBehaviour
         Debug.Log(
             $"UserName:{UserData.UserName}"
         );
-
-        BGMManager_Takeshita.Instance.StopBGM();
     }
 }

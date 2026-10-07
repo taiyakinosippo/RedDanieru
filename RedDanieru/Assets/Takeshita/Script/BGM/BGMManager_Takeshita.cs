@@ -1,18 +1,14 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class BGMManager_Takeshita : MonoBehaviour
 {
     public static BGMManager_Takeshita Instance;
 
     [SerializeField]
-    private AudioSource bgmSource;
+    private AudioSource normalBgmSource;
 
-    // タイトルで流す元のBGM
-    private AudioClip defaultClip;
-
-    // 直前にいたシーン名
-    private string currentSceneName;
+    [SerializeField]
+    private AudioSource battleBgmSource;
 
     private void Awake()
     {
@@ -25,69 +21,45 @@ public class BGMManager_Takeshita : MonoBehaviour
         Instance = this;
 
         DontDestroyOnLoad(gameObject);
-
-        defaultClip = bgmSource.clip;
-        currentSceneName = SceneManager.GetActiveScene().name;
     }
 
-    private void OnEnable()
+    public void PlayNormalBGM()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
+        StopBattleBGM();
 
-    private void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        // 破棄予定の重複オブジェクトは処理しない
-        if (Instance != this)
+        if (normalBgmSource != null &&
+            !normalBgmSource.isPlaying)
         {
-            return;
-        }
-
-        string previousSceneName = currentSceneName;
-        currentSceneName = scene.name;
-
-        // ダンジョン制作シーン(テストプレイ含む)からタイトルに戻ったらBGMをリセット
-        if (scene.name == "TitleScene" &&
-            (previousSceneName == "Katayama_ren" || previousSceneName == "Testplay"))
-        {
-            ResetBGM();
+            normalBgmSource.Play();
         }
     }
 
-    public void PlayBGM()
+    public void PlayBattleBGM()
     {
-        if (!bgmSource.isPlaying)
+        if (normalBgmSource != null)
         {
-            bgmSource.Play();
+            normalBgmSource.Stop();
+        }
+
+        if (battleBgmSource != null)
+        {
+            battleBgmSource.Play();
         }
     }
 
-    public void StopBGM()
+    public void StopNormalBGM()
     {
-        bgmSource.Stop();
-    }
-
-    // BGMを差し替えて再生する
-    public void ChangeBGM(AudioClip clip)
-    {
-        if (clip == null)
+        if (normalBgmSource != null)
         {
-            return;
+            normalBgmSource.Stop();
         }
-
-        bgmSource.Stop();
-        bgmSource.clip = clip;
-        bgmSource.Play();
     }
 
-    // タイトルのBGMに戻して最初から再生する
-    public void ResetBGM()
+    public void StopBattleBGM()
     {
-        ChangeBGM(defaultClip);
+        if (battleBgmSource != null)
+        {
+            battleBgmSource.Stop();
+        }
     }
 }
