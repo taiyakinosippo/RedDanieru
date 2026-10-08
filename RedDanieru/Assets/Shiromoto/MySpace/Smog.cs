@@ -10,59 +10,80 @@ public class DustEffect : MonoBehaviour
 
     private ParticleSystem.EmissionModule emission;
 
-    void Start()
+    private void Awake()
     {
-        mainCamera = Camera.main;
-        emission = dustParticle.emission;
-
-        // テストプレイ中は砂埃を再生しない
-        if (IsTestPlayScene())
+        if (dustParticle != null)
         {
-            emission.enabled = false;
+            emission = dustParticle.emission;
         }
     }
 
-    void OnEnable()
+    private void Start()
+    {
+        SetupEffect();
+    }
+
+    private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        SetupEffect();
+    }
+
+    private void SetupEffect()
+    {
         mainCamera = Camera.main;
 
-        // テストプレイ中は砂埃を再生しない
+        if (dustParticle == null)
+            return;
+
+        emission = dustParticle.emission;
+
+        // Testplayでは完全停止
         if (IsTestPlayScene())
         {
-            if (dustParticle != null)
-            {
-                dustParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            }
+            emission.enabled = false;
 
-            if (dustParticle != null)
+            dustParticle.Stop(
+                true,
+                ParticleSystemStopBehavior.StopEmittingAndClear
+            );
+        }
+        else
+        {
+            // 編集シーンではParticleSystemを再生可能な状態に戻す
+            emission.enabled = false;
+
+            if (!dustParticle.isPlaying)
             {
-                emission = dustParticle.emission;
-                emission.enabled = false;
+                dustParticle.Play();
             }
         }
     }
 
-    void Update()
+    private void Update()
     {
-        // テストプレイ中は処理しない
+        // Testplayでは完全に処理しない
         if (IsTestPlayScene())
-        {
-            if (dustParticle != null)
-            {
-                emission.enabled = false;
-            }
-
             return;
+
+        if (dustParticle == null)
+            return;
+
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+
+            if (mainCamera == null)
+                return;
         }
 
         // 左クリックを押している間
@@ -71,15 +92,8 @@ public class DustEffect : MonoBehaviour
             if (EventSystem.current != null &&
                 EventSystem.current.IsPointerOverGameObject())
             {
+                emission.enabled = false;
                 return;
-            }
-
-            if (mainCamera == null)
-            {
-                mainCamera = Camera.main;
-
-                if (mainCamera == null)
-                    return;
             }
 
             Ray ray =
@@ -93,25 +107,22 @@ public class DustEffect : MonoBehaviour
                 100f,
                 targetLayer))
             {
-                // 高さを固定
                 Vector3 pos = hit.point;
+
+                // 高さを固定
                 pos.y = 2.5f;
 
-                // マウスが当たった場所へ砂埃を移動
                 dustParticle.transform.position = pos;
 
-                // 砂埃を発生させる
                 emission.enabled = true;
             }
             else
             {
-                // 対象Layer以外なら砂埃を出さない
                 emission.enabled = false;
             }
         }
         else
         {
-            // 左クリックを離したら砂埃を出さない
             emission.enabled = false;
         }
     }
