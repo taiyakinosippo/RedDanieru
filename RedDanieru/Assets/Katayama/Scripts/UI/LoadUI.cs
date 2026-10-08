@@ -117,9 +117,9 @@ public class LoadUI : MonoBehaviour
 
         foreach (var dungeon in cachedDungeons)
         {
-            Debug.Log(
-                $"Name={dungeon.dungeonName} Tag={dungeon.tag}"
-            );
+            //Debug.Log(
+            //    $"Name={dungeon.dungeonName} Tag={dungeon.tag}"
+            //);
         }
 
         var randomDungeons = cachedDungeons.OrderBy(x => Random.value).Take(Mathf.Min(20, cachedDungeons.Length));
