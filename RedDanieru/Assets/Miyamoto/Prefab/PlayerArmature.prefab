@@ -752,6 +752,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackData:
   - {fileID: 11400000, guid: 6dfcc78475f8196488788fa58960f00e, type: 2}
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 513
   _attackPoint: {fileID: 2325853284761564942}
 --- !u!114 &7366741231797108926
 MonoBehaviour:

@@ -188,9 +188,7 @@ namespace Player
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
             // プレイヤーを移動させる＋プレイヤーのジャンプ(落下)も考慮する＋敵と重なっていたら横に押し出す
-            _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
-                             new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime +
-                             GetEnemyPushOut());
+            _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime +GetEnemyPushOut());
 
             _playerAnimation.PlayerMoveAnimatior(_animationBlend, inputMagnitude);
         }
