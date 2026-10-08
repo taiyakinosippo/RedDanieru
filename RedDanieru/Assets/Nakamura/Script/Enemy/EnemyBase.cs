@@ -206,7 +206,7 @@ public class EnemyBase : MonoBehaviour
 
             //プレイヤーとの距離が攻撃範囲内の場合、攻撃する
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)
+            if (distanceToPlayer <= enemyAttackArea)
             {
                 //攻撃範囲内なら常に停止
                 agent.isStopped = true;
@@ -552,12 +552,23 @@ public class EnemyBase : MonoBehaviour
     }
 
     //敵の移動速度を変動させる
-    public float AddEnemyMoveSpeed(float value)
+    public void AddEnemyMoveSpeed(float value)
     {
         float previousSpeed = enemyMoveSpeed;  //変更前の速度を保存
-        Debug.Log(value);
 
         enemyMoveSpeed += value;
+        if (enemyMoveSpeed < 0)
+            enemyMoveSpeed = 0;
+
+        agent.speed = enemyMoveSpeed;  //NavMeshAgentの速度も更新
+    }
+
+
+    public float SetEnemyMoveSpeed(float value)
+    {
+        float previousSpeed = enemyMoveSpeed;  //変更前の速度を保存
+
+        enemyMoveSpeed = value;
         if (enemyMoveSpeed < 0)
             enemyMoveSpeed = 0;
 
