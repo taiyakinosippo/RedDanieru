@@ -614,7 +614,6 @@ public class DungeonUIManager : MonoBehaviour
 
         GameStartbutton.interactable = false;
 
-        // BGMやプレイヤー生成は、開始が確定したあと全員の画面でFusionLauncher.HandleGameStartedが行う
         NetworkGameState.Instance.RequestStartGame();
     }
 
