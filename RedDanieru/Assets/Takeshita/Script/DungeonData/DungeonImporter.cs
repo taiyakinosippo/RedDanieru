@@ -93,7 +93,7 @@ public class DungeonImporter : MonoBehaviour
                     string json =
                         request.downloadHandler.text;
 
-                    Debug.Log("受信文字数=" + json.Length);
+                    //Debug.Log("受信文字数=" + json.Length);
 
                     if (string.IsNullOrEmpty(json))
                     {
@@ -123,7 +123,7 @@ public class DungeonImporter : MonoBehaviour
             LoadedDungeonId = dungeonId;
             loaded = true;
 
-            Debug.Log($"ダンジョン読込完了 : {dungeonId} ({data.width}x{data.depth})");
+            //Debug.Log($"ダンジョン読込完了 : {dungeonId} ({data.width}x{data.depth})");
         }
         finally
         {

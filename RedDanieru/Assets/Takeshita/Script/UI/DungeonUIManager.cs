@@ -349,7 +349,7 @@ public class DungeonUIManager : MonoBehaviour
     public void MultiMode()
     {
         GameModeManager.IsMultiplayer = true;
-        Debug.Log("Multi");
+        //Debug.Log("Multi");
         MapSelectButton();
     }
 
@@ -399,8 +399,8 @@ public class DungeonUIManager : MonoBehaviour
 
     public void MapSelectButton()
     {
-        Debug.Log("MapSelectButton");
-        Debug.Log("DungeonName=" + RoomInfo.SelectedDungeonName);
+        //Debug.Log("MapSelectButton");
+        //Debug.Log("DungeonName=" + RoomInfo.SelectedDungeonName);
 
         MatchingRoomCreateWindow.SetActive(true);
         MatchingRoomCreateLaycast.SetActive(true);
@@ -422,7 +422,7 @@ public class DungeonUIManager : MonoBehaviour
         RoomInfo.IsPrivate = IsPrivateRoom;
         RoomInfo.MaxPlayers = MaxPlayers;
 
-        Debug.Log("RoomID = " + RoomInfo.RoomId);
+       // Debug.Log("RoomID = " + RoomInfo.RoomId);
 
         Laycast.SetActive(true);
         CautionObj.SetActive(true);
@@ -842,9 +842,9 @@ public class DungeonUIManager : MonoBehaviour
     {
         MaxPlayers = index + 2;
 
-        Debug.Log(
-            $"最大人数 : {MaxPlayers}人"
-        );
+        //Debug.Log(
+        //    $"最大人数 : {MaxPlayers}人"
+        //);
     }
 
     private void CheckSearchCondition()
