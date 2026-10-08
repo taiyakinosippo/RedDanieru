@@ -218,7 +218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyHP: 750
   enemyPower: 300
-  enemyDefense: 100
+  enemyDefense: 0
   enemyMoveSpeed: 3
   enemySearchArea: 15
   enemyTrackingTime: 3
@@ -388,6 +388,10 @@ PrefabInstance:
     - target: {fileID: 3478025250975259355, guid: cc2904f8420d54e45b80616562ff859c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8735932539965035658, guid: cc2904f8420d54e45b80616562ff859c, type: 3}
+      propertyPath: m_Controller
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
