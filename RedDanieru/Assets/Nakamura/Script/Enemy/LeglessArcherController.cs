@@ -52,7 +52,7 @@ public class LeglessArcherController : EnemyBase
                 float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
                 //プレイヤーが近すぎる場合は逃げる
-                if (distanceToPlayer < escapeDistance * transform.localScale.x)
+                if (distanceToPlayer < escapeDistance * transform.localScale.x && enemyMoveSpeed != 0)
                 {
                     //プレイヤーから逃げる
                     Vector3 escapeDirection = (transform.position - player.position).normalized;  //逃げる方向を計算
