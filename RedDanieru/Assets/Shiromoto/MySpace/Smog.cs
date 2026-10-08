@@ -14,6 +14,12 @@ public class DustEffect : MonoBehaviour
     {
         mainCamera = Camera.main;
         emission = dustParticle.emission;
+
+        // テストプレイ中は砂埃を再生しない
+        if (IsTestPlayScene())
+        {
+            emission.enabled = false;
+        }
     }
 
     void OnEnable()
@@ -29,27 +35,72 @@ public class DustEffect : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         mainCamera = Camera.main;
+
+        // テストプレイ中は砂埃を再生しない
+        if (IsTestPlayScene())
+        {
+            if (dustParticle != null)
+            {
+                dustParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+
+            if (dustParticle != null)
+            {
+                emission = dustParticle.emission;
+                emission.enabled = false;
+            }
+        }
     }
 
     void Update()
     {
+        // テストプレイ中は処理しない
+        if (IsTestPlayScene())
+        {
+            if (dustParticle != null)
+            {
+                emission.enabled = false;
+            }
+
+            return;
+        }
+
         // 左クリックを押している間
         if (Input.GetMouseButton(0))
         {
-            if (EventSystem.current.IsPointerOverGameObject()) return;
-
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, targetLayer))
+            if (EventSystem.current != null &&
+                EventSystem.current.IsPointerOverGameObject())
             {
-                //高さを固定
+                return;
+            }
+
+            if (mainCamera == null)
+            {
+                mainCamera = Camera.main;
+
+                if (mainCamera == null)
+                    return;
+            }
+
+            Ray ray =
+                mainCamera.ScreenPointToRay(
+                    Input.mousePosition
+                );
+
+            if (Physics.Raycast(
+                ray,
+                out RaycastHit hit,
+                100f,
+                targetLayer))
+            {
+                // 高さを固定
                 Vector3 pos = hit.point;
                 pos.y = 2.5f;
 
                 // マウスが当たった場所へ砂埃を移動
                 dustParticle.transform.position = pos;
 
-                // 新しい砂埃を発生させる
+                // 砂埃を発生させる
                 emission.enabled = true;
             }
             else
@@ -63,5 +114,10 @@ public class DustEffect : MonoBehaviour
             // 左クリックを離したら砂埃を出さない
             emission.enabled = false;
         }
+    }
+
+    private bool IsTestPlayScene()
+    {
+        return SceneManager.GetActiveScene().name == "Testplay";
     }
 }
