@@ -135,6 +135,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerArmature (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2541269729341896002, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: a3991f3216ccfc94c83b66c1915733e5, type: 2}
+    - target: {fileID: 2541269729341896002, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 4971866911252378769, guid: a3991f3216ccfc94c83b66c1915733e5, type: 2}
+    - target: {fileID: 2541269729341896002, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6363232815336297457, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.39
