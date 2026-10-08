@@ -15874,6 +15874,7 @@ GameObject:
   - component: {fileID: 1144079127}
   - component: {fileID: 1144079128}
   - component: {fileID: 1144079129}
+  - component: {fileID: 1144079130}
   m_Layer: 0
   m_Name: DungeonManager
   m_TagString: Untagged
@@ -16063,6 +16064,18 @@ MonoBehaviour:
   cameraPosition: {x: 16, y: 30, z: 16}
   cameraRotation: {x: 90, y: 0, z: 0}
   titleSceneName: Takeshita_Matching
+--- !u!114 &1144079130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1144079121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad599aec06ef18d429d34cfe5adbd4b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1147053230
 GameObject:
   m_ObjectHideFlags: 0
