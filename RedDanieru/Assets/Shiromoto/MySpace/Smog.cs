@@ -129,6 +129,9 @@ public class DustEffect : MonoBehaviour
 
     private bool IsTestPlayScene()
     {
-        return SceneManager.GetActiveScene().name == "Testplay";
+        string sceneName = SceneManager.GetActiveScene().name;
+
+        return sceneName == "Testplay" ||
+               sceneName == "Takeshita_Matching";
     }
 }

@@ -9,7 +9,9 @@ namespace Player
     public class PlayerAttack : MonoBehaviour
     {
         [SerializeField] List<PlayerAttackData> attackData = new ();
+        [SerializeField] LayerMask _wallLayer;
         public  Transform _attackPoint;
+
         private PlayerAnimation _playerAnimation;
         private PlayerStatus _playerStatus;
         private PlayerAttackData _currentAttackData;
@@ -18,6 +20,10 @@ namespace Player
         private HashSet<EnemyBase> hitEnemies = new();
 
         private bool _isAttackHitActive = false;
+
+        // 攻撃の当たる位置と回転を計算するための変数
+        private Vector3 _attackPosition;
+        private Quaternion _attackRotation;
 
         void Start()
         {
@@ -49,7 +55,7 @@ namespace Player
             _input.attack = false;
 
             //当たり判定をここで有効にする
-            _isAttackHitActive = true;
+            _isAttackHitActive = false;
 
             // 攻撃データを決定
             _currentAttackData = attackData[0];
@@ -62,7 +68,6 @@ namespace Player
             
         }
 
-
         //------------------------------------------------------
         //プレイヤーの攻撃があたった場合の(ダメージ、属性)
         //------------------------------------------------------
@@ -71,30 +76,32 @@ namespace Player
             if (_currentAttackData != null)
             {
                 //攻撃の当たる位置を計算する
-                Vector3 attackPosition =
+                _attackPosition =
     　　　　　　_attackPoint.position +
     　　　　　　_attackPoint.rotation * _currentAttackData.attackOffset;
 
                 //攻撃の当たり判定の回転を計算する
-                Quaternion attackRotation =
+                _attackRotation =
     　　　　　　_attackPoint.rotation *
     　　　　　　Quaternion.Euler(_currentAttackData.attackRotation);
 
                 //攻撃があったかどうかを判定する
                 Collider[] hitColliders =
-                 Physics.OverlapBox(
-                attackPosition,
+                Physics.OverlapBox(
+                _attackPosition,
                 _currentAttackData.playerAttackRadius,
-               attackRotation,
+                _attackRotation,
                 _currentAttackData.hitLayer,
-                QueryTriggerInteraction.Ignore
-            );
+                QueryTriggerInteraction.Ignore);
+
                 //攻撃があたった場合の処理
                 foreach (Collider collider in hitColliders)
                 {
                     EnemyBase enemy = collider.GetComponent<EnemyBase>();
 
                     if (enemy == null) continue;
+
+                    if (IsWallInFront(enemy)) continue;
 
                     // すでに今回の攻撃で攻撃済みなら無視
                     if (hitEnemies.Contains(enemy))continue;
@@ -104,11 +111,18 @@ namespace Player
                     // 今のところ仕様が決まっていないので、ダメージはプレイヤーの攻撃力と攻撃モーションによって決まるようにする
                     int damage =_currentAttackData.additionalDamage + _playerStatus.CurrentAttack;
 
-                    // マルチでは全員の画面の敵にダメージが入るようにNetworkGameStateを通す
-                    NetworkGameState.DamageEnemy(enemy, damage);
+                    enemy.Damage(damage);
 
                 }
             }
+        }
+        
+        //--------------------------------------------------
+        //Animation Eventで攻撃判定開始
+        //--------------------------------------------------
+        public void StartAttackHit()
+        {
+            _isAttackHitActive = true;
         }
 
 
@@ -125,7 +139,26 @@ namespace Player
             // プレイヤーのAttackアクション終了
             _actionPriority.EndAction();
         }
+
+        private bool IsWallInFront(EnemyBase enemy)
+        {
+            Vector3 PlayerPosition = transform.position;
+            Vector3 targetPosition = enemy.transform.position;
+
+            Vector3 direction = targetPosition - PlayerPosition;
+            float distance = direction.magnitude;
+
+            return Physics.Raycast(
+                PlayerPosition,
+                direction.normalized,
+                distance,
+                _wallLayer,
+                QueryTriggerInteraction.Ignore
+            );
+        }
     }
+
+    
 
 
 }
