@@ -23,7 +23,7 @@ public class DungeonListViewer : MonoBehaviour
 
         UnityWebRequest request =
             UnityWebRequest.Get(
-                "http://10.219.32.66/RedDaniel/list_dungeon.php"
+                ServerApi.Url("list_dungeon.php")
             );
 
         yield return request.SendWebRequest();
