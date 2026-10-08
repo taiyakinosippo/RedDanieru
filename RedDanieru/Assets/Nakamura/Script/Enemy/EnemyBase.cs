@@ -375,14 +375,15 @@ public class EnemyBase : MonoBehaviour
         //ダメージ中はダメージを受けない
         if (currentState == enemyState.Damage)
             return;
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowDamage(playerPow, transform.position);
+     
         Debug.Log("Enemy hit");
         //ダメージ計算
         int damage = playerPow - enemyDefense;
-        if (damage > 0)
-            currentHp -= damage;
+        if (damage > 0) currentHp -= damage;
 
+        //UIにダメージを表示にするために値を渡す
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowDamage(damage, transform.position);
         if (currentHp <= 0)
         {
             //死亡処理
