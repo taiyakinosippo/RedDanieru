@@ -12757,7 +12757,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &958366390
 RectTransform:
   m_ObjectHideFlags: 0
@@ -15957,7 +15957,6 @@ MonoBehaviour:
   RoomKeyText: {fileID: 1177709637}
   CautionText: {fileID: 1754813140}
   passwordInputField: {fileID: 1503237835}
-  playerCountDropdown: {fileID: 958366391}
   createRoomIdInput: {fileID: 773521741}
   fusionLauncher: {fileID: 196130119}
   roomDBUploader: {fileID: 1144079126}
@@ -22905,7 +22904,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 20
   m_Viewport: {fileID: 1341745663}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 112537290}
