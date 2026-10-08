@@ -181,6 +181,9 @@ public class DungeonUIManager : MonoBehaviour
     // マルチのゲームが始まっているか
     private bool isInGame;
 
+    // マップセレクト中に音を拾うシーンのカメラのリスナー（ゲーム中はプレイヤーのカメラが拾う）
+    private AudioListener sceneAudioListener;
+
     private const float AliveInterval = 3f;
 
     public void Start()
@@ -227,9 +230,21 @@ public class DungeonUIManager : MonoBehaviour
 
         createRoomIdInput.onValueChanged.AddListener(OnCreateRoomIdChanged);
 
+        // シーンにAudioListenerが無いとBGMが聞こえないので、プレイヤーが出るまではカメラで拾う
+        if (Camera.main != null)
+        {
+            sceneAudioListener = Camera.main.GetComponent<AudioListener>();
+
+            if (sceneAudioListener != null)
+            {
+                sceneAudioListener.enabled = true;
+            }
+        }
+
+        // タイトルから流れているBGMを途切れさせずに引き継ぐ
         if (BGMManager_Takeshita.Instance != null)
         {
-            BGMManager_Takeshita.Instance.PlayNormalBGM();
+            BGMManager_Takeshita.Instance.ContinueNormalBGM();
         }
 
         fusionLauncher.MatchFailed += OnMatchFailed;
@@ -247,6 +262,8 @@ public class DungeonUIManager : MonoBehaviour
 
     private void Update()
     {
+        DisableSceneAudioListenerIfPlayerSpawned();
+
         if (!GameModeManager.IsMultiplayer || !MatchingObj.activeSelf)
             return;
 
@@ -288,6 +305,23 @@ public class DungeonUIManager : MonoBehaviour
             playerCount >= 2 &&
             NetworkGameState.Instance != null &&
             !NetworkGameState.Instance.GameStarted;
+    }
+
+    // プレイヤーのカメラ（別のAudioListener）が出てきたら、シーンのカメラのリスナーを切る
+    // リスナーが2つあると警告が出続けるため。切った後は何もしない
+    private void DisableSceneAudioListenerIfPlayerSpawned()
+    {
+        if (sceneAudioListener == null || !sceneAudioListener.enabled)
+            return;
+
+        foreach (AudioListener listener in FindObjectsByType<AudioListener>(FindObjectsSortMode.None))
+        {
+            if (listener != sceneAudioListener && listener.enabled)
+            {
+                sceneAudioListener.enabled = false;
+                return;
+            }
+        }
     }
 
     public string UploadTag
@@ -614,7 +648,6 @@ public class DungeonUIManager : MonoBehaviour
 
         GameStartbutton.interactable = false;
 
-        // BGMやプレイヤー生成は、開始が確定したあと全員の画面でFusionLauncher.HandleGameStartedが行う
         NetworkGameState.Instance.RequestStartGame();
     }
 

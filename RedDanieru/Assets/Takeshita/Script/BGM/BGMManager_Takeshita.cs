@@ -91,8 +91,21 @@ public class BGMManager_Takeshita : MonoBehaviour
     {
         StopBattleBGM();
 
-        if (normalBgmSource != null &&
-            !normalBgmSource.isPlaying)
+        if (normalBgmSource != null)
+        {
+            normalBgmSource.Stop();
+            normalBgmSource.Play();
+        }
+
+        Debug.Log("PlayNormalBGM再生中");
+    }
+
+    // 通常BGMが流れていればそのまま引き継ぎ、止まっていれば最初から再生する
+    public void ContinueNormalBGM()
+    {
+        StopBattleBGM();
+
+        if (normalBgmSource != null && !normalBgmSource.isPlaying)
         {
             normalBgmSource.Play();
         }
@@ -100,6 +113,7 @@ public class BGMManager_Takeshita : MonoBehaviour
 
     public void PlayBattleBGM()
     {
+        StopNormalBGM();
         if (normalBgmSource != null)
         {
             normalBgmSource.Stop();
@@ -109,6 +123,7 @@ public class BGMManager_Takeshita : MonoBehaviour
         {
             battleBgmSource.Play();
         }
+        Debug.Log("PlayButtleBGM再生中");
     }
 
     public void StopNormalBGM()
@@ -117,6 +132,7 @@ public class BGMManager_Takeshita : MonoBehaviour
         {
             normalBgmSource.Stop();
         }
+        Debug.Log("PlayNormalBGM停止中");
     }
 
     public void StopBattleBGM()
@@ -125,5 +141,31 @@ public class BGMManager_Takeshita : MonoBehaviour
         {
             battleBgmSource.Stop();
         }
+        Debug.Log("PlayButtleBGM停止中");
+    }
+
+    public void PlayTitleBGM()
+    {
+        if (normalBgmSource != null)
+        {
+            normalBgmSource.Stop();
+        }
+
+        if (battleBgmSource != null)
+        {
+            battleBgmSource.Stop();
+        }
+
+        if (normalBgmSource != null)
+        {
+            normalBgmSource.clip = defaultClip;
+            normalBgmSource.Play();
+        }
+    }
+
+    public void StopAllBGM()
+    {
+        StopNormalBGM();
+        StopBattleBGM();
     }
 }

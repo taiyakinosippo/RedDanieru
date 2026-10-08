@@ -111,6 +111,11 @@ public class GameStopManager: MonoBehaviour
 
         ResetPauseState();
 
+        if (BGMManager_Takeshita.Instance != null)
+        {
+            BGMManager_Takeshita.Instance.PlayTitleBGM();
+        }
+
         // 接続を切らずにシーンを移動すると、ルームに自分が残ったままになる
         if (FusionLauncher.Instance != null)
         {
