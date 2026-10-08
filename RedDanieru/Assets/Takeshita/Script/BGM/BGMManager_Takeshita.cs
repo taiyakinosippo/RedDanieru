@@ -100,6 +100,17 @@ public class BGMManager_Takeshita : MonoBehaviour
         Debug.Log("PlayNormalBGM再生中");
     }
 
+    // 通常BGMが流れていればそのまま引き継ぎ、止まっていれば最初から再生する
+    public void ContinueNormalBGM()
+    {
+        StopBattleBGM();
+
+        if (normalBgmSource != null && !normalBgmSource.isPlaying)
+        {
+            normalBgmSource.Play();
+        }
+    }
+
     public void PlayBattleBGM()
     {
         StopNormalBGM();
