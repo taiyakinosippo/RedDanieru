@@ -24,9 +24,11 @@ public class CreateStick : MonoBehaviour
 
     void Update()
     {
-        // クリア・ゲームオーバー時はメインカメラが無効になるので何もしない（以前は毎フレーム例外が出ていた）
         if (Camera.main == null)
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse0)) Inster();
             return;
+        }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
