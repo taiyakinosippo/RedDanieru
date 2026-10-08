@@ -97,6 +97,7 @@ namespace Player
             // 回避出来る時間を減らす
             _evadeTimer -= Time.deltaTime;
 
+            _playerStatus.PlayerDefenseUp(1000);
             // 回避終了
             if (_evadeTimer <= 0.0f)
             {
@@ -129,6 +130,7 @@ namespace Player
             // 減速終了
             if (_decelerationTimer <= 0.0f)
             {
+                _playerStatus.PlayerDefenseDown();
                 _decelerationTimer = 0.0f;
                 _playerAnimation.PlayerEvadeAnimationEnd();
                 _input.evade = false;
