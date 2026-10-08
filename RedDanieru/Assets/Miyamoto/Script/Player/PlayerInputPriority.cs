@@ -59,11 +59,11 @@ namespace Player
                 AddAction(ActionType.Evade);
             }
 
-            if (_input.cameraChange)
-            {
-                Debug.Log("CameraChange");
-                AddAction(ActionType.CameraChange);
-            }
+            //if (_input.cameraChange)
+            //{
+            //    Debug.Log("CameraChange");
+            //    AddAction(ActionType.CameraChange);
+            //}
 
             if (_input.sticker && Grounded)
             {
@@ -91,8 +91,8 @@ namespace Player
                 case ActionType.Attack:
                     return 70;
 
-                case ActionType.CameraChange:
-                    return 30;
+                //case ActionType.CameraChange:
+                //    return 30;
 
                 case ActionType.Move:
                     return 10;
