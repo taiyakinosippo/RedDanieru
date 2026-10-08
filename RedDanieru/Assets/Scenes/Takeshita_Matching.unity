@@ -573,10 +573,7 @@ MonoBehaviour:
   - RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
   - RawGuidValue: 936e8d781bab5ee40aaef89b30a096e9
   spawnAreaCenter: {fileID: 2385698833403189835}
-  areaWidth: 3.5
-  areaDepth: 8
-  networkGameState: {fileID: 3805771293113062858, guid: 3d8e31cc28db5004faf643c58c5494c8, type: 3}
-  CanSpawn: 0
+  importer: {fileID: 0}
 --- !u!4 &44870708
 Transform:
   m_ObjectHideFlags: 0
@@ -2844,9 +2841,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   soloPlayerPrefab: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
   spawnPoint: {fileID: 2385698833403189835}
-  runner: {fileID: 0}
   playerSpawner: {fileID: 44870706}
   networkGameStatePrefab: {fileID: 3805771293113062858, guid: 3d8e31cc28db5004faf643c58c5494c8, type: 3}
+  importer: {fileID: 0}
 --- !u!4 &196130120
 Transform:
   m_ObjectHideFlags: 0
@@ -16028,6 +16025,7 @@ MonoBehaviour:
   MachingRoomCreateText: {fileID: 2009689944}
   SclollView: {fileID: 403514442}
   JoinCautionRoomText: {fileID: 1516287748}
+  joinStatusText: {fileID: 0}
   fusionLauncher: {fileID: 196130119}
   roomDBUploader: {fileID: 1144079126}
   dungeonUIManager: {fileID: 1144079124}
@@ -16047,6 +16045,7 @@ MonoBehaviour:
   content: {fileID: 1058553602}
   roomButtonPrefab: {fileID: 5777309063693440220, guid: c0a848af9235ed149a76eead99fe0a0c, type: 3}
   roomListLoader: {fileID: 1144079127}
+  roomDBUploader: {fileID: 0}
 --- !u!114 &1144079129
 MonoBehaviour:
   m_ObjectHideFlags: 0

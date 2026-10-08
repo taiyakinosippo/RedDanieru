@@ -663,7 +663,7 @@ MonoBehaviour:
   SyncScale: 0
   SyncParent: 0
   _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
+  DisableSharedModeInterpolation: 1
 --- !u!114 &8290669454086937819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -706,6 +706,10 @@ MonoBehaviour:
   GroundLayers:
     serializedVersion: 2
     m_Bits: 257
+  EnemyLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  EnemyPushOutSpeed: 6
 --- !u!114 &6575345361052619142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -860,6 +864,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b097b5903026804d87183bb6bb48ef7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _IsDead:
+    _value: 0
 --- !u!114 &8412102540417615573
 MonoBehaviour:
   m_ObjectHideFlags: 0
