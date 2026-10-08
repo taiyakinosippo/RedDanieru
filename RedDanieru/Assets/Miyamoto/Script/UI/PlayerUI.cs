@@ -7,7 +7,6 @@ using Unity.VisualScripting;
 
 public class PlayerUI : MonoBehaviour
 {
-    public TextMeshProUGUI _dieText;
 
     public PlayerStatus _status;
 
@@ -19,7 +18,6 @@ public class PlayerUI : MonoBehaviour
 
     private void Start()
     {
-        _dieText.enabled = false;
         Debug.Log("PlayerUI Object = " +gameObject.name);
         Debug.Log("Root=" + transform.root.name);
         _cursorController = GetComponent<CursorController>();
@@ -43,11 +41,6 @@ public class PlayerUI : MonoBehaviour
     {
 
        NetworkObject obj = GetComponentInParent<NetworkObject>();
-
-       if (obj != null && obj.HasInputAuthority)
-       {
-                _dieText.enabled = true;
-       }
 
         // カーソルを表示する
         _cursorController.ShowCursor();

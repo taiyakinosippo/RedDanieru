@@ -90,17 +90,7 @@ public class GameOverManager : MonoBehaviour
         isGameOver = true;
 
         Time.timeScale = 0f;
-
-        PlayerUI[] playerUIs =
-    FindObjectsOfType<PlayerUI>(true);
-
-        foreach (PlayerUI ui in playerUIs)
-        {
-            if (ui._dieText != null)
-            {
-                ui._dieText.enabled = false;
-            }
-        }
+      
 
         // 全員の画面でそれぞれ判定しているので、自分の画面のプレイヤーを消すだけでよい
         GameObject[] players =
