@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Fusion;
 
 public class GameStopManager: MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class GameStopManager: MonoBehaviour
 
     public bool CanOpenPauseMenu { get; private set; }
     public static bool IsPaused { get; private set; }
+
+    private NetworkRunner runner;
 
     private void Update()
     {
@@ -55,6 +58,8 @@ public class GameStopManager: MonoBehaviour
 
     public void Start()
     {
+        runner = FindObjectOfType<NetworkRunner>();
+
         SettingUI.SetActive(false);
         GameStopUI.SetActive(false);
         GameStopCautionUI.SetActive(false);

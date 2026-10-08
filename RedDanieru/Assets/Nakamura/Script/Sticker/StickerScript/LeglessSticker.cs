@@ -8,7 +8,7 @@ public class LeglessSticker : StickerBase
     public override void OnEnemyApply()
     {
         //敵の速度を保存
-        saveSpeed = enemyScript.AddEnemyMoveSpeed(-999f);
+        saveSpeed = enemyScript.SetEnemyMoveSpeed(0.0f);
     }
 
     //ステッカーが敵から剥がれたときの処理

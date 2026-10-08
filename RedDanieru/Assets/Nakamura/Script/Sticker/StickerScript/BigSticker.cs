@@ -6,9 +6,11 @@ public class BigSticker : StickerBase
     private float bigScale = 3.0f;  //拡大率
     //private float scaleTime = 2.0f;  //拡大縮小時間
     private int addPower = 100;  //攻撃力の拡大率
-    private float addSearchScale = 1.5f;  //索敵範囲の拡大率
+    private float addSearchScale = 1.0f;  //索敵範囲の拡大率
     private float addAttackScale = 1.0f;  //攻撃範囲の拡大率
     private float addAttackCoolTime = 0.5f;  //攻撃クールタイムの拡大率
+    private float setSpeed = 1.0f;  //移動速度の変化量
+    private float saveSpeed;  //保存する速度
 
     //public override StickerState.State OnEnemyUpdate(GameObject enemy, StickerState.State state)
     //{
@@ -47,6 +49,7 @@ public class BigSticker : StickerBase
         enemyScript.AddEnemySearchArea(addSearchScale);
         enemyScript.AddEnemyAttackArea(addAttackScale);
         enemyScript.AddEnemyAttackCoolTime(addAttackCoolTime);
+        saveSpeed = enemyScript.SetEnemyMoveSpeed(setSpeed);
     }
     
     //ステッカーが敵から剥がれたときの処理
@@ -60,6 +63,7 @@ public class BigSticker : StickerBase
         enemyScript.AddEnemySearchArea(-addSearchScale);
         enemyScript.AddEnemyAttackArea(-addAttackScale);
         enemyScript.AddEnemyAttackCoolTime(-addAttackCoolTime);
+        enemyScript.SetEnemyMoveSpeed(saveSpeed);
 
         //float scale = transform.localScale.x;  //現在の拡大率
 
