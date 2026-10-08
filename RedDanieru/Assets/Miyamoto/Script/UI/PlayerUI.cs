@@ -42,15 +42,15 @@ public class PlayerUI : MonoBehaviour
 
        NetworkObject obj = GetComponentInParent<NetworkObject>();
 
-        // カーソルを表示する
-        _cursorController.ShowCursor();
         Debug.Log("死亡UI表示");
 
        if (!GameModeManager.IsMultiplayer)
        {
                 FindObjectOfType<GameOverManager>()
                     ?.GameOver();
-       }
+            // カーソルを表示する
+            _cursorController.ShowCursor();
+        }
         
     }
 }
