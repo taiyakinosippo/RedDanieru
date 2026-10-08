@@ -8,6 +8,9 @@ public class StickerState : MonoBehaviour
 
     public bool isSpecialMove = false;  //ステッカーによる特殊行動の有無
 
+    //trueのときは見た目だけ（マルチで他の人の画面の敵。効果はホストの画面で動く）
+    public bool IsVisualOnly { get; private set; }
+
     private void Awake()
     {
         //ステッカー表示用コンポーネント取得
@@ -19,7 +22,10 @@ public class StickerState : MonoBehaviour
         //ゲーム開始時に貼られているステッカーがあれば適用する
         if (currentSticker != Sticker.None)
         {
-            Apply(currentSticker);
+            if (IsVisualOnly)
+                ApplyVisual(currentSticker);
+            else
+                Apply(currentSticker);
         }
     }
 
@@ -109,7 +115,45 @@ public class StickerState : MonoBehaviour
     public void OnHit()
     {
         //ダメージを反応させる
-        currentStickerScript.OnDamageHit();
+        currentStickerScript?.OnDamageHit();
+    }
+
+    //-----マルチプレイ用-----
+
+    //見た目だけ変える（効果のスクリプトは付けない）
+    public void ApplyVisual(Sticker sticker)
+    {
+        currentSticker = sticker;
+
+        if (sticker == Sticker.None)
+            stickerDisplay.HideSticker();
+        else
+            stickerDisplay.ShowSticker(sticker);
+    }
+
+    public void SetVisualOnly(bool visualOnly)
+    {
+        if (IsVisualOnly == visualOnly)
+            return;
+
+        IsVisualOnly = visualOnly;
+
+        if (visualOnly)
+        {
+            //効果のスクリプトだけ外す（剥がしたときの処理は呼ばない。種類と見た目は残す）
+            if (currentStickerScript != null)
+            {
+                Destroy(currentStickerScript);
+                currentStickerScript = null;
+            }
+        }
+        else if (currentSticker != Sticker.None && currentStickerScript == null)
+        {
+            //ホストを引き継いだので効果を付け直す
+            Sticker sticker = currentSticker;
+            currentSticker = Sticker.None;
+            Apply(sticker);
+        }
     }
 }
 

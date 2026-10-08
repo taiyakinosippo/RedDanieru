@@ -30,7 +30,12 @@ public class PlayerName : NetworkBehaviour
 
         if (Object.HasInputAuthority)
         {
-            RPC_SetName(UserData.UserName);
+            // タイトルを通らずに始めたとき（マッチングシーンから直接再生など）は名前が空になるので代わりの名前を付ける
+            string userName = string.IsNullOrWhiteSpace(UserData.UserName)
+                ? $"Player{Runner.LocalPlayer.PlayerId}"
+                : UserData.UserName;
+
+            RPC_SetName(userName);
         }
     }
 

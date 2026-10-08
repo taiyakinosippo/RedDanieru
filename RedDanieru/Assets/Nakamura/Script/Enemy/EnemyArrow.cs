@@ -12,6 +12,7 @@ public class EnemyArrow : MonoBehaviour
     private float firstFallSpeed = 1f;  //矢の落下初速度
     private float maxFallSpeed = 5f;  //矢の最大落下速度
     private float fallAcceleration = 0.3f;  //矢の落下加速度
+    private bool visualOnly = false;  //見た目だけの矢（マルチで他の人の画面に出す矢）
 
     void Start()
     {
@@ -38,10 +39,11 @@ public class EnemyArrow : MonoBehaviour
     }
 
     //敵の攻撃力を設定する関数
-    public void Setting(int power, LeglessArcherController controller)
+    public void Setting(int power, LeglessArcherController controller, bool isVisualOnly = false)
     {
         enemyPower = power;
         leglessArcherController = controller;
+        visualOnly = isVisualOnly;
     }
 
     //矢の初期化処理
@@ -49,13 +51,14 @@ public class EnemyArrow : MonoBehaviour
     {
         enemyPower = 10;  //デフォルトの攻撃力にリセット
         fallSpeed = firstFallSpeed;  //矢の落下速度を初期化
+        visualOnly = false;
     }
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Arrow Hit : " + other.gameObject.name);
 
-        //プレイヤーに当たった処理
-        if (other.CompareTag("Player"))
+        //プレイヤーに当たった処理（見た目だけの矢はダメージを与えない）
+        if (!visualOnly && other.CompareTag("Player"))
         {
             PlayerStatus playerStatus =
                 other.GetComponentInParent<PlayerStatus>();

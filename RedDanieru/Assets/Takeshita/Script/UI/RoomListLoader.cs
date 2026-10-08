@@ -1,7 +1,6 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
 
 public class RoomListLoader : MonoBehaviour
@@ -27,7 +26,17 @@ public class RoomListLoader : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI JoinCautionRoomText;
 
+    [Tooltip("参加待ち画面の状態表示（未設定ならMatchingObj内の「MatchingNow_text (1)」を使う）")]
+    [SerializeField]
+    private TMP_Text joinStatusText;
+
     private RoomData selectedRoom;
+
+    // 確認画面を開いたときに入力されていたパスワード
+    private string selectedRoomPassword;
+
+    // 接続に失敗したときに出す文
+    private string joinMessage;
 
     [SerializeField]
     private FusionLauncher fusionLauncher;
@@ -50,12 +59,35 @@ public class RoomListLoader : MonoBehaviour
         MatchingObj.SetActive(false);
         MaxPlayerCautionObj.SetActive(false);
 
+        if (joinStatusText == null)
+        {
+            Transform status = MatchingObj.transform.Find("MatchingNow_text (1)");
+
+            if (status != null)
+            {
+                joinStatusText = status.GetComponent<TMP_Text>();
+            }
+        }
+
+        fusionLauncher.MatchFailed += OnMatchFailed;
+    }
+
+    private void OnDestroy()
+    {
+        if (fusionLauncher != null)
+        {
+            fusionLauncher.MatchFailed -= OnMatchFailed;
+        }
     }
 
     private void OnEnable()
     {
-        refresCoroutine =
-            StartCoroutine(RefreshLoop());
+        // 一覧の表示先が無いときは取得しない
+        if (content != null)
+        {
+            refresCoroutine =
+                StartCoroutine(RefreshLoop());
+        }
     }
 
     private void OnDisable()
@@ -63,6 +95,27 @@ public class RoomListLoader : MonoBehaviour
         if (refresCoroutine != null)
         {
             StopCoroutine(refresCoroutine);
+        }
+    }
+
+    private void Update()
+    {
+        if (!MatchingObj.activeSelf || joinStatusText == null)
+            return;
+
+        if (!string.IsNullOrEmpty(joinMessage))
+        {
+            joinStatusText.text = joinMessage;
+        }
+        else if (fusionLauncher.Runner == null)
+        {
+            joinStatusText.text = "接続中...";
+        }
+        else
+        {
+            joinStatusText.text =
+                $"ホストの開始を待っています ({fusionLauncher.PlayerCount}/{fusionLauncher.MaxPlayers})\n" +
+                $"ルームID : {RoomInfo.RoomId}";
         }
     }
 
@@ -78,43 +131,25 @@ public class RoomListLoader : MonoBehaviour
 
     IEnumerator LoadRooms()
     {
-        UnityWebRequest request =
-            UnityWebRequest.Get(
-                "http://10.219.32.66/RedDaniel/GetRooms.php"
-            );
+        RoomData[] rooms = null;
 
-        yield return request.SendWebRequest();
+        yield return roomDBUploader.GetRooms(result => rooms = result);
 
-        //Debug.Log(request.downloadHandler.text);
-
-        if (request.result !=
-            UnityWebRequest.Result.Success)
-        {
-            Debug.LogError(request.error);
+        if (content == null || rooms == null)
             yield break;
-        }
-
-        string json ="{\"rooms\":" +request.downloadHandler.text +"}";
-
-        RoomList list =
-            JsonUtility.FromJson<RoomList>(json);
-
-        Debug.Log("Room Count : " + list.rooms.Length);
 
         foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
 
-        foreach (RoomData room in list.rooms)
+        foreach (RoomData room in rooms)
         {
             if (room.is_private == 1)
                 continue;
 
             if (room.map_name != RoomInfo.SelectedDungeonName)
                 continue;
-
-            Debug.Log("表示対象：" + room.room_id);
 
             GameObject obj =
                 Instantiate(
@@ -165,16 +200,23 @@ public class RoomListLoader : MonoBehaviour
         );
     }
 
+    public void ShowJoinCaution(RoomData room)
+    {
+        ShowJoinCaution(room, "");
+    }
+
+    /// <summary>
+    /// 参加確認を出す（ここではまだ接続しない）
+    /// password : 非公開ルームのときに入力されていたパスワード
+    /// </summary>
     public void ShowJoinCaution(
-     RoomData room)
+     RoomData room, string password)
     {
         selectedRoom = room;
+        selectedRoomPassword = password ?? "";
 
         JoinCautionObj.SetActive(true);
 
-        bool isPrivate = room.is_private == 1;
-
-      
         string roomType =
             room.is_private == 1
             ? "非公開ルーム"
@@ -194,32 +236,46 @@ public class RoomListLoader : MonoBehaviour
         if (selectedRoom == null)
             return;
 
-        Debug.Log("dungeon_id = " + selectedRoom.dungeon_id);
+        StartCoroutine(JoinFlow(selectedRoom.room_id, selectedRoomPassword));
+    }
 
-        if (selectedRoom.current_players >=
-            selectedRoom.max_players)
+    /// <summary>
+    /// ルームに参加する（最新の情報で満員・パスワードを確認 → ステージ読込 → 接続）
+    /// </summary>
+    private IEnumerator JoinFlow(string roomId, string password)
+    {
+        yield return roomDBUploader.SearchRoom(roomId);
+
+        RoomData room = roomDBUploader.foundRoom;
+
+        if (room == null)
+        {
+            Debug.Log("ルームが見つかりません : " + roomId);
+
+            JoinCautionRoomText.text =
+                $"RoomID : {roomId}\n" +
+                "ルームが見つかりません\n" +
+                "（終了したか、既に始まっています）";
+            yield break;
+        }
+
+        Debug.Log("dungeon_id = " + room.dungeon_id);
+
+        if (room.current_players >=
+            room.max_players)
         {
             StartCoroutine(MaxPlayer());
-            return;
+            yield break;
         }
 
         // プライベートルームの場合
-        if (selectedRoom.is_private == 1)
+        if (room.is_private == 1 &&
+            password.Trim() != (room.password ?? "").Trim())
         {
-            string inputPassword =
-                dungeonUIManager.RoomSearchPassword;
+            Debug.Log("パスワード不一致");
 
-            Debug.Log($"入力PW=[{inputPassword}]");
-            Debug.Log($"DB PW=[{selectedRoom.password}]");
-
-            if (inputPassword.Trim() !=
-                selectedRoom.password.Trim())
-            {
-                Debug.Log("パスワード不一致");
-
-                StartCoroutine(PswObj());
-                return;
-            }
+            StartCoroutine(PswObj());
+            yield break;
         }
 
         JoinCautionObj.SetActive(false);
@@ -227,28 +283,37 @@ public class RoomListLoader : MonoBehaviour
         MatchingObj.SetActive(true);
         MachingRoomCreateText.SetActive(false);
 
-        RoomInfo.RoomId =
-            selectedRoom.room_id;
+        GameModeManager.IsMultiplayer = true;
 
-        RoomInfo.SelectedDungeon =
-            selectedRoom.dungeon_id;
+        RoomInfo.RoomId = room.room_id;
+        RoomInfo.SelectedDungeon = room.dungeon_id;
+        RoomInfo.SelectedDungeonName = room.map_name;
+        RoomInfo.MaxPlayers = room.max_players;
+        RoomInfo.Password = room.password;
+        RoomInfo.IsPrivate = room.is_private == 1;
 
-        RoomInfo.SelectedDungeonName =
-            selectedRoom.map_name;
+        joinMessage = null;
 
         importer.ImportDungeon(
-            selectedRoom.dungeon_id
+            room.dungeon_id
         );
 
-        StartCoroutine(
-            roomDBUploader.JoinRoom()
-        );
-
+        // 人数はホストが実際の接続数で更新するので、ここではDBの人数を増やさない
         fusionLauncher.StartMatch(
-            selectedRoom.room_id
+            room.room_id,
+            room.max_players,
+            false
         );
 
         dungeonUIManager.MatchingNow();
+    }
+
+    private void OnMatchFailed(string message)
+    {
+        if (MatchingObj.activeSelf)
+        {
+            joinMessage = message + "\n戻るボタンで戻ってください";
+        }
     }
 
     public IEnumerator PswObj()
@@ -278,11 +343,11 @@ public class RoomListLoader : MonoBehaviour
 
     public void MatchingBack()
     {
-        StartCoroutine(
-            roomDBUploader.LeaveRoom()
-        );
-
         fusionLauncher.CancelMatch();
+
+        // 前の部屋の情報を次に持ち越さない
+        RoomInfo.ClearRoom();
+        joinMessage = null;
 
         MatchingObj.SetActive(false);
         JoinCautionObj.SetActive(false);

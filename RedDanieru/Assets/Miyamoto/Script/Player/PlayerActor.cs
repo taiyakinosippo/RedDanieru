@@ -138,16 +138,12 @@ namespace Player
         //    }
         //}
 
-        //ソロ用UpDate
+        // ソロ・マルチ共通のUpdate
+        // マルチでは自分が操作するキャラだけ動かす（他の人のキャラはNetworkTransformで同期される）
+        // ※以前はFixedUpdateNetworkでも呼んでいたため、マルチだと1フレームに2回動いていた
         private void FixedUpdate()
         {
-            UpdatePlayer();
-        }
-
-        //マルチ用UpDate
-        public override void FixedUpdateNetwork()
-        {
-            if (!HasInputAuthority)
+            if (Object != null && Object.IsValid && !HasStateAuthority)
                 return;
 
             UpdatePlayer();
@@ -155,7 +151,7 @@ namespace Player
 
         private void UpdatePlayer()
         {
-            GameOverManager gameOver = FindObjectOfType<GameOverManager>();
+            GameOverManager gameOver = GameOverManager.Instance;
 
             if (gameOver != null && gameOver.IsGameOver)
             {
@@ -179,9 +175,6 @@ namespace Player
 
                 // 入力を取得
                 _actionPriority.CheckInput(_input, _playerMovement.Grounded);
-
-
-                Debug.Log(_actionPriority.currentActionType);
 
                 if (_actionPriority.currentActionType == ActionType.Move ||
                     _actionPriority.currentActionType == ActionType.None ||
@@ -250,7 +243,21 @@ namespace Player
 
         private void HidePlayer()
         {
+            // ソロでは通信していないのでRPCは使えない
+            if (Object == null || !Object.IsValid)
+            {
+                HidePlayerLocal();
+                return;
+            }
+
             RPC_HidePlayer();
+
+            NetworkAuthorityController authority = GetComponent<NetworkAuthorityController>();
+
+            if (authority != null)
+            {
+                authority.MarkDead();
+            }
 
             if (NetworkGameState.Instance != null)
             {
@@ -261,6 +268,11 @@ namespace Player
 
         [Rpc(RpcSources.All, RpcTargets.All)]
         private void RPC_HidePlayer()
+        {
+            HidePlayerLocal();
+        }
+
+        private void HidePlayerLocal()
         {
             CharacterController cc =
                 GetComponent<CharacterController>();

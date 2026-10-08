@@ -1,212 +1,201 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
+/// <summary>
+/// ルーム情報（ルームID・マップ・パスワード・人数）の保存と検索
+/// テストモードのときはPHPサーバーの代わりにLocalTestServerを使う
+/// </summary>
 public class RoomDBUploader : MonoBehaviour
 {
     public RoomData foundRoom;
 
+    // サーバーが落ちているときに固まらないようにする
+    private const int TimeoutSeconds = 5;
+
     public IEnumerator UploadRoom()
     {
+        RoomData room = new RoomData
+        {
+            room_id = RoomInfo.RoomId,
+            dungeon_id = RoomInfo.SelectedDungeon,
+            map_name = RoomInfo.SelectedDungeonName,
+            password = RoomInfo.Password ?? "",
+            is_private = RoomInfo.IsPrivate ? 1 : 0,
+            max_players = RoomInfo.MaxPlayers,
+            current_players = 1
+        };
+
+        Debug.Log($"ルーム保存 ID={room.room_id} Map={room.map_name} Private={room.is_private} Max={room.max_players}");
+
+        if (OnlineTestMode.Enabled)
+        {
+            LocalTestServer.SaveRoom(room);
+            yield break;
+        }
+
         WWWForm form = new WWWForm();
+        form.AddField("room_id", room.room_id);
+        form.AddField("dungeon_id", room.dungeon_id ?? "");
+        form.AddField("map_name", room.map_name ?? "");
+        form.AddField("password", room.password);
+        form.AddField("is_private", room.is_private);
+        form.AddField("max_players", room.max_players);
 
-        Debug.Log("RoomId = " + RoomInfo.RoomId);
-        Debug.Log("Map = " + RoomInfo.SelectedDungeonName);
-        Debug.Log("Password = " + DungeonUIManager.Password);
-
-        form.AddField(
-            "room_id",
-            RoomInfo.RoomId
-        );
-
-        form.AddField(
-            "dungeon_id",
-            RoomInfo.SelectedDungeon
-            );
-
-        form.AddField(
-            "map_name",
-            RoomInfo.SelectedDungeonName
-        );
-
-        form.AddField(
-            "password",
-            DungeonUIManager.Password
-        );
-
-        form.AddField(
-            "is_private",
-            DungeonUIManager.IsPrivateRoom ? 1 : 0
-        );
-
-        form.AddField(
-            "max_players",
-            DungeonUIManager.MaxPlayers
-        );
-
-        UnityWebRequest request =
-            UnityWebRequest.Post(
-                "http://10.219.32.66/RedDaniel/SaveRoom.php",
-                form
-            );
-
-        yield return request.SendWebRequest();
-
-        if (request.result ==
-            UnityWebRequest.Result.Success)
-        {
-            Debug.Log(
-                "ルーム保存成功 : " +
-                request.downloadHandler.text
-            );
-        }
-        else
-        {
-            Debug.LogError(request.error);
-        }
+        yield return Post("SaveRoom.php", form, "ルーム保存");
     }
 
-    public IEnumerator DeleteRoom()
+    public IEnumerator DeleteRoom(string roomId)
     {
+        if (string.IsNullOrEmpty(roomId))
+            yield break;
+
+        if (OnlineTestMode.Enabled)
+        {
+            LocalTestServer.DeleteRoom(roomId);
+            yield break;
+        }
+
         WWWForm form = new WWWForm();
+        form.AddField("room_id", roomId);
 
-        form.AddField(
-            "room_id",
-            RoomInfo.RoomId
-        );
-
-        UnityWebRequest request =
-            UnityWebRequest.Post(
-                "http://10.219.32.66/RedDaniel/DeleteRoom.php",
-                form
-            );
-
-        yield return request.SendWebRequest();
+        yield return Post("DeleteRoom.php", form, "ルーム削除");
     }
 
-    public IEnumerator UpdateAlive()
+    /// <summary>
+    /// ホストが定期的に呼ぶ。生存通知と、DBの人数を実際の接続数に合わせる
+    /// </summary>
+    public IEnumerator UpdateAlive(string roomId, int currentPlayers)
     {
+        if (string.IsNullOrEmpty(roomId))
+            yield break;
+
+        if (OnlineTestMode.Enabled)
+        {
+            LocalTestServer.KeepAlive(roomId, currentPlayers);
+            yield break;
+        }
+
         WWWForm form = new WWWForm();
+        form.AddField("room_id", roomId);
 
-        form.AddField(
-            "room_id",
-            RoomInfo.RoomId ?? ""
-        );
+        yield return Post("UpdateRoomAlive.php", form, null);
 
-        UnityWebRequest request =
-            UnityWebRequest.Post(
-                "http://10.219.32.66/RedDaniel/UpdateRoomAlive.php",
-                form
-            );
+        // PHP側は +1/-1 しかできないので、差分の回数だけ呼んで実際の人数に合わせる
+        RoomData room = null;
 
-        yield return request.SendWebRequest();
+        yield return FetchRoom(roomId, result => room = result);
 
-        if (request.result ==
-            UnityWebRequest.Result.Success)
+        if (room == null)
+            yield break;
+
+        int diff = Mathf.Clamp(currentPlayers - room.current_players, -3, 3);
+
+        for (int i = 0; i < Mathf.Abs(diff); i++)
         {
-            Debug.Log("Alive更新");
-        }
-    }
+            WWWForm countForm = new WWWForm();
+            countForm.AddField("room_id", roomId);
 
-    public IEnumerator JoinRoom()
-    {
-        WWWForm form = new WWWForm();
-
-        form.AddField(
-            "room_id",
-            RoomInfo.RoomId
-        );
-
-        UnityWebRequest request =
-            UnityWebRequest.Post(
-                "http://10.219.32.66/RedDaniel/JoinRoom.php",
-                form
-            );
-
-        yield return request.SendWebRequest();
-
-        if (request.result ==
-            UnityWebRequest.Result.Success)
-        {
-            Debug.Log("人数追加成功");
-        }
-        else
-        {
-            Debug.LogError(request.error);
-        }
-    }
-
-    public IEnumerator LeaveRoom()
-    {
-        WWWForm form = new WWWForm();
-
-        form.AddField(
-            "room_id",
-            RoomInfo.RoomId
-        );
-
-        UnityWebRequest request =
-            UnityWebRequest.Post(
-                "http://10.219.32.66/RedDaniel/LeaveRoom.php",
-                form
-            );
-
-        yield return request.SendWebRequest();
-
-        if (request.result ==
-            UnityWebRequest.Result.Success)
-        {
-            Debug.Log("人数減少成功");
-        }
-        else
-        {
-            Debug.LogError(request.error);
+            yield return Post(diff > 0 ? "JoinRoom.php" : "LeaveRoom.php", countForm, null);
         }
     }
 
     public IEnumerator SearchRoom(string roomId)
     {
-        WWWForm form = new WWWForm();
+        RoomData room = null;
 
-        form.AddField(
-            "room_id",
-            roomId
-        );
+        yield return FetchRoom(roomId, result => room = result);
 
-        UnityWebRequest request =
-            UnityWebRequest.Post(
-                "http://10.219.32.66/RedDaniel/SearchRoom.php",
-                form
-            );
+        foundRoom = room;
+    }
 
-        yield return request.SendWebRequest();
-
-        if (request.result ==
-            UnityWebRequest.Result.Success)
+    public IEnumerator GetRooms(Action<RoomData[]> onLoaded)
+    {
+        if (OnlineTestMode.Enabled)
         {
-            string json =
-                request.downloadHandler.text;
-
-            Debug.Log("検索結果 : " + json);
-
-            if (string.IsNullOrEmpty(json) ||
-                json == "NOT_FOUND")
-            {
-                foundRoom = null;
-            }
-            else
-            {
-                foundRoom =
-                    JsonUtility.FromJson<RoomData>(
-                        json
-                    );
-            }
+            onLoaded?.Invoke(LocalTestServer.GetRooms());
+            yield break;
         }
-        else
-        {
-            Debug.LogError(request.error);
 
-            foundRoom = null;
+        using (UnityWebRequest request = UnityWebRequest.Get(ServerApi.Url("GetRooms.php")))
+        {
+            request.timeout = TimeoutSeconds;
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning("ルーム一覧の取得に失敗 : " + request.error);
+                onLoaded?.Invoke(Array.Empty<RoomData>());
+                yield break;
+            }
+
+            RoomList list =
+                JsonUtility.FromJson<RoomList>("{\"rooms\":" + request.downloadHandler.text + "}");
+
+            onLoaded?.Invoke(list?.rooms ?? Array.Empty<RoomData>());
+        }
+    }
+
+    private IEnumerator FetchRoom(string roomId, Action<RoomData> onLoaded)
+    {
+        if (string.IsNullOrEmpty(roomId))
+        {
+            onLoaded(null);
+            yield break;
+        }
+
+        if (OnlineTestMode.Enabled)
+        {
+            onLoaded(LocalTestServer.FindRoom(roomId));
+            yield break;
+        }
+
+        WWWForm form = new WWWForm();
+        form.AddField("room_id", roomId);
+
+        using (UnityWebRequest request = UnityWebRequest.Post(ServerApi.Url("SearchRoom.php"), form))
+        {
+            request.timeout = TimeoutSeconds;
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning("ルーム検索に失敗 : " + request.error);
+                onLoaded(null);
+                yield break;
+            }
+
+            string json = request.downloadHandler.text;
+
+            if (string.IsNullOrEmpty(json) || json == "NOT_FOUND")
+            {
+                onLoaded(null);
+                yield break;
+            }
+
+            onLoaded(JsonUtility.FromJson<RoomData>(json));
+        }
+    }
+
+    private IEnumerator Post(string file, WWWForm form, string logLabel)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Post(ServerApi.Url(file), form))
+        {
+            request.timeout = TimeoutSeconds;
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning($"{file} に失敗 : {request.error}");
+            }
+            else if (logLabel != null)
+            {
+                Debug.Log($"{logLabel}成功 : {request.downloadHandler.text}");
+            }
         }
     }
 }

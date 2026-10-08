@@ -16,10 +16,15 @@ public class ExplosiveBarrel : MonoBehaviour
     [Header("エフェクト位置")]
     [SerializeField] private Vector3 effectOffset = Vector3.zero;
 
+    // Spaceはジャンプと同じキーなので、普段は無効にしておく
+    // （有効のままだとジャンプのたびに全部の樽が爆発し、マルチでは自分の画面だけ爆発してずれる）
+    [Header("デバッグ用：Spaceで爆発")]
+    [SerializeField] private bool debugExplodeWithSpace = false;
+
     void Update()
     {
         // デバッグ用
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (debugExplodeWithSpace && Input.GetKeyDown(KeyCode.Space))
         {
             Damage(1);
         }

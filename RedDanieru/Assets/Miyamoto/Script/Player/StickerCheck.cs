@@ -65,6 +65,9 @@ namespace Player
             //押されていないなら処理を動かさない
             if (!input.sticker) return;
 
+            //前回の対象が残っていると、離れた物に貼ったり剥がしたりしてしまう
+            _interactObject = null;
+
             //1人称の時のRayの判定
             if (_playerCamera.isFirstPerson)
             {

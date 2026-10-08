@@ -27,6 +27,22 @@ public class GameOverManager : MonoBehaviour
 
     public bool IsGameOver => isGameOver;
 
+    // プレイヤーが毎フレーム参照するので、探さずに済むようにしておく
+    public static GameOverManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+
     private void Start()
     {
         ResetGameOverState();
@@ -40,24 +56,12 @@ public class GameOverManager : MonoBehaviour
         if (gameOverShown)
             return;
 
-        NetworkRunner runner = FindObjectOfType<NetworkRunner>();
-
-        if (runner == null)
-            return;
-
-        if (NetworkGameState.Instance != null)
+        // 途中で抜けた人は数えず、残っている全員が死んだらゲームオーバー
+        if (NetworkGameState.Instance != null &&
+            NetworkGameState.Instance.AreAllPlayersDead())
         {
-            Debug.Log(
-                $"Dead={NetworkGameState.Instance.DeadPlayerCount} " +
-                $"Start={NetworkGameState.Instance.StartPlayerCount}"
-            );
-
-            if (NetworkGameState.Instance.DeadPlayerCount >=
-                NetworkGameState.Instance.StartPlayerCount)
-            {
-                gameOverShown = true;
-                GameOver();
-            }
+            gameOverShown = true;
+            GameOver();
         }
     }
 
@@ -98,22 +102,13 @@ public class GameOverManager : MonoBehaviour
             }
         }
 
-        if (GameModeManager.IsMultiplayer)
-        {
-            if (NetworkGameState.Instance != null)
-            {
-                NetworkGameState.Instance.RPC_HideAllPlayers();
-            }
-        }
-        else
-        {
-            GameObject[] players =
-            GameObject.FindGameObjectsWithTag("Player");
+        // 全員の画面でそれぞれ判定しているので、自分の画面のプレイヤーを消すだけでよい
+        GameObject[] players =
+        GameObject.FindGameObjectsWithTag("Player");
 
-            foreach (GameObject player in players)
-            {
-                player.SetActive(false);
-            }
+        foreach (GameObject player in players)
+        {
+            player.SetActive(false);
         }
 
     //    PlayerInput[] inputs =
@@ -208,7 +203,7 @@ public class GameOverManager : MonoBehaviour
         Time.timeScale = 1f;
 
         FusionLauncher launcher =
-            FindObjectOfType<FusionLauncher>();
+            FusionLauncher.Instance;
 
         if (launcher != null)
         {

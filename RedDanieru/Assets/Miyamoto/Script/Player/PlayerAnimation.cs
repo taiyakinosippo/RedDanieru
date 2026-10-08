@@ -28,6 +28,7 @@ namespace Player
         private NetworkMecanimAnimator _networkAnimator;
         private PlayerAttack _playerAttack;
         private PlayerEvade _playerEvade;
+        private NetworkAuthorityController _networkAuthority;
 
         //----------------------------------------------------------
         //初期化
@@ -49,6 +50,8 @@ namespace Player
             _playerAttack = GetComponent<PlayerAttack>();
 
             _playerEvade = GetComponent<PlayerEvade>();
+
+            _networkAuthority = GetComponent<NetworkAuthorityController>();
 
             //アニメーションをIDに変換
             AssignAnimationIDs();
@@ -148,7 +151,7 @@ namespace Player
         {
             if (_hasAnimator)
             {
-                _animator.SetTrigger(_animIDAttack);
+                SetTriggerSynced(_animIDAttack);
             }
         }
 
@@ -158,6 +161,11 @@ namespace Player
         public void OnAttackAnimationEnd()
         {
             _animator.ResetTrigger(_animIDAttack);
+
+            // 他の人のキャラのアニメーションでも呼ばれるので、自分のキャラのときだけ処理する
+            if (!IsLocallyControlled)
+                return;
+
             Debug.Log("Attack animation end");
             _playerAttack.AttackEnd();
         }
@@ -169,7 +177,7 @@ namespace Player
         {
             if (_hasAnimator)
             {
-                _animator.SetTrigger(_animIDStickerPaste);
+                SetTriggerSynced(_animIDStickerPaste);
             }
         }
 
@@ -179,6 +187,10 @@ namespace Player
         public void OnStickerPasteAnimationEnd()
         {
             _animator.ResetTrigger(_animIDStickerPaste);
+
+            if (!IsLocallyControlled)
+                return;
+
             Debug.Log("Sticker Paste animation end");
             _stickerCheck.StickerAnimationEnd();
         }
@@ -191,7 +203,7 @@ namespace Player
             if (_hasAnimator)
             {
                 Debug.Log("はがすアニメーション再生");
-                _animator.SetTrigger(_animIDStickerPeelOff);
+                SetTriggerSynced(_animIDStickerPeelOff);
 
             }
         }
@@ -202,6 +214,10 @@ namespace Player
         public void OnStickerPeelOffAnimationEnd()
         {
             _animator.ResetTrigger(_animIDStickerPeelOff);
+
+            if (!IsLocallyControlled)
+                return;
+
             Debug.Log("Sticker Peel off animation end");
             _stickerCheck.StickerAnimationEnd();
         }
@@ -213,7 +229,7 @@ namespace Player
         {
             if (_hasAnimator)
             {
-                _animator.SetTrigger(_animIDEvade);
+                SetTriggerSynced(_animIDEvade);
             }
         }
 
@@ -225,6 +241,27 @@ namespace Player
             _animator.ResetTrigger(_animIDEvade);
         }
 
+
+        //----------------------------------------------------------
+        //トリガーを再生する（マルチでは他の人の画面にも同期する）
+        //Animator.SetTriggerだけだと自分の画面でしか再生されない
+        //（NetworkMecanimAnimatorのトリガー同期は一瞬の値なので取りこぼすことがある）
+        //----------------------------------------------------------
+        private void SetTriggerSynced(int triggerHash)
+        {
+            _animator.SetTrigger(triggerHash);
+
+            if (_networkAuthority != null &&
+                _networkAuthority.Object != null &&
+                _networkAuthority.Object.IsValid)
+            {
+                _networkAuthority.SendAnimatorTrigger(triggerHash);
+            }
+        }
+
+        // このキャラを自分が操作しているか（ソロでは常にtrue）
+        private bool IsLocallyControlled =>
+            NetworkAuthorityController.IsLocallyControlled(gameObject);
 
         public void OnFootstep(AnimationEvent animationEvent)
         {
