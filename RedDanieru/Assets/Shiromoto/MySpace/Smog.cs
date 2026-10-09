@@ -8,7 +8,19 @@ public class DustEffect : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private LayerMask targetLayer;
 
+    [Header("マウス移動速度の判定（画面の高さ/秒）")]
+    // この速さを超えたら砂埃を出し始める
+    [SerializeField] private float startSpeed = 0.8f;
+    // この速さを下回ったら砂埃を止める（startSpeedより小さくしてチラつきを防ぐ）
+    [SerializeField] private float stopSpeed = 0.4f;
+    // 速度のなめらかさ（大きいほど反応が早い）
+    [SerializeField] private float speedSmoothing = 10f;
+
     private ParticleSystem.EmissionModule emission;
+
+    private Vector3 lastMousePosition;
+    private float smoothedSpeed;
+    private bool isMovingFast;
 
     private void Awake()
     {
@@ -86,9 +98,17 @@ public class DustEffect : MonoBehaviour
                 return;
         }
 
+        // クリックした瞬間は速度をリセット（その場でクリックしただけでは出さない）
+        if (Input.GetMouseButtonDown(0))
+        {
+            ResetMouseSpeed();
+        }
+
         // 左クリックを押している間
         if (Input.GetMouseButton(0))
         {
+            UpdateMouseSpeed();
+
             if (EventSystem.current != null &&
                 EventSystem.current.IsPointerOverGameObject())
             {
@@ -114,7 +134,8 @@ public class DustEffect : MonoBehaviour
 
                 dustParticle.transform.position = pos;
 
-                emission.enabled = true;
+                // マウスを大きく動かしている時だけ出す（止まっている・細かい編集中は出さない）
+                emission.enabled = isMovingFast;
             }
             else
             {
@@ -124,6 +145,46 @@ public class DustEffect : MonoBehaviour
         else
         {
             emission.enabled = false;
+        }
+    }
+
+    private void ResetMouseSpeed()
+    {
+        lastMousePosition = Input.mousePosition;
+        smoothedSpeed = 0f;
+        isMovingFast = false;
+    }
+
+    private void UpdateMouseSpeed()
+    {
+        Vector3 mousePosition = Input.mousePosition;
+        float deltaTime = Time.unscaledDeltaTime;
+
+        if (deltaTime > 0f && Screen.height > 0)
+        {
+            // 解像度に左右されないよう画面の高さで割る
+            float speed =
+                (mousePosition - lastMousePosition).magnitude
+                / Screen.height
+                / deltaTime;
+
+            smoothedSpeed = Mathf.Lerp(
+                smoothedSpeed,
+                speed,
+                1f - Mathf.Exp(-speedSmoothing * deltaTime)
+            );
+        }
+
+        lastMousePosition = mousePosition;
+
+        if (isMovingFast)
+        {
+            if (smoothedSpeed < stopSpeed)
+                isMovingFast = false;
+        }
+        else if (smoothedSpeed > startSpeed)
+        {
+            isMovingFast = true;
         }
     }
 
