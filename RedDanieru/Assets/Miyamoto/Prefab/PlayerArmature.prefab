@@ -814,7 +814,7 @@ MonoBehaviour:
     m_Bits: 128
   _wallLayer:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 513
   isStickerDected: 0
 --- !u!114 &7489732825488192994
 MonoBehaviour:
