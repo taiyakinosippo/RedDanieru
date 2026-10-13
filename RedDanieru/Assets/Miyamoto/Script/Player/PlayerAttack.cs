@@ -141,6 +141,9 @@ namespace Player
             _actionPriority.EndAction();
         }
 
+        //------------------------------------------------------
+        //プレイヤーの前に壁があるかどうかを判定する
+        //------------------------------------------------------
         private bool IsWallInFront(EnemyBase enemy)
         {
             Vector3 PlayerPosition = transform.position;
