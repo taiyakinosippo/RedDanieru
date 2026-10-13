@@ -17,11 +17,11 @@ namespace Player
         [Tooltip("3人称の時のステッカーや壁があるかの判定の範囲")]
         public float checkRadius = 1.0f;
 
-        [Tooltip("壁として判定するレイヤー")]
-        public LayerMask wallLayer;
-
         [Tooltip("ステッカーがあるかどうかを判定するレイヤー")]
         public LayerMask stickerLayer;
+
+        [Tooltip("壁があるかどうかを判定するレイヤー")]
+        public LayerMask _wallLayer;
 
         private bool isWallDetected = false;
 
@@ -96,7 +96,7 @@ namespace Player
                     // 前方に壁があるか判定（出す方向はカメラの向き）
                     isWallDetected =
                     Physics.Raycast(rayOrigin, _playerCamera.currentCamera.transform.forward,
-                                    firstPersonWallDistance, wallLayer,
+                                    firstPersonWallDistance, _wallLayer,
                                     QueryTriggerInteraction.Ignore
                                     );
 
@@ -134,7 +134,7 @@ namespace Player
                 // 一番カメラの真正面に近いステッカー
                 StickerState targetSticker = null;
 
-                // プレイヤーの前にある球体を使って地面にいるかどうかを判定
+                // プレイヤーの前にある球体を使って目の前にあるかどうかを判定
                 Vector3 spherePosition =
                 transform.position + transform.forward * thirdPersonWallDistance + Vector3.up * thirdPersonWallCheckHeight;
 
@@ -148,23 +148,18 @@ namespace Player
 
                     if (sticker == null) continue;
 
+                    if (IsWallInFront(sticker)) continue;
+
                     Debug.Log("StickerState発見 / currentSticker = " + sticker.currentSticker);
 
                     if (sticker.currentSticker == Sticker.None)
                         continue;
 
                     // カメラ → ステッカーの方向
-                    Vector3 direction =
-                        (sticker.transform.position -
-                         _playerCamera.currentCamera.transform.position)
-                         .normalized;
+                    Vector3 direction =(sticker.transform.position -_playerCamera.currentCamera.transform.position) .normalized;
 
                     // カメラ真正面との一致度
-                    float dot =
-                        Vector3.Dot(
-                            _playerCamera.currentCamera.transform.forward,
-                            direction
-                        );
+                    float dot =Vector3.Dot( _playerCamera.currentCamera.transform.forward, direction);
 
                     Debug.Log(
                         "Sticker = "
@@ -213,7 +208,7 @@ namespace Player
                         StickerState sticker = collider.GetComponent<StickerState>();
 
                         if (sticker == null) continue;
-
+                        if (IsWallInFront(sticker)) continue;
                         isStickerStateFound = true;
 
                         Debug.Log("StickerState発見 / currentSticker = " + sticker.currentSticker);
@@ -296,18 +291,29 @@ namespace Player
      
 
         public void StickerAnimationEnd()
+        { 
+           _stickerInteractor.ReceiptPickup(_interactObject);
+           _actionPriority.EndAction();
+        }
+
+        //------------------------------------------------------
+        //プレイヤーの前に壁があるかどうかを判定する
+        //------------------------------------------------------
+        private bool IsWallInFront(StickerState sticker)
         {
-            if (isStickerDected)
-            {
-                _stickerInteractor.ReceiptPickup(_interactObject);
-                _actionPriority.EndAction();
-            }
-            else
-            {
-                _stickerInteractor.ReceiptPickup(_interactObject);
-                _actionPriority.EndAction();
-            }
-           
+            Vector3 PlayerPosition = transform.position;
+            Vector3 targetPosition = sticker.transform.position;
+
+            Vector3 direction = targetPosition - PlayerPosition;
+            float distance = direction.magnitude;
+
+            return Physics.Raycast(
+                PlayerPosition,
+                direction.normalized,
+                distance,
+                _wallLayer,
+                QueryTriggerInteraction.Ignore
+            );
         }
     }
 }
