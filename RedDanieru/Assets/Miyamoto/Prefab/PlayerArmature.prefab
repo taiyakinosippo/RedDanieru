@@ -809,12 +809,12 @@ MonoBehaviour:
   thirdPersonWallCheckHeight: 1
   firstPersonWallCheckHeight: 1
   checkRadius: 1
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 1
   stickerLayer:
     serializedVersion: 2
     m_Bits: 128
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 512
   isStickerDected: 0
 --- !u!114 &7489732825488192994
 MonoBehaviour:
