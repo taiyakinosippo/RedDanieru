@@ -319,6 +319,16 @@ public class GoalClear : MonoBehaviour
         isCleared = true;
         alreadyShown = true;
 
+        // PauseUI‚ð•Â‚¶‚é
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.DisablePauseMenu();
+            gameStopManager.GameReturnButton();
+        }
+
         GameObject[] players =
             GameObject.FindGameObjectsWithTag("Player");
 

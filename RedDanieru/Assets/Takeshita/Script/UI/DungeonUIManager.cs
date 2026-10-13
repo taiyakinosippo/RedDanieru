@@ -138,7 +138,6 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI RoomKeyText;
     [SerializeField] private TextMeshProUGUI CautionText;
     [SerializeField] private TMP_InputField passwordInputField;
-    [SerializeField] private Dropdown playerCountDropdown;
     [SerializeField] private TMP_InputField createRoomIdInput;
   
     [Header("大事な奴ら")]
@@ -159,7 +158,7 @@ public class DungeonUIManager : MonoBehaviour
     private HashSet<string> selectedTags =new HashSet<string>();
 
     [Header("数値")]
-    public static int MaxPlayers = 2;
+    public static int MaxPlayers = 3;
 
     public static bool IsPrivateRoom;
     public static string Password="";
@@ -219,9 +218,9 @@ public class DungeonUIManager : MonoBehaviour
 
         passwordInputField.onValueChanged.AddListener(OnPasswordChanged);
 
-        playerCountDropdown.onValueChanged.AddListener(OnPlayerCountChanged);
+        //playerCountDropdown.onValueChanged.AddListener(OnPlayerCountChanged);
 
-        OnPlayerCountChanged(playerCountDropdown.value);
+        //OnPlayerCountChanged(playerCountDropdown.value);
 
         privateRoomIdInput.onValueChanged.AddListener(OnPrivateRoomIdChanged);
 
@@ -454,9 +453,11 @@ public class DungeonUIManager : MonoBehaviour
 
         RoomInfo.Password = Password;
         RoomInfo.IsPrivate = IsPrivateRoom;
+        MaxPlayers = 3;
+
         RoomInfo.MaxPlayers = MaxPlayers;
 
-       // Debug.Log("RoomID = " + RoomInfo.RoomId);
+        // Debug.Log("RoomID = " + RoomInfo.RoomId);
 
         Laycast.SetActive(true);
         CautionObj.SetActive(true);
@@ -869,15 +870,6 @@ public class DungeonUIManager : MonoBehaviour
         yield return roomDBUploader.SearchRoom(roomId);
 
         CheckPrivateRoom();
-    }
-
-    private void OnPlayerCountChanged(int index)
-    {
-        MaxPlayers = index + 2;
-
-        //Debug.Log(
-        //    $"最大人数 : {MaxPlayers}人"
-        //);
     }
 
     private void CheckSearchCondition()

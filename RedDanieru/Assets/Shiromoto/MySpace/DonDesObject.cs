@@ -38,6 +38,7 @@ public class DonDesObject : MonoBehaviour
                 createStick.ChangeMode(CreateStick.EffectPermission.OK);
                 break;
 
+            case "Takeshita_Matching":
             case "Katayama_ren":
                 createStick.ChangeMode(CreateStick.EffectPermission.depends);
                 break;

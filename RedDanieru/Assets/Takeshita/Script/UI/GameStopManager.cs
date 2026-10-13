@@ -136,4 +136,15 @@ public class GameStopManager: MonoBehaviour
     {
         SettingUI.SetActive(false);
     }
+
+    public void ForceClosePauseMenu()
+    {
+        IsPaused = false;
+
+        GameStopUI.SetActive(false);
+        GameStopCautionUI.SetActive(false);
+        SettingUI.SetActive(false);
+
+        DisablePauseMenu();
+    }
 }

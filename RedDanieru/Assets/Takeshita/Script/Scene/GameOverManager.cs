@@ -86,7 +86,14 @@ public class GameOverManager : MonoBehaviour
         if (isGameOver)
             return;
 
-        
+        GameStopManager gameStopManager =
+      FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.ForceClosePauseMenu();
+        }
+
         if (BGMManager_Takeshita.Instance != null)
         {
             BGMManager_Takeshita.Instance.PlayNormalBGM();
