@@ -144,6 +144,8 @@ namespace Player
 
                 foreach (Collider collider in isCollider)
                 {
+                    Debug.Log($"見つかった : {collider.name}");
+
                     StickerState sticker = collider.GetComponent<StickerState>();
 
                     if (sticker == null) continue;
@@ -229,6 +231,12 @@ namespace Player
                                 direction
                             );
 
+                        // 自分自身なら優先度を下げる
+                        if (sticker.transform.root == transform.root)
+                        {
+                            dot -= 1.0f;
+                        }
+
                         Debug.Log(
                             "Sticker = "
                             + sticker.currentSticker
@@ -241,7 +249,8 @@ namespace Player
                         {
                             maxDot = dot;
                             targetSticker = sticker;
-                        }
+
+                         }
 
                         if (targetSticker != null)
                         {
@@ -291,8 +300,9 @@ namespace Player
      
 
         public void StickerAnimationEnd()
-        { 
-           _stickerInteractor.ReceiptPickup(_interactObject);
+        {
+            
+            _stickerInteractor.ReceiptPickup(_interactObject);
            _actionPriority.EndAction();
         }
 

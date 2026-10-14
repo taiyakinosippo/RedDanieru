@@ -243,5 +243,14 @@ namespace Player
                 _playerUI.GameOver();
             }
         }
+
+        public float SetMoveSpeed(float speed)
+        {
+            float old = PlayerMoveSpeed;
+            PlayerMoveSpeed = speed;
+            return old;
+        }
     }
+
+
 }
