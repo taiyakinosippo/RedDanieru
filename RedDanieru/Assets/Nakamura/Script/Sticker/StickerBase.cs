@@ -1,9 +1,11 @@
 using UnityEngine;
 using System.Collections;
+using Player;
 
 public class StickerBase : MonoBehaviour
 {
     protected EnemyBase enemyScript;
+    protected PlayerStatus playerStatus;
     protected StickerState stickerState;
     public int attackRate = 30; //ステッカー行動が行われる確率
 
@@ -71,6 +73,12 @@ public class StickerBase : MonoBehaviour
     public void GetEnemyScript()
     {
         enemyScript = GetComponent<EnemyBase>();
+        stickerState = GetComponent<StickerState>();
+    }
+
+    public void GetPlayerScript()
+    {
+        playerStatus = GetComponent<PlayerStatus>();
         stickerState = GetComponent<StickerState>();
     }
 

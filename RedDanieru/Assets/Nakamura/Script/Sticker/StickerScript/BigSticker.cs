@@ -88,4 +88,16 @@ public class BigSticker : StickerBase
         //スケールを元に戻す
         transform.localScale = new Vector3(1f, 1f, 1.0f);
     }
+
+    public override void OnPlayerApply()
+    {
+        //スケールを拡大
+        transform.localScale = new Vector3(bigScale, bigScale, bigScale);
+    }
+
+    public override void OnPlayerRemove()
+    {
+        //スケールを元に戻す
+        transform.localScale = new Vector3(1f, 1f, 1.0f);
+    }
 }
