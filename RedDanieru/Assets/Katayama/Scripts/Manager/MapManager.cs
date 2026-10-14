@@ -13,7 +13,7 @@ public class MapManager : MonoBehaviour
         Top,
         Bottom
     }
-    [Header("V‹Kƒ}ƒbƒv‚ğ¶¬‚·‚éiEditorScene‚Ì‚İONj")]
+    [Header("æ–°è¦ãƒãƒƒãƒ—ã‚’ç”Ÿæˆã™ã‚‹ï¼ˆEditorSceneã®ã¿ONï¼‰")]
     [SerializeField] private bool createOnStart = true;
 
     [Header("Map Size")]
@@ -21,28 +21,28 @@ public class MapManager : MonoBehaviour
     public int height = 1;
     public int depth = 32;
 
-    [Header("•ÇƒTƒCƒYİ’è")]
+    [Header("å£ã‚µã‚¤ã‚ºè¨­å®š")]
     [SerializeField][Min(0.01f)] private float wallSize = 1f;
     [SerializeField][Min(0.01f)] private float wallSpacing = 1f;
 
-    // ’Êí‚Ì•Ç‚Ì‚‚³
+    // é€šå¸¸ã®å£ã®é«˜ã•
     [SerializeField] private float normalWallYOffset = 0f;
 
-    // ”z’u‚µ‚½•Ç‚Ì‚‚³
+    // é…ç½®ã—ãŸå£ã®é«˜ã•
     [SerializeField] private float placedWallYOffset = 0f;
 
-    // Î‚ß•Ç‚Ì‚‚³
+    // æ–œã‚å£ã®é«˜ã•
     [SerializeField] private float diagonalWallYOffset = 0f;
 
-    [Header("°ƒTƒCƒYİ’è")]
+    [Header("åºŠã‚µã‚¤ã‚ºè¨­å®š")]
     [SerializeField][Min(0.01f)] private float floorSize = 1f;
     [SerializeField][Min(0.01f)] private float floorSpacing = 1f;
     [SerializeField] private float floorYOffset = -1f;
 
-    [Header("“G”z’uİ’è")]
+    [Header("æ•µé…ç½®è¨­å®š")]
     [SerializeField][Min(0.01f)] private float enemySpacing = 1f;
 
-    [Header("İ’uƒIƒuƒWƒFƒNƒgƒTƒCƒYİ’è")]
+    [Header("è¨­ç½®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚µã‚¤ã‚ºè¨­å®š")]
     [SerializeField][Min(0.01f)] private float objectSize = 1f;
     [SerializeField][Min(0.01f)] private float objectSpacing = 1f;
     [SerializeField] private float objectYOffset = 0f;
@@ -54,23 +54,23 @@ public class MapManager : MonoBehaviour
 
     [SerializeField] private GameObject floorPrefab;
 
-    [Header("ƒS[ƒ‹ŒxUI")]
+    [Header("ã‚´ãƒ¼ãƒ«è­¦å‘ŠUI")]
     [SerializeField] private GameObject goalWarningUI;
     [SerializeField] private TMP_Text goalWarningText;
     [SerializeField] private float goalWarningDuration = 2f;
 
-    [Header("°ãƒ‰ƒ“ƒ_ƒ€‘•ü")]
+    [Header("åºŠä¸Šãƒ©ãƒ³ãƒ€ãƒ è£…é£¾")]
     [SerializeField] private GameObject[] floorDecorationPrefabs;
     [SerializeField][Range(0f, 1f)] private float floorDecorationSpawnChance = 0.25f;
     [SerializeField] private float floorDecorationYOffset = 0f;
     [SerializeField] private bool randomDecorationRotation = true;
 
-    [Header("ŠOü•Ç")]
+    [Header("å¤–å‘¨å£")]
     [SerializeField] private bool createOuterBoundaryWalls = true;
     [SerializeField] private GameObject outerWallPrefab;
     [SerializeField] private float outerWallYOffset = 0f;
 
-    [Header("ƒXƒ^[ƒg’n“_‚Ì“üŒû")]
+    [Header("ã‚¹ã‚¿ãƒ¼ãƒˆåœ°ç‚¹ã®å…¥å£")]
     [SerializeField] private bool enableStartEntrance = true;
     [SerializeField] private EntranceDirection entranceDirection = EntranceDirection.Bottom;
     [SerializeField][Min(0)] private int entrancePosition = 0;
@@ -85,35 +85,49 @@ public class MapManager : MonoBehaviour
 
     [SerializeField] private PlaceObjectPrefab[] objectPrefabs;
 
+    [System.Serializable]
+    public class SpawnMarkerPrefab
+    {
+        public PlaceObjectType type;
+        public GameObject prefab;
+    }
+
+    [Header("ç¨®é¡ã”ã¨ã®ã‚¹ãƒãƒ¼ãƒ³ãƒã‚¤ãƒ³ãƒˆ")]
+    [Tooltip("ç·¨é›†ç”»é¢ã§è¡¨ç¤ºã™ã‚‹ãƒãƒ¼ã‚«ãƒ¼ã‚’ã€é…ç½®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç¨®é¡ã”ã¨ã«è¨­å®š")]
+    [SerializeField] private SpawnMarkerPrefab[] spawnMarkerPrefabs;
+
+    [Tooltip("ãƒãƒ¼ã‚«ãƒ¼ã‚’è¡¨ç¤ºã™ã‚‹ç·¨é›†ã‚·ãƒ¼ãƒ³å")]
+    [SerializeField] private string mapCreateSceneName = "Katayama_ren";
+
     [Header("NavMesh")]
     [SerializeField] private NavMeshSurface navMeshSurface;
 
-    [Header("ƒJƒƒ‰İ’è")]
+    [Header("ã‚«ãƒ¡ãƒ©è¨­å®š")]
     [SerializeField] private Camera mapCamera;
 
-    [Tooltip("32~32ƒ}ƒbƒv‚ÌƒJƒƒ‰ˆÊ’u")]
+    [Tooltip("32Ã—32ãƒãƒƒãƒ—æ™‚ã®ã‚«ãƒ¡ãƒ©ä½ç½®")]
     [SerializeField]
     private Vector3 baseCameraPosition =
         new Vector3(15.5f, 35f, 18.5f);
 
-    [Tooltip("ƒJƒƒ‰Šp“x")]
+    [Tooltip("ã‚«ãƒ¡ãƒ©è§’åº¦")]
     [SerializeField]
     private Vector3 cameraRotation =
         new Vector3(90f, 0f, 0f);
 
-    [Tooltip("32~32ƒ}ƒbƒv‚ÌOrthographic Size")]
+    [Tooltip("32Ã—32ãƒãƒƒãƒ—æ™‚ã®Orthographic Size")]
     [SerializeField]
     private float baseOrthographicSize = 20f;
 
-    [Tooltip("Šî€‚Æ‚È‚éƒ}ƒbƒvƒTƒCƒY")]
+    [Tooltip("åŸºæº–ã¨ãªã‚‹ãƒãƒƒãƒ—ã‚µã‚¤ã‚º")]
     [SerializeField]
     private float baseMapSize = 31f;
 
-    [Header("ƒŠƒXƒ|[ƒ“")]
+    [Header("ãƒªã‚¹ãƒãƒ¼ãƒ³")]
     [SerializeField] private GameObject respawnPointPrefab;
     [SerializeField] private GameObject respawnAreaPrefab;
 
-    [Header("ƒŠƒXƒ|[ƒ“‰ŠúˆÊ’u")]
+    [Header("ãƒªã‚¹ãƒãƒ¼ãƒ³åˆæœŸä½ç½®")]
     [SerializeField]
     private Vector3 defaultRespawnPointPosition =
         new Vector3(0f, 0f, 0f);
@@ -122,7 +136,7 @@ public class MapManager : MonoBehaviour
     private Vector3 defaultRespawnAreaPosition =
         new Vector3(0f, -1f, 0f);
 
-    [Header("ƒŠƒXƒ|[ƒ“ƒGƒŠƒA‰ŠúƒTƒCƒY")]
+    [Header("ãƒªã‚¹ãƒãƒ¼ãƒ³ã‚¨ãƒªã‚¢åˆæœŸã‚µã‚¤ã‚º")]
     [SerializeField]
     private Vector3 defaultRespawnAreaScale =
         new Vector3(3f, 1f, 3f);
@@ -138,7 +152,7 @@ public class MapManager : MonoBehaviour
     private GameObject[,,] placedObjects;
     private PlaceObjectType[,,] placedObjectTypes;
 
-    // Î‚ß•Ç‚Æ°‚ª“¯‚¶ƒ}ƒX‚É‘¶İ‚µ‚Ä‚¢‚é‚©
+    // æ–œã‚å£ã¨åºŠãŒåŒã˜ãƒã‚¹ã«å­˜åœ¨ã—ã¦ã„ã‚‹ã‹
     private bool[,,] diagonalWallFloor;
 
     private int mapRevision = 0;
@@ -161,10 +175,10 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // À•W
+    // åº§æ¨™
     //==================================================
 
-    // ’Êí‚Ì•Ç—p
+    // é€šå¸¸ã®å£ç”¨
     private Vector3 GetNormalWallWorldPosition(
         Vector3Int pos)
     {
@@ -175,7 +189,7 @@ public class MapManager : MonoBehaviour
         );
     }
 
-    // ”z’u‚µ‚½•Ç—p
+    // é…ç½®ã—ãŸå£ç”¨
     private Vector3 GetPlacedWallWorldPosition(
         Vector3Int pos)
     {
@@ -186,7 +200,7 @@ public class MapManager : MonoBehaviour
         );
     }
 
-    // Î‚ß•Ç—p
+    // æ–œã‚å£ç”¨
     private Vector3 GetDiagonalWallWorldPosition(
         Vector3Int pos)
     {
@@ -228,7 +242,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒTƒCƒY
+    // ã‚µã‚¤ã‚º
     //==================================================
 
     private void SetWallScale(GameObject obj)
@@ -256,7 +270,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // •ÏX’Ê’m
+    // å¤‰æ›´é€šçŸ¥
     //==================================================
 
     private void MarkMapChanged()
@@ -273,7 +287,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // V‹Kƒ}ƒbƒv
+    // æ–°è¦ãƒãƒƒãƒ—
     //==================================================
 
     public void CreateNewMap()
@@ -388,7 +402,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // •Ç
+    // å£
     //==================================================
 
     private GameObject CreateWall(
@@ -402,13 +416,13 @@ public class MapManager : MonoBehaviour
         if (wallPrefab == null)
         {
             Debug.LogError(
-                "Wall Prefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "Wall PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return null;
         }
 
-        // ’Êí‚Ì•Ç‚ÍnormalWallYOffset‚ğg—p
+        // é€šå¸¸ã®å£ã¯normalWallYOffsetã‚’ä½¿ç”¨
         GameObject wall =
             Instantiate(
                 wallPrefab,
@@ -437,7 +451,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Î‚ß•Ç”»’è
+    // æ–œã‚å£åˆ¤å®š
     //==================================================
 
     private void UpdateDiagonalWalls()
@@ -469,12 +483,12 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ‚±‚Ìƒ}ƒX‚ª’Êí‚Ì•Ç‚Æ‚µ‚Ä‘¶İ‚µ‚Ä‚¢‚é‚©
+        // ã“ã®ãƒã‚¹ãŒé€šå¸¸ã®å£ã¨ã—ã¦å­˜åœ¨ã—ã¦ã„ã‚‹ã‹
         bool mapWall =
             map[pos.x, pos.y, pos.z] ==
             TileType.Wall;
 
-        // ‚±‚Ìƒ}ƒX‚ª”z’u‚µ‚½Wall‚©
+        // ã“ã®ãƒã‚¹ãŒé…ç½®ã—ãŸWallã‹
         bool placedWall =
             map[pos.x, pos.y, pos.z] ==
             TileType.Floor &&
@@ -558,7 +572,7 @@ public class MapManager : MonoBehaviour
 
         Quaternion rotation;
 
-        // –k{“Œ
+        // åŒ—ï¼‹æ±
         if (north &&
             east &&
             !south &&
@@ -571,7 +585,7 @@ public class MapManager : MonoBehaviour
                     0f
                 );
         }
-        // “Œ{“ì
+        // æ±ï¼‹å—
         else if (east &&
                  south &&
                  !north &&
@@ -584,7 +598,7 @@ public class MapManager : MonoBehaviour
                     0f
                 );
         }
-        // “ì{¼
+        // å—ï¼‹è¥¿
         else if (south &&
                  west &&
                  !north &&
@@ -597,7 +611,7 @@ public class MapManager : MonoBehaviour
                     0f
                 );
         }
-        // ¼{–k
+        // è¥¿ï¼‹åŒ—
         else if (west &&
                  north &&
                  !east &&
@@ -624,7 +638,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // •Ç”»’è
+    // å£åˆ¤å®š
     //==================================================
 
     private bool IsWall(
@@ -669,7 +683,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Î‚ß•Ç”»’è
+    // æ–œã‚å£åˆ¤å®š
     //==================================================
 
     private bool IsDiagonalWall(
@@ -695,7 +709,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Î‚ß•Ç‚Ö•ÏX
+    // æ–œã‚å£ã¸å¤‰æ›´
     //==================================================
 
     private void ReplaceWithDiagonalWall(
@@ -729,7 +743,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ‚·‚Å‚ÉÎ‚ß•Ç‚È‚ç‰ñ“]‚Æ‚‚³‚ğXV
+        // ã™ã§ã«æ–œã‚å£ãªã‚‰å›è»¢ã¨é«˜ã•ã‚’æ›´æ–°
         if (IsDiagonalWall(currentWall))
         {
             currentWall.transform.rotation =
@@ -751,7 +765,7 @@ public class MapManager : MonoBehaviour
 
         Destroy(currentWall);
 
-        // Î‚ß•Ç‚ÍdiagonalWallYOffset‚ğg—p
+        // æ–œã‚å£ã¯diagonalWallYOffsetã‚’ä½¿ç”¨
         GameObject diagonalWall =
             Instantiate(
                 diagonalWallPrefab,
@@ -813,7 +827,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Î‚ß•Ç‚Ì‰º‚É°‚ğì‚é
+    // æ–œã‚å£ã®ä¸‹ã«åºŠã‚’ä½œã‚‹
     //==================================================
 
     private void CreateDiagonalWallFloor(
@@ -841,7 +855,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ’Êí•Ç‚Ö–ß‚·
+    // é€šå¸¸å£ã¸æˆ»ã™
     //==================================================
 
     private void RestoreNormalWall(
@@ -852,7 +866,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ’Êíƒ}ƒbƒv•Ç
+        // é€šå¸¸ãƒãƒƒãƒ—å£
         if (map[
                 pos.x,
                 pos.y,
@@ -881,7 +895,7 @@ public class MapManager : MonoBehaviour
 
             Destroy(currentWall);
 
-            // ’Êí•Ç‚ÍnormalWallYOffset‚ğg—p
+            // é€šå¸¸å£ã¯normalWallYOffsetã‚’ä½¿ç”¨
             GameObject normalWall =
                 Instantiate(
                     wallPrefab,
@@ -911,7 +925,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ”z’u‚µ‚½Wall
+        // é…ç½®ã—ãŸWall
         if (map[
                 pos.x,
                 pos.y,
@@ -945,7 +959,7 @@ public class MapManager : MonoBehaviour
 
             Destroy(currentWall);
 
-            // ”z’u•Ç‚ÍplacedWallYOffset‚ğg—p
+            // é…ç½®å£ã¯placedWallYOffsetã‚’ä½¿ç”¨
             GameObject normalWall =
                 Instantiate(
                     wallPrefab,
@@ -979,7 +993,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Î‚ß•Ç—p‚Ì°‚ğíœ
+    // æ–œã‚å£ç”¨ã®åºŠã‚’å‰Šé™¤
     //==================================================
 
     private void RemoveDiagonalWallFloor(
@@ -1027,7 +1041,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒŠƒXƒ|[ƒ“
+    // ãƒªã‚¹ãƒãƒ¼ãƒ³
     //==================================================
 
     private void CreateDefaultRespawnObjects()
@@ -1048,7 +1062,7 @@ public class MapManager : MonoBehaviour
         else
         {
             Debug.LogError(
-                "Respawn Point Prefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "Respawn Point PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
         }
 
@@ -1071,13 +1085,13 @@ public class MapManager : MonoBehaviour
         else
         {
             Debug.LogError(
-                "Respawn Area Prefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "Respawn Area PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
         }
     }
 
     //==================================================
-    // Œ@í
+    // æ˜å‰Š
     //==================================================
 
     public void Dig(
@@ -1157,7 +1171,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ”z’u‚µ‚½Wall‚ğŒ@í
+        // é…ç½®ã—ãŸWallã‚’æ˜å‰Š
         if (isPlacedWall)
         {
             GameObject wall =
@@ -1184,7 +1198,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ’Êí•Ç‚ğŒ@í
+        // é€šå¸¸å£ã‚’æ˜å‰Š
         map[
             pos.x,
             pos.y,
@@ -1222,7 +1236,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // °
+    // åºŠ
     //==================================================
 
     private GameObject CreateFloor(
@@ -1236,7 +1250,7 @@ public class MapManager : MonoBehaviour
         if (floorPrefab == null)
         {
             Debug.LogError(
-                "Floor Prefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "Floor PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return null;
@@ -1285,7 +1299,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // °ãƒ‰ƒ“ƒ_ƒ€‘•ü
+    // åºŠä¸Šãƒ©ãƒ³ãƒ€ãƒ è£…é£¾
     //==================================================
 
     private void CreateRandomFloorDecoration(
@@ -1414,7 +1428,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ŠOü•Ç
+    // å¤–å‘¨å£
     //==================================================
 
     private void CreateOuterBoundaryWalls()
@@ -1432,13 +1446,13 @@ public class MapManager : MonoBehaviour
         if (prefab == null)
         {
             Debug.LogError(
-                "ŠOü•ÇPrefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "å¤–å‘¨å£PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return;
         }
 
-        // ‰º‘¤
+        // ä¸‹å´
         for (int x = 0; x < width; x++)
         {
             if (IsEntranceCell(EntranceDirection.Bottom, x))
@@ -1456,7 +1470,7 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // ã‘¤
+        // ä¸Šå´
         for (int x = 0; x < width; x++)
         {
             if (IsEntranceCell(EntranceDirection.Top, x))
@@ -1474,7 +1488,7 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // ¶‘¤
+        // å·¦å´
         for (int z = 0; z < depth; z++)
         {
             if (IsEntranceCell(EntranceDirection.Left, z))
@@ -1492,7 +1506,7 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // ‰E‘¤
+        // å³å´
         for (int z = 0; z < depth; z++)
         {
             if (IsEntranceCell(EntranceDirection.Right, z))
@@ -1510,8 +1524,8 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // l‹÷‚Í•K‚¸ì¬‚·‚éB
-        // “üŒû‚ªŠp‚É‚ ‚Á‚Ä‚àAŠp‚ÌŠO‘¤‚Ü‚Å•Ç‚ª“rØ‚ê‚È‚¢‚æ‚¤‚É‚·‚éB
+        // å››éš…ã¯å¿…ãšä½œæˆã™ã‚‹ã€‚
+        // å…¥å£ãŒè§’ã«ã‚ã£ã¦ã‚‚ã€è§’ã®å¤–å´ã¾ã§å£ãŒé€”åˆ‡ã‚Œãªã„ã‚ˆã†ã«ã™ã‚‹ã€‚
         CreateOuterWall(
             new Vector3(
                 -wallSpacing,
@@ -1558,7 +1572,7 @@ public class MapManager : MonoBehaviour
             return false;
         }
 
-        // İ’è‚µ‚½•ûŒüˆÈŠO‚É‚Í“üŒû‚ğì‚ç‚È‚¢
+        // è¨­å®šã—ãŸæ–¹å‘ä»¥å¤–ã«ã¯å…¥å£ã‚’ä½œã‚‰ãªã„
         if (direction != entranceDirection)
         {
             return false;
@@ -1575,21 +1589,21 @@ public class MapManager : MonoBehaviour
             return false;
         }
 
-        // “üŒû•‚ğƒ}ƒbƒvƒTƒCƒYˆÈ“à‚É§ŒÀ
+        // å…¥å£å¹…ã‚’ãƒãƒƒãƒ—ã‚µã‚¤ã‚ºä»¥å†…ã«åˆ¶é™
         int widthClamped = Mathf.Clamp(
             entranceWidth,
             1,
             max + 1
         );
 
-        // “üŒûˆÊ’u‚ğƒ}ƒbƒv“à‚Éû‚ß‚é
+        // å…¥å£ä½ç½®ã‚’ãƒãƒƒãƒ—å†…ã«åã‚ã‚‹
         int center = Mathf.Clamp(
             entrancePosition,
             0,
             max
         );
 
-        // “üŒû•‚ğˆÛ‚µ‚½‚Ü‚ÜŠJnˆÊ’u‚ğŒvZ
+        // å…¥å£å¹…ã‚’ç¶­æŒã—ãŸã¾ã¾é–‹å§‹ä½ç½®ã‚’è¨ˆç®—
         int start =
             center - Mathf.FloorToInt(
                 widthClamped / 2f
@@ -1646,7 +1660,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // •Û‘¶ƒf[ƒ^ì¬
+    // ä¿å­˜ãƒ‡ãƒ¼ã‚¿ä½œæˆ
     //==================================================
 
     public DungeonMapData CreateSaveData()
@@ -1785,7 +1799,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒ_ƒ“ƒWƒ‡ƒ““Ç‚İ‚İ
+    // ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³èª­ã¿è¾¼ã¿
     //==================================================
 
     public void LoadDungeon(
@@ -1795,7 +1809,7 @@ public class MapManager : MonoBehaviour
         if (data == null)
         {
             Debug.LogError(
-                "DungeonMapData‚ªnull‚Å‚·B"
+                "DungeonMapDataãŒnullã§ã™ã€‚"
             );
 
             return;
@@ -1847,7 +1861,7 @@ public class MapManager : MonoBehaviour
                 depth
             ];
 
-        // “G‚ğ’â~
+        // æ•µã‚’åœæ­¢
         GameObject[] enemies =
             GameObject.FindGameObjectsWithTag(
                 "Enemy"
@@ -1874,7 +1888,7 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // Œ»İ‚Ìƒ}ƒbƒv‚ğíœ
+        // ç¾åœ¨ã®ãƒãƒƒãƒ—ã‚’å‰Šé™¤
         for (
             int i = transform.childCount - 1;
             i >= 0;
@@ -1889,7 +1903,7 @@ public class MapManager : MonoBehaviour
         respawnPointObject = null;
         respawnAreaObject = null;
 
-        // ƒ^ƒCƒ‹‚ğ•œŒ³
+        // ã‚¿ã‚¤ãƒ«ã‚’å¾©å…ƒ
         int index = 0;
 
         for (int y = 0; y < height; y++)
@@ -1936,10 +1950,10 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // Î‚ß•Ç‚ğÄ”»’è
+        // æ–œã‚å£ã‚’å†åˆ¤å®š
         UpdateDiagonalWalls();
 
-        // ”z’uƒIƒuƒWƒFƒNƒg‚ğ•œŒ³
+        // é…ç½®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å¾©å…ƒ
         if (data.objects != null)
         {
             foreach (
@@ -1961,7 +1975,7 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // ”z’u‚µ‚½Wall‚ğŠÜ‚ß‚ÄÄ”»’è
+        // é…ç½®ã—ãŸWallã‚’å«ã‚ã¦å†åˆ¤å®š
         UpdateDiagonalWalls();
 
         BuildNavigation();
@@ -1987,12 +2001,12 @@ public class MapManager : MonoBehaviour
         }
 
         Debug.Log(
-            "ƒ_ƒ“ƒWƒ‡ƒ“•œŒ³Š®—¹"
+            "ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³å¾©å…ƒå®Œäº†"
         );
     }
 
     //==================================================
-    // ”z’uƒIƒuƒWƒFƒNƒg
+    // é…ç½®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     //==================================================
 
     public void PlaceObject(
@@ -2019,7 +2033,7 @@ public class MapManager : MonoBehaviour
         )
         {
             Debug.Log(
-                "°ˆÈŠO‚É‚ÍƒIƒuƒWƒFƒNƒg‚ğ”z’u‚Å‚«‚Ü‚¹‚ñB"
+                "åºŠä»¥å¤–ã«ã¯ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’é…ç½®ã§ãã¾ã›ã‚“ã€‚"
             );
 
             return;
@@ -2042,23 +2056,50 @@ public class MapManager : MonoBehaviour
         )
         {
             ShowGoalWarning(
-                "‚·‚Å‚ÉƒS[ƒ‹‚Í’u‚¢‚Ä‚ ‚è‚Ü‚·B"
+                "ã™ã§ã«ã‚´ãƒ¼ãƒ«ã¯ç½®ã„ã¦ã‚ã‚Šã¾ã™ã€‚"
             );
 
             return;
         }
 
-        GameObject prefab =
-            GetObjectPrefab(type);
-
-        if (prefab == null)
-        {
-            Debug.LogError(
-                type +
-                " ‚ÌPrefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+        // ç·¨é›†ç”»é¢ã§ã¯å®Ÿä½“ã‚’ç”Ÿæˆã›ãšã€é…ç½®ä½ç½®ã‚’ç¤ºã™ãƒãƒ¼ã‚«ãƒ¼ã‚’ç”Ÿæˆã™ã‚‹ã€‚
+        // ãƒ†ã‚¹ãƒˆãƒ—ãƒ¬ã‚¤ç”»é¢ã§ã¯ã€ç™»éŒ²ã•ã‚ŒãŸæœ¬ç‰©ã®Prefabã‚’ç”Ÿæˆã™ã‚‹ã€‚
+        bool isMapCreateScene =
+            string.Equals(
+                SceneManager.GetActiveScene().name,
+                mapCreateSceneName,
+                System.StringComparison.OrdinalIgnoreCase
             );
 
-            return;
+        GameObject prefab;
+
+        if (isMapCreateScene)
+        {
+            prefab = GetSpawnMarkerPrefab(type);
+
+            if (prefab == null)
+            {
+                Debug.LogError(
+                    type +
+                    " ã®ã‚¹ãƒãƒ¼ãƒ³ãƒã‚¤ãƒ³ãƒˆç”¨PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚MapManagerã®Inspectorã§ç¨®é¡ã”ã¨ã®ã‚¹ãƒãƒ¼ãƒ³ãƒã‚¤ãƒ³ãƒˆã‚’è¨­å®šã—ã¦ãã ã•ã„ã€‚"
+                );
+
+                return;
+            }
+        }
+        else
+        {
+            prefab = GetObjectPrefab(type);
+
+            if (prefab == null)
+            {
+                Debug.LogError(
+                    type +
+                    " ã®PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
+                );
+
+                return;
+            }
         }
 
         Vector3 spawnPosition;
@@ -2082,7 +2123,7 @@ public class MapManager : MonoBehaviour
                 transform
             );
 
-        if (type != PlaceObjectType.Enemy)
+        if (isMapCreateScene || type != PlaceObjectType.Enemy)
         {
             SetObjectScale(obj);
 
@@ -2092,10 +2133,10 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // MapƒGƒfƒBƒ^[‚Å‚ÍGoal‚ğ‰¡‚É“|‚·
+        // ç·¨é›†ç”»é¢ã§ã¯ã‚´ãƒ¼ãƒ«ãƒãƒ¼ã‚«ãƒ¼ã‚’æ¨ªå‘ãã«ã—ã¦è¦‹ã‚„ã™ãã™ã‚‹ã€‚
         if (
-            type == PlaceObjectType.Goal &&
-            SceneManager.GetActiveScene().name == "Katayama_ren"
+            isMapCreateScene &&
+            type == PlaceObjectType.Goal
         )
         {
             obj.transform.rotation =
@@ -2105,28 +2146,33 @@ public class MapManager : MonoBehaviour
         }
 
         Rigidbody[] rigidbodies =
-            obj.GetComponentsInChildren<
-                Rigidbody
-            >();
+            obj.GetComponentsInChildren<Rigidbody>(true);
 
-        foreach (Rigidbody rb in rigidbodies)
+        if (isMapCreateScene)
         {
-            rb.isKinematic = true;
-            rb.useGravity = false;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            rb.constraints =
-                RigidbodyConstraints.FreezeAll;
+            // ç·¨é›†ç”»é¢ã®ä»®ç´ æã§ã¯ Rigidbody ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆè‡ªä½“ã‚’ç„¡åŠ¹ã«ã™ã‚‹ã€‚
+            foreach (Rigidbody rb in rigidbodies)
+            {
+                rb.isKinematic = true;
+                rb.useGravity = false;
+                rb.detectCollisions = false;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
         }
+        // ãƒ†ã‚¹ãƒˆãƒ—ãƒ¬ã‚¤ã§ã¯æœ¬ç‰©ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã® Rigidbody è¨­å®šã‚’å¤‰æ›´ã—ãªã„ã€‚
 
         NavMeshAgent[] agents =
-            obj.GetComponentsInChildren<
-                NavMeshAgent
-            >();
+            obj.GetComponentsInChildren<NavMeshAgent>(true);
 
-        foreach (NavMeshAgent agent in agents)
+        // NavMeshAgent ã¯ä»®ç´ æã§ã¯ç„¡åŠ¹ã«ã™ã‚‹ã€‚
+        if (isMapCreateScene)
         {
-            agent.enabled = false;
+            foreach (NavMeshAgent agent in agents)
+            {
+                agent.enabled = false;
+            }
         }
 
         placedObjects[
@@ -2141,8 +2187,11 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = type;
 
-        // ƒ}ƒ‹ƒ`ƒvƒŒƒC‚Å‘Sˆõ‚Ì‰æ–Ê‚Ì“¯‚¶“GEƒIƒuƒWƒFƒNƒg‚ğ‘Î‰•t‚¯‚é‚½‚ß‚ÌID
-        NetworkSyncId.Assign(obj, pos);
+        // å®Ÿä½“ã‚’ç”Ÿæˆã™ã‚‹ãƒ†ã‚¹ãƒˆãƒ—ãƒ¬ã‚¤å´ã ã‘ã«ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯åŒæœŸIDã‚’å‰²ã‚Šå½“ã¦ã‚‹ã€‚
+        if (!isMapCreateScene)
+        {
+            NetworkSyncId.Assign(obj, pos);
+        }
 
         PlaceObject placeObject =
             obj.GetComponent<PlaceObject>();
@@ -2156,7 +2205,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒIƒuƒWƒFƒNƒg‚Ì’ê–Ê‚ğ°‚É‡‚í‚¹‚é
+    // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®åº•é¢ã‚’åºŠã«åˆã‚ã›ã‚‹
     //==================================================
 
     private bool TryGetBounds(
@@ -2274,7 +2323,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // •ÇƒIƒuƒWƒFƒNƒg”z’u
+    // å£ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆé…ç½®
     //==================================================
 
     private void PlaceDiggableWall(
@@ -2285,7 +2334,7 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // ”z’uWall‚Í°ƒ}ƒX‚É’u‚­
+        // é…ç½®Wallã¯åºŠãƒã‚¹ã«ç½®ã
         if (
             map[
                 pos.x,
@@ -2311,13 +2360,13 @@ public class MapManager : MonoBehaviour
         if (wallPrefab == null)
         {
             Debug.LogError(
-                "Wall Prefab‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "Wall PrefabãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return;
         }
 
-        // ”z’u‚µ‚½•Ç‚ÍplacedWallYOffset‚ğg—p
+        // é…ç½®ã—ãŸå£ã¯placedWallYOffsetã‚’ä½¿ç”¨
         GameObject wall =
             Instantiate(
                 wallPrefab,
@@ -2356,8 +2405,27 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Prefabæ“¾
+    // Prefabå–å¾—
     //==================================================
+
+    private GameObject GetSpawnMarkerPrefab(
+        PlaceObjectType type)
+    {
+        if (spawnMarkerPrefabs == null)
+        {
+            return null;
+        }
+
+        foreach (SpawnMarkerPrefab data in spawnMarkerPrefabs)
+        {
+            if (data != null && data.type == type)
+            {
+                return data.prefab;
+            }
+        }
+
+        return null;
+    }
 
     private GameObject GetObjectPrefab(
         PlaceObjectType type)
@@ -2382,7 +2450,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒIƒuƒWƒFƒNƒgíœ
+    // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆå‰Šé™¤
     //==================================================
 
     public void DeleteObject(
@@ -2466,7 +2534,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒŠƒXƒ|[ƒ“
+    // ãƒªã‚¹ãƒãƒ¼ãƒ³
     //==================================================
 
     public bool HasRespawnPoint()
@@ -2559,7 +2627,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ”z’uƒIƒuƒWƒFƒNƒgæ“¾
+    // é…ç½®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆå–å¾—
     //==================================================
 
     public GameObject GetPlacedObject(
@@ -2578,7 +2646,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // Œ@í‰Â”\”»’è
+    // æ˜å‰Šå¯èƒ½åˆ¤å®š
     //==================================================
 
     public bool IsDiggable(
@@ -2684,7 +2752,7 @@ public class MapManager : MonoBehaviour
         if (navMeshSurface == null)
         {
             Debug.LogWarning(
-                "NavMeshSurface‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "NavMeshSurfaceãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return;
@@ -2723,7 +2791,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒJƒƒ‰
+    // ã‚«ãƒ¡ãƒ©
     //==================================================
 
     public void AdjustCamera()
@@ -2756,7 +2824,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒ}ƒbƒv“à”»’è
+    // ãƒãƒƒãƒ—å†…åˆ¤å®š
     //==================================================
 
     private bool IsInsideMap(
@@ -2771,7 +2839,7 @@ public class MapManager : MonoBehaviour
             pos.z < depth;
     }
 
-    //İ’u‚³‚ê‚Ä‚¢‚é“G‚Æƒgƒ‰ƒbƒv‚ÌRigidbody‚ğ‘S‚Ä’â~‚·‚é
+    //è¨­ç½®ã•ã‚Œã¦ã„ã‚‹æ•µã¨ãƒˆãƒ©ãƒƒãƒ—ã®Rigidbodyã‚’å…¨ã¦åœæ­¢ã™ã‚‹
     public void ObjectsAllFreeze()
     {
         for (int x = 0; x < placedObjects.GetLength(0); x++)
@@ -2780,16 +2848,16 @@ public class MapManager : MonoBehaviour
             {
                 for (int z = 0; z < placedObjects.GetLength(2); z++)
                 {
-                    //İ’u‚³‚ê‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg‚ğæ“¾
+                    //è¨­ç½®ã•ã‚Œã¦ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—
                     GameObject obj = placedObjects[x, y, z];
 
-                    //“G‚Æƒgƒ‰ƒbƒvˆÈŠO‚ÍƒXƒLƒbƒv
+                    //æ•µã¨ãƒˆãƒ©ãƒƒãƒ—ä»¥å¤–ã¯ã‚¹ã‚­ãƒƒãƒ—
                     if (obj == null || (obj.tag != "Enemy" && obj.tag != "Trap"))
                         continue;
 
-                    Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();  //Rigidbody‚ğ‚Â‘S‚Ä‚ÌqƒIƒuƒWƒFƒNƒg‚ğæ“¾
+                    Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();  //Rigidbodyã‚’æŒã¤å…¨ã¦ã®å­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’å–å¾—
 
-                    //Rigidbody‚ğ’â~
+                    //Rigidbodyã‚’åœæ­¢
                     foreach (Rigidbody rb in rigidbodies)
                     {
                         rb.linearVelocity = Vector3.zero;
@@ -2803,7 +2871,7 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
-    // ƒS[ƒ‹Œx•\¦
+    // ã‚´ãƒ¼ãƒ«è­¦å‘Šè¡¨ç¤º
     //==================================================
 
     private void ShowGoalWarning(string message)
@@ -2811,7 +2879,7 @@ public class MapManager : MonoBehaviour
         if (goalWarningUI == null)
         {
             Debug.LogError(
-                "Goal Warning UI‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "Goal Warning UIãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return;

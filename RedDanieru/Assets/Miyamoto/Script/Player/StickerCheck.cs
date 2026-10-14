@@ -144,6 +144,8 @@ namespace Player
 
                 foreach (Collider collider in isCollider)
                 {
+                    Debug.Log($"見つかった : {collider.name}");
+
                     StickerState sticker = collider.GetComponent<StickerState>();
 
                     if (sticker == null) continue;
@@ -229,6 +231,12 @@ namespace Player
                                 direction
                             );
 
+                        // 自分自身なら優先度を下げる
+                        if (sticker.transform.root == transform.root)
+                        {
+                            dot -= 1.0f;
+                        }
+
                         Debug.Log(
                             "Sticker = "
                             + sticker.currentSticker
@@ -241,7 +249,8 @@ namespace Player
                         {
                             maxDot = dot;
                             targetSticker = sticker;
-                        }
+
+                         }
 
                         if (targetSticker != null)
                         {
@@ -291,8 +300,9 @@ namespace Player
      
 
         public void StickerAnimationEnd()
-        { 
-           _stickerInteractor.ReceiptPickup(_interactObject);
+        {
+            
+            _stickerInteractor.ReceiptPickup(_interactObject);
            _actionPriority.EndAction();
         }
 
@@ -301,19 +311,35 @@ namespace Player
         //------------------------------------------------------
         private bool IsWallInFront(StickerState sticker)
         {
-            Vector3 PlayerPosition = transform.position;
+            Vector3 playerPosition = transform.position;
             Vector3 targetPosition = sticker.transform.position;
 
-            Vector3 direction = targetPosition - PlayerPosition;
+            Vector3 direction = targetPosition - playerPosition;
             float distance = direction.magnitude;
 
-            return Physics.Raycast(
-                PlayerPosition,
+            // プレイヤーから対象までのRaycast
+            RaycastHit[] hits = Physics.RaycastAll(
+                playerPosition,
                 direction.normalized,
                 distance,
                 _wallLayer,
                 QueryTriggerInteraction.Ignore
             );
+
+            foreach (RaycastHit hit in hits)
+            {
+                // 自分自身は無視
+                if (hit.transform == sticker.transform ||
+                    hit.transform.IsChildOf(sticker.transform))
+                {
+                    continue;
+                }
+
+                // 対象より手前に壁がある
+                return true;
+            }
+
+            return false;
         }
     }
 }
