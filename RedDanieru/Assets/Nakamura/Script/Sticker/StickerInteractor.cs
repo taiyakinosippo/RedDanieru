@@ -29,7 +29,7 @@ public class StickerInteractor : MonoBehaviour
 
     void Update()
     {
-        //// インタラクト対象を更新
+        ////インタラクト対象を更新
         //UpdateInteractObjects();
 
         //保持中のステッカーのインデックスを変更
@@ -40,6 +40,12 @@ public class StickerInteractor : MonoBehaviour
         //{
         //    ReceiptPickup();
         //}
+
+        //プレイヤーにステッカーを貼る処理(仮)
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            StickerToPlayer();
+        }
     }
 
     //インタラクト対象のオブジェクトを更新
@@ -175,6 +181,12 @@ public class StickerInteractor : MonoBehaviour
 
         //ステッカーUIの更新
         stickerSlotUI.SetStickerUI(slot, sticker);
+    }
+
+    //プレイヤーにステッカーを貼る処理
+    private void StickerToPlayer()
+    {
+        ReceiptPickup(gameObject);
     }
 
     //一番カメラの中央にあるオブジェクトを取得

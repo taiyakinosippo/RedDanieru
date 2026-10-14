@@ -13,8 +13,12 @@ public class StickerState : MonoBehaviour
 
     private void Awake()
     {
-        //ステッカー表示用コンポーネント取得
-        stickerDisplay = transform.Find("StickerDisplay").GetComponent<StickerDisplay>();
+        Transform display = transform.Find("StickerDisplay");
+
+        if (display != null)
+        {
+            stickerDisplay = display.GetComponent<StickerDisplay>();
+        }
     }
 
     private void Start()
@@ -45,9 +49,6 @@ public class StickerState : MonoBehaviour
 
         currentSticker = sticker;
 
-        //ステッカー表示
-        stickerDisplay.ShowSticker(sticker);
-
         //ステッカーコンポーネント追加
         switch (sticker)
         {
@@ -74,6 +75,12 @@ public class StickerState : MonoBehaviour
                 break;
         }
 
+        // ステッカー表示
+        if (gameObject.CompareTag("Enemy"))
+        {
+            stickerDisplay?.ShowSticker(sticker);
+        }
+
         //Apply関数実行
         if (gameObject.CompareTag("Enemy"))
         {
@@ -86,7 +93,7 @@ public class StickerState : MonoBehaviour
 
     //ステッカーを剥がす
     public Sticker Remove()
-    {
+    { 
         if (currentStickerScript != null)
         {
             //Remove関数実行
@@ -122,8 +129,12 @@ public class StickerState : MonoBehaviour
 
     //見た目だけ変える（効果のスクリプトは付けない）
     public void ApplyVisual(Sticker sticker)
-    {
+    {   
         currentSticker = sticker;
+
+        // プレイヤーには表示しない
+        if (gameObject.CompareTag("Player"))
+            return;
 
         if (sticker == Sticker.None)
             stickerDisplay.HideSticker();

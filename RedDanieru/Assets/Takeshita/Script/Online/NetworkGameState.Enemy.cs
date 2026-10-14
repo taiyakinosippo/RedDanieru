@@ -298,28 +298,64 @@ public partial class NetworkGameState
     /// </summary>
     public static bool RequestPeelSticker(StickerState target, int slot)
     {
-        int id = NetworkSyncId.Of(target);
-
-        if (!IsOnline(out NetworkGameState state) || id == 0)
+        if (!IsOnline(out NetworkGameState state))
             return false;
 
-        state.RPC_RequestPeel(id, slot);
-        return true;
-    }
+        int id = NetworkSyncId.Of(target);
 
+        // 敵
+        if (id != 0)
+        {
+            state.RPC_RequestPeel(id, slot);
+            return true;
+        }
+
+        // プレイヤー
+        NetworkObject playerObj = target.GetComponentInParent<NetworkObject>();
+
+        if (playerObj != null)
+        {
+            state.RPC_RequestPeelPlayer(
+                playerObj.InputAuthority,
+                slot);
+
+            return true;
+        }
+        return false;
+    }
     /// <summary>
     /// マルチのときはステッカーを貼る処理をマスタークライアントにお願いする
     /// 失敗したらステッカーは手元に戻ってくる
     /// </summary>
     public static bool RequestApplySticker(StickerState target, Sticker sticker, int slot)
     {
-        int id = NetworkSyncId.Of(target);
-
-        if (!IsOnline(out NetworkGameState state) || id == 0)
+        if (!IsOnline(out NetworkGameState state))
             return false;
 
-        state.RPC_RequestApply(id, (byte)sticker, slot);
-        return true;
+        int id = NetworkSyncId.Of(target);
+
+        if (id != 0)
+        {
+            state.RPC_RequestApply(id, (byte)sticker, slot);
+            return true;
+        }
+
+        NetworkObject playerObj =
+            target.GetComponent<NetworkObject>();
+
+        if (playerObj != null)
+        {
+            Debug.Log($"プレイヤーへステッカー送信: {playerObj.InputAuthority} sticker={sticker}");
+
+            state.RPC_RequestApplyPlayer(
+                playerObj.InputAuthority,
+                (byte)sticker,
+                slot);
+
+            return true;
+        }
+
+        return false;
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
@@ -401,5 +437,110 @@ public partial class NetworkGameState
     private PlayerRef GetRequester(RpcInfo info)
     {
         return info.Source.IsRealPlayer ? info.Source : Runner.LocalPlayer;
+    }
+
+    private static StickerState FindPlayerSticker(PlayerRef player)
+    {
+        foreach (NetworkAuthorityController authority in
+                 UnityEngine.Object.FindObjectsOfType<NetworkAuthorityController>())
+        {
+            NetworkObject netObj =
+                authority.GetComponent<NetworkObject>();
+
+            if (netObj != null &&
+                netObj.InputAuthority == player)
+            {
+                return authority.GetComponent<StickerState>();
+            }
+        }
+
+        return null;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    private void RPC_RequestApplyPlayer(PlayerRef targetPlayer,byte sticker,int slot,RpcInfo info = default)
+    {
+        StickerState target =
+            FindPlayerSticker(targetPlayer);
+
+        if (target != null &&
+            target.currentSticker == Sticker.None)
+        {
+            target.Apply((Sticker)sticker);
+
+            RPC_PlayerStickerChanged(
+                targetPlayer,
+                sticker);
+
+            return;
+        }
+
+        RPC_StickerResult(
+            GetRequester(info),
+            slot,
+            sticker);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_PlayerStickerChanged(PlayerRef targetPlayer, byte sticker)
+    {
+        StickerState target =
+            FindPlayerSticker(targetPlayer);
+
+        if (target == null)
+            return;
+
+        NetworkObject playerObj = target.GetComponentInParent<NetworkObject>();
+
+        if ((Sticker)sticker == Sticker.None)
+        {
+            target.Remove();
+        }
+        else
+        {
+            NetworkObject netObj = target.GetComponentInParent<NetworkObject>();
+
+            if (netObj != null && netObj.HasInputAuthority)
+            {
+                Debug.Log($"自分にステッカーが貼られた！ {(Sticker)sticker}");
+              
+                target.Apply((Sticker)sticker);
+            }
+            else
+            {
+                target.ApplyVisual((Sticker)sticker);
+            }
+        }
+    }
+
+    //プレイヤー用剥がし
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    private void RPC_RequestPeelPlayer(PlayerRef targetPlayer,int slot,RpcInfo info = default)
+    {
+        StickerState target =
+            FindPlayerSticker(targetPlayer);
+
+        if (target != null &&
+            target.currentSticker != Sticker.None)
+        {
+            Sticker removed =
+                target.Remove();
+
+            RPC_PlayerStickerChanged(
+                targetPlayer,
+                (byte)Sticker.None);
+
+            RPC_StickerResult(
+                GetRequester(info),
+                slot,
+                (byte)removed);
+
+            return;
+        }
+
+        RPC_StickerResult(
+            GetRequester(info),
+            slot,
+            (byte)Sticker.None);
     }
 }

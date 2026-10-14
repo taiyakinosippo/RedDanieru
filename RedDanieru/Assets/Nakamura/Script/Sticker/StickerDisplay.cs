@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using Fusion;
 
 public class StickerDisplay : MonoBehaviour
 {
@@ -24,6 +25,14 @@ public class StickerDisplay : MonoBehaviour
     public void ShowSticker(Sticker stickerType)
     {
         stickerRenderer.enabled = true;
+
+        NetworkObject netObj =
+    GetComponentInParent<NetworkObject>();
+
+        if (netObj != null)
+        {
+            return;
+        }
 
         foreach (var visual in stickerVisuals)
         {
