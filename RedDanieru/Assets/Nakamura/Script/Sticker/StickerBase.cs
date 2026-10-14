@@ -5,7 +5,7 @@ public class StickerBase : MonoBehaviour
 {
     protected EnemyBase enemyScript;
     protected StickerState stickerState;
-    public int attackRate = 30; //ステッカーが貼られる確率
+    public int attackRate = 30; //ステッカー行動が行われる確率
 
     public virtual void OnEnemyApply()
     {
@@ -37,13 +37,6 @@ public class StickerBase : MonoBehaviour
         //ステッカーが物から剥がれたときの処理
     }
 
-    //敵自分のスクリプトを取得する
-    public void GetEnemyScript() 
-    {
-        enemyScript = GetComponent<EnemyBase>();
-        stickerState = GetComponent<StickerState>();
-    }
-
     public virtual void OnWallApply()
     {
         //ステッカーが壁に貼られたときの処理
@@ -57,6 +50,28 @@ public class StickerBase : MonoBehaviour
     public virtual void OnWallRemove()
     {
         //ステッカーが壁から剥がれたときの処理
+    }
+
+    public virtual void OnPlayerApply()
+    {
+        //ステッカーがプレイヤーに貼られたときの処理
+    }
+
+    public virtual void OnPlayerUpdate()
+    {
+        //ステッカーがプレイヤーに貼られている間の処理
+    }
+
+    public virtual void OnPlayerRemove()
+    {
+        //ステッカーがプレイヤーから剥がれたときの処理
+    }
+
+    //敵自分のスクリプトを取得する
+    public void GetEnemyScript()
+    {
+        enemyScript = GetComponent<EnemyBase>();
+        stickerState = GetComponent<StickerState>();
     }
 
     public virtual void OnDamageHit()
