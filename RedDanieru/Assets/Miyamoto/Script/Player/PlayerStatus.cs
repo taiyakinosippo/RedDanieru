@@ -108,6 +108,8 @@ namespace Player
                 return;
             }
 
+            GetComponent<StickerState>()?.OnHit();
+
             // マルチで他の人のキャラに当たったときは、そのキャラを操作している人に届ける
             // （敵はホストの画面で動いているので、ホストの画面の他人のキャラに当たることがある）
             if (!NetworkAuthorityController.IsLocallyControlled(gameObject))
@@ -250,7 +252,18 @@ namespace Player
             PlayerMoveSpeed = speed;
             return old;
         }
+
+        public int SetAttack(int attack)
+        {
+            int old = PlayerAttack;
+            PlayerAttack = attack;
+            return old;
+        }
+
+        public int AddDefense(int value)
+        {
+            PlayerDefense += value;
+            return PlayerDefense;
+        }
     }
-
-
 }
