@@ -1,5 +1,6 @@
 using UnityEngine;
 using static Fusion.Sockets.NetConnectionMap;
+using Player;
 
 public class HardeningSticker : StickerBase
 {
@@ -8,6 +9,8 @@ public class HardeningSticker : StickerBase
     private float hardeningDuration = 5.0f;  //硬化時間
     private float hardeningTimer = 0.0f;  //硬化時間のタイマー
     private int damageCounter = 0;  //ダメージを受けた回数のカウンター
+
+    private PlayerStatus playerStatus;
 
     public override void OnDamageHit()
     {
@@ -93,5 +96,72 @@ public class HardeningSticker : StickerBase
     public override void OnWallRemove()
     {
 
+    }
+
+    public override void OnPlayerUpdate()
+    {
+        if (playerStatus == null)
+            return;
+
+        if (damageCounter >= 3)
+        {
+            if (!isHardening)
+            {
+                playerStatus.PlayerDefenseUp(DefenseUpAmount);
+
+                isHardening = true;
+
+                Debug.Log("硬化発動");
+            }
+            else
+            {
+                hardeningTimer -= Time.deltaTime;
+
+                if (hardeningTimer <= 0f)
+                {
+                    playerStatus.PlayerDefenseUp(-DefenseUpAmount);
+
+                    hardeningTimer = hardeningDuration;
+                    isHardening = false;
+                    damageCounter = 0;
+
+                    Debug.Log("硬化終了");
+                }
+            }
+        }
+    }
+
+    //プレイヤー用貼られたとき
+    public override void OnPlayerApply()
+    {
+        if (stickerState == null)
+        {
+            stickerState =
+                GetComponent<StickerState>();
+        }
+
+        playerStatus =
+            GetComponent<PlayerStatus>();
+
+        stickerState.isSpecialMove = true;
+
+        hardeningTimer = hardeningDuration;
+        damageCounter = 0;
+        isHardening = false;
+    }
+
+    //プレイヤー用剥がされたとき
+    public override void OnPlayerRemove()
+    {
+        stickerState.isSpecialMove = false;
+
+        if (isHardening && playerStatus != null)
+        {
+            playerStatus.PlayerDefenseUp(
+                -DefenseUpAmount);
+        }
+
+        isHardening = false;
+        damageCounter = 0;
     }
 }

@@ -1,9 +1,11 @@
 using System.Collections;
 using UnityEngine;
+using Player;
 
 public class BigSticker : StickerBase
 {
     private float bigScale = 3.0f;  //拡大率
+    private float playerScale = 2.0f; //プレイヤー拡大率
     //private float scaleTime = 2.0f;  //拡大縮小時間
     private int addPower = 100;  //攻撃力の拡大率
     private float addSearchScale = 1.0f;  //索敵範囲の拡大率
@@ -11,6 +13,9 @@ public class BigSticker : StickerBase
     private float addAttackCoolTime = 0.5f;  //攻撃クールタイムの拡大率
     private float setSpeed = 1.0f;  //移動速度の変化量
     private float saveSpeed;  //保存する速度
+    private int saveAttack; //保存する攻撃力
+
+    private PlayerStatus playerStatus;
 
     //public override StickerState.State OnEnemyUpdate(GameObject enemy, StickerState.State state)
     //{
@@ -87,5 +92,47 @@ public class BigSticker : StickerBase
     {
         //スケールを元に戻す
         transform.localScale = new Vector3(1f, 1f, 1.0f);
+    }
+
+    public override void OnPlayerApply()
+    {
+        transform.localScale =
+            Vector3.one * playerScale;
+
+        playerStatus =
+            GetComponent<PlayerStatus>();
+
+        if (playerStatus != null)
+        {
+            saveAttack =
+                playerStatus.SetAttack(
+                    Mathf.RoundToInt(
+                        playerStatus._playerAttack * 2.0f));
+
+            saveSpeed =
+                playerStatus.SetMoveSpeed(
+                    playerStatus._playerMoveSpeed);
+        }
+
+        Debug.Log("Big発動");
+    }
+
+    public override void OnPlayerRemove()
+    {
+        transform.localScale = Vector3.one;
+
+        if (playerStatus == null)
+        {
+            playerStatus =
+                GetComponent<PlayerStatus>();
+        }
+
+        if (playerStatus != null)
+        {
+            playerStatus.SetAttack(saveAttack);
+            playerStatus.SetMoveSpeed(saveSpeed);
+        }
+
+        Debug.Log("Big解除");
     }
 }
