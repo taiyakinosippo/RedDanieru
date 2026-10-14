@@ -301,19 +301,35 @@ namespace Player
         //------------------------------------------------------
         private bool IsWallInFront(StickerState sticker)
         {
-            Vector3 PlayerPosition = transform.position;
+            Vector3 playerPosition = transform.position;
             Vector3 targetPosition = sticker.transform.position;
 
-            Vector3 direction = targetPosition - PlayerPosition;
+            Vector3 direction = targetPosition - playerPosition;
             float distance = direction.magnitude;
 
-            return Physics.Raycast(
-                PlayerPosition,
+            // プレイヤーから対象までのRaycast
+            RaycastHit[] hits = Physics.RaycastAll(
+                playerPosition,
                 direction.normalized,
                 distance,
                 _wallLayer,
                 QueryTriggerInteraction.Ignore
             );
+
+            foreach (RaycastHit hit in hits)
+            {
+                // 自分自身は無視
+                if (hit.transform == sticker.transform ||
+                    hit.transform.IsChildOf(sticker.transform))
+                {
+                    continue;
+                }
+
+                // 対象より手前に壁がある
+                return true;
+            }
+
+            return false;
         }
     }
 }
