@@ -29,6 +29,10 @@ public partial class NetworkGameState : NetworkBehaviour
     {
         Instance = this;
 
+        Debug.Log(
+            $"NetworkGameStateは {gameObject.name} に付いています"
+        );
+
         SpawnedEnemySync();
     }
 

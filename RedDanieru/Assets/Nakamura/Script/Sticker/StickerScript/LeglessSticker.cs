@@ -1,8 +1,11 @@
 using UnityEngine;
+using Player;
 
 public class LeglessSticker : StickerBase
 {
     private float saveSpeed;  //保存する速度
+
+    private PlayerStatus playerStatus;
 
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
@@ -18,15 +21,39 @@ public class LeglessSticker : StickerBase
         enemyScript.AddEnemyMoveSpeed(saveSpeed);
     }
 
-    //ステッカーが物に貼られたときの処理
+    //Stickerがプレイヤーから貼られたとき
     public override void OnTrapApply()
     {
+        playerStatus =
+        GetComponent<Player.PlayerStatus>();
 
+        if (playerStatus != null)
+        {
+            saveSpeed = playerStatus.SetMoveSpeed(0f);
+
+            Debug.Log("Legless発動");
+        }
     }
 
-    //ステッカーが物から剥がれたときの処理
+    //Stickerがプレイヤーから剝がされたとき
     public override void OnTrapRemove()
     {
+        Debug.Log("Legless解除");
 
+        if (playerStatus == null)
+        {
+            playerStatus =
+                GetComponent<Player.PlayerStatus>();
+        }
+
+        if (playerStatus != null)
+        {
+            playerStatus.SetMoveSpeed(saveSpeed);
+
+            Debug.Log(
+                $"復元後 speed={playerStatus._playerMoveSpeed}"
+            );
+        }
     }
+
 }
