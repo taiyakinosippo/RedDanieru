@@ -7823,6 +7823,10 @@ PrefabInstance:
       value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefab
+      value: 
+      objectReference: {fileID: 7461072477327439928, guid: 71de1f033943d494083b84b295d25403, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: baseCameraPosition.x
       value: 9
       objectReference: {fileID: 0}
@@ -7842,6 +7846,70 @@ PrefabInstance:
       propertyPath: defaultRespawnPointPosition.z
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[1].type
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[2].type
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[3].type
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[4].type
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[5].type
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[6].type
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[7].type
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[0].prefab
+      value: 
+      objectReference: {fileID: 8173197566262819081, guid: dc081bb92bfaf314983a13531124810b, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[1].prefab
+      value: 
+      objectReference: {fileID: 6372522022111549087, guid: 1f37a1d38e4aca24ca3be9eb45d1a5d0, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[2].prefab
+      value: 
+      objectReference: {fileID: 5839628444456617438, guid: 8e8574c80e733e449b15bbe808156281, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[3].prefab
+      value: 
+      objectReference: {fileID: 1986632935637041606, guid: 6c82d9e1bd619724881355df115c3f0b, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[4].prefab
+      value: 
+      objectReference: {fileID: 5009899248836205637, guid: 0726c9df4fcbf2646978d557314606b9, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[5].prefab
+      value: 
+      objectReference: {fileID: 7228817060988096996, guid: cef61556abd241d4190b4ff72669ad46, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[6].prefab
+      value: 
+      objectReference: {fileID: 3579314766830224434, guid: cad4bf3e4a3afba4c833b64e1665ff91, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: spawnMarkerPrefabs.Array.data[7].prefab
+      value: 
+      objectReference: {fileID: 4530003306004163418, guid: a281aaaef0214dbbb7a0c5e5d4d370d1, type: 3}
     - target: {fileID: 2170924399791435939, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
