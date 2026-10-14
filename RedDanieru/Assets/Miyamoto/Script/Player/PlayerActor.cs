@@ -46,6 +46,11 @@ namespace Player
 #endif
             }
         }
+
+
+        //--------------------------------------------------------
+        // 初期化
+        //--------------------------------------------------------
         private void Start()
         {    
             // プレイヤーの入力を制御するためのStarterAssetsInputsコンポーネント
@@ -149,6 +154,9 @@ namespace Player
             UpdatePlayer();
         }
 
+        //--------------------------------------------------------
+        // プレイヤーの更新処理
+        //--------------------------------------------------------
         private void UpdatePlayer()
         {
             GameOverManager gameOver = GameOverManager.Instance;
@@ -165,7 +173,7 @@ namespace Player
                 HidePlayer();
             }
 
-              if (!_playerStatus._isDead)
+            if (!_playerStatus._isDead)
             {
                 //コンポーネントを取得できているか
                 _animation.AnimatorComPonent();
@@ -173,7 +181,7 @@ namespace Player
                 // 地面にいるかどうかの判定
                 _playerMovement.GroundedCheck();
 
-                // 入力を取得
+                // プレイヤーの入力を取得して、何の動きをするかを決定する
                 _actionPriority.CheckInput(_input, _playerMovement.Grounded);
 
                 if (_actionPriority.currentActionType == ActionType.Move ||
@@ -221,19 +229,28 @@ namespace Player
             }
         }
 
+        //--------------------------------------------------------
+        // カメラの更新処理をLateUpdateで呼ぶプレイヤーの動きに追従させるため
+        //--------------------------------------------------------
         private void LateUpdate()
         {
             CameraContoller();
         }
 
+
+        //--------------------------------------------------------
+        // カメラの更新処理
+        //--------------------------------------------------------
         public void CameraContoller()
         {
+            // プレイヤーが死んでいない場合は通常のカメラ操作
             if (!_playerStatus._isDead)
             {
                 //カメラの動き
                 _playerCamera.CameraLateUpdate(IsCurrentDeviceMouse, _input);
             }
 
+            // プレイヤーが死んでいる場合は死んだ後のカメラ操作
             else if (GameModeManager.IsMultiplayer && _playerStatus._isDead)
             {
                 //カメラの動き
@@ -241,6 +258,9 @@ namespace Player
             }
         }
 
+        //--------------------------------------------------------
+        // プレイヤーが死んだ時の処理
+        //--------------------------------------------------------
         private void HidePlayer()
         {
             // ソロでは通信していないのでRPCは使えない

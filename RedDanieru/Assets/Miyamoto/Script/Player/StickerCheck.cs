@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Player
 {
+    /// <summary>
+    /// プレイヤーがステッカーを貼る、剥がすかどうかを判定するスクリプト
+    /// </summary>
     public class StickerCheck : MonoBehaviour
     {
         [Tooltip("壁との判定距離")]
@@ -23,27 +26,25 @@ namespace Player
         [Tooltip("壁があるかどうかを判定するレイヤー")]
         public LayerMask _wallLayer;
 
-        private bool isWallDetected = false;
+        private bool isWallDetected = false;           //壁があるかどうかを判定する変数
 
-        //ステッカーがあればtrueになければfalse
-        public bool isStickerDected = false;
+        public bool isStickerDected = false;           //ステッカーがあるかどうかを判定する
 
-        private bool isStickerStateFound = false;
+        private bool isStickerStateFound = false;      //ステッカーの状態を持つscriptが存在するかどうかを判定する変数
 
-        private bool _playerHasSticker = false;
+        private bool _playerHasSticker = false;        //プレイヤーがステッカーを持っているかどうかを判定する変数
 
-        private PlayerAnimation _playerAnimation;
+        private PlayerAnimation _playerAnimation;      //プレイヤーのアニメーションを制御するスクリプト
 
-        private PlayerInputPriority _actionPriority;
+        private PlayerInputPriority _actionPriority;   //プレイヤーのアクションの優先度を制御するスクリプト
 
-        private PlayerCamera _playerCamera;
+        private PlayerCamera _playerCamera;            //プレイヤーのカメラを制御するスクリプト
 
-        private PlayerMovement _playerMovement;
+        private StickerInteractor _stickerInteractor;  //プレイヤーがステッカーを持っているかどうかやはがしたり貼ったりする処理を行っているスクリプト
 
-        private StickerInteractor _stickerInteractor;
+        private GameObject _interactObject = null;     //
 
-        private GameObject _interactObject = null;  //インタラクトトリガー内にあるStickerState持ちのオブジェクトのリスト
-
+        //初期化を行う関数
         private void Start()
         {
             _playerAnimation = GetComponent<PlayerAnimation>();
@@ -52,7 +53,6 @@ namespace Player
 
             _playerCamera = GetComponent<PlayerCamera>();
 
-            _playerMovement = GetComponent<PlayerMovement>();
 
             _stickerInteractor = GetComponent<StickerInteractor>();
         }
