@@ -17,6 +17,7 @@ public class BGMManager_Takeshita : MonoBehaviour
     // 直前にいたシーン名
     private string currentSceneName;
 
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -97,7 +98,7 @@ public class BGMManager_Takeshita : MonoBehaviour
             normalBgmSource.Play();
         }
 
-        Debug.Log("PlayNormalBGM再生中");
+        //Debug.Log("PlayNormalBGM再生中");
     }
 
     // 通常BGMが流れていればそのまま引き継ぎ、止まっていれば最初から再生する
@@ -132,7 +133,7 @@ public class BGMManager_Takeshita : MonoBehaviour
         {
             normalBgmSource.Stop();
         }
-        Debug.Log("PlayNormalBGM停止中");
+        //Debug.Log("PlayNormalBGM停止中");
     }
 
     public void StopBattleBGM()
@@ -141,7 +142,7 @@ public class BGMManager_Takeshita : MonoBehaviour
         {
             battleBgmSource.Stop();
         }
-        Debug.Log("PlayButtleBGM停止中");
+        //Debug.Log("PlayButtleBGM停止中");
     }
 
     public void PlayTitleBGM()
