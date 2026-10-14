@@ -12,15 +12,32 @@ public class PlaceObject : MonoBehaviour
 
     private Renderer[] renderers;
     private Color[] defaultColors;
+    private string[] colorProperties;
 
     private void Awake()
     {
-        renderers = GetComponentsInChildren<Renderer>();
+        renderers = GetComponentsInChildren<Renderer>(true);
         defaultColors = new Color[renderers.Length];
+        colorProperties = new string[renderers.Length];
 
         for (int i = 0; i < renderers.Length; i++)
         {
-            defaultColors[i] = renderers[i].material.color;
+            Material material = renderers[i].material;
+
+            if (material.HasProperty("_BaseColor"))
+            {
+                colorProperties[i] = "_BaseColor";
+                defaultColors[i] = material.GetColor("_BaseColor");
+            }
+            else if (material.HasProperty("_Color"))
+            {
+                colorProperties[i] = "_Color";
+                defaultColors[i] = material.GetColor("_Color");
+            }
+            else
+            {
+                colorProperties[i] = null;
+            }
         }
     }
 
@@ -29,9 +46,15 @@ public class PlaceObject : MonoBehaviour
     /// </summary>
     public void Select()
     {
-        foreach (Renderer renderer in renderers)
+        for (int i = 0; i < renderers.Length; i++)
         {
-            renderer.material.color = selectColor;
+            if (string.IsNullOrEmpty(colorProperties[i]))
+                continue;
+
+            renderers[i].material.SetColor(
+                colorProperties[i],
+                selectColor
+            );
         }
     }
 
@@ -42,7 +65,13 @@ public class PlaceObject : MonoBehaviour
     {
         for (int i = 0; i < renderers.Length; i++)
         {
-            renderers[i].material.color = defaultColors[i];
+            if (string.IsNullOrEmpty(colorProperties[i]))
+                continue;
+
+            renderers[i].material.SetColor(
+                colorProperties[i],
+                defaultColors[i]
+            );
         }
     }
 }
