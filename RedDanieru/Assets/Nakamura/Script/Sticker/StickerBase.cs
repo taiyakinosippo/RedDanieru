@@ -9,6 +9,11 @@ public class StickerBase : MonoBehaviour
     protected StickerState stickerState;
     public int attackRate = 30; //ステッカー行動が行われる確率
 
+    protected virtual void Awake()
+    {
+        stickerState = GetComponent<StickerState>();
+    }
+
     public virtual void OnEnemyApply()
     {
         //ステッカーが敵に貼られたときの処理

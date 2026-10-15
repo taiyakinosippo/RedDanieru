@@ -35,7 +35,18 @@ public class StickerState : MonoBehaviour
 
     private void Update()
     {
-        if (isSpecialMove && !gameObject.CompareTag("Enemy"))
+        if (!isSpecialMove || currentStickerScript == null)
+            return;
+
+        if (gameObject.CompareTag("Enemy"))
+        {
+            currentStickerScript.OnEnemyUpdate();
+        }
+        else if (gameObject.CompareTag("Player"))
+        {
+            currentStickerScript.OnPlayerUpdate();
+        }
+        else
         {
             currentStickerScript.OnTrapUpdate();
         }
@@ -81,7 +92,7 @@ public class StickerState : MonoBehaviour
             stickerDisplay?.ShowSticker(sticker);
         }
 
-        //Apply関数実行
+        // Apply関数実行
         if (gameObject.CompareTag("Enemy"))
         {
             currentStickerScript?.GetEnemyScript();
@@ -96,8 +107,10 @@ public class StickerState : MonoBehaviour
             currentStickerScript?.GetPlayerScript();
             currentStickerScript?.OnPlayerApply();
         }
-        else
+        else{
             Debug.LogError("ステッカーを貼る対象がEnemyでもTrapでもPlayerでもありません。");
+            currentStickerScript?.OnTrapApply();
+        }
     }
 
     //ステッカーを剥がす
@@ -105,15 +118,19 @@ public class StickerState : MonoBehaviour
     { 
         if (currentStickerScript != null)
         {
-            //Remove関数実行
+            // Remove関数実行
             if (gameObject.CompareTag("Enemy"))
+            {
                 currentStickerScript?.OnEnemyRemove();
+            }
             else if (gameObject.CompareTag("Trap"))
                 currentStickerScript?.OnTrapRemove();
             else if (gameObject.CompareTag("Player"))
                 currentStickerScript?.OnPlayerRemove();
-            else
+            else{
                 Debug.LogError("ステッカーを剥がす対象がEnemyでもTrapでもPlayerでもありません。");
+                currentStickerScript?.OnTrapRemove();
+            }
 
             //破棄
             Destroy(currentStickerScript);
@@ -145,6 +162,16 @@ public class StickerState : MonoBehaviour
     {   
         currentSticker = sticker;
 
+        //でかさ反映
+        if (sticker == Sticker.Big)
+        {
+            transform.localScale = Vector3.one * 2f;
+        }
+        else if (sticker == Sticker.None)
+        {
+            transform.localScale = Vector3.one;
+        }
+
         // プレイヤーには表示しない
         if (gameObject.CompareTag("Player"))
             return;
@@ -153,6 +180,7 @@ public class StickerState : MonoBehaviour
             stickerDisplay.HideSticker();
         else
             stickerDisplay.ShowSticker(sticker);
+
     }
 
     public void SetVisualOnly(bool visualOnly)
