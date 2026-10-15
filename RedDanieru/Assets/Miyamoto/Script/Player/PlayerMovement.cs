@@ -72,6 +72,8 @@ namespace Player
         private PlayerInputPriority _actionPriority;
         private PlayerStatus        _playerStatus;
 
+        public bool IsDashLocked = false;
+
         // 押し出し判定用（毎回配列を作らないように使い回す）
         private readonly Collider[] _enemyHits = new Collider[16];
 
@@ -122,6 +124,9 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerMove(StarterAssetsInputs _input)
         {
+            if (IsDashLocked)
+                return;
+
             if (GameStopManager.IsPaused)
                 return;
 
