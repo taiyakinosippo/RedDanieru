@@ -2,12 +2,23 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using Player;
 
 public class ChargeDashSticker : StickerBase
 {
     private Rigidbody rb;
     protected NavMeshAgent agent;
     private Transform target;
+
+    private Player.PlayerInputPriority input;
+
+    private bool canUse = true;
+    private bool isUsing = false;
+
+    private float coolTime = 15f;
+    private float coolTimer;
+
+    private CharacterController controller;
 
     private enum DashState
     {
@@ -26,6 +37,8 @@ public class ChargeDashSticker : StickerBase
     private Vector3 effectOffset = Vector3.zero;  //エフェクトの位置補正
     private Vector3 dashDirection;  //敵の向く方向
     private GameObject lastEnteredObject;  //最後に衝突したオブジェクト
+
+    private Player.PlayerMovement playerMovement;
 
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
@@ -126,7 +139,10 @@ public class ChargeDashSticker : StickerBase
             dashDirection.Normalize();
 
             //動けるようにする
-            CanMove();
+            if (enemyScript != null)
+            {
+                CanMove();
+            }
 
             //突進へ
             state = DashState.Dash;
@@ -243,7 +259,22 @@ public class ChargeDashSticker : StickerBase
             //プレイヤーが突き飛ばされる
 
         }
-        
+
+        if (hitObject.CompareTag("Enemy"))
+        {
+            EnemyBase enemy =
+                hitObject.GetComponent<EnemyBase>();
+
+            if (enemy != null)
+            {
+                NetworkGameState.DamageEnemy(enemy, 500);
+
+                enemy.Stun(3f);
+
+                EndPlayerDash();
+            }
+        }
+
         //敵だけ終了
         if (enemyScript != null)
         {
@@ -252,6 +283,140 @@ public class ChargeDashSticker : StickerBase
 
             //6秒間スタン
             enemyScript.Stun(6f);
+        }
+    }
+
+    //プレイヤーに貼られたとき
+    public override void OnPlayerApply()
+    {
+        controller =
+            GetComponent<CharacterController>();
+
+        playerMovement = GetComponent<PlayerMovement>();
+
+        stickerState.isSpecialMove = true;
+
+        canUse = true;
+    }
+
+    public override void OnPlayerUpdate()
+    {
+        if (!canUse)
+        {
+            coolTimer -= Time.deltaTime;
+
+            if (coolTimer <= 0)
+            {
+                canUse = true;
+            }
+
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E) &&canUse &&!isUsing)
+        {
+            target = FindNearestEnemy();
+
+            if (target != null)
+            {
+                isUsing = true;
+
+                playerMovement.IsDashLocked = true;
+
+                state = DashState.Charge;
+                timer = chargeTime;
+            }
+        }
+
+        if (!isUsing)
+            return;
+
+        switch (state)
+        {
+            case DashState.Charge:
+                Charge();
+                break;
+
+            case DashState.Dash:
+                PlayerDash();
+                break;
+        }
+    }
+
+    private Transform FindNearestEnemy()
+    {
+        EnemyBase[] enemies =
+            FindObjectsOfType<EnemyBase>();
+
+        Transform nearest = null;
+
+        float nearestDist = Mathf.Infinity;
+
+        foreach (EnemyBase enemy in enemies)
+        {
+            float dist = Vector3.Distance(
+                transform.position,
+                enemy.transform.position);
+
+            if (dist < nearestDist)
+            {
+                nearestDist = dist;
+                nearest = enemy.transform;
+            }
+        }
+
+        return nearest;
+    }
+
+    private void PlayerDash()
+    {
+        controller.Move(dashDirection *trapDashSpeed *Time.deltaTime);
+
+        CheckDashHitEnemy();
+
+        timer -= Time.deltaTime;
+
+        if (timer <= 0f)
+        {
+            EndPlayerDash();
+        }
+    }
+
+    private void EndPlayerDash()
+    {
+        isUsing = false;
+
+        canUse = false;
+
+        coolTimer = coolTime;
+
+        if (playerMovement != null)
+        {
+            playerMovement.IsDashLocked = false;
+        }
+    }
+
+    private void CheckDashHitEnemy()
+    {
+        Collider[] hits =
+            Physics.OverlapSphere(
+                transform.position,
+                1.0f,
+                LayerMask.GetMask("Enemy"));
+
+        foreach (Collider hit in hits)
+        {
+            EnemyBase enemy =
+                hit.GetComponent<EnemyBase>();
+
+            if (enemy != null)
+            {
+                NetworkGameState.DamageEnemy(enemy, 500);
+
+                enemy.Stun(3f);
+
+                EndPlayerDash();
+            }
         }
     }
 }
