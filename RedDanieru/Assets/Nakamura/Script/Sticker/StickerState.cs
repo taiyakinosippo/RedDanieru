@@ -98,12 +98,17 @@ public class StickerState : MonoBehaviour
             currentStickerScript?.GetEnemyScript();
             currentStickerScript?.OnEnemyApply();
         }
+        else if (gameObject.CompareTag("Trap"))
+        {
+            currentStickerScript?.OnTrapApply();
+        }
         else if (gameObject.CompareTag("Player"))
         {
+            currentStickerScript?.GetPlayerScript();
             currentStickerScript?.OnPlayerApply();
         }
-        else
-        {
+        else{
+            Debug.LogError("ステッカーを貼る対象がEnemyでもTrapでもPlayerでもありません。");
             currentStickerScript?.OnTrapApply();
         }
     }
@@ -118,12 +123,12 @@ public class StickerState : MonoBehaviour
             {
                 currentStickerScript?.OnEnemyRemove();
             }
+            else if (gameObject.CompareTag("Trap"))
+                currentStickerScript?.OnTrapRemove();
             else if (gameObject.CompareTag("Player"))
-            {
                 currentStickerScript?.OnPlayerRemove();
-            }
-            else
-            {
+            else{
+                Debug.LogError("ステッカーを剥がす対象がEnemyでもTrapでもPlayerでもありません。");
                 currentStickerScript?.OnTrapRemove();
             }
 
