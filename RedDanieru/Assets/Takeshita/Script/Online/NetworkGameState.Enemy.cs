@@ -543,4 +543,14 @@ public partial class NetworkGameState
             slot,
             (byte)Sticker.None);
     }
+
+    //プレイヤー用チャージエフェクト
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_PlayChargeEffect(Vector3 pos)
+    {
+        Instantiate(
+            StickerEffectManager.Instance.ChargeEffect,
+            pos,
+            Quaternion.identity);
+    }
 }

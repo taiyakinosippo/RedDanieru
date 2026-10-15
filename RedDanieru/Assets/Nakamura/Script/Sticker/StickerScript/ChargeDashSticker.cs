@@ -111,10 +111,22 @@ public class ChargeDashSticker : StickerBase
     //溜め
     private void Charge()
     {
-        if(!chargeEffectPlayed)
+        if (!chargeEffectPlayed)
         {
-            //溜めエフェクト再生
-            Instantiate(StickerEffectManager.Instance.ChargeEffect, transform.position + effectOffset, Quaternion.identity, transform);
+            if (NetworkGameState.Instance != null)
+            {
+                NetworkGameState.Instance.RPC_PlayChargeEffect(
+                    transform.position + effectOffset);
+            }
+            else
+            {
+                Instantiate(
+                    StickerEffectManager.Instance.ChargeEffect,
+                    transform.position + effectOffset,
+                    Quaternion.identity,
+                    transform);
+            }
+
             chargeEffectPlayed = true;
         }
 
