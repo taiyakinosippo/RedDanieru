@@ -46,7 +46,7 @@ public class LeglessArcherController : EnemyBase
             {
                 //最後に見た位置を更新
                 lastPlayerPosition = player.position;
-                trackingTimer = enemyTrackingTime;
+                trackingTimer = enemyTrackingTime + playerLostTime;
                 isTrackingLastPosition = false;
 
                 float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -85,56 +85,29 @@ public class LeglessArcherController : EnemyBase
             }
 
             //プレイヤーが見えない場合
-            if (!isTrackingLastPosition)
+            if (!isTrackingLastPosition && trackingTimer > playerLostTime)
             {
                 //最後に見た場所へ移動
                 agent.SetDestination(lastPlayerPosition);
                 isTrackingLastPosition = true;
             }
 
-            trackingTimer -= Time.deltaTime;
-
-            if (trackingTimer <= 0f)
-            {
-                currentState = enemyState.Idle;
-                agent.isStopped = true;
-                agent.ResetPath();
-
-                //specialCoolTimer = specialInterval;
-                isTrackingLastPosition = false;
-            }
-            else
-            {
-                currentState = enemyState.Move;
-                agent.isStopped = false;
-            }
+            //プレイヤーが見えない場合の処理
+            PlayerLostMove();
 
             return;
         }
 
         //プレイヤーが索敵範囲から外れた場合
-        if (trackingTimer > 0f)
+        if (!isTrackingLastPosition )
         {
-            if (!isTrackingLastPosition)
-            {
-                //最後に見た場所へ移動
-                agent.SetDestination(lastPlayerPosition);
-                isTrackingLastPosition = true;
-            }
-
-            trackingTimer -= Time.deltaTime;
-            currentState = enemyState.Move;
-            agent.isStopped = false;
+            //最後に見た場所へ移動
+            agent.SetDestination(lastPlayerPosition);
+            isTrackingLastPosition = true;
         }
-        else
-        {
-            currentState = enemyState.Idle;
-            agent.isStopped = true;
-            agent.ResetPath();
 
-            //specialCoolTimer = specialInterval;
-            isTrackingLastPosition = false;
-        }
+        //プレイヤーが見えない場合の処理
+        PlayerLostMove();
     }
 
     public override void Attack()
