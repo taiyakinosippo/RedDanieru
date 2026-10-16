@@ -23,19 +23,23 @@ public class PoisonSticker : StickerBase
     private void Update()
     {
         //ステッカーが敵に貼られている場合
-        if (enemyScript != null)
+        if (gameObject.CompareTag("Enemy") || gameObject.CompareTag("Player"))
         {
-            PoisonDamage();
+            PoisonEnemyDamage();
         }
     }
 
     //毒ダメージを与える処理
-    private void PoisonDamage()
+    private void PoisonEnemyDamage()
     {
         if (poisonTimer <= 0.0f)
         {
             //毒ダメージを与える
-            enemyScript.AddEnemyCurrentHP(-poisonDamage);
+            if (enemyScript != null)
+                enemyScript.AddEnemyCurrentHP(-poisonDamage);
+            else if (playerStatus != null)
+                playerStatus.Damage(poisonDamage);
+
             poisonTimer = poisonInterval;
         }
         else
