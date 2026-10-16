@@ -62,6 +62,16 @@ public class SaveManager : MonoBehaviour
     }
 
 
+    // ダンジョン読み込み完了時に未保存状態を解除する。
+    public void SetMapLoadedClean()
+    {
+        hasUnsavedChanges = false;
+        testPlayCleared = false;
+        clearedMapRevision = -1;
+        UpdateSaveButton();
+    }
+
+
     //==================================================
     // テストプレイクリア
     //==================================================
