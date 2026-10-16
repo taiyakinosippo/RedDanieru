@@ -5,8 +5,8 @@ using Player;
 public class BigSticker : StickerBase
 {
     private float bigScale = 3.0f;  //拡大率
-    private float playerScale = 1.0f; //プレイヤー拡大率
-    private float scaleTime = 2.0f;  //拡大縮小時間
+    private float playerScale = 2.0f; //プレイヤー拡大率
+    private float scaleTime = 1.0f;  //拡大縮小時間
     private int addPower = 100;  //攻撃力の拡大率
     private float addSearchScale = 1.0f;  //索敵範囲の拡大率
     private float addAttackScale = 1.0f;  //攻撃範囲の拡大率
