@@ -22,15 +22,19 @@ namespace Player
         //-----------------------------------------------------------
         public void CheckInput(StarterAssetsInputs _input, bool Grounded)
         {
-            if (currentActionType == ActionType.Attack || currentActionType == ActionType.Jump || currentActionType == ActionType.Sticker)
+            //アクションが続いているなら判定を行わない
+            if (IsLocked(currentActionType))
             {
-                // 攻撃中やジャンプ中に押されたジャンプ入力・攻撃入力を消費（リセット）して残らないようにする
+                // 押された入力は溜めずに捨てる
                 _input.jump = false;
-                _input.attack = false;
                 _input.sticker = false;
+                _input.evade = false;
+
+                // 攻撃中のattackだけは、コンボの先行入力として PlayerAttack が使うので残す
+                if (currentActionType != ActionType.Attack) _input.attack = false;
+
                 return;
             }
-
             // 空中で押した攻撃は無効
             if (!Grounded)
             {
@@ -59,12 +63,6 @@ namespace Player
                 AddAction(ActionType.Evade);
             }
 
-            //if (_input.cameraChange)
-            //{
-            //    Debug.Log("CameraChange");
-            //    AddAction(ActionType.CameraChange);
-            //}
-
             if (_input.sticker && Grounded)
             {
                 AddAction(ActionType.Sticker);
@@ -79,13 +77,13 @@ namespace Player
         {
             switch (action)
             {
-                case ActionType.Sticker:
+                case ActionType.Jump:
                     return 100;
 
                 case ActionType.Evade:
                     return 90;
 
-                case ActionType.Jump:
+                case ActionType.Sticker:
                     return 80;
 
                 case ActionType.Attack:
@@ -131,7 +129,14 @@ namespace Player
             return currentActionType;
         }
 
+        //-----------------------------------------------------------------
+        //アクションが続いているかどうかを判定する
+        //-----------------------------------------------------------------
+        private bool IsLocked(ActionType action)
+        {
+            return action != ActionType.None && action != ActionType.Move;
 
+        }
         //--------------------------------------------------------------
         //アクションをもとに戻す
         //--------------------------------------------------------------
