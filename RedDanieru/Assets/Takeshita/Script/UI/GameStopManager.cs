@@ -22,8 +22,6 @@ public class GameStopManager: MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Debug.Log("ESC");
-
             if (GameStopUI.activeSelf)
             {
                 GameReturnButton();

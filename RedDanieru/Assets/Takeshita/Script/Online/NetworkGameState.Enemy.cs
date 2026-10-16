@@ -546,11 +546,15 @@ public partial class NetworkGameState
 
     //プレイヤー用チャージエフェクト
     [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_PlayChargeEffect(Vector3 pos)
+    public void RPC_PlayChargeEffect(NetworkId playerId)
     {
+        if (!Runner.TryFindObject(playerId, out NetworkObject playerObj))
+            return;
+
         Instantiate(
             StickerEffectManager.Instance.ChargeEffect,
-            pos,
-            Quaternion.identity);
+            playerObj.transform.position,
+            Quaternion.identity,
+            playerObj.transform);
     }
 }

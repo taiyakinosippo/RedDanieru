@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using Player;
+using Fusion;
 
 public class ChargeDashSticker : StickerBase
 {
@@ -115,8 +116,14 @@ public class ChargeDashSticker : StickerBase
         {
             if (NetworkGameState.Instance != null)
             {
-                NetworkGameState.Instance.RPC_PlayChargeEffect(
-                    transform.position + effectOffset);
+                NetworkObject netObj =
+                    GetComponent<NetworkObject>();
+
+                if (netObj != null)
+                {
+                    NetworkGameState.Instance.RPC_PlayChargeEffect(
+                        netObj.Id);
+                }
             }
             else
             {
@@ -131,14 +138,19 @@ public class ChargeDashSticker : StickerBase
         }
 
         //プレイヤーの方を向く
-        Vector3 dir = target.position - transform.position;
-        dir.y = 0;
-        if (dir != Vector3.zero)
+        // 敵だけターゲット方向を向く
+        if (enemyScript != null)
         {
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                Quaternion.LookRotation(dir),
-                Time.deltaTime * 8f);
+            Vector3 dir = target.position - transform.position;
+            dir.y = 0;
+
+            if (dir != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation,
+                    Quaternion.LookRotation(dir),
+                    Time.deltaTime * 8f);
+            }
         }
 
         timer -= Time.deltaTime;
@@ -325,12 +337,16 @@ public class ChargeDashSticker : StickerBase
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.E) &&canUse &&!isUsing)
+        if (Input.GetKeyDown(KeyCode.E) && canUse && !isUsing)
         {
             target = FindNearestEnemy();
 
             if (target != null)
             {
+                dashDirection = transform.forward;
+                dashDirection.y = 0;
+                dashDirection.Normalize();
+
                 isUsing = true;
 
                 playerMovement.IsDashLocked = true;
