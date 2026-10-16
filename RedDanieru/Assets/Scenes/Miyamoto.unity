@@ -175,50 +175,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _sphereSize
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _followSpeed
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _cameraRadius
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _safeDistance
-      value: 0.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _wallDistance
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _approachSpeed
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _wallLayer.m_Bits
-      value: 768
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _playerRayOffset.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _playerRayOffset.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: _deadCameraBottomClamp
-      value: -50
-      objectReference: {fileID: 0}
-    - target: {fileID: 7605335574708653334, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: near clip plane
-      value: 0.01
-      objectReference: {fileID: 0}
     - target: {fileID: 8486463525180710779, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -227,37 +183,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9056627886569442442, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 9056627886569442442, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -5
-      objectReference: {fileID: 0}
-    - target: {fileID: 9056627886569442442, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9056627886569442442, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9056627886569442442, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9056627886569442442, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 559397494}
     - targetCorrespondingSourceObject: {fileID: 6224012741235196918, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 0}
@@ -406,27 +335,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &559397471 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
-  m_PrefabInstance: {fileID: 33418666}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &559397494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 559397471}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f06a7f56c0f87c4c9b3e0a378872937, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _playerRenderers: {fileID: 559397471}
-  _hideDistance: 2
-  _showDistance: 3
-  _playerOffset: {x: 0, y: 1, z: -1}
 --- !u!1001 &806474079
 PrefabInstance:
   m_ObjectHideFlags: 0

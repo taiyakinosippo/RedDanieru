@@ -26,8 +26,10 @@ namespace Player
         public float _sphereSize = 0.5f;
         [Tooltip("壁からどれだけ離すか")]
         public float _wallDistance = 0.1f;
-        [Tooltip("カメラの追従速度")]
-        public float _followSpeed = 1.0f;
+        [Tooltip("カメラの追従速度カメラが前に進むとき")]
+        public float _forwardFollowSpeed = 1.0f;
+        [Tooltip("カメラの追従速度カメラが後ろに進むとき")]
+        public float _backFollowSpeed = 1.0f;
         [Tooltip("プレイヤーのRayを受け取る高さ")]
         public Vector3 _playerRayOffset = new Vector3(0, 1.0f, 0);
         [Tooltip("カメラの半径")]
@@ -36,8 +38,8 @@ namespace Player
         public float _deadCameraTopClamp = 90.0f;
         [Tooltip("死んだときのマルチの場合のカメラの下方向の制限")]
         public float _deadCameraBottomClamp = -90.0f;
-
-
+        [Tooltip("最初の高さを覚えておく")]
+        public float _initialHeight = 0;
         // 壁に寄せている最中かどうか
         private bool _isPulledIn;
         // 左右の角度
@@ -78,6 +80,7 @@ namespace Player
             _hidePlayer = GetComponent<HidePlayerWhenClose>();
             _playerPosition = transform.position + Vector3.up * _playerRayOffset.y;
             _rayPosition = transform.position + _playerRayOffset;
+            _initialHeight = currentCamera.transform.position.y - _playerPosition.y;
             Vector3 cameraOffset = currentCamera.transform.position - _playerPosition;
             _defaultCameraDistance = cameraOffset.magnitude;
             // 最初は通常距離
@@ -110,8 +113,7 @@ namespace Player
 
             currentCamera = isFirstPerson ? FirstPersonPerspective　: ThirdPersonPerspective;
 
-            LocalCameraManager.CameraTransform =
-                currentCamera.transform;
+            LocalCameraManager.CameraTransform = currentCamera.transform;
         }
 
   
@@ -154,8 +156,12 @@ namespace Player
             // プレイヤーの周りに壁があるか
             bool playerNearWall = Physics.CheckSphere(_playerPosition, _sphereSize, _wallLayer, QueryTriggerInteraction.Ignore);
             // カメラが壁に触れているか
-            bool cameraTouchingWall = Physics.CheckSphere(currentCamera.transform.position, _cameraRadius, _wallLayer, QueryTriggerInteraction.Ignore);
-         
+            bool cameraTouchingWall = Physics.CheckSphere(currentCamera.transform.position, _cameraRadius, 
+                                                          _wallLayer, QueryTriggerInteraction.Ignore);
+            //プレイヤーとカメラの間に物体がないかどうか
+            bool hasObstacleBetween = Physics.SphereCast(_playerPosition, _sphereSize, cameraDirection,
+             out RaycastHit hit, _defaultCameraDistance, _wallLayer, QueryTriggerInteraction.Ignore)
+                ;
             if (!playerNearWall)
             {
                 _isPulledIn = false;
@@ -165,22 +171,25 @@ namespace Player
                 _isPulledIn = true;
             }
 
+            //壁にプレイヤーの
             if (_isPulledIn)
             {
                 targetDistance = 0.1f;
             }
-
-
-            else if (Physics.SphereCast(_playerPosition, _sphereSize, cameraDirection,
-               out RaycastHit hit, _defaultCameraDistance, _wallLayer, QueryTriggerInteraction.Ignore))
+            else if (hasObstacleBetween)
             {
                 // 球の中心が当たった位置までなら、壁から半径ぶんは離れている
                 targetDistance = Mathf.Max(hit.distance, 0.1f);
             }
-            if(!_isPulledIn)
+            if(!_isPulledIn && hasObstacleBetween)
             {
                 // 壁から離れたら、なめらかに戻す(フレームレートに依存しない形)
-                float t = 1f - Mathf.Exp(-_followSpeed * Time.deltaTime);
+                float t = 1f - Mathf.Exp(-_forwardFollowSpeed * Time.deltaTime);
+                _cameraDistance = Mathf.Lerp(_cameraDistance, targetDistance, t);
+            }
+            else if(!_isPulledIn && !hasObstacleBetween)
+            {
+                float t = 1f - Mathf.Exp(-_backFollowSpeed * Time.deltaTime);
                 _cameraDistance = Mathf.Lerp(_cameraDistance, targetDistance, t);
             }
             else
@@ -188,7 +197,7 @@ namespace Player
                 _cameraDistance = targetDistance;
             }
 
-            currentCamera.transform.position = _playerPosition + cameraDirection * _cameraDistance;
+            currentCamera.transform.position = _playerPosition + cameraDirection * _cameraDistance　+ Vector3.up * _initialHeight;
             currentCamera.transform.rotation = cameraRotation;
 
             _hidePlayer.isWithinHideDistance(currentCamera);
