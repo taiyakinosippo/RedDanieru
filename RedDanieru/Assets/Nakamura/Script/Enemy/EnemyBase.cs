@@ -12,6 +12,7 @@ public class EnemyBase : MonoBehaviour
         Move,
         Attack,
         Special,
+        Back,
         Damage,
         Stun,
         Dead
@@ -29,10 +30,12 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    protected enemyState currentState { get; set; }  //現在の状態
+    [SerializeField] protected enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
-    protected float trackingTimer = 0.0f;  //現在の追跡時間
+    [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
+    protected float playerLostTime = 3.5f;  //プレイヤーを見失い立ち尽くす時間
+    protected Vector3 respawnPos;  //敵のリスポーン位置
     protected float attackCoolTimer;  //現在の攻撃クールタイム
     protected float attackTimer;  //現在の攻撃開始タイマー
     protected float damageTimer;  //現在のダメージタイマー
@@ -72,6 +75,10 @@ public class EnemyBase : MonoBehaviour
         //マルチで先にホストからHPが届いていたら上書きしない
         if (!networkHpApplied)
             currentHp = enemyHP;
+        
+        //リスポーン位置を初期化
+        respawnPos = transform.position;  
+
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
         //specialCoolTimer = specialInterval;
@@ -96,7 +103,22 @@ public class EnemyBase : MonoBehaviour
                 SpecialAttack();
                 break;
 
+            case enemyState.Back: //リス地に帰宅状態
+
+                //リスポーン位置に到着したら通常状態に戻す
+                if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+                {
+                    currentState = enemyState.Idle;
+                    agent.isStopped = true;
+                    agent.ResetPath();
+                }
+
+                //索敵は続行
+                EnemyMove();
+                break;
+
             case enemyState.Damage:  //ダメージ状態
+
                 if (damageTimer <= 0f)
                 {
                     //ダメージモーションが終了したら通常状態に戻す
@@ -110,6 +132,7 @@ public class EnemyBase : MonoBehaviour
                 break;
 
             case enemyState.Stun:  //スタン状態
+
                 if (stunTimer <= 0f)
                 {
                     //スタンモーションが終了したら通常状態に戻す
@@ -163,28 +186,14 @@ public class EnemyBase : MonoBehaviour
 
             if (!CanSeePlayer(player))
             {
-                //追跡時間が残っている場合は追跡を続ける
-                if (trackingTimer > 0f)
-                {
-                    //追跡時間を減らす
-                    trackingTimer -= Time.deltaTime;
-
-                    //最後にプレイヤーを確認した位置に向かって移動
-                    currentState = enemyState.Move;
-                    agent.isStopped = false;
-                }
-                else
-                {
-                    currentState = enemyState.Idle;
-                    //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
-                    return;
-                }
+                //プレイヤーを見失った場合の処理
+                PlayerLostMove();
 
                 return;
             }
 
             //追跡時間をリセット
-            trackingTimer = enemyTrackingTime;
+            trackingTimer = enemyTrackingTime + playerLostTime;
 
             //プレイヤーの方向を向く
             //Vector3 direction = (player.position - transform.position).normalized;
@@ -230,24 +239,34 @@ public class EnemyBase : MonoBehaviour
             }
         }
         //プレイヤーを見失った場合
-        else if (currentState != enemyState.Special)
+        else if (currentState != enemyState.Special && currentState != enemyState.Idle && currentState != enemyState.Back)
         {
-            //追跡時間が残っている場合は追跡を続ける
-            if (trackingTimer > 0f)
-            {
-                //追跡時間を減らす
-                trackingTimer -= Time.deltaTime;
+            //プレイヤーを見失った場合の処理
+            PlayerLostMove();
+        }
+    }
 
-                //最後にプレイヤーを確認した位置に向かって移動
-                currentState = enemyState.Move;
-                agent.isStopped = false;
-            }
-            else
-            {
-                currentState = enemyState.Idle;
-                //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
-                return;
-            }
+    //プレイヤーを見失った場合の処理
+    public virtual void PlayerLostMove()
+    {
+        //追跡時間を減らす
+        trackingTimer -= Time.deltaTime;
+
+        //追跡時間が残っている場合は追跡を続ける
+        if (trackingTimer > playerLostTime)
+        {
+            //最後にプレイヤーを確認した位置に向かって移動
+            currentState = enemyState.Move;
+            agent.isStopped = false;
+        }
+        else if (trackingTimer > 0f)  //追跡時間が終わり、立ち尽くす
+        {
+            agent.ResetPath();
+        }
+        else  //追跡時間がなくなった場合はリスポーン位置に戻る
+        {
+            GoBackRespawnPos();
+            return;
         }
     }
 
@@ -367,6 +386,16 @@ public class EnemyBase : MonoBehaviour
         currentState = enemyState.Idle;
         agent.enabled = true;
         specialCoolTimer = specialInterval;
+    }
+    
+    //リス地に戻る処理
+    public virtual void GoBackRespawnPos()
+    {
+        Debug.Log("プレイヤーを見失ったのでリスポーン位置に戻ります。");
+        currentState = enemyState.Back;
+        //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
+        agent.isStopped = false;
+        agent.SetDestination(respawnPos);
     }
 
     //ダメージ処理

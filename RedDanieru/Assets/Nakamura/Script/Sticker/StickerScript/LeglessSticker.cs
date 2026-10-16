@@ -21,8 +21,18 @@ public class LeglessSticker : StickerBase
         enemyScript.AddEnemyMoveSpeed(saveSpeed);
     }
 
+    public virtual void OnTrapApply() 
+    {
+    
+    }
+    
+    public virtual void OnTrapRemove() 
+    { 
+    
+    }
+
     //Stickerがプレイヤーから貼られたとき
-    public override void OnTrapApply()
+    public override void OnPlayerApply()
     {
         playerStatus =
         GetComponent<Player.PlayerStatus>();
@@ -36,7 +46,7 @@ public class LeglessSticker : StickerBase
     }
 
     //Stickerがプレイヤーから剝がされたとき
-    public override void OnTrapRemove()
+    public override void OnPlayerRemove()
     {
         Debug.Log("Legless解除");
 
