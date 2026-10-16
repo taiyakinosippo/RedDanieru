@@ -44,6 +44,18 @@ public class StickerState : MonoBehaviour
         }
         else if (gameObject.CompareTag("Player"))
         {
+            if (NetworkGameState.Instance != null)
+            {
+                NetworkAuthorityController authority =
+                    GetComponent<NetworkAuthorityController>();
+
+                if (authority != null &&
+                    authority != NetworkAuthorityController.Local)
+                {
+                    return;
+                }
+            }
+
             currentStickerScript.OnPlayerUpdate();
         }
         else
