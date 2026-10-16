@@ -29,6 +29,10 @@ public class StickerInteractor : MonoBehaviour
 
     void Update()
     {
+        //ゲーム停止中
+        if (GameStopManager.IsPaused)
+            return;
+
         ////インタラクト対象を更新
         //UpdateInteractObjects();
 
@@ -106,6 +110,9 @@ public class StickerInteractor : MonoBehaviour
 
     public void ReceiptPickup(GameObject interactObj)
     {
+        if (GameStopManager.IsPaused)
+            return;
+
         if (interactObj == null)
             return;
 
@@ -143,11 +150,19 @@ public class StickerInteractor : MonoBehaviour
         {
             Sticker sticker = holdSticker[holdIndex];
 
+            // ChargeDashは敵とプレイヤーのみ
+            if (sticker == Sticker.ChargeDash &&
+                !target.CompareTag("Enemy") &&
+                !target.CompareTag("Player"))
+            {
+                Debug.Log("ChargeDashは敵とプレイヤーにしか貼れません");
+                return;
+            }
+
             holdSticker[holdIndex] = Sticker.None;
-            //ステッカーUIのスロットを空にする
+
             stickerSlotUI.SetStickerUI(holdIndex, Sticker.None);
 
-            //マルチではホストに貼ってもらう（先に他の人が貼っていたらReceiveStickerで戻ってくる）
             if (NetworkGameState.RequestApplySticker(target, sticker, holdIndex))
                 return;
 

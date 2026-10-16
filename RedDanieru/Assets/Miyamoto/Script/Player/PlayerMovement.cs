@@ -124,6 +124,11 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerMove(StarterAssetsInputs _input)
         {
+            if (_actionPriority.currentActionType != ActionType.None)
+            {
+                Debug.Log(_actionPriority.currentActionType);
+            }
+
             if (IsDashLocked)
                 return;
 

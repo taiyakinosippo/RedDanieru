@@ -255,8 +255,11 @@ namespace Player
 
         public int SetAttack(int attack)
         {
-            int old = PlayerAttack;
+            int old = CurrentAttack;
+
+            CurrentAttack = attack;
             PlayerAttack = attack;
+
             return old;
         }
 

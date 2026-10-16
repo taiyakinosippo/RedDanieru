@@ -15,6 +15,7 @@ public class BigSticker : StickerBase
     private float saveSpeed;  //保存する速度
     private int saveAttack; //保存する攻撃力
 
+    private PlayerCamera playerCamera;
     private PlayerStatus playerStatus;
 
     //ステッカーが敵に貼られたときの処理
@@ -74,8 +75,10 @@ public class BigSticker : StickerBase
 
         if (playerStatus != null)
         {
-            saveAttack = playerStatus.SetAttack(
-                Mathf.RoundToInt(playerStatus._playerAttack * 2.0f));
+            saveAttack =
+                playerStatus.SetAttack(
+                    Mathf.RoundToInt(
+                        playerStatus._playerAttack * 1.5f));
 
             saveSpeed = playerStatus.SetMoveSpeed(
                 playerStatus._playerMoveSpeed);
@@ -83,6 +86,14 @@ public class BigSticker : StickerBase
 
         //スケールを拡大
         StartCoroutine(Grow(playerScale));
+
+        playerCamera =
+    GetComponent<PlayerCamera>();
+
+        if (playerCamera != null)
+        {
+            playerCamera.SetCameraDistance(1.5f);
+        }
 
         Debug.Log("Big発動");
     }
@@ -102,6 +113,11 @@ public class BigSticker : StickerBase
         {
             playerStatus.SetAttack(saveAttack);
             playerStatus.SetMoveSpeed(saveSpeed);
+        }
+
+        if (playerCamera != null)
+        {
+            playerCamera.ResetCameraDistance();
         }
 
         Debug.Log("Big解除");
