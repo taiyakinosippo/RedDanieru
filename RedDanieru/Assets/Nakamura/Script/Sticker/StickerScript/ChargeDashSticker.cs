@@ -139,6 +139,7 @@ public class ChargeDashSticker : StickerBase
 
         //プレイヤーの方を向く
         // 敵だけターゲット方向を向く
+        //プレイヤーは方向転換可能
         if (enemyScript != null)
         {
             Vector3 dir = target.position - transform.position;
@@ -151,6 +152,15 @@ public class ChargeDashSticker : StickerBase
                     Quaternion.LookRotation(dir),
                     Time.deltaTime * 8f);
             }
+        }
+
+        if (playerMovement != null)
+        {
+            float mouseX = Input.GetAxis("Mouse X");
+
+            transform.Rotate(
+                Vector3.up,
+                mouseX * 250f * Time.deltaTime);
         }
 
         timer -= Time.deltaTime;
