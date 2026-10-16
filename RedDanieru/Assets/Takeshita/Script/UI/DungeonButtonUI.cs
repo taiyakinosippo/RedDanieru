@@ -49,6 +49,35 @@ public class DungeonButtonUI : MonoBehaviour
         }
 
         Canvas.ForceUpdateCanvases();
+
+        ScrollRect scrollRect =
+            GetComponentInParent<ScrollRect>();
+
+        if (open && scrollRect != null)
+        {
+            RectTransform viewport =
+                scrollRect.viewport;
+
+            RectTransform item =
+                transform as RectTransform;
+
+            Canvas.ForceUpdateCanvases();
+
+            Vector3[] corners = new Vector3[4];
+            item.GetWorldCorners(corners);
+
+            Vector3[] viewportCorners = new Vector3[4];
+            viewport.GetWorldCorners(viewportCorners);
+
+            float itemBottom = corners[0].y;
+            float viewportBottom = viewportCorners[0].y;
+
+            if (itemBottom < viewportBottom)
+            {
+                scrollRect.content.anchoredPosition +=
+                    new Vector2(0, viewportBottom - itemBottom + 50);
+            }
+        }
     }
 
     public void Close()

@@ -22,8 +22,6 @@ public class GameStopManager: MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Debug.Log("ESC");
-
             if (GameStopUI.activeSelf)
             {
                 GameReturnButton();
@@ -93,6 +91,8 @@ public class GameStopManager: MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         GameStopUI.SetActive(false);
+        Debug.Log("Pause解除");
+        Debug.Log(IsPaused);
     }
 
     public void SettingUIButton()

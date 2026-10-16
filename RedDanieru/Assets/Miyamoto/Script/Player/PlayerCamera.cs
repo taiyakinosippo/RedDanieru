@@ -57,8 +57,12 @@ namespace Player
         private HidePlayerWhenClose _hidePlayer;
         // 現在のカメラ距離
         private float _cameraDistance;
+
         // 壁がないときの通常距離
         private float _defaultCameraDistance;
+
+        // 元のカメラ距離
+        private float _baseCameraDistance;
 
 
 
@@ -83,6 +87,8 @@ namespace Player
             _initialHeight = currentCamera.transform.position.y - _playerPosition.y;
             Vector3 cameraOffset = currentCamera.transform.position - _playerPosition;
             _defaultCameraDistance = cameraOffset.magnitude;
+            _baseCameraDistance = _defaultCameraDistance;
+
             // 最初は通常距離
             _cameraDistance = _defaultCameraDistance;
         }
@@ -255,6 +261,23 @@ namespace Player
                 Debug.Log("通常カメラに切り替え");
                 _deadCamera.SetActive(false);
             }
+        }
+
+        public void SetCameraDistanceMultiplier(float multiplier)
+        {
+            _defaultCameraDistance *= multiplier;
+        }
+
+        public void SetCameraDistance(float multiplier)
+        {
+            _defaultCameraDistance =
+                _baseCameraDistance * multiplier;
+        }
+
+        public void ResetCameraDistance()
+        {
+            _defaultCameraDistance =
+                _baseCameraDistance;
         }
     }
 }

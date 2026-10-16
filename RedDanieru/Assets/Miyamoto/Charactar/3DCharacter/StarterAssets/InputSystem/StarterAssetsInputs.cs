@@ -41,22 +41,34 @@ namespace Player
 
 		public void OnJump(InputValue value)
 		{
-			JumpInput(value.isPressed);
+			if (GameStopManager.IsPaused)
+				return;
+			
+				JumpInput(value.isPressed);
 		}
 
 		public void OnEvade(InputValue value)
 		{
+			if (GameStopManager.IsPaused)
+				return;
+
 			EvadeInput(value.isPressed);
 		}
 
 		public void OnAttack(InputValue value)
 		{
+			if (GameStopManager.IsPaused)
+				return;
+
             Debug.Log("Attack");
             AttackInput(value.isPressed);
 		}
 
 		public void OnSticker(InputValue value)
 		{
+			if (GameStopManager.IsPaused)
+				return;
+
 			StickerInput(value.isPressed);
 		}
 
