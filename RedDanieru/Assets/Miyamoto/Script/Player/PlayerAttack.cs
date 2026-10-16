@@ -8,23 +8,24 @@ namespace Player
 {
     public class PlayerAttack : MonoBehaviour
     {
-        [SerializeField] List<PlayerAttackData> attackData = new ();
-        [SerializeField] LayerMask _wallLayer;
-        public  Transform _attackPoint;
+        [SerializeField] List<PlayerAttackData> attackData = new ();  // このlistの中から攻撃データを選択するようにする
+        [SerializeField] LayerMask _wallLayer;                        // 攻撃する際に壁があるかどうかを判定するためのレイヤー
+        public  Transform _attackPoint;                               // 当たり判定の位置を決めるためのTransform
 
-        private PlayerAnimation _playerAnimation;
-        private PlayerStatus _playerStatus;
-        private PlayerAttackData _currentAttackData;
-        private PlayerInputPriority _actionPriority;
-        // 今回の攻撃ですでに攻撃した敵
-        private HashSet<EnemyBase> hitEnemies = new();
+        private PlayerAnimation _playerAnimation;                     // プレイヤーのアニメーションを制御するためのスクリプト
+        private PlayerStatus _playerStatus;                           // プレイヤーのステータスを管理するためのスクリプト
+        private PlayerAttackData _currentAttackData;                  // 現在の攻撃データを格納する変数
+        private PlayerInputPriority _actionPriority;                  // プレイヤーのアクションの優先度を管理するためのスクリプト
+        private HashSet<EnemyBase> hitEnemies = new();                // 今回の攻撃で当たった敵を格納するためのHashSet
 
-        private bool _isAttackHitActive = false;
+        private bool _isAttackHitActive = false;　　　　　　　　　　　　
+        private Vector3 _attackPosition;                               // 攻撃の当たる位置と回転を計算するための格納変数
+        private Quaternion _attackRotation;                            // 攻撃の当たる位置と回転を計算するための格納変数
 
-        // 攻撃の当たる位置と回転を計算するための変数
-        private Vector3 _attackPosition;
-        private Quaternion _attackRotation;
 
+        //-----------------------------------------------------
+        //初期化
+        //-----------------------------------------------------
         void Start()
         {
             _playerAnimation = GetComponent<PlayerAnimation>();
@@ -33,8 +34,8 @@ namespace Player
         }
 
         //-----------------------------------------------------
-        //攻撃したときの
-        //ここにUpdateで攻撃入力を受け取り続けるようにする
+        //攻撃したときのここにUpdateで攻撃入力を受け取り続けるようにする
+        //-----------------------------------------------------
         void Update()
         {
             if (_isAttackHitActive)
