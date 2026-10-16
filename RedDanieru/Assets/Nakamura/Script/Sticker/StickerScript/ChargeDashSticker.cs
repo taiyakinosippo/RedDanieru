@@ -3,6 +3,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using Player;
+using Fusion;
 
 public class ChargeDashSticker : StickerBase
 {
@@ -15,7 +16,7 @@ public class ChargeDashSticker : StickerBase
     private bool canUse = true;
     private bool isUsing = false;
 
-    private float coolTime = 15f;
+    private float coolTime = 7f;
     private float coolTimer;
 
     private CharacterController controller;
@@ -30,7 +31,7 @@ public class ChargeDashSticker : StickerBase
 
     private float enemyDashSpeed = 13.0f;  //敵の突進速度
     private float trapDashSpeed = 20.0f;  //物の突進速度
-    private float dashTime = 5.0f;  //突進時間
+    private float dashTime = 0.5f;  //突進時間
     private float chargeTime = 2.0f;  //溜め時間
     private float timer = 0.0f;  //溜め時間のタイマー
     private bool chargeEffectPlayed = false;  //溜めエフェクトが再生されたかどうかのフラグ
@@ -111,22 +112,55 @@ public class ChargeDashSticker : StickerBase
     //溜め
     private void Charge()
     {
-        if(!chargeEffectPlayed)
+        if (!chargeEffectPlayed)
         {
-            //溜めエフェクト再生
-            Instantiate(StickerEffectManager.Instance.ChargeEffect, transform.position + effectOffset, Quaternion.identity, transform);
+            if (NetworkGameState.Instance != null)
+            {
+                NetworkObject netObj =
+                    GetComponent<NetworkObject>();
+
+                if (netObj != null)
+                {
+                    NetworkGameState.Instance.RPC_PlayChargeEffect(
+                        netObj.Id);
+                }
+            }
+            else
+            {
+                Instantiate(
+                    StickerEffectManager.Instance.ChargeEffect,
+                    transform.position + effectOffset,
+                    Quaternion.identity,
+                    transform);
+            }
+
             chargeEffectPlayed = true;
         }
 
         //プレイヤーの方を向く
-        Vector3 dir = target.position - transform.position;
-        dir.y = 0;
-        if (dir != Vector3.zero)
+        // 敵だけターゲット方向を向く
+        //プレイヤーは方向転換可能
+        if (enemyScript != null)
         {
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                Quaternion.LookRotation(dir),
-                Time.deltaTime * 8f);
+            Vector3 dir = target.position - transform.position;
+            dir.y = 0;
+
+            if (dir != Vector3.zero)
+            {
+                transform.rotation = Quaternion.Slerp(
+                    transform.rotation,
+                    Quaternion.LookRotation(dir),
+                    Time.deltaTime * 8f);
+            }
+        }
+
+        if (playerMovement != null)
+        {
+            float mouseX = Input.GetAxis("Mouse X");
+
+            transform.Rotate(
+                Vector3.up,
+                mouseX * 250f * Time.deltaTime);
         }
 
         timer -= Time.deltaTime;
@@ -313,12 +347,16 @@ public class ChargeDashSticker : StickerBase
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.E) &&canUse &&!isUsing)
+        if (Input.GetKeyDown(KeyCode.E) && canUse && !isUsing)
         {
             target = FindNearestEnemy();
 
             if (target != null)
             {
+                dashDirection = transform.forward;
+                dashDirection.y = 0;
+                dashDirection.Normalize();
+
                 isUsing = true;
 
                 playerMovement.IsDashLocked = true;
@@ -372,7 +410,7 @@ public class ChargeDashSticker : StickerBase
     {
         controller.Move(dashDirection *trapDashSpeed *Time.deltaTime);
 
-        CheckDashHitEnemy();
+        CheckDashHit();
 
         timer -= Time.deltaTime;
 
@@ -396,27 +434,44 @@ public class ChargeDashSticker : StickerBase
         }
     }
 
-    private void CheckDashHitEnemy()
+    private void CheckDashHit()
     {
         Collider[] hits =
             Physics.OverlapSphere(
                 transform.position,
-                1.0f,
-                LayerMask.GetMask("Enemy"));
+                1.0f);
 
         foreach (Collider hit in hits)
         {
+            if (hit.transform == transform)
+                continue;
+
             EnemyBase enemy =
                 hit.GetComponent<EnemyBase>();
 
+            // 敵
             if (enemy != null)
             {
                 NetworkGameState.DamageEnemy(enemy, 500);
-
                 enemy.Stun(3f);
 
                 EndPlayerDash();
+                return;
             }
+
+            // 壁
+            if (hit.GetComponent<WallBlock>() != null)
+            {
+                EndPlayerDash();
+                return;
+            }
+
+            //// Block
+            //if (hit.CompareTag("Floor"))
+            //{
+            //    EndPlayerDash();
+            //    return;
+            //}
         }
     }
 }

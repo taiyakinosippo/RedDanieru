@@ -15,6 +15,7 @@ public class BigSticker : StickerBase
     private float saveSpeed;  //保存する速度
     private int saveAttack; //保存する攻撃力
 
+    private PlayerCamera playerCamera;
     private PlayerStatus playerStatus;
 
     //public override StickerState.State OnEnemyUpdate(GameObject enemy, StickerState.State state)
@@ -107,11 +108,19 @@ public class BigSticker : StickerBase
             saveAttack =
                 playerStatus.SetAttack(
                     Mathf.RoundToInt(
-                        playerStatus._playerAttack * 2.0f));
+                        playerStatus._playerAttack * 1.5f));
 
             saveSpeed =
                 playerStatus.SetMoveSpeed(
                     playerStatus._playerMoveSpeed);
+        }
+
+        playerCamera =
+    GetComponent<PlayerCamera>();
+
+        if (playerCamera != null)
+        {
+            playerCamera.SetCameraDistance(1.5f);
         }
 
         Debug.Log("Big発動");
@@ -132,6 +141,11 @@ public class BigSticker : StickerBase
         {
             playerStatus.SetAttack(saveAttack);
             playerStatus.SetMoveSpeed(saveSpeed);
+        }
+
+        if (playerCamera != null)
+        {
+            playerCamera.ResetCameraDistance();
         }
 
         Debug.Log("Big解除");

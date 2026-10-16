@@ -18,8 +18,9 @@ public partial class NetworkGameState : NetworkBehaviour
 
     [Networked] public int DeadPlayerCount { get; set; }
 
-    [Networked]
-    public int StartPlayerCount { get; set; }
+    [Networked] public int StartPlayerCount { get; set; }
+
+    [Networked] public int SharedCoin { get; private set; } = 10000;
 
     private bool localStartHandled;
     private bool localClearHandled;
@@ -167,5 +168,17 @@ public partial class NetworkGameState : NetworkBehaviour
         var players = NetworkAuthorityController.ActivePlayers;
 
         return players.Count > 0 && players.All(player => player.IsDead);
+    }
+
+    //購入量
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_BuyItem(int price)
+    {
+        if (SharedCoin < price)
+            return;
+
+        SharedCoin -= price;
+
+        Debug.Log($"購入後コイン: {SharedCoin}");
     }
 }
