@@ -91,6 +91,8 @@ public class GameStopManager: MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         GameStopUI.SetActive(false);
+        Debug.Log("Pause解除");
+        Debug.Log(IsPaused);
     }
 
     public void SettingUIButton()
