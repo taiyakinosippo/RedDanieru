@@ -96,8 +96,8 @@ public class BigSticker : StickerBase
 
     public override void OnPlayerApply()
     {
-        transform.localScale =
-            Vector3.one * playerScale;
+        //スケールを拡大
+        transform.localScale = new Vector3(bigScale, bigScale, bigScale);
 
         playerStatus =
             GetComponent<PlayerStatus>();
@@ -119,7 +119,8 @@ public class BigSticker : StickerBase
 
     public override void OnPlayerRemove()
     {
-        transform.localScale = Vector3.one;
+        //スケールを元に戻す
+        transform.localScale = new Vector3(1f, 1f, 1.0f);
 
         if (playerStatus == null)
         {

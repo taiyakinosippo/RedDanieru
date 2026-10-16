@@ -42,6 +42,8 @@ public class UIManager : MonoBehaviour
 
     public void ShowDamage(int damage, Vector3 position)
     {
+        Debug.Log("ダメージUI表示");
+
         // ダメージUIを生成
         GameObject ui = Instantiate(_damageUI, _canvas.transform);
 
