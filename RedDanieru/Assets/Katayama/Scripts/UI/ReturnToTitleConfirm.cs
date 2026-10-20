@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ReturnToTitleConfirm : MonoBehaviour
 {
@@ -12,12 +13,19 @@ public class ReturnToTitleConfirm : MonoBehaviour
     [Header("セーブ管理")]
     [SerializeField] private SaveManager saveManager;
 
+    [Header("セーブ画面")]
+    [SerializeField] private SaveLoadUI saveLoadUI;
+
     private void Start()
     {
         if (saveManager == null)
         {
-            saveManager =
-                FindObjectOfType<SaveManager>();
+            saveManager = FindObjectOfType<SaveManager>();
+        }
+
+        if (saveLoadUI == null)
+        {
+            saveLoadUI = FindObjectOfType<SaveLoadUI>();
         }
 
         if (confirmPanel != null)
@@ -26,17 +34,11 @@ public class ReturnToTitleConfirm : MonoBehaviour
         }
     }
 
-    //==================================================
-    // Titleボタン
-    //==================================================
-
+    // タイトルへ戻るボタン
     public void OpenConfirm()
     {
-        // 未保存の変更がある場合だけ確認画面を表示
-        if (
-            saveManager != null &&
-            saveManager.HasUnsavedChanges()
-        )
+        if (saveManager != null &&
+            saveManager.HasUnsavedChanges())
         {
             if (confirmPanel != null)
             {
@@ -46,37 +48,43 @@ public class ReturnToTitleConfirm : MonoBehaviour
             return;
         }
 
-        // 変更がない場合はそのままタイトルへ
         GoToTitle();
     }
 
-
-    //==================================================
-    // 「はい」ボタン
-    //==================================================
-
+    // はい：セーブ画面を開く
     public void Yes()
+    {
+        if (confirmPanel != null)
+        {
+            confirmPanel.SetActive(false);
+        }
+
+        if (saveLoadUI != null)
+        {
+            saveLoadUI.OpenSaveLoad();
+        }
+        else
+        {
+            Debug.LogError(
+                "SaveLoadUIが設定されていません。"
+            );
+        }
+    }
+
+    // いいえ：保存せずにタイトルへ戻る
+    public void No()
     {
         GoToTitle();
     }
 
-
-    //==================================================
-    // 「いいえ」ボタン
-    //==================================================
-
-    public void No()
+    // キャンセル：編集画面に戻る
+    public void Cancel()
     {
         if (confirmPanel != null)
         {
             confirmPanel.SetActive(false);
         }
     }
-
-
-    //==================================================
-    // タイトルへ
-    //==================================================
 
     private void GoToTitle()
     {
@@ -93,9 +101,7 @@ public class ReturnToTitleConfirm : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene(
-                titleSceneName
-            );
+            SceneManager.LoadScene(titleSceneName);
         }
     }
 }

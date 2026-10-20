@@ -31,16 +31,10 @@ public class LocalSaveUI : MonoBehaviour
     [Header("保存管理")]
     [SerializeField] private SaveManager saveManager;
 
-    [Header("保存画面を開いたときに隠すUI")]
-    [SerializeField] private GameObject mapCreateUI;
-
-    [SerializeField] private GameObject otherEditUI;
+    [Header("セーブ＆ロード画面")]
+    [SerializeField] private SaveLoadUI saveLoadUI;
 
     private string overwriteDungeonName;
-
-    //==================================================
-    // 初期化
-    //==================================================
 
     private void Start()
     {
@@ -53,223 +47,85 @@ public class LocalSaveUI : MonoBehaviour
 
     public void OpenSavePanel()
     {
-        if (savePanel == null)
+        if (savePanel == null ||
+            saveManager == null ||
+            saveSlotParent == null ||
+            saveSlotPrefab == null)
         {
-            Debug.LogError(
-                "保存先選択パネルが設定されていません。"
-            );
-
+            Debug.LogError("LocalSaveUIのInspector設定を確認してください。");
             return;
         }
-
-        if (saveManager == null)
-        {
-            Debug.LogError(
-                "SaveManagerが設定されていません。"
-            );
-
-            return;
-        }
-
-        if (saveSlotParent == null)
-        {
-            Debug.LogError(
-                "保存先ボタンの親(Content)が設定されていません。"
-            );
-
-            return;
-        }
-
-        if (saveSlotPrefab == null)
-        {
-            Debug.LogError(
-                "保存先ボタンPrefabが設定されていません。"
-            );
-
-            return;
-        }
-
-        //==================================================
-        // マップ作成画面を隠す
-        //==================================================
-
-        if (mapCreateUI != null)
-        {
-            mapCreateUI.SetActive(false);
-        }
-
-        if (otherEditUI != null)
-        {
-            otherEditUI.SetActive(false);
-        }
-
-        //==================================================
-        // 保存画面を表示
-        //==================================================
 
         savePanel.SetActive(true);
-
         savePanel.transform.SetAsLastSibling();
-
-        //==================================================
-        // 以前のボタンを削除
-        //==================================================
 
         ClearSaveSlotButtons();
 
-        //==================================================
-        // 保存済みダンジョンを表示
-        //==================================================
-
-        CreateSavedDungeonButtons();
-
-        //==================================================
-        // 新規保存ボタンを表示
-        //==================================================
-
+        // 新規保存ボタンを先に表示
         CreateEmptyButtons();
 
-        //==================================================
-        // 名前入力画面を閉じる
-        //==================================================
+        // 保存済みダンジョンをその下に表示
+        CreateSavedDungeonButtons();
 
         if (nameSavePanel != null)
-        {
             nameSavePanel.SetActive(false);
-        }
-
-        //==================================================
-        // 上書き確認画面を閉じる
-        //==================================================
 
         if (overwritePanel != null)
-        {
             overwritePanel.SetActive(false);
-        }
 
-        Debug.Log(
-            "保存先選択画面を開きました。"
-        );
-    }
-
-    //==================================================
-    // 保存済みダンジョンボタン作成
-    //==================================================
-
-    private void CreateSavedDungeonButtons()
-    {
-        string[] dungeonNames =
-            saveManager.GetSavedDungeonNames();
-
-        if (dungeonNames == null)
-        {
-            return;
-        }
-
-        foreach (string dungeonName in dungeonNames)
-        {
-            if (string.IsNullOrEmpty(dungeonName))
-            {
-                continue;
-            }
-
-            CreateSavedDungeonButton(
-                dungeonName
-            );
-        }
+        Debug.Log("保存先選択画面を開きました。");
     }
 
     //==================================================
     // 保存済みダンジョンボタン
     //==================================================
 
-    private void CreateSavedDungeonButton(
-        string dungeonName
-    )
+    private void CreateSavedDungeonButtons()
     {
-        GameObject buttonObject =
-            Instantiate(
-                saveSlotPrefab,
-                saveSlotParent
-            );
+        string[] dungeonNames = saveManager.GetSavedDungeonNames();
 
-        buttonObject.transform.localScale =
-            Vector3.one;
+        if (dungeonNames == null)
+            return;
 
-        buttonObject.transform.localRotation =
-            Quaternion.identity;
-
-        //==================================================
-        // ダンジョン名
-        //==================================================
-
-        TMP_Text text =
-            buttonObject.GetComponentInChildren<TMP_Text>(
-                true
-            );
-
-        if (text != null)
+        foreach (string dungeonName in dungeonNames)
         {
-            text.text =
-                dungeonName;
-
-            text.gameObject.SetActive(true);
-
-            text.enabled =
-                true;
-
-            text.color =
-                Color.black;
-
-            text.alignment =
-                TextAlignmentOptions.Center;
-        }
-        else
-        {
-            Debug.LogError(
-                "SaveSlotButtonPrefabにTMP_Textがありません。"
-            );
-        }
-
-        //==================================================
-        // ボタン
-        //==================================================
-
-        Button button =
-            buttonObject.GetComponent<Button>();
-
-        if (button != null)
-        {
-            button.onClick.AddListener(
-                () =>
-                {
-                    SelectSavedDungeon(
-                        dungeonName
-                    );
-                }
-            );
-        }
-        else
-        {
-            Debug.LogError(
-                "SaveSlotButtonPrefabにButtonがありません。"
-            );
+            if (!string.IsNullOrEmpty(dungeonName))
+                CreateSavedDungeonButton(dungeonName);
         }
     }
 
-    //==================================================
-    // 新規保存ボタン作成
-    //==================================================
-
-    private void CreateEmptyButtons()
+    private void CreateSavedDungeonButton(string dungeonName)
     {
-        for (
-            int i = 0;
-            i < emptySlotCount;
-            i++
-        )
+        GameObject buttonObject =
+            Instantiate(saveSlotPrefab, saveSlotParent);
+
+        buttonObject.transform.localScale = Vector3.one;
+        buttonObject.transform.localRotation = Quaternion.identity;
+
+        TMP_Text text =
+            buttonObject.GetComponentInChildren<TMP_Text>(true);
+
+        if (text != null)
         {
-            CreateEmptyButton();
+            text.text = dungeonName;
+            text.gameObject.SetActive(true);
+            text.enabled = true;
+            text.color = Color.black;
+            text.alignment = TextAlignmentOptions.Center;
+        }
+
+        Button button = buttonObject.GetComponent<Button>();
+
+        if (button != null)
+        {
+            button.onClick.AddListener(() =>
+            {
+                SelectSavedDungeon(dungeonName);
+            });
+        }
+        else
+        {
+            Debug.LogError("保存先ボタンPrefabにButtonがありません。");
         }
     }
 
@@ -277,139 +133,80 @@ public class LocalSaveUI : MonoBehaviour
     // 新規保存ボタン
     //==================================================
 
+    private void CreateEmptyButtons()
+    {
+        for (int i = 0; i < emptySlotCount; i++)
+            CreateEmptyButton();
+    }
+
     private void CreateEmptyButton()
     {
         GameObject buttonObject =
-            Instantiate(
-                saveSlotPrefab,
-                saveSlotParent
-            );
+            Instantiate(saveSlotPrefab, saveSlotParent);
 
-        buttonObject.transform.localScale =
-            Vector3.one;
-
-        buttonObject.transform.localRotation =
-            Quaternion.identity;
-
-        //==================================================
-        // 新規保存の文字
-        //==================================================
+        buttonObject.transform.localScale = Vector3.one;
+        buttonObject.transform.localRotation = Quaternion.identity;
 
         TMP_Text text =
-            buttonObject.GetComponentInChildren<TMP_Text>(
-                true
-            );
+            buttonObject.GetComponentInChildren<TMP_Text>(true);
 
         if (text != null)
         {
-            text.text =
-                "新規保存";
-
+            text.text = "新規保存";
             text.gameObject.SetActive(true);
-
-            text.enabled =
-                true;
-
-            text.color =
-                Color.black;
-
-            text.alignment =
-                TextAlignmentOptions.Center;
-        }
-        else
-        {
-            Debug.LogError(
-                "SaveSlotButtonPrefabにTMP_Textがありません。"
-            );
+            text.enabled = true;
+            text.color = Color.black;
+            text.alignment = TextAlignmentOptions.Center;
         }
 
-        //==================================================
-        // ボタン
-        //==================================================
-
-        Button button =
-            buttonObject.GetComponent<Button>();
+        Button button = buttonObject.GetComponent<Button>();
 
         if (button != null)
-        {
-            button.onClick.AddListener(
-                SelectEmptySlot
-            );
-        }
+            button.onClick.AddListener(SelectEmptySlot);
         else
-        {
-            Debug.LogError(
-                "SaveSlotButtonPrefabにButtonがありません。"
-            );
-        }
+            Debug.LogError("保存先ボタンPrefabにButtonがありません。");
     }
 
-    //==================================================
-    // 保存済みダンジョンを選択
-    //==================================================
+//==================================================
+// 保存済みダンジョンを選択
+//==================================================
 
-    private void SelectSavedDungeon(
-        string dungeonName
-    )
+private void SelectSavedDungeon(string dungeonName)
     {
-        overwriteDungeonName =
-            dungeonName;
+        overwriteDungeonName = dungeonName;
 
         if (overwriteText != null)
         {
             overwriteText.text =
-                "「" +
-                dungeonName +
-                "」を上書きしますか？";
+                "「" + dungeonName + "］にはすでにデータが存在してます。\n" +
+                " 現在のデータを上書きして保存しますか？";
         }
 
         if (savePanel != null)
-        {
             savePanel.SetActive(false);
-        }
 
         if (overwritePanel != null)
-        {
             overwritePanel.SetActive(true);
-        }
-
-        Debug.Log(
-            "上書き確認 : " +
-            dungeonName
-        );
     }
 
     //==================================================
     // 新規保存を選択
     //==================================================
-
     private void SelectEmptySlot()
     {
         if (dungeonNameInput == null)
         {
-            Debug.LogError(
-                "ダンジョン名入力欄が設定されていません。"
-            );
-
+            Debug.LogError("ダンジョン名入力欄が設定されていません。");
             return;
         }
 
-        dungeonNameInput.text =
-            "";
+        dungeonNameInput.text = "";
 
         if (savePanel != null)
-        {
             savePanel.SetActive(false);
-        }
 
         if (nameSavePanel != null)
-        {
             nameSavePanel.SetActive(true);
-        }
-
-        Debug.Log(
-            "新規保存を選択しました。"
-        );
     }
 
     //==================================================
@@ -418,108 +215,72 @@ public class LocalSaveUI : MonoBehaviour
 
     public void SaveNewDungeon()
     {
-        if (saveManager == null)
+        if (saveManager == null || dungeonNameInput == null)
         {
-            Debug.LogError(
-                "SaveManagerが設定されていません。"
-            );
-
+            Debug.LogError("SaveManagerまたは入力欄が設定されていません。");
             return;
         }
 
-        if (dungeonNameInput == null)
-        {
-            Debug.LogError(
-                "ダンジョン名入力欄が設定されていません。"
-            );
-
-            return;
-        }
-
-        string dungeonName =
-            dungeonNameInput.text.Trim();
+        string dungeonName = dungeonNameInput.text.Trim();
 
         if (string.IsNullOrEmpty(dungeonName))
         {
-            Debug.Log(
-                "ダンジョン名を入力してください。"
-            );
-
+            Debug.LogWarning("ダンジョン名を入力してください。");
             return;
         }
 
-        bool success =
-            saveManager.Save(
-                dungeonName
-            );
-
-        if (!success)
-        {
+        if (!saveManager.Save(dungeonName))
             return;
-        }
 
-        Debug.Log(
-            "新規保存しました : " +
-            dungeonName
-        );
+        Debug.Log("新規保存しました : " + dungeonName);
 
-        if (nameSavePanel != null)
-        {
-            nameSavePanel.SetActive(false);
-        }
-
-        OpenSavePanel();
+        CloseAfterSuccess();
     }
 
     //==================================================
-    // 上書き確定
+    // 上書き保存
     //==================================================
 
     public void ConfirmOverwrite()
     {
         if (saveManager == null)
         {
-            Debug.LogError(
-                "SaveManagerが設定されていません。"
-            );
-
+            Debug.LogError("SaveManagerが設定されていません。");
             return;
         }
 
-        if (string.IsNullOrEmpty(
-            overwriteDungeonName))
+        if (string.IsNullOrEmpty(overwriteDungeonName))
         {
-            Debug.LogError(
-                "上書き対象が選択されていません。"
-            );
-
+            Debug.LogError("上書き対象が選択されていません。");
             return;
         }
 
-        bool success =
-            saveManager.Overwrite(
-                overwriteDungeonName
-            );
-
-        if (!success)
-        {
+        if (!saveManager.Overwrite(overwriteDungeonName))
             return;
-        }
 
-        Debug.Log(
-            "上書き保存しました : " +
-            overwriteDungeonName
-        );
+        Debug.Log("上書き保存しました : " + overwriteDungeonName);
 
-        overwriteDungeonName =
-            "";
+        overwriteDungeonName = "";
 
-        if (overwritePanel != null)
+        CloseAfterSuccess();
+    }
+
+    //==================================================
+    // 保存成功後に画面を閉じる
+    //==================================================
+
+    private void CloseAfterSuccess()
+    {
+        if (saveLoadUI != null)
         {
-            overwritePanel.SetActive(false);
+            saveLoadUI.CloseSaveLoad();
         }
-
-        OpenSavePanel();
+        else
+        {
+            Return();
+            Debug.LogWarning(
+                "SaveLoadUIが未設定のため、保存用パネルのみ閉じました。");
+        }
     }
 
     //==================================================
@@ -528,13 +289,10 @@ public class LocalSaveUI : MonoBehaviour
 
     public void CancelOverwrite()
     {
-        overwriteDungeonName =
-            "";
+        overwriteDungeonName = "";
 
         if (overwritePanel != null)
-        {
             overwritePanel.SetActive(false);
-        }
 
         OpenSavePanel();
     }
@@ -546,82 +304,38 @@ public class LocalSaveUI : MonoBehaviour
     public void ReturnFromNameSave()
     {
         if (nameSavePanel != null)
-        {
             nameSavePanel.SetActive(false);
-        }
 
         OpenSavePanel();
     }
 
     //==================================================
-    // 保存画面を閉じる
+    // 保存用パネルを閉じる
     //==================================================
 
     public void Return()
     {
         CloseAllPanels();
-
-        //==================================================
-        // マップ作成画面を戻す
-        //==================================================
-
-        if (mapCreateUI != null)
-        {
-            mapCreateUI.SetActive(true);
-        }
-
-        if (otherEditUI != null)
-        {
-            otherEditUI.SetActive(true);
-        }
-
-        Debug.Log(
-            "保存画面から戻りました。"
-        );
     }
-
-    //==================================================
-    // 生成したボタンを削除
-    //==================================================
 
     private void ClearSaveSlotButtons()
     {
         if (saveSlotParent == null)
-        {
             return;
-        }
 
-        for (
-            int i = saveSlotParent.childCount - 1;
-            i >= 0;
-            i--
-        )
-        {
-            Destroy(
-                saveSlotParent.GetChild(i).gameObject
-            );
-        }
+        for (int i = saveSlotParent.childCount - 1; i >= 0; i--)
+            Destroy(saveSlotParent.GetChild(i).gameObject);
     }
-
-    //==================================================
-    // 全パネルを閉じる
-    //==================================================
 
     private void CloseAllPanels()
     {
         if (savePanel != null)
-        {
             savePanel.SetActive(false);
-        }
 
         if (nameSavePanel != null)
-        {
             nameSavePanel.SetActive(false);
-        }
 
         if (overwritePanel != null)
-        {
             overwritePanel.SetActive(false);
-        }
     }
 }

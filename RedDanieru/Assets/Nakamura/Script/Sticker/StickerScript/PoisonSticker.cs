@@ -20,6 +20,11 @@ public class PoisonSticker : StickerBase
         
     }
 
+    public override void OnWallApply()
+    {
+        gameObject.SetActive(false);
+    }
+
     private void Update()
     {
         //ステッカーが敵に貼られている場合

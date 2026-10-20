@@ -20,12 +20,30 @@ public class SaveLoadUI : MonoBehaviour
     [Header("Local Save UI")]
     [SerializeField] private LocalSaveUI localSaveUI;
 
-    //==================================================
-    // 初期化
-    //==================================================
+    [Header("ボタンの色")]
+    [SerializeField] private Color normalColor = Color.white;
+    [SerializeField] private Color selectedColor = Color.gray;
+
+    private Image saveButtonImage;
+    private Image loadButtonImage;
+
+    private enum SelectedMenu
+    {
+        None,
+        Save,
+        Load
+    }
+
+    private SelectedMenu selectedMenu = SelectedMenu.None;
 
     private void Start()
     {
+        if (saveButton != null)
+            saveButtonImage = saveButton.GetComponent<Image>();
+
+        if (loadButton != null)
+            loadButtonImage = loadButton.GetComponent<Image>();
+
         CloseSaveLoad();
     }
 
@@ -36,29 +54,21 @@ public class SaveLoadUI : MonoBehaviour
     public void OpenSaveLoad()
     {
         if (saveLoadPanel != null)
-        {
             saveLoadPanel.SetActive(true);
-        }
 
         if (saveButtonObject != null)
-        {
             saveButtonObject.SetActive(true);
-        }
 
         if (loadButtonObject != null)
-        {
             loadButtonObject.SetActive(true);
-        }
 
-        // LocalSaveUIを閉じる
         if (localSaveUI != null)
-        {
-            // LocalSaveUI側の画面を閉じる
             localSaveUI.Return();
-        }
 
-        // 最初は両方押せる
-        ResetButtons();
+        if (reEditUI != null)
+            reEditUI.CloseLoadList();
+
+        SelectSave();
     }
 
     //==================================================
@@ -67,33 +77,17 @@ public class SaveLoadUI : MonoBehaviour
 
     public void SelectSave()
     {
-        if (saveButton != null)
-        {
-            saveButton.interactable = true;
-        }
+        selectedMenu = SelectedMenu.Save;
 
-        if (loadButton != null)
-        {
-            loadButton.interactable = false;
-        }
-
-        // Load一覧を閉じる
         if (reEditUI != null)
-        {
             reEditUI.CloseLoadList();
-        }
 
-        // LocalSaveUIを開く
         if (localSaveUI != null)
-        {
             localSaveUI.OpenSavePanel();
-        }
         else
-        {
-            Debug.LogError(
-                "LocalSaveUIが設定されていません。"
-            );
-        }
+            Debug.LogError("LocalSaveUIが設定されていません。");
+
+        UpdateButtonState();
     }
 
     //==================================================
@@ -102,26 +96,55 @@ public class SaveLoadUI : MonoBehaviour
 
     public void SelectLoad()
     {
+        selectedMenu = SelectedMenu.Load;
+
+        if (localSaveUI != null)
+            localSaveUI.Return();
+
+        if (reEditUI != null)
+            reEditUI.OpenLoadList();
+        else
+            Debug.LogError("ReEditUIが設定されていません。");
+
+        UpdateButtonState();
+    }
+
+    //==================================================
+    // ボタンの有効状態と色を更新
+    //==================================================
+
+    private void UpdateButtonState()
+    {
         if (saveButton != null)
         {
-            saveButton.interactable = false;
+            saveButton.interactable = true;
+
+            if (saveButtonImage == null)
+                saveButtonImage = saveButton.GetComponent<Image>();
+
+            if (saveButtonImage != null)
+            {
+                saveButtonImage.color =
+                    selectedMenu == SelectedMenu.Save
+                    ? selectedColor
+                    : normalColor;
+            }
         }
 
         if (loadButton != null)
         {
             loadButton.interactable = true;
-        }
 
-        // LocalSaveUIを閉じる
-        if (localSaveUI != null)
-        {
-            localSaveUI.Return();
-        }
+            if (loadButtonImage == null)
+                loadButtonImage = loadButton.GetComponent<Image>();
 
-        // Load一覧を開く
-        if (reEditUI != null)
-        {
-            reEditUI.OpenLoadList();
+            if (loadButtonImage != null)
+            {
+                loadButtonImage.color =
+                    selectedMenu == SelectedMenu.Load
+                    ? selectedColor
+                    : normalColor;
+            }
         }
     }
 
@@ -131,37 +154,7 @@ public class SaveLoadUI : MonoBehaviour
 
     public void ReturnFromSaveLoad()
     {
-        // LocalSaveUIを閉じる
-        if (localSaveUI != null)
-        {
-            localSaveUI.Return();
-        }
-
-        // Load一覧を閉じる
-        if (reEditUI != null)
-        {
-            reEditUI.CloseLoadList();
-        }
-
-        // 両方押せる状態に戻す
-        ResetButtons();
-    }
-
-    //==================================================
-    // ボタン状態を初期化
-    //==================================================
-
-    private void ResetButtons()
-    {
-        if (saveButton != null)
-        {
-            saveButton.interactable = true;
-        }
-
-        if (loadButton != null)
-        {
-            loadButton.interactable = true;
-        }
+        CloseSaveLoad();
     }
 
     //==================================================
@@ -170,33 +163,23 @@ public class SaveLoadUI : MonoBehaviour
 
     public void CloseSaveLoad()
     {
-        // LocalSaveUIを閉じる
         if (localSaveUI != null)
-        {
             localSaveUI.Return();
-        }
 
-        // Load一覧を閉じる
         if (reEditUI != null)
-        {
             reEditUI.CloseLoadList();
-        }
 
         if (saveButtonObject != null)
-        {
             saveButtonObject.SetActive(false);
-        }
 
         if (loadButtonObject != null)
-        {
             loadButtonObject.SetActive(false);
-        }
 
         if (saveLoadPanel != null)
-        {
             saveLoadPanel.SetActive(false);
-        }
 
-        ResetButtons();
+        selectedMenu = SelectedMenu.None;
+
+        UpdateButtonState();
     }
 }
