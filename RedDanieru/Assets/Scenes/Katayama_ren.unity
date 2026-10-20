@@ -1741,6 +1741,8 @@ MonoBehaviour:
   overwriteText: {fileID: 182781332}
   saveManager: {fileID: 8102463527040786997}
   saveLoadUI: {fileID: 7722181649151125841}
+  normalButtonColor: {r: 1, g: 1, b: 1, a: 1}
+  highlightedButtonColor: {r: 0.6, g: 0.8, b: 1, a: 1}
 --- !u!1 &571841673
 GameObject:
   m_ObjectHideFlags: 0
@@ -11978,7 +11980,7 @@ MonoBehaviour:
   undoManager: {fileID: 8410757127297276586}
   saveManager: {fileID: 8102463527040786997}
   content: {fileID: 6399448746728801256}
-  buttonPrefab: {fileID: 4555289007072389027, guid: 357ab9e21f080334b914f186d32590f0, type: 3}
+  buttonPrefab: {fileID: 4555289007072389027, guid: e2fabb1289dc1384ab6fbfdcde9c830d, type: 3}
   scrollView: {fileID: 5738936906055324231}
   loadCanvas: {fileID: 5614769946881736992}
   testPlayManager: {fileID: 5211732390022496711}
@@ -11986,6 +11988,8 @@ MonoBehaviour:
   saveLoadUI: {fileID: 7722181649151125841}
   unsavedConfirmPanel: {fileID: 1937138738}
   unsavedConfirmText: {fileID: 713282726}
+  normalButtonColor: {r: 1, g: 1, b: 1, a: 1}
+  highlightedButtonColor: {r: 0.6, g: 0.8, b: 1, a: 1}
 --- !u!114 &4503610447359357538
 MonoBehaviour:
   m_ObjectHideFlags: 0

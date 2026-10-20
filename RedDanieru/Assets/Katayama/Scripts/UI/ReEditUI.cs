@@ -38,6 +38,12 @@ public class ReEditUI : MonoBehaviour
     [SerializeField] private GameObject unsavedConfirmPanel;
     [SerializeField] private TMP_Text unsavedConfirmText;
 
+    [Header("ロードボタンの色")]
+    [SerializeField] private Color normalButtonColor = Color.white;
+    [SerializeField]
+    private Color highlightedButtonColor =
+        new Color(0.6f, 0.8f, 1f, 1f);
+
     public bool IsSelectingDungeon { get; private set; }
 
     private string pendingDungeonName;
@@ -52,10 +58,6 @@ public class ReEditUI : MonoBehaviour
         if (unsavedConfirmPanel != null)
             unsavedConfirmPanel.SetActive(false);
     }
-
-    //==================================================
-    // 読み込み一覧を開く
-    //==================================================
 
     public void OpenLoadList()
     {
@@ -72,7 +74,8 @@ public class ReEditUI : MonoBehaviour
             content == null ||
             buttonPrefab == null)
         {
-            Debug.LogError("ReEditUIのInspector設定を確認してください。");
+            Debug.LogError(
+                "ReEditUIのInspector設定を確認してください。");
             return;
         }
 
@@ -97,21 +100,18 @@ public class ReEditUI : MonoBehaviour
         CreateButtonList();
     }
 
-    //==================================================
-    // ダンジョン一覧作成
-    // 登録日の昇順（古い順）
-    //==================================================
-
     private void CreateButtonList()
     {
+        // 以前のボタンを削除
         for (int i = content.childCount - 1; i >= 0; i--)
+        {
             Destroy(content.GetChild(i).gameObject);
+        }
 
         string[] files = Directory.GetFiles(
             Application.persistentDataPath,
             "*.json");
 
-        // ファイルの作成日時が古いものから表示する
         files = files
             .OrderBy(file => File.GetCreationTime(file))
             .ThenBy(file => Path.GetFileNameWithoutExtension(file))
@@ -128,34 +128,51 @@ public class ReEditUI : MonoBehaviour
         }
     }
 
-    //==================================================
-    // ダンジョンボタン作成
-    //==================================================
-
     private void CreateDungeonButton(string dungeonName)
     {
-        GameObject buttonObject = Instantiate(buttonPrefab, content);
+        GameObject buttonObject =
+            Instantiate(buttonPrefab, content);
+
         buttonObject.SetActive(true);
 
-        TMP_Text text =
-            buttonObject.GetComponentInChildren<TMP_Text>();
+        // ボタン内のTextMeshProを取得
+        TMP_Text[] texts =
+            buttonObject.GetComponentsInChildren<TMP_Text>(true);
 
-        if (text != null)
-            text.text = dungeonName;
+        if (texts.Length > 0)
+        {
+            // ボタン内のテキストに実際のダンジョン名を設定
+            TMP_Text dungeonText = texts[0];
+
+            dungeonText.text = dungeonName;
+            dungeonText.color = Color.black;
+            dungeonText.ForceMeshUpdate();
+
+            Debug.Log(
+                "ロードボタン名を設定: " + dungeonName);
+        }
         else
-            Debug.LogWarning("ButtonPrefabにTMP_Textがありません。");
+        {
+            Debug.LogError(
+                "ButtonPrefab内にTextMeshProがありません。");
+        }
 
         Button button = buttonObject.GetComponent<Button>();
 
         if (button == null)
         {
-            Debug.LogError("ButtonPrefabにButtonがありません。");
+            Debug.LogError(
+                "ButtonPrefabにButtonコンポーネントがありません。");
+
             Destroy(buttonObject);
             return;
         }
 
         button.interactable = true;
         button.onClick.RemoveAllListeners();
+
+        // マウスを重ねたときの色を設定
+        SetButtonColors(button);
 
         string selectedDungeon = dungeonName;
 
@@ -165,9 +182,19 @@ public class ReEditUI : MonoBehaviour
         });
     }
 
-    //==================================================
-    // ロード要求
-    //==================================================
+    private void SetButtonColors(Button button)
+    {
+        if (button == null)
+            return;
+
+        ColorBlock colors = button.colors;
+
+        colors.normalColor = normalButtonColor;
+        colors.highlightedColor = highlightedButtonColor;
+
+        button.colors = colors;
+        button.transition = Selectable.Transition.ColorTint;
+    }
 
     private void RequestLoadDungeon(string dungeonName)
     {
@@ -200,10 +227,6 @@ public class ReEditUI : MonoBehaviour
         LoadDungeon(dungeonName);
     }
 
-    //==================================================
-    // ダイアログ：ロードする
-    //==================================================
-
     public void ConfirmPendingLoad()
     {
         if (string.IsNullOrEmpty(pendingDungeonName))
@@ -218,23 +241,13 @@ public class ReEditUI : MonoBehaviour
         LoadDungeon(dungeonName);
     }
 
-    //==================================================
-    // ダイアログ：キャンセル
-    //==================================================
-
     public void CancelPendingLoad()
     {
         pendingDungeonName = null;
 
         if (unsavedConfirmPanel != null)
             unsavedConfirmPanel.SetActive(false);
-
-        // 一覧を開いたままにして、現在のマップを維持する
     }
-
-    //==================================================
-    // ダンジョン読み込み
-    //==================================================
 
     private void LoadDungeon(string dungeonName)
     {
@@ -244,7 +257,8 @@ public class ReEditUI : MonoBehaviour
 
         if (!File.Exists(path))
         {
-            Debug.LogError("ダンジョンが見つかりません : " + dungeonName);
+            Debug.LogError(
+                "ダンジョンが見つかりません : " + dungeonName);
             return;
         }
 
@@ -257,20 +271,20 @@ public class ReEditUI : MonoBehaviour
 
             if (data == null)
             {
-                Debug.LogError("ダンジョンデータの読み込みに失敗しました。");
+                Debug.LogError(
+                    "ダンジョンデータの読み込みに失敗しました。");
                 return;
             }
 
             if (mapManager == null)
             {
-                Debug.LogError("MapManagerが設定されていません。");
+                Debug.LogError(
+                    "MapManagerが設定されていません。");
                 return;
             }
 
-            // 保存されたマップを復元
             mapManager.LoadDungeon(data, false);
 
-            // ロード前のUndo / Redo履歴をすべて削除
             if (undoManager != null)
             {
                 undoManager.ClearHistory();
@@ -281,7 +295,6 @@ public class ReEditUI : MonoBehaviour
                     "UndoManagerが未設定です。Inspectorで割り当ててください。");
             }
 
-            // ロードしたマップを未保存状態ではないものとして扱う
             if (saveManager != null)
             {
                 saveManager.SetMapLoadedClean();
@@ -290,7 +303,8 @@ public class ReEditUI : MonoBehaviour
             SaveManager.LastDungeonId = data.dungeonId;
             SaveManager.LastDungeonName = dungeonName;
 
-            Debug.Log("ダンジョンを読み込みました : " + dungeonName);
+            Debug.Log(
+                "ダンジョンを読み込みました : " + dungeonName);
 
             if (saveLoadUI != null)
             {
@@ -313,10 +327,6 @@ public class ReEditUI : MonoBehaviour
                 "ダンジョンのロードに失敗しました : " + e.Message);
         }
     }
-
-    //==================================================
-    // 読み込み一覧を閉じる
-    //==================================================
 
     public void CloseLoadList()
     {
