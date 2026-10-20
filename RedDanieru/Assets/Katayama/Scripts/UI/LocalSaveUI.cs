@@ -1,3 +1,4 @@
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,11 +35,35 @@ public class LocalSaveUI : MonoBehaviour
     [Header("セーブ＆ロード画面")]
     [SerializeField] private SaveLoadUI saveLoadUI;
 
+    [Header("ボタンの色")]
+    [SerializeField] private Color normalButtonColor = Color.white;
+
+    [SerializeField]
+    private Color highlightedButtonColor =
+        new Color(0.6f, 0.8f, 1f, 1f);
+
     private string overwriteDungeonName;
 
     private void Start()
     {
         CloseAllPanels();
+    }
+
+    //==================================================
+    // ボタンの色を設定
+    //==================================================
+
+    private void SetButtonColors(Button button)
+    {
+        if (button == null)
+            return;
+
+        ColorBlock colors = button.colors;
+        colors.normalColor = normalButtonColor;
+        colors.highlightedColor = highlightedButtonColor;
+        button.colors = colors;
+
+        button.transition = Selectable.Transition.ColorTint;
     }
 
     //==================================================
@@ -61,10 +86,7 @@ public class LocalSaveUI : MonoBehaviour
 
         ClearSaveSlotButtons();
 
-        // 新規保存ボタンを先に表示
         CreateEmptyButtons();
-
-        // 保存済みダンジョンをその下に表示
         CreateSavedDungeonButtons();
 
         if (nameSavePanel != null)
@@ -118,6 +140,8 @@ public class LocalSaveUI : MonoBehaviour
 
         if (button != null)
         {
+            SetButtonColors(button);
+
             button.onClick.AddListener(() =>
             {
                 SelectSavedDungeon(dungeonName);
@@ -162,24 +186,29 @@ public class LocalSaveUI : MonoBehaviour
         Button button = buttonObject.GetComponent<Button>();
 
         if (button != null)
+        {
+            SetButtonColors(button);
             button.onClick.AddListener(SelectEmptySlot);
+        }
         else
+        {
             Debug.LogError("保存先ボタンPrefabにButtonがありません。");
+        }
     }
 
-//==================================================
-// 保存済みダンジョンを選択
-//==================================================
+    //==================================================
+    // 保存済みダンジョンを選択
+    //==================================================
 
-private void SelectSavedDungeon(string dungeonName)
+    private void SelectSavedDungeon(string dungeonName)
     {
         overwriteDungeonName = dungeonName;
 
         if (overwriteText != null)
         {
             overwriteText.text =
-                "「" + dungeonName + "］にはすでにデータが存在してます。\n" +
-                " 現在のデータを上書きして保存しますか？";
+                "「" + dungeonName + "」にはすでにデータが存在しています。\n" +
+                "現在のデータを上書きして保存しますか？";
         }
 
         if (savePanel != null)
@@ -192,6 +221,7 @@ private void SelectSavedDungeon(string dungeonName)
     //==================================================
     // 新規保存を選択
     //==================================================
+
     private void SelectEmptySlot()
     {
         if (dungeonNameInput == null)
@@ -233,7 +263,6 @@ private void SelectSavedDungeon(string dungeonName)
             return;
 
         Debug.Log("新規保存しました : " + dungeonName);
-
         CloseAfterSuccess();
     }
 
@@ -261,7 +290,6 @@ private void SelectSavedDungeon(string dungeonName)
         Debug.Log("上書き保存しました : " + overwriteDungeonName);
 
         overwriteDungeonName = "";
-
         CloseAfterSuccess();
     }
 
