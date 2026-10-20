@@ -368,8 +368,6 @@ public class DungeonUIManager : MonoBehaviour
             gameStopManager.EnablePauseMenu();
         }
 
-        Debug.Log("Solo");
-
         ScrolView.SetActive(false);
 
         importer.ImportDungeon(
