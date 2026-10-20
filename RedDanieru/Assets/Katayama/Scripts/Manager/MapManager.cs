@@ -157,6 +157,9 @@ public class MapManager : MonoBehaviour
 
     private int mapRevision = 0;
 
+    // ダンジョン読み込み中は変更通知を行わない。
+    private bool isLoadingDungeon = false;
+
     public int MapRevision
     {
         get { return mapRevision; }
@@ -275,6 +278,11 @@ public class MapManager : MonoBehaviour
 
     private void MarkMapChanged()
     {
+        if (isLoadingDungeon)
+        {
+            return;
+        }
+
         mapRevision++;
 
         SaveManager saveManager =
@@ -1815,6 +1823,9 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // 復元中の PlaceObject などで未保存扱いにならないようにする。
+        isLoadingDungeon = true;
+
         width = data.width;
         height = data.height;
         depth = data.depth;
@@ -1992,12 +2003,15 @@ public class MapManager : MonoBehaviour
 
         mapRevision++;
 
+        // 読み込みによる生成・復元は編集扱いにしない。
+        isLoadingDungeon = false;
+
         SaveManager saveManager =
             FindObjectOfType<SaveManager>();
 
         if (saveManager != null)
         {
-            saveManager.SetMapModified();
+            saveManager.SetMapLoadedClean();
         }
 
         Debug.Log(
