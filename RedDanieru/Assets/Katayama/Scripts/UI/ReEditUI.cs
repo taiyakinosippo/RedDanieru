@@ -1,4 +1,7 @@
+
+using System;
 using System.IO;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +10,12 @@ public class ReEditUI : MonoBehaviour
 {
     [Header("マップ管理")]
     [SerializeField] private MapManager mapManager;
+
+    [Header("履歴管理")]
+    [SerializeField] private UndoManager undoManager;
+
+    [Header("保存状態管理")]
+    [SerializeField] private SaveManager saveManager;
 
     [Header("読み込み一覧")]
     [SerializeField] private Transform content;
@@ -25,7 +34,13 @@ public class ReEditUI : MonoBehaviour
     [Header("セーブ＆ロード画面")]
     [SerializeField] private SaveLoadUI saveLoadUI;
 
+    [Header("未保存確認ダイアログ")]
+    [SerializeField] private GameObject unsavedConfirmPanel;
+    [SerializeField] private TMP_Text unsavedConfirmText;
+
     public bool IsSelectingDungeon { get; private set; }
+
+    private string pendingDungeonName;
 
     private void Awake()
     {
@@ -33,6 +48,9 @@ public class ReEditUI : MonoBehaviour
 
         if (scrollView != null)
             scrollView.SetActive(false);
+
+        if (unsavedConfirmPanel != null)
+            unsavedConfirmPanel.SetActive(false);
     }
 
     //==================================================
@@ -43,13 +61,16 @@ public class ReEditUI : MonoBehaviour
     {
         Debug.Log("Loadボタンが押されました。");
 
-        if (testPlayManager != null && testPlayManager.IsTestPlay)
+        if (testPlayManager != null &&
+            testPlayManager.IsTestPlay)
         {
             Debug.LogWarning("テストプレイ中は読み込みできません。");
             return;
         }
 
-        if (scrollView == null || content == null || buttonPrefab == null)
+        if (scrollView == null ||
+            content == null ||
+            buttonPrefab == null)
         {
             Debug.LogError("ReEditUIのInspector設定を確認してください。");
             return;
@@ -78,6 +99,7 @@ public class ReEditUI : MonoBehaviour
 
     //==================================================
     // ダンジョン一覧作成
+    // 登録日の昇順（古い順）
     //==================================================
 
     private void CreateButtonList()
@@ -86,7 +108,14 @@ public class ReEditUI : MonoBehaviour
             Destroy(content.GetChild(i).gameObject);
 
         string[] files = Directory.GetFiles(
-            Application.persistentDataPath, "*.json");
+            Application.persistentDataPath,
+            "*.json");
+
+        // ファイルの作成日時が古いものから表示する
+        files = files
+            .OrderBy(file => File.GetCreationTime(file))
+            .ThenBy(file => Path.GetFileNameWithoutExtension(file))
+            .ToArray();
 
         Debug.Log("保存済みダンジョン数 : " + files.Length);
 
@@ -108,7 +137,8 @@ public class ReEditUI : MonoBehaviour
         GameObject buttonObject = Instantiate(buttonPrefab, content);
         buttonObject.SetActive(true);
 
-        TMP_Text text = buttonObject.GetComponentInChildren<TMP_Text>();
+        TMP_Text text =
+            buttonObject.GetComponentInChildren<TMP_Text>();
 
         if (text != null)
             text.text = dungeonName;
@@ -131,8 +161,75 @@ public class ReEditUI : MonoBehaviour
 
         button.onClick.AddListener(() =>
         {
-            LoadDungeon(selectedDungeon);
+            RequestLoadDungeon(selectedDungeon);
         });
+    }
+
+    //==================================================
+    // ロード要求
+    //==================================================
+
+    private void RequestLoadDungeon(string dungeonName)
+    {
+        if (saveManager != null &&
+            saveManager.HasUnsavedChanges())
+        {
+            pendingDungeonName = dungeonName;
+
+            if (unsavedConfirmPanel == null)
+            {
+                Debug.LogError(
+                    "未保存確認ダイアログが設定されていません。");
+                return;
+            }
+
+            if (unsavedConfirmText != null)
+            {
+                unsavedConfirmText.text =
+                    "現在のマップは保存されていません。\n" +
+                    "ロードすると編集内容が失われます。\n" +
+                    "ロードしますか？";
+            }
+
+            unsavedConfirmPanel.SetActive(true);
+            unsavedConfirmPanel.transform.SetAsLastSibling();
+
+            return;
+        }
+
+        LoadDungeon(dungeonName);
+    }
+
+    //==================================================
+    // ダイアログ：ロードする
+    //==================================================
+
+    public void ConfirmPendingLoad()
+    {
+        if (string.IsNullOrEmpty(pendingDungeonName))
+            return;
+
+        string dungeonName = pendingDungeonName;
+        pendingDungeonName = null;
+
+        if (unsavedConfirmPanel != null)
+            unsavedConfirmPanel.SetActive(false);
+
+        LoadDungeon(dungeonName);
+    }
+
+    //==================================================
+    // ダイアログ：キャンセル
+    //==================================================
+
+    public void CancelPendingLoad()
+    {
+        pendingDungeonName = null;
+
+        if (unsavedConfirmPanel != null)
+            unsavedConfirmPanel.SetActive(false);
+
+        // 一覧を開いたままにして、現在のマップを維持する
     }
 
     //==================================================
@@ -151,43 +248,69 @@ public class ReEditUI : MonoBehaviour
             return;
         }
 
-        string json = File.ReadAllText(path);
-        DungeonMapData data = JsonUtility.FromJson<DungeonMapData>(json);
-
-        if (data == null)
+        try
         {
-            Debug.LogError("ダンジョンデータの読み込みに失敗しました。");
-            return;
+            string json = File.ReadAllText(path);
+
+            DungeonMapData data =
+                JsonUtility.FromJson<DungeonMapData>(json);
+
+            if (data == null)
+            {
+                Debug.LogError("ダンジョンデータの読み込みに失敗しました。");
+                return;
+            }
+
+            if (mapManager == null)
+            {
+                Debug.LogError("MapManagerが設定されていません。");
+                return;
+            }
+
+            // 保存されたマップを復元
+            mapManager.LoadDungeon(data, false);
+
+            // ロード前のUndo / Redo履歴をすべて削除
+            if (undoManager != null)
+            {
+                undoManager.ClearHistory();
+            }
+            else
+            {
+                Debug.LogWarning(
+                    "UndoManagerが未設定です。Inspectorで割り当ててください。");
+            }
+
+            // ロードしたマップを未保存状態ではないものとして扱う
+            if (saveManager != null)
+            {
+                saveManager.SetMapLoadedClean();
+            }
+
+            SaveManager.LastDungeonId = data.dungeonId;
+            SaveManager.LastDungeonName = dungeonName;
+
+            Debug.Log("ダンジョンを読み込みました : " + dungeonName);
+
+            if (saveLoadUI != null)
+            {
+                saveLoadUI.CloseSaveLoad();
+            }
+            else
+            {
+                CloseLoadList();
+
+                if (localSaveUI != null)
+                    localSaveUI.Return();
+
+                Debug.LogWarning(
+                    "SaveLoadUIが未設定です。Inspectorで割り当ててください。");
+            }
         }
-
-        if (mapManager == null)
+        catch (Exception e)
         {
-            Debug.LogError("MapManagerが設定されていません。");
-            return;
-        }
-
-        // マップを復元
-        mapManager.LoadDungeon(data, false);
-
-        SaveManager.LastDungeonId = data.dungeonId;
-        SaveManager.LastDungeonName = dungeonName;
-
-        Debug.Log("ダンジョンを読み込みました : " + dungeonName);
-
-        // ロード成功後、セーブ＆ロード画面全体を閉じる
-        if (saveLoadUI != null)
-        {
-            saveLoadUI.CloseSaveLoad();
-        }
-        else
-        {
-            CloseLoadList();
-
-            if (localSaveUI != null)
-                localSaveUI.Return();
-
-            Debug.LogWarning(
-                "SaveLoadUIが未設定です。Inspectorで割り当ててください。");
+            Debug.LogError(
+                "ダンジョンのロードに失敗しました : " + e.Message);
         }
     }
 
@@ -201,5 +324,10 @@ public class ReEditUI : MonoBehaviour
 
         if (scrollView != null)
             scrollView.SetActive(false);
+
+        if (unsavedConfirmPanel != null)
+            unsavedConfirmPanel.SetActive(false);
+
+        pendingDungeonName = null;
     }
 }
