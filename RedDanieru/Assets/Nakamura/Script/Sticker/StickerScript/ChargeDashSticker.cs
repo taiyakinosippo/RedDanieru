@@ -55,7 +55,12 @@ public class ChargeDashSticker : StickerBase
 
     public override void OnEnemyUpdate()
     {
-        target = enemyScript.player;  //プレイヤー取得
+        target = enemyScript.player;
+
+        if (target == null)
+        {
+            return;
+        }
 
         switch (state)
         {
@@ -112,6 +117,11 @@ public class ChargeDashSticker : StickerBase
     //溜め
     private void Charge()
     {
+        if (target == null)
+        {
+            return;
+        }
+
         if (!chargeEffectPlayed)
         {
             if (NetworkGameState.Instance != null)

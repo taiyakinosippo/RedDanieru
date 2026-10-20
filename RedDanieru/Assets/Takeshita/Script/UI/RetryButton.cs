@@ -1,9 +1,19 @@
 using UnityEngine;
 using System.Collections;
 
+public enum RetryType
+{
+    Clear,
+    GameOver
+}
+
+
 public class RetryButton : MonoBehaviour
 {
     private DungeonImporter dungeonImporter;
+
+    [SerializeField]
+    private RetryType retryType;
 
     private void Awake()
     {
@@ -20,81 +30,61 @@ public class RetryButton : MonoBehaviour
     {
         Time.timeScale = 1f;
 
-        GoalClear goalClear =
-            FindObjectOfType<GoalClear>();
-
-        if (dungeonImporter == null)
-        {
-            Debug.LogError("DungeonImporterが見つからない");
-        }
-
-        if (goalClear != null)
-        {
-            goalClear.ResetClearState();
-        }
-
         ResetCameras();
 
-        Debug.Log("⑦ Player検索開始");
+        Player.PlayerMovement[] players =
+            FindObjectsOfType<Player.PlayerMovement>(true);
 
-        GameObject[] players =
-            GameObject.FindGameObjectsWithTag("Player");
-
-        Debug.Log("⑧ Player数 = " + players.Length);
-
-        foreach (GameObject player in players)
+        foreach (var player in players)
         {
-            Debug.Log("⑨ Destroyする = " + player.name);
-
-            Destroy(player);
+            Destroy(player.gameObject);
         }
 
-        Debug.Log("⑩ Player削除予約完了");
-
         yield return null;
-
-        Debug.Log("ImportDungeon開始");
 
         dungeonImporter.ImportDungeon(
             RoomInfo.SelectedDungeon
         );
 
-        Debug.Log("StartSolo直前");
-
-        if (FusionLauncher.Instance == null)
-        {
-            Debug.LogError("FusionLauncher.Instance が null");
-            yield break;
-        }
-
-        Debug.Log("StartSolo呼び出し");
-
         FusionLauncher.Instance.StartSolo();
 
-        Debug.Log("StartSolo呼び出し後");
+        // 最後にUIを閉じる
+        switch (retryType)
+        {
+            case RetryType.Clear:
+                {
+                    GoalClear goalClear =
+                        FindObjectOfType<GoalClear>();
+
+                    if (goalClear != null)
+                    {
+                        goalClear.ResetClearState();
+                    }
+                    break;
+                }
+
+            case RetryType.GameOver:
+                {
+                    GameOverManager gameOverManager =
+                        FindObjectOfType<GameOverManager>();
+
+                    if (gameOverManager != null)
+                    {
+                        gameOverManager.ResetGameOverState();
+                    }
+                    break;
+                }
+        }
     }
 
     private void ResetCameras()
     {
-        Player.PlayerCamera[] cameras =
-            FindObjectsOfType<Player.PlayerCamera>(true);
+        Camera[] allCameras =
+            FindObjectsOfType<Camera>(true);
 
-        foreach (var camera in cameras)
+        foreach (Camera cam in allCameras)
         {
-            if (camera._deadCamera != null)
-            {
-                camera._deadCamera.SetActive(false);
-            }
-
-            if (camera.ThirdPersonPerspective != null)
-            {
-                camera.ThirdPersonPerspective.SetActive(true);
-            }
-
-            if (camera.FirstPersonPerspective != null)
-            {
-                camera.FirstPersonPerspective.SetActive(false);
-            }
+            cam.gameObject.SetActive(true);
         }
     }
 }
