@@ -809,7 +809,6 @@ RectTransform:
   m_Children:
   - {fileID: 8728925877471953020}
   - {fileID: 5479755046779741524}
-  - {fileID: 5322205069078657890}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -911,7 +910,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cd0bbab22080f74d803286c68c527c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stageNameText: {fileID: 6259181748995533539}
+  stageNameText: {fileID: 4156098959797845447}
   creatorNameText: {fileID: 0}
   tagText: {fileID: 0}
   likeCountText: {fileID: 0}
@@ -1128,16 +1127,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6451815032053843855}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 9205613953017243917}
+  m_Father: {fileID: 8728925877471953020}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -75}
   m_SizeDelta: {x: 400, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8516502271581795527
@@ -1543,6 +1542,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5322205069078657890}
   - {fileID: 5058710927685854741}
   - {fileID: 1813262534204860427}
   - {fileID: 1855056750206839712}
