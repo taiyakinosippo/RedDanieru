@@ -132,13 +132,33 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     private IEnumerator StartSoloWhenStageReady()
     {
-        // ステージを読み込み終わってからスタート地点に出す
         if (importer != null)
         {
-            yield return importer.WaitUntilLoaded(RoomInfo.SelectedDungeon);
+            yield return importer.WaitUntilLoaded(
+                RoomInfo.SelectedDungeon
+            );
         }
 
-        Pose pose = PlayerSpawnPoint.GetSpawnPose(spawnPoint, 0, 1);
+        Debug.Log("マップ読込完了");
+
+        // 既存プレイヤーを全削除
+        Player.PlayerMovement[] players =
+            FindObjectsOfType<Player.PlayerMovement>(true);
+
+        foreach (var oldPlayer in players)
+        {
+            Destroy(oldPlayer.gameObject);
+        }
+
+        yield return null;
+
+        Pose pose = PlayerSpawnPoint.GetSpawnPose(
+            spawnPoint,
+            0,
+            1
+        );
+
+        Debug.Log("SpawnPos = " + pose.position);
 
         GameObject player = Instantiate(
             soloPlayerPrefab,
@@ -146,10 +166,21 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             pose.rotation
         );
 
-        // CharacterControllerの内部位置を出現位置に合わせる
-        PlayerSpawnPoint.Teleport(player, pose);
+        Debug.Log("Player生成成功 : " + player.name);
 
-        // カーソルを非表示にする
+        PlayerSpawnPoint.Teleport(
+            player,
+            pose
+        );
+
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+        }
+
         _cursorController.HideCursor();
     }
 
