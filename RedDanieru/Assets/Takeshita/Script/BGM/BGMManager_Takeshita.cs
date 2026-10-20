@@ -124,8 +124,7 @@ public class BGMManager_Takeshita : MonoBehaviour
         {
             battleBgmSource.Play();
         }
-        Debug.Log("PlayButtleBGM再生中");
-    }
+     }
 
     public void StopNormalBGM()
     {

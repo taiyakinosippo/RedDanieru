@@ -124,16 +124,13 @@ namespace Player
         //-----------------------------------------------------
         public void PlayerMove(StarterAssetsInputs _input)
         {
-            if (_actionPriority.currentActionType != ActionType.None)
-            {
-                Debug.Log(_actionPriority.currentActionType);
-            }
-
             if (IsDashLocked)
                 return;
 
             if (GameStopManager.IsPaused)
-                return;
+            {
+                _input.move = Vector2.zero;
+            }
 
             // Shiftキーを押している場合は走り、押していない場合は歩く
             float targetSpeed =  _playerStatus._playerMoveSpeed;
@@ -263,7 +260,15 @@ namespace Player
         public void PlayerJumpAndGravity(StarterAssetsInputs _input)
         {
             if (GameStopManager.IsPaused)
-                return;
+            {
+                Debug.Log("JumpAndGravity");
+            }
+
+            // Pause中は新しいジャンプだけ禁止
+            if (GameStopManager.IsPaused)
+            {
+                _input.jump = false;
+            }
 
             // 空中から地面に戻った瞬間
             if (Grounded && !_wasGrounded)

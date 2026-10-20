@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
+using UnityEngine.Networking;
 
 public class GoalClear : MonoBehaviour
 {
@@ -32,6 +34,9 @@ public class GoalClear : MonoBehaviour
     private bool isCleared = false;
     private bool alreadyShown = false;
     private CursorController _cursorController;
+
+    private GameObject spawnedClearCamera;
+
     private void Start()
     {
         _cursorController = GetComponent<CursorController>();
@@ -51,6 +56,8 @@ public class GoalClear : MonoBehaviour
         {
             clearPanel.SetActive(false);
         }
+
+        DestroyClearCamera();
 
         Time.timeScale = 1f;
     }
@@ -153,11 +160,12 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
-        GameObject cameraObject =
-            Instantiate(clearCameraPrefab);
+
+        spawnedClearCamera =
+     Instantiate(clearCameraPrefab);
 
         Camera clearCamera =
-            cameraObject.GetComponentInChildren<Camera>();
+            spawnedClearCamera.GetComponentInChildren<Camera>();
 
         if (clearCamera == null)
         {
@@ -165,7 +173,11 @@ public class GoalClear : MonoBehaviour
                 "Clear Camera PrefabÇ…CameraÇ™Ç†ÇËÇ‹ÇπÇÒÅB"
             );
 
-            Destroy(cameraObject);
+            if (spawnedClearCamera != null)
+            {
+                Destroy(spawnedClearCamera);
+                spawnedClearCamera = null;
+            }
 
             return;
         }
@@ -316,6 +328,8 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
+        AddClearCount();
+
         isCleared = true;
         alreadyShown = true;
 
@@ -364,5 +378,37 @@ public class GoalClear : MonoBehaviour
         Debug.Log(
             "GAME CLEAR! Clear UIÇï\é¶ÇµÇ‹ÇµÇΩÅB"
         );
+    }
+
+    private void AddClearCount()
+    {
+        StartCoroutine(AddClearCountCoroutine());
+    }
+
+    private IEnumerator AddClearCountCoroutine()
+    {
+        WWWForm form = new WWWForm();
+
+        form.AddField(
+            "dungeon_id",
+            RoomInfo.SelectedDungeon
+        );
+
+        UnityWebRequest request =
+            UnityWebRequest.Post(
+                ServerApi.Url("add_clear_count.php"),
+                form
+            );
+
+        yield return request.SendWebRequest();
+    }
+
+    public void DestroyClearCamera()
+    {
+        if (spawnedClearCamera != null)
+        {
+            Destroy(spawnedClearCamera);
+            spawnedClearCamera = null;
+        }
     }
 }
