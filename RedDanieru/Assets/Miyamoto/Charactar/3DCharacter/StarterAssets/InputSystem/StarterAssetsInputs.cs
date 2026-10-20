@@ -41,9 +41,6 @@ namespace Player
 
 		public void OnJump(InputValue value)
 		{
-			if (GameStopManager.IsPaused)
-				return;
-			
 				JumpInput(value.isPressed);
 		}
 

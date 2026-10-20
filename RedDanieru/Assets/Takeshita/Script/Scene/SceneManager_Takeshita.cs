@@ -93,9 +93,5 @@ public class SceneManager_Takeshita : MonoBehaviour
         }
 
         UserData.UserName = userName;
-
-        Debug.Log(
-            $"UserName:{UserData.UserName}"
-        );
     }
 }
