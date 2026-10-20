@@ -10,6 +10,8 @@ public class LikeButton : MonoBehaviour
 
     private string dungeonId;
 
+    private bool likedThisRun;
+
     private void OnEnable()
     {
         dungeonId = RoomInfo.SelectedDungeon;
@@ -32,13 +34,11 @@ public class LikeButton : MonoBehaviour
             return;
         }
 
-        if (PlayerPrefs.HasKey(
-            "Like_" + dungeonId))
+        if (likedThisRun)
         {
             Debug.Log(
-                "既にいいね済み"
+                "今回のプレイでは既にいいね済み"
             );
-
             return;
         }
 
