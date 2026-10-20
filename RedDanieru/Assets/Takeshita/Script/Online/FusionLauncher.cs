@@ -126,8 +126,7 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     public void StartSolo()
     {
-        Debug.Log("StartSolo");
-
+        Debug.Log("StartSolo呼び出し");
         StartCoroutine(StartSoloWhenStageReady());
     }
 
