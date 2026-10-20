@@ -36,21 +36,13 @@ public class SaveLoadUI : MonoBehaviour
 
     private SelectedMenu selectedMenu = SelectedMenu.None;
 
-    //==================================================
-    // 初期化
-    //==================================================
-
     private void Start()
     {
         if (saveButton != null)
-        {
             saveButtonImage = saveButton.GetComponent<Image>();
-        }
 
         if (loadButton != null)
-        {
             loadButtonImage = loadButton.GetComponent<Image>();
-        }
 
         CloseSaveLoad();
     }
@@ -62,33 +54,21 @@ public class SaveLoadUI : MonoBehaviour
     public void OpenSaveLoad()
     {
         if (saveLoadPanel != null)
-        {
             saveLoadPanel.SetActive(true);
-        }
 
         if (saveButtonObject != null)
-        {
             saveButtonObject.SetActive(true);
-        }
 
         if (loadButtonObject != null)
-        {
             loadButtonObject.SetActive(true);
-        }
 
         if (localSaveUI != null)
-        {
             localSaveUI.Return();
-        }
 
         if (reEditUI != null)
-        {
             reEditUI.CloseLoadList();
-        }
 
-        // 最初はどちらも未選択
-        selectedMenu = SelectedMenu.None;
-        UpdateButtonState();
+        SelectSave();
     }
 
     //==================================================
@@ -99,21 +79,13 @@ public class SaveLoadUI : MonoBehaviour
     {
         selectedMenu = SelectedMenu.Save;
 
-        // ロード一覧を閉じる
         if (reEditUI != null)
-        {
             reEditUI.CloseLoadList();
-        }
 
-        // セーブUIを開く
         if (localSaveUI != null)
-        {
             localSaveUI.OpenSavePanel();
-        }
         else
-        {
             Debug.LogError("LocalSaveUIが設定されていません。");
-        }
 
         UpdateButtonState();
     }
@@ -126,21 +98,13 @@ public class SaveLoadUI : MonoBehaviour
     {
         selectedMenu = SelectedMenu.Load;
 
-        // セーブUIを閉じる
         if (localSaveUI != null)
-        {
             localSaveUI.Return();
-        }
 
-        // ロード一覧を開く
         if (reEditUI != null)
-        {
             reEditUI.OpenLoadList();
-        }
         else
-        {
             Debug.LogError("ReEditUIが設定されていません。");
-        }
 
         UpdateButtonState();
     }
@@ -151,41 +115,36 @@ public class SaveLoadUI : MonoBehaviour
 
     private void UpdateButtonState()
     {
-        // 両方とも常に押せる
         if (saveButton != null)
         {
             saveButton.interactable = true;
+
+            if (saveButtonImage == null)
+                saveButtonImage = saveButton.GetComponent<Image>();
+
+            if (saveButtonImage != null)
+            {
+                saveButtonImage.color =
+                    selectedMenu == SelectedMenu.Save
+                    ? selectedColor
+                    : normalColor;
+            }
         }
 
         if (loadButton != null)
         {
             loadButton.interactable = true;
-        }
 
-        if (saveButtonImage == null && saveButton != null)
-        {
-            saveButtonImage = saveButton.GetComponent<Image>();
-        }
+            if (loadButtonImage == null)
+                loadButtonImage = loadButton.GetComponent<Image>();
 
-        if (loadButtonImage == null && loadButton != null)
-        {
-            loadButtonImage = loadButton.GetComponent<Image>();
-        }
-
-        if (saveButtonImage != null)
-        {
-            saveButtonImage.color =
-                selectedMenu == SelectedMenu.Save
-                ? selectedColor
-                : normalColor;
-        }
-
-        if (loadButtonImage != null)
-        {
-            loadButtonImage.color =
-                selectedMenu == SelectedMenu.Load
-                ? selectedColor
-                : normalColor;
+            if (loadButtonImage != null)
+            {
+                loadButtonImage.color =
+                    selectedMenu == SelectedMenu.Load
+                    ? selectedColor
+                    : normalColor;
+            }
         }
     }
 
@@ -195,18 +154,7 @@ public class SaveLoadUI : MonoBehaviour
 
     public void ReturnFromSaveLoad()
     {
-        if (localSaveUI != null)
-        {
-            localSaveUI.Return();
-        }
-
-        if (reEditUI != null)
-        {
-            reEditUI.CloseLoadList();
-        }
-
-        selectedMenu = SelectedMenu.None;
-        UpdateButtonState();
+        CloseSaveLoad();
     }
 
     //==================================================
@@ -216,31 +164,22 @@ public class SaveLoadUI : MonoBehaviour
     public void CloseSaveLoad()
     {
         if (localSaveUI != null)
-        {
             localSaveUI.Return();
-        }
 
         if (reEditUI != null)
-        {
             reEditUI.CloseLoadList();
-        }
 
         if (saveButtonObject != null)
-        {
             saveButtonObject.SetActive(false);
-        }
 
         if (loadButtonObject != null)
-        {
             loadButtonObject.SetActive(false);
-        }
 
         if (saveLoadPanel != null)
-        {
             saveLoadPanel.SetActive(false);
-        }
 
         selectedMenu = SelectedMenu.None;
+
         UpdateButtonState();
     }
 }
