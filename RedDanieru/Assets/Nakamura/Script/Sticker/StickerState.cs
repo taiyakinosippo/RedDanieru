@@ -38,11 +38,7 @@ public class StickerState : MonoBehaviour
         if (!isSpecialMove || currentStickerScript == null)
             return;
 
-        if (gameObject.CompareTag("Enemy"))
-        {
-            currentStickerScript.OnEnemyUpdate();
-        }
-        else if (gameObject.CompareTag("Player"))
+        if (gameObject.CompareTag("Player"))
         {
             if (NetworkGameState.Instance != null)
             {
@@ -58,7 +54,7 @@ public class StickerState : MonoBehaviour
 
             currentStickerScript.OnPlayerUpdate();
         }
-        else
+        else if (gameObject.CompareTag("Trap"))
         {
             currentStickerScript.OnTrapUpdate();
         }
@@ -95,6 +91,9 @@ public class StickerState : MonoBehaviour
                 break;
             case Sticker.Explosion:
                 currentStickerScript = gameObject.AddComponent<ExplosionSticker>();
+                break;
+            case Sticker.Cactus:
+                currentStickerScript = gameObject.AddComponent<CactusSticker>();
                 break;
         }
 
@@ -155,7 +154,7 @@ public class StickerState : MonoBehaviour
             }
 
             //破棄
-            Destroy(currentStickerScript);
+            //Destroy(currentStickerScript);
         }
 
         //貼られていたステッカーを回収
@@ -217,7 +216,7 @@ public class StickerState : MonoBehaviour
             //効果のスクリプトだけ外す（剥がしたときの処理は呼ばない。種類と見た目は残す）
             if (currentStickerScript != null)
             {
-                Destroy(currentStickerScript);
+                //Destroy(currentStickerScript);
                 currentStickerScript = null;
             }
         }
