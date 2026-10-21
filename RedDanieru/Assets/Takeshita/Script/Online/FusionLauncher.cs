@@ -27,11 +27,9 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField]
     private PlayerSpawner playerSpawner;
 
-    [SerializeField]
-    private NetworkGameState networkGameStatePrefab;
+    [SerializeField] private NetworkGameState networkGameStatePrefab;
 
-    [SerializeField]
-    private DungeonImporter importer;
+    [SerializeField] private DungeonImporter importer;
 
     private NetworkRunner runner;
 
@@ -445,6 +443,68 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         Debug.LogWarning($"サーバーから切断 : {reason}");
+    }
+
+    public void RestartMatch()
+    {
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+
+            Debug.Log("PauseMenu Enable");
+        }
+
+        if (Runner != null &&
+            playerSpawner != null)
+        {
+            playerSpawner.SpawnLocalPlayer(
+                Runner
+            );
+        }
+    }
+
+    public void DespawnLocalPlayer()
+    {
+        if (Runner != null &&
+            playerSpawner != null)
+        {
+            playerSpawner.DespawnLocalPlayer(
+                Runner
+            );
+        }
+    }
+
+    public void StartRetryWithMap()
+    {
+        StartCoroutine(
+            RetryWithMapCoroutine()
+        );
+    }
+
+    private IEnumerator RetryWithMapCoroutine()
+    {
+        DespawnLocalPlayer();
+
+        yield return null;
+
+        DungeonImporter importer =
+            FindObjectOfType<DungeonImporter>();
+
+        if (importer != null)
+        {
+            importer.ImportDungeon(
+                RoomInfo.SelectedDungeon
+            );
+
+            yield return importer.WaitUntilLoaded(
+                RoomInfo.SelectedDungeon
+            );
+        }
+
+        RestartMatch();
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }

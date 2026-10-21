@@ -36,6 +36,7 @@ public class PlayerSpawner : MonoBehaviour
 
     public void SpawnLocalPlayer(NetworkRunner runner)
     {
+        Debug.Log("SpawnLocalPlayer呼び出し");
         if (spawnCoroutine != null)
             return;
 
@@ -52,12 +53,21 @@ public class PlayerSpawner : MonoBehaviour
 
         spawnCoroutine = null;
 
+        if (runner.TryGetPlayerObject(runner.LocalPlayer, out _))
+        {
+            Debug.Log("既にPlayerObjectが存在するためスポーンしない");
+            yield break;
+        }
+
         if (runner == null || !runner.IsRunning)
             yield break;
 
         // 既に生成済みなら何もしない
         if (runner.TryGetPlayerObject(runner.LocalPlayer, out _))
+        {
+            Debug.Log("既にPlayerObjectが残っている");
             yield break;
+        }
 
         // 全員で同じ並び順になるようにPlayerIdで並べる
         PlayerRef[] players =
@@ -105,4 +115,23 @@ public class PlayerSpawner : MonoBehaviour
             0.5f
         );
     }
+
+    public void DespawnLocalPlayer(NetworkRunner runner)
+    {
+        if (runner == null)
+            return;
+
+        if (runner.TryGetPlayerObject(
+            runner.LocalPlayer,
+            out NetworkObject obj))
+        {
+            runner.Despawn(obj);
+
+            runner.SetPlayerObject(
+                runner.LocalPlayer,
+                null
+            );
+        }
+    }
+
 }
