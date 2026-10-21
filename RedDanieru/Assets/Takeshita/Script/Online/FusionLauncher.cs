@@ -27,11 +27,9 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField]
     private PlayerSpawner playerSpawner;
 
-    [SerializeField]
-    private NetworkGameState networkGameStatePrefab;
+    [SerializeField] private NetworkGameState networkGameStatePrefab;
 
-    [SerializeField]
-    private DungeonImporter importer;
+    [SerializeField] private DungeonImporter importer;
 
     private NetworkRunner runner;
 
@@ -445,6 +443,30 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         Debug.LogWarning($"サーバーから切断 : {reason}");
+    }
+
+    public void RestartMatch()
+    {
+        Debug.Log("RestartMatch呼び出し");
+
+        if (Runner != null &&
+            playerSpawner != null)
+        {
+            playerSpawner.SpawnLocalPlayer(
+                Runner
+            );
+        }
+    }
+
+    public void DespawnLocalPlayer()
+    {
+        if (Runner != null &&
+            playerSpawner != null)
+        {
+            playerSpawner.DespawnLocalPlayer(
+                Runner
+            );
+        }
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }
