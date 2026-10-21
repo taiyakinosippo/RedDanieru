@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Player;
+using UnityEngine.AI;
 
 public class BigSticker : StickerBase
 {
@@ -14,13 +15,20 @@ public class BigSticker : StickerBase
     private float setSpeed = 1.0f;  //移動速度の変化量
     private float saveSpeed;  //保存する速度
     private int saveAttack; //保存する攻撃力
+    private int defaultAgentTypeId;  //NavMeshAgentのデフォルトのエージェントタイプIDを保存する変数
+    private int bigAgentTypeId;  //NavMeshAgentの巨大化用のエージェントタイプIDを保存する変数
 
+    private NavMeshAgent agent;
     private PlayerCamera playerCamera;
     private PlayerStatus playerStatus;
 
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
     {
+        agent = GetComponent<NavMeshAgent>();
+        defaultAgentTypeId = agent.agentTypeID;  //デフォルトのエージェントタイプIDを保存
+        bigAgentTypeId = NavMesh.GetSettingsByIndex(1).agentTypeID;  //巨大化用のエージェントタイプIDを取得
+
         //スケールを拡大
         StartCoroutine(Grow(bigScale));
 
@@ -35,6 +43,8 @@ public class BigSticker : StickerBase
     //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
+        agent.agentTypeID = defaultAgentTypeId;  //エージェントタイプIDを元に戻す
+
         //スケールを元に戻す
         transform.localScale = new Vector3(1f, 1f, 1.0f);
 
@@ -137,6 +147,14 @@ public class BigSticker : StickerBase
             yield break;
         }
 
+        if (agent != null)
+        {
+            //移動を完全に停止し、経路をクリアする
+            agent.isStopped = true;
+            agent.ResetPath();
+            agent.enabled = false;  //NavMeshAgentを無効化
+        }
+
         //拡大開始時の底面の高さ
         float originalBottomY = col.bounds.min.y;
 
@@ -161,6 +179,20 @@ public class BigSticker : StickerBase
         }
 
         transform.localScale = endScale;
+
+        //巨大化用のエージェントタイプIDに変更
+        agent.agentTypeID = bigAgentTypeId;  
+
+        // 4. 重要：大きくなったことで壁に埋まっていないかチェックし、座標を補正
+        // 自身の周囲（拡大後の半径分）のNavMesh上の最も近い安全なポイントを探す
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, agent.radius * 2f, NavMesh.AllAreas))
+        {
+            transform.position = hit.position;
+        }
+
+        // 5. エージェントを再有効化して移動を再開
+        agent.enabled = true;
+        agent.isStopped = false;
 
         //最後にもう一度底面の高さを補正
         float finalDiff = originalBottomY - col.bounds.min.y;
