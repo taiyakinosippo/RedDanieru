@@ -214,4 +214,13 @@ public class NetworkAuthorityController : NetworkBehaviour
             IsDead = true;
         }
     }
+
+    public void ResetDeadState()
+    {
+        if (HasStateAuthority)
+        {
+            IsDead = false;
+        }
+    }
+
 }
