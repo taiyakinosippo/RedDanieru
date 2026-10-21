@@ -240,6 +240,8 @@ public partial class NetworkGameState : NetworkBehaviour
         {
             IsCleared = false;
 
+            GameStarted = false;
+
             RetryVoteCount = 0;
             RetryCountdown = 0;
             RetryCountdownStarted = false;
@@ -275,15 +277,16 @@ public partial class NetworkGameState : NetworkBehaviour
         }
 
         NetworkAuthorityController[] players =
-    FindObjectsOfType<NetworkAuthorityController>();
+      FindObjectsOfType<NetworkAuthorityController>();
 
         foreach (NetworkAuthorityController player in players)
         {
             player.ResetDeadState();
         }
 
-        FusionLauncher.Instance.DespawnLocalPlayer();
+        GameStopManager gsm =
+    FindObjectOfType<GameStopManager>(true);
 
-        FusionLauncher.Instance.HandleGameStarted();
+        FusionLauncher.Instance.StartRetryWithMap();
     }
 }

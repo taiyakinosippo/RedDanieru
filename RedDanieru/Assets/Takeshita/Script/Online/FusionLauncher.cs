@@ -447,7 +447,15 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     public void RestartMatch()
     {
-        Debug.Log("RestartMatch呼び出し");
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+
+            Debug.Log("PauseMenu Enable");
+        }
 
         if (Runner != null &&
             playerSpawner != null)
@@ -467,6 +475,36 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
                 Runner
             );
         }
+    }
+
+    public void StartRetryWithMap()
+    {
+        StartCoroutine(
+            RetryWithMapCoroutine()
+        );
+    }
+
+    private IEnumerator RetryWithMapCoroutine()
+    {
+        DespawnLocalPlayer();
+
+        yield return null;
+
+        DungeonImporter importer =
+            FindObjectOfType<DungeonImporter>();
+
+        if (importer != null)
+        {
+            importer.ImportDungeon(
+                RoomInfo.SelectedDungeon
+            );
+
+            yield return importer.WaitUntilLoaded(
+                RoomInfo.SelectedDungeon
+            );
+        }
+
+        RestartMatch();
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }
