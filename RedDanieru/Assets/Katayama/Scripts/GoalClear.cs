@@ -375,9 +375,6 @@ public class GoalClear : MonoBehaviour
             );
         }
 
-        Debug.Log(
-            "GAME CLEAR! Clear UIÇï\é¶ÇµÇ‹ÇµÇΩÅB"
-        );
     }
 
     private void AddClearCount()

@@ -17,6 +17,8 @@ public class GameStopManager: MonoBehaviour
 
     private void Update()
     {
+        Debug.Log($"ESC CanOpenPauseMenu={CanOpenPauseMenu}");
+        
         if (!CanOpenPauseMenu)
             return;
 
