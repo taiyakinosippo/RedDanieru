@@ -135,6 +135,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerArmature (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 2697843322473174110, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: attackData.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2697843322473174110, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'attackData.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: bf5e341aa010bb448bcda4dbb663926d, type: 2}
+    - target: {fileID: 2697843322473174110, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'attackData.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 95950352e1ce2974cb5a12cea997ce43, type: 2}
+    - target: {fileID: 3244406581610145446, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: PlayerAttack
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3244406581610145446, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: PlayerDefense
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 6363232815336297457, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.39
@@ -178,6 +198,42 @@ PrefabInstance:
     - target: {fileID: 6575345361052619142, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: _cameraRadius
       value: 0.03
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: TotalWords
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: StateHashes.Array.size
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: TriggerHashes.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[17]'
+      value: 321101326
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[18]'
+      value: -51004022
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[19]'
+      value: 1680125592
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[20]'
+      value: -1947038436
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'TriggerHashes.Array.data[5]'
+      value: 1680125592
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'TriggerHashes.Array.data[6]'
+      value: 321101326
       objectReference: {fileID: 0}
     - target: {fileID: 8486463525180710779, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: m_AnchorMax.x

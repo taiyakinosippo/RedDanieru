@@ -16,6 +16,8 @@ namespace Player
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
         private int _animIDAttack;
+        private int _animIDAttack2;
+        private int _animIDAttack3;
         private int _animIDStickerPaste;
         private int _animIDStickerPeelOff;
         private int _animIDEvade;
@@ -76,6 +78,8 @@ namespace Player
             _animIDFreeFall = Animator.StringToHash("FreeFall");
             _animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
             _animIDAttack = Animator.StringToHash("Attack");
+            _animIDAttack2 = Animator.StringToHash("Attack2");
+            _animIDAttack3 = Animator.StringToHash("Attack3");
             _animIDStickerPaste = Animator.StringToHash("StickerPaste");
             _animIDStickerPeelOff = Animator.StringToHash("StickerPeelOff");
             _animIDEvade = Animator.StringToHash("Evade");
@@ -147,20 +151,43 @@ namespace Player
         //----------------------------------------------------------
         //プレイヤーのアッタクアニメーションを再生させる
         //----------------------------------------------------------
-        public void PlayerAttackAnimator()
+        public void PlayerAttackAnimator(int comboIndex)
         {
-            if (_hasAnimator)
+            switch (comboIndex)
             {
-                SetTriggerSynced(_animIDAttack);
+                case 0:
+                    SetTriggerSynced(_animIDAttack);
+                    break;
+
+                case 1:
+                    _animator.SetTrigger(_animIDAttack2);
+                    break;
+
+                case 2:
+                    _animator.SetTrigger(_animIDAttack3);
+                    break;
             }
         }
 
         //----------------------------------------------------------
         //プレイヤーのアッタクアニメーションが終了すると勝手に呼ばれる
         //----------------------------------------------------------
-        public void OnAttackAnimationEnd()
+        public void OnAttackAnimationEnd(int comboIndex)
         {
-            _animator.ResetTrigger(_animIDAttack);
+            switch (comboIndex)
+            {
+                case 0:
+                    _animator.ResetTrigger(_animIDAttack);
+                    break;
+
+                case 1:
+                    _animator.ResetTrigger(_animIDAttack2);
+                    break;
+
+                case 2:
+                    _animator.ResetTrigger(_animIDAttack3);
+                    break;
+            }
 
             // 他の人のキャラのアニメーションでも呼ばれるので、自分のキャラのときだけ処理する
             if (!IsLocallyControlled)

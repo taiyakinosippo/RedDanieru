@@ -1,4 +1,6 @@
+using Fusion;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 ///<summry>
@@ -8,9 +10,9 @@ namespace Player
 {
     public class PlayerAttack : MonoBehaviour
     {
-        [SerializeField] List<PlayerAttackData> attackData = new ();  // このlistの中から攻撃データを選択するようにする
+        [SerializeField] List<PlayerAttackData> attackData = new();  // このlistの中から攻撃データを選択するようにする
         [SerializeField] LayerMask _wallLayer;                        // 攻撃する際に壁があるかどうかを判定するためのレイヤー
-        public  Transform _attackPoint;                               // 当たり判定の位置を決めるためのTransform
+        public Transform _attackPoint;                               // 当たり判定の位置を決めるためのTransform
 
         private PlayerAnimation _playerAnimation;                     // プレイヤーのアニメーションを制御するためのスクリプト
         private PlayerStatus _playerStatus;                           // プレイヤーのステータスを管理するためのスクリプト
@@ -18,9 +20,15 @@ namespace Player
         private PlayerInputPriority _actionPriority;                  // プレイヤーのアクションの優先度を管理するためのスクリプト
         private HashSet<EnemyBase> hitEnemies = new();                // 今回の攻撃で当たった敵を格納するためのHashSet
 
-        private bool _isAttackHitActive = false;　　　　　　　　　　　　
+        private bool _isAttackHitActive = false;
         private Vector3 _attackPosition;                               // 攻撃の当たる位置と回転を計算するための格納変数
         private Quaternion _attackRotation;                            // 攻撃の当たる位置と回転を計算するための格納変数
+
+        //コンボ攻撃用の変数たち
+        private int  _comboIndex = 0;                                  // 現在のコンボ段数（0から始まる）
+        private bool _isAttacking = false;                             // 攻撃アニメーションが再生されているかどうか
+        private bool _isComboInputWindowOpen = false;　　　　　　　　　 // 次の攻撃を入力できるタイミングかどうか。
+        private bool _hasQueuedComboInput = false;　　　　　　　　　　 // 受付時間中に次の攻撃入力があったかどうか。
 
 
         //-----------------------------------------------------
@@ -51,22 +59,41 @@ namespace Player
         {
             if (!_input.attack)
                 return;
+            //当たり判定をここで有効にする
+            _isAttackHitActive = false;
 
             //ここでアクションン
             _input.attack = false;
 
-            //当たり判定をここで有効にする
+            if (_isAttacking)
+            {
+                if (_isComboInputWindowOpen && _comboIndex < attackData.Count - 1)
+                {
+                    _hasQueuedComboInput = true;
+                }
+                return;
+            }
+
+            // 新しい攻撃を開始する
+            BeginAttack();
+        }
+
+        private void BeginAttack()
+        {
+            _isAttacking = true;
             _isAttackHitActive = false;
+            _isComboInputWindowOpen = false;
 
-            // 攻撃データを決定
-            _currentAttackData = attackData[0];
+            // 現在のコンボ番号に対応する攻撃データを取得
+            _currentAttackData = attackData[_comboIndex];
 
-            // 今回の攻撃で当たった敵をリセット
+            // 攻撃済みの敵をリセット
             hitEnemies.Clear();
 
-            //アッタクモーション
-            _playerAnimation.PlayerAttackAnimator();
-            
+            Debug.Log($"{_comboIndex + 1}段目の攻撃を開始");
+
+            // コンボ番号に対応した攻撃アニメーションを再生
+            _playerAnimation.PlayerAttackAnimator(_comboIndex);
         }
 
         //------------------------------------------------------
@@ -78,13 +105,14 @@ namespace Player
             {
                 //攻撃の当たる位置を計算する
                 _attackPosition =
-    　　　　　　_attackPoint.position +
-    　　　　　　_attackPoint.rotation * _currentAttackData.attackOffset;
+                _attackPoint.position + 
+                _attackPoint.rotation * 
+                _currentAttackData.attackOffset;
 
                 //攻撃の当たり判定の回転を計算する
                 _attackRotation =
-    　　　　　　_attackPoint.rotation *
-    　　　　　　Quaternion.Euler(_currentAttackData.attackRotation);
+                _attackPoint.rotation *
+                Quaternion.Euler(_currentAttackData.attackRotation);
 
                 //攻撃があったかどうかを判定する
                 Collider[] hitColliders =
@@ -105,12 +133,12 @@ namespace Player
                     if (IsWallInFront(enemy)) continue;
 
                     // すでに今回の攻撃で攻撃済みなら無視
-                    if (hitEnemies.Contains(enemy))continue;
+                    if (hitEnemies.Contains(enemy)) continue;
 
                     hitEnemies.Add(enemy);
 
                     // 今のところ仕様が決まっていないので、ダメージはプレイヤーの攻撃力と攻撃モーションによって決まるようにする
-                    int damage =_currentAttackData.additionalDamage + _playerStatus.CurrentAttack;
+                    int damage = _currentAttackData.additionalDamage + _playerStatus.CurrentAttack;
 
                     // マルチでは全員の画面の敵にダメージが入るようにNetworkGameStateを通す
                     NetworkGameState.DamageEnemy(enemy, damage);
@@ -118,7 +146,7 @@ namespace Player
                 }
             }
         }
-        
+
         //--------------------------------------------------
         //Animation Eventで攻撃判定開始
         //--------------------------------------------------
@@ -127,6 +155,21 @@ namespace Player
             _isAttackHitActive = true;
         }
 
+        //--------------------------------------------------
+        // コンボ入力受付を開始
+        //--------------------------------------------------
+        public void OpenComboInputWindow()
+        {
+            _isComboInputWindowOpen = true;
+        }
+
+        //--------------------------------------------------
+        // コンボ入力受付を終了
+        //--------------------------------------------------
+        public void CloseComboInputWindow()
+        {
+            _isComboInputWindowOpen = false;
+        }
 
         //------------------------------------------------------
         //プレイヤーの攻撃アニメーションが終わるときに呼び出される
@@ -135,10 +178,33 @@ namespace Player
         {
             _isAttackHitActive = false;
             _currentAttackData = null;
-
             hitEnemies.Clear();
 
-            // プレイヤーのAttackアクション終了
+            _isComboInputWindowOpen = false;
+
+            // 次のコンボ入力が予約されている場合
+            if (_hasQueuedComboInput &&
+                _comboIndex < attackData.Count - 1)
+            {
+                // 次の攻撃へ進む
+                _comboIndex++;
+
+                // 予約を解除
+                _hasQueuedComboInput = false;
+
+                Debug.Log($"{_comboIndex + 1}段目のコンボ攻撃へ移行");
+
+                // 次の攻撃アニメーションを再生
+                BeginAttack();
+
+                return;
+            }
+
+            // コンボが終了した場合
+            _hasQueuedComboInput = false;
+            _comboIndex = 0;
+            _isAttacking = false;
+
             _actionPriority.EndAction();
         }
 
