@@ -41,7 +41,12 @@ public class ChargeDashSticker : StickerBase
 
     public override void OnEnemyUpdate()
     {
-        target = enemyScript.player;  //プレイヤー取得
+        target = enemyScript.player;
+
+        if (target == null)
+        {
+            return;
+        }
 
         switch (state)
         {
@@ -98,7 +103,11 @@ public class ChargeDashSticker : StickerBase
     //溜め
     private void Charge()
     {
-        Debug.Log($"ChargeDashSticker: {state}, EnemyState: {enemyScript.currentState}");
+        if (target == null)
+        {
+            return;
+        }
+
         if (!chargeEffectPlayed)
         {
             //溜めエフェクト再生
@@ -139,7 +148,6 @@ public class ChargeDashSticker : StickerBase
     //敵の突進
     private void EnemyDash()
     {
-        Debug.Log($"ChargeDashSticker: {state}, EnemyState: {enemyScript.currentState}");
         //ここで突進
         Vector3 velocity = dashDirection * enemyDashSpeed;
         velocity.y = rb.linearVelocity.y;   //重力は維持

@@ -141,19 +141,19 @@ public class LoadUI : MonoBehaviour
 
             string[] tags =
             {
-        "EASY",
-        "NORMAL",
-        "HARD"
-    };
+                "EASY",
+                "NORMAL",
+                "HARD"
+            };
 
             ui.tagText.text =
                 tags[Random.Range(0, tags.Length)];
 
             ui.likeCountText.text =
-                "GOOD:" + Random.Range(0, 100);
+                "GOOD:" + dungeon.like_count;
 
             ui.clearCountText.text =
-                "CLEAR:" + Random.Range(0, 20);
+                "CLEAR:" + dungeon.clearCount;
 
             string selectedDungeonId =
                 dungeon.dungeonId;
@@ -227,10 +227,10 @@ public class LoadUI : MonoBehaviour
             ui.tagText.text = dungeon.tag;
 
             ui.likeCountText.text =
-                "GOOD:" + Random.Range(0, 100);
+                "GOOD:" + dungeon.like_count;
 
             ui.clearCountText.text =
-                "CLEAR:" + Random.Range(0, 20);
+                "CLEAR:" + dungeon.clearCount;
 
             string selectedDungeonId =
                 dungeon.dungeonId;
@@ -361,10 +361,10 @@ public class LoadUI : MonoBehaviour
             ui.tagText.text =dungeon.tag;
 
             ui.likeCountText.text =
-                "GOOD:" + Random.Range(0, 100);
+                "GOOD:" + dungeon.like_count;
 
             ui.clearCountText.text =
-                "CLEAR:" + Random.Range(0, 20);
+                "CLEAR:" + dungeon.clearCount;
 
             string selectedDungeonId =
                 dungeon.dungeonId;

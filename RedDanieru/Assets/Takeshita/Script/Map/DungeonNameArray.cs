@@ -13,4 +13,7 @@ public class DungeonListItem
     public string dungeonName;
     public string creatorName;
     public string tag;
+
+    public int clearCount;
+    public int like_count;
 }
