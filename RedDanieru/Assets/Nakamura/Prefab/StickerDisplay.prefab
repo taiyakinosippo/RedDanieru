@@ -113,6 +113,8 @@ MonoBehaviour:
     visual: {fileID: 2100000, guid: 9080663e19e6c1746956add261632240, type: 2}
   - stickerType: 6
     visual: {fileID: 2100000, guid: a50e1b06babb4e64b861e9e6bc5a33ad, type: 2}
+  - stickerType: 7
+    visual: {fileID: 2100000, guid: 7dc61041e72c10b4c84ff3c93efbc5bf, type: 2}
 --- !u!114 &7800920619990822450
 MonoBehaviour:
   m_ObjectHideFlags: 0
