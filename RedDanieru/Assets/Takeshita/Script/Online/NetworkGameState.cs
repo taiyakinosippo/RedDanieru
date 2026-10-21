@@ -30,6 +30,8 @@ public partial class NetworkGameState : NetworkBehaviour
 
     [Networked] public NetworkBool RetryCountdownStarted { get; set; }
 
+    [Networked] public NetworkBool IsRetrying { get; set; }
+    
     private bool localStartHandled;
     private bool localClearHandled;
     private float localStartTime;
@@ -238,6 +240,10 @@ public partial class NetworkGameState : NetworkBehaviour
     {
         if (HasStateAuthority)
         {
+            IsRetrying = true;
+
+            Debug.Log("IsRetrying TRUE");
+
             IsCleared = false;
 
             GameStarted = false;
