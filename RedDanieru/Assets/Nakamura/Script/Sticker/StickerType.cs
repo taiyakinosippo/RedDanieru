@@ -9,4 +9,5 @@ public enum Sticker
     Legless,
     Poison,
     Explosion,
+    Cactus,
 }

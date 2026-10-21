@@ -1999,7 +1999,7 @@ public class MapManager : MonoBehaviour
         CreateRespawnObjects(data);
         CreateOuterBoundaryWalls();
 
-        AdjustCamera();
+        //AdjustCamera();
 
         mapRevision++;
 

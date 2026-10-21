@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 public class EnemyBase : MonoBehaviour
 {
-    protected enum enemyState
+    public enum enemyState
     {
         Idle,
         Move,
@@ -30,7 +30,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    [SerializeField] protected enemyState currentState;  //現在の状態
+    public enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
@@ -50,6 +50,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected LayerMask obstacleLayer;  //障害物のレイヤー
     public Transform player;
     protected NavMeshAgent agent;
+    private NavMeshPath chasePath;
 
     //-----マルチプレイ用-----
     //マルチではホスト（マスタークライアント）の画面の敵だけAIを動かし、
@@ -68,6 +69,7 @@ public class EnemyBase : MonoBehaviour
         stickerState = GetComponent<StickerState>();
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
+        chasePath = new NavMeshPath();
     }
 
     public virtual void Start()
@@ -75,9 +77,9 @@ public class EnemyBase : MonoBehaviour
         //マルチで先にホストからHPが届いていたら上書きしない
         if (!networkHpApplied)
             currentHp = enemyHP;
-        
+
         //リスポーン位置を初期化
-        respawnPos = transform.position;  
+        respawnPos = transform.position;
 
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
@@ -232,7 +234,16 @@ public class EnemyBase : MonoBehaviour
             else
             {
                 //プレイヤーに向かって移動
-                //moveDirection = direction;
+                agent.CalculatePath(player.position, chasePath);
+
+                //経路がつながっていない場合は追跡しない
+                if (chasePath.status != NavMeshPathStatus.PathComplete)
+                {
+                    agent.isStopped = true;
+                    agent.ResetPath();
+                    return;
+                }
+
                 currentState = enemyState.Move;
                 agent.isStopped = false;
                 agent.SetDestination(player.position);
@@ -255,16 +266,32 @@ public class EnemyBase : MonoBehaviour
         //追跡時間が残っている場合は追跡を続ける
         if (trackingTimer > playerLostTime)
         {
-            //最後にプレイヤーを確認した位置に向かって移動
+            //経路計算中なら待機
+            if (agent.pathPending)
+                return;
+
+            //有効な経路がない場合は停止
+            if (!agent.hasPath ||
+                agent.pathStatus != NavMeshPathStatus.PathComplete)
+            {
+                agent.isStopped = true;
+                agent.ResetPath();
+                return;
+            }
+
+            //最後に設定された経路を追跡
             currentState = enemyState.Move;
             agent.isStopped = false;
         }
-        else if (trackingTimer > 0f)  //追跡時間が終わり、立ち尽くす
+        else if (trackingTimer > 0f)
         {
+            //追跡時間が終わったら停止
+            agent.isStopped = true;
             agent.ResetPath();
         }
-        else  //追跡時間がなくなった場合はリスポーン位置に戻る
+        else
         {
+            //追跡時間がなくなった場合はリスポーン位置に戻る
             GoBackRespawnPos();
             return;
         }
@@ -387,7 +414,7 @@ public class EnemyBase : MonoBehaviour
         agent.enabled = true;
         specialCoolTimer = specialInterval;
     }
-    
+
     //リス地に戻る処理
     public virtual void GoBackRespawnPos()
     {
@@ -404,7 +431,7 @@ public class EnemyBase : MonoBehaviour
         //ダメージ中はダメージを受けない
         if (currentState == enemyState.Damage)
             return;
-     
+
         Debug.Log("Enemy hit");
         //ダメージ計算
         int damage = playerPow - enemyDefense;
