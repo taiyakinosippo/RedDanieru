@@ -100,7 +100,11 @@ public class MapManager : MonoBehaviour
     [SerializeField] private string mapCreateSceneName = "Katayama_ren";
 
     [Header("NavMesh")]
+    [Tooltip("通常の敵（NormalEnemy）用NavMeshSurface")]
     [SerializeField] private NavMeshSurface navMeshSurface;
+
+    [Tooltip("BigEnemy専用NavMeshSurface")]
+    [SerializeField] private NavMeshSurface bigEnemyNavMeshSurface;
 
     [Header("カメラ設定")]
     [SerializeField] private Camera mapCamera;
@@ -2763,16 +2767,28 @@ public class MapManager : MonoBehaviour
 
     public void BuildNavigation()
     {
-        if (navMeshSurface == null)
-        {
-            Debug.LogWarning(
-                "NavMeshSurfaceが設定されていません。"
-            );
+        bool builtAny = false;
 
-            return;
+        // 通常の敵用NavMeshを更新
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh();
+            builtAny = true;
         }
 
-        navMeshSurface.BuildNavMesh();
+        // BigEnemy専用NavMeshを更新
+        if (bigEnemyNavMeshSurface != null)
+        {
+            bigEnemyNavMeshSurface.BuildNavMesh();
+            builtAny = true;
+        }
+
+        if (!builtAny)
+        {
+            Debug.LogWarning(
+                "NavMeshSurfaceが設定されていません。MapManagerのInspectorで通常敵用とBigEnemy用のNavMeshSurfaceを設定してください。"
+            );
+        }
     }
 
     public void EnableEnemyMovement()
