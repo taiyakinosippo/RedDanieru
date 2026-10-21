@@ -375,6 +375,13 @@ public class GoalClear : MonoBehaviour
             );
         }
 
+        EnemyBase[] enemies =
+    FindObjectsOfType<EnemyBase>();
+
+        foreach (EnemyBase enemy in enemies)
+        {
+            enemy.StopEnemy();
+        }
     }
 
     private void AddClearCount()
