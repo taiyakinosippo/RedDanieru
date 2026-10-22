@@ -342,10 +342,10 @@ public class DungeonUIManager : MonoBehaviour
 
     public void UploadDungeon()
     {
-        uploader.UploadDungeon(
-            dungeonNameInput.text,
-            creatorNameInput.text
-        );
+        //uploader.UploadDungeon(
+        //    dungeonNameInput.text,
+        //    creatorNameInput.text
+        //);
     }
 
     public void DownloadDungeon()

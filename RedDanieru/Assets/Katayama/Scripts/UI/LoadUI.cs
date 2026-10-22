@@ -146,8 +146,7 @@ public class LoadUI : MonoBehaviour
                 "HARD"
             };
 
-            ui.tagText.text =
-                tags[Random.Range(0, tags.Length)];
+            ui.tagText.text =dungeon.tag;
 
             ui.likeCountText.text =
                 "GOOD:" + dungeon.like_count;
