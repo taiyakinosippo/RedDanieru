@@ -30,6 +30,11 @@ public class LoadUI : MonoBehaviour
     [SerializeField] private ScrollRect scrollRect;
 
     [SerializeField] private GameObject noConnectionObj;
+    [SerializeField] private GameObject loadingObj;
+
+    [SerializeField] private Button stageSearchButton;
+    [SerializeField] private Button refreshButton;
+    [SerializeField] private Button roomSearchButton;
 
     private DungeonListItem[] cachedDungeons;
 
@@ -37,8 +42,11 @@ public class LoadUI : MonoBehaviour
     {
         noConnectionObj.SetActive(false);
     }
+
     private void OnEnable()
     {
+        loadingObj.SetActive(true);
+
         StartCoroutine(GetDungeonList());
     }
 
@@ -80,7 +88,8 @@ public class LoadUI : MonoBehaviour
 
     private IEnumerator GetDungeonList()
     {
-         foreach (Transform child in content)
+       
+        foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
@@ -109,9 +118,14 @@ public class LoadUI : MonoBehaviour
             {
                 Debug.LogError(request.error);
 
-                Debug.Log("通信失敗");
+                yield return new WaitForSeconds(2f);
 
+                loadingObj.SetActive(false);
                 noConnectionObj.SetActive(true);
+
+                refreshButton.interactable = false;
+                roomSearchButton.interactable = false;
+                stageSearchButton.interactable = false;
 
                 yield break;
             }
@@ -129,7 +143,18 @@ public class LoadUI : MonoBehaviour
 
             cachedDungeons = data.dungeons;
 
+            refreshButton.interactable=true;
+            roomSearchButton.interactable = true;
+            stageSearchButton.interactable =true;
+
+            Debug.Log("ボタン有効化");
+            Debug.Log(refreshButton.interactable);
+            Debug.Log(roomSearchButton.interactable);
+            Debug.Log(stageSearchButton.interactable);
+
+
             noConnectionObj.SetActive(false);
+            loadingObj.SetActive(false);
         }
 
         foreach (var dungeon in cachedDungeons)
