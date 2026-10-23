@@ -29,8 +29,14 @@ public class LoadUI : MonoBehaviour
 
     [SerializeField] private ScrollRect scrollRect;
 
+    [SerializeField] private GameObject noConnectionObj;
+
     private DungeonListItem[] cachedDungeons;
 
+    public void Start()
+    {
+        noConnectionObj.SetActive(false);
+    }
     private void OnEnable()
     {
         StartCoroutine(GetDungeonList());
@@ -74,7 +80,7 @@ public class LoadUI : MonoBehaviour
 
     private IEnumerator GetDungeonList()
     {
-        foreach (Transform child in content)
+         foreach (Transform child in content)
         {
             Destroy(child.gameObject);
         }
@@ -95,9 +101,18 @@ public class LoadUI : MonoBehaviour
 
             yield return request.SendWebRequest();
 
+            Debug.Log("result = " + request.result);
+            Debug.Log("response = " + request.responseCode);
+            Debug.Log("body = " + request.downloadHandler.text);
+
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(request.error);
+
+                Debug.Log("í êMé∏îs");
+
+                noConnectionObj.SetActive(true);
+
                 yield break;
             }
 
@@ -113,6 +128,8 @@ public class LoadUI : MonoBehaviour
             }
 
             cachedDungeons = data.dungeons;
+
+            noConnectionObj.SetActive(false);
         }
 
         foreach (var dungeon in cachedDungeons)
@@ -445,4 +462,22 @@ public class LoadUI : MonoBehaviour
             tags.Contains(d.tag)
         ));
     }
+
+
+    public void ShowConnectionError()
+    {
+        if (noConnectionObj != null)
+        {
+            noConnectionObj.SetActive(true);
+        }
+    }
+
+    public void HideConnectionError()
+    {
+        if (noConnectionObj != null)
+        {
+            noConnectionObj.SetActive(false);
+        }
+    }
+
 }
