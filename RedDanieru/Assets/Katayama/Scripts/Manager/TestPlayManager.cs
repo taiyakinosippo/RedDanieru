@@ -733,9 +733,13 @@ public class TestPlayManager : MonoBehaviour
         );
 
         dungeonUploader.UploadDungeon(
-            dungeonName,
-            creatorName
-        );
+     dungeonName,
+     creatorName,
+     DifficultyManager.Instance
+         .CurrentDifficulty
+         .ToString()
+         .ToUpper()
+ );
     }
 
     //==================================================
