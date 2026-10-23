@@ -194,6 +194,8 @@ public class LoadUI : MonoBehaviour
 
     public void RefreshButton()
     {
+        dungeonUIManager.HideNoResult();
+
         if (cachedDungeons == null)
             return;
 
