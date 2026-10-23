@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
 
 public class DonDesObject : MonoBehaviour
 {
     private static DonDesObject instance;
     [SerializeField] CreateStick createStick;
+    [SerializeField] private LightingSettings settingsLight;
 
     void Awake()
     {
@@ -29,6 +31,11 @@ public class DonDesObject : MonoBehaviour
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        EffectCheck(scene, mode);
+    }
+
+    private void EffectCheck(Scene scene, LoadSceneMode mode)
     {
         if (createStick == null) return;
 
