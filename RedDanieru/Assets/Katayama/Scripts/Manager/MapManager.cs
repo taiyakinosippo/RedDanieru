@@ -127,6 +127,26 @@ public class MapManager : MonoBehaviour
     [SerializeField]
     private float baseMapSize = 31f;
 
+    [Header("カメラ拡大・縮小")]
+    [Tooltip("マウスホイールで拡大・縮小する速さ")]
+    [SerializeField][Min(0.1f)] private float zoomSpeed = 2f;
+
+    [Tooltip("最も拡大したときのOrthographic Size")]
+    [SerializeField][Min(0.1f)] private float minZoomSize = 3f;
+
+    [Tooltip("最も縮小したときのOrthographic Size")]
+    [SerializeField][Min(1f)] private float maxZoomSize = 100f;
+
+    [Header("編集画面でのマップ表示位置")]
+    [Tooltip("プラスでマップを画面右へ移動")]
+    [SerializeField] private float mapScreenOffsetX = 2f;
+
+    [Tooltip("プラスでマップを画面下へ移動")]
+    [SerializeField] private float mapScreenOffsetY = 2f;
+
+    [Header("カメラ移動制限")]
+    [SerializeField] private float cameraMoveLimit = 5f;
+
     [Header("リスポーン")]
     [SerializeField] private GameObject respawnPointPrefab;
     [SerializeField] private GameObject respawnAreaPrefab;
@@ -164,6 +184,9 @@ public class MapManager : MonoBehaviour
     // ダンジョン読み込み中は変更通知を行わない。
     private bool isLoadingDungeon = false;
 
+    private bool isDraggingCamera = false;
+    private Vector3 lastMousePosition;
+
     public int MapRevision
     {
         get { return mapRevision; }
@@ -180,6 +203,127 @@ public class MapManager : MonoBehaviour
             CreateNewMap();
         }
     }
+
+    // マウスホイールで編集カメラを拡大・縮小
+
+
+
+    private void Update()
+    {
+        if (mapCamera == null || !mapCamera.orthographic)
+        {
+            return;
+        }
+
+        // カメラ移動開始（中ボタン・右クリック）
+        if (Input.GetMouseButtonDown(2) || Input.GetMouseButtonDown(1))
+        {
+            isDraggingCamera = true;
+            lastMousePosition = Input.mousePosition;
+        }
+
+        // カメラ移動終了
+        if (Input.GetMouseButtonUp(2) || Input.GetMouseButtonUp(1))
+        {
+            isDraggingCamera = false;
+        }
+
+        // カメラ移動中
+        if (isDraggingCamera &&
+            (Input.GetMouseButton(2) || Input.GetMouseButton(1)))
+        {
+            Vector3 mouseDelta =
+                Input.mousePosition - lastMousePosition;
+
+            lastMousePosition = Input.mousePosition;
+
+            float moveScale =
+                mapCamera.orthographicSize * 2f / Screen.height;
+
+            Vector3 move =
+                -mapCamera.transform.right * mouseDelta.x * moveScale
+                - mapCamera.transform.up * mouseDelta.y * moveScale;
+
+            mapCamera.transform.position += move;
+
+            // カメラの移動範囲を制限
+            ClampCameraPosition();
+        }
+
+        // マップ中心基準のズーム
+        float scroll = Input.mouseScrollDelta.y;
+
+        if (Mathf.Abs(scroll) < 0.01f)
+        {
+            return;
+        }
+
+        float oldSize = mapCamera.orthographicSize;
+
+        float newSize = Mathf.Clamp(
+            oldSize - scroll * zoomSpeed,
+            minZoomSize,
+            maxZoomSize
+        );
+
+        if (Mathf.Approximately(oldSize, newSize))
+        {
+            return;
+        }
+
+        // マップの中心座標
+        Vector3 mapCenter = new Vector3(
+            (width - 1) * wallSpacing * 0.5f,
+            0f,
+            (depth - 1) * wallSpacing * 0.5f
+        );
+
+        // マップ中心までの画面上の距離
+        Vector3 toCenter =
+            mapCenter - mapCamera.transform.position;
+
+        Vector3 right = mapCamera.transform.right;
+        Vector3 up = mapCamera.transform.up;
+
+        float centerX = Vector3.Dot(toCenter, right);
+        float centerY = Vector3.Dot(toCenter, up);
+
+        float ratio = newSize / oldSize;
+
+        // マップ中心の画面位置を維持
+        mapCamera.transform.position +=
+            right * centerX * (1f - ratio)
+            + up * centerY * (1f - ratio);
+
+        mapCamera.orthographicSize = newSize;
+
+        // ズーム後も移動範囲を制限
+        ClampCameraPosition();
+    }
+
+    // カメラの移動範囲を制限
+    private void ClampCameraPosition()
+    {
+        if (mapCamera == null)
+        {
+            return;
+        }
+
+        Vector3 pos = mapCamera.transform.position;
+
+        float minX = -cameraMoveLimit;
+        float maxX = (width - 1) * wallSpacing + cameraMoveLimit;
+
+        float minZ = -cameraMoveLimit;
+        float maxZ = (depth - 1) * wallSpacing + cameraMoveLimit;
+
+        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+        pos.z = Mathf.Clamp(pos.z, minZ, maxZ);
+
+        mapCamera.transform.position = pos;
+    }
+
+
 
     //==================================================
     // 座標
@@ -2824,6 +2968,7 @@ public class MapManager : MonoBehaviour
     // カメラ
     //==================================================
 
+
     public void AdjustCamera()
     {
         if (mapCamera == null)
@@ -2831,27 +2976,45 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // マップサイズに合わせたズーム倍率
         float currentMapSize =
-            Mathf.Max(
-                width,
-                depth
-            );
+            Mathf.Max(width, depth);
 
         float scale =
-            currentMapSize /
-            baseMapSize;
+            currentMapSize / baseMapSize;
 
-        mapCamera.transform.position =
-            baseCameraPosition *
-            scale;
+        // マップ中央の座標
+        float centerX =
+            (width - 1) * wallSpacing * 0.5f;
 
+        float centerZ =
+            (depth - 1) * wallSpacing * 0.5f;
+
+        // カメラの角度を設定
         mapCamera.transform.eulerAngles =
             cameraRotation;
 
-        mapCamera.orthographicSize =
-            baseOrthographicSize *
-            scale;
+        // マップ中央の基準位置
+        Vector3 mapCenter =
+            new Vector3(
+                centerX,
+                baseCameraPosition.y * scale,
+                centerZ
+            );
+
+        // マップを画面右下へ移動する
+        Vector3 screenOffset =
+            -mapCamera.transform.right * mapScreenOffsetX
+            + mapCamera.transform.up * mapScreenOffsetY;
+
+        // カメラ位置
+        mapCamera.transform.position =
+            mapCenter + screenOffset;
+
+        // マップサイズに応じた初期ズーム
+        mapCamera.orthographicSize = maxZoomSize;
     }
+
 
     //==================================================
     // マップ内判定
