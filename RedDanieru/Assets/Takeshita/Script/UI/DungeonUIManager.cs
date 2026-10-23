@@ -120,6 +120,7 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private Button HARDButton;
     private readonly Color normalColor = new Color32(0x96, 0xCD, 0xFF, 255);
     private readonly Color selectedColor = new Color32(0x8B, 0xA4, 0xBA, 255);
+    [SerializeField] private GameObject noResultObj;
 
     [Header("Caution")]
     public GameObject CautionObj;
@@ -200,6 +201,7 @@ public class DungeonUIManager : MonoBehaviour
         RoomInCautionLayout.SetActive(false);
         StageSearchLaycast.SetActive(false);
         StageSearchObj.SetActive(false);
+        noResultObj.SetActive(false);
 
         RoomInButton.interactable = false;
         GameStartbutton.interactable = false;
@@ -342,10 +344,10 @@ public class DungeonUIManager : MonoBehaviour
 
     public void UploadDungeon()
     {
-        uploader.UploadDungeon(
-            dungeonNameInput.text,
-            creatorNameInput.text
-        );
+        //uploader.UploadDungeon(
+        //    dungeonNameInput.text,
+        //    creatorNameInput.text
+        //);
     }
 
     public void DownloadDungeon()
@@ -713,14 +715,31 @@ public class DungeonUIManager : MonoBehaviour
         string creatorName =
             creatorNameSearchInput.text;
 
-        loadUI.SearchDungeon(
-            stageName,
-            creatorName,
-            selectedTags
-        );
+        bool found =
+            loadUI.SearchDungeon(
+                stageName,
+                creatorName,
+                selectedTags
+            );
+
+        if (!found)
+        {
+            StartCoroutine(ShowNoResult());
+            return;
+        }
 
         StageSearchObj.SetActive(false);
         StageSearchLaycast.SetActive(false);
+    }
+
+    private IEnumerator ShowNoResult()
+    {
+        noResultObj.SetActive(true);
+        
+        yield return new WaitForSeconds(2f);
+
+            noResultObj.SetActive(false);
+        
     }
 
     public void StageSearchButton()
