@@ -8935,17 +8935,29 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4887041762409014461}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: zoomSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: baseMapSize
       value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: maxZoomSize
-      value: 40
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: minZoomSize
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: goalWarningUI
       value: 
       objectReference: {fileID: 1610861911}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: cameraMoveLimit
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: goalWarningText
       value: 
@@ -8956,11 +8968,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: mapScreenOffsetX
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: mapScreenOffsetY
-      value: 10
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: spawnMarkerPrefab
@@ -8980,7 +8992,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: baseOrthographicSize
-      value: 16.5
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: bigEnemyNavMeshSurface
@@ -13143,7 +13155,6 @@ GameObject:
   - component: {fileID: 4887041762409014461}
   - component: {fileID: 2692068510418597106}
   - component: {fileID: 1568506313032387303}
-  - component: {fileID: 5592778366994857752}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -13151,26 +13162,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &5592778366994857752
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5592778366994857751}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 683143774f13f2a4fb7210df8564b006, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  zoomSpeed: 2
-  minZoom: 5
-  moveSpeed: 0.025
-  targetCamera: {fileID: 4887041762409014461}
-  mapMinX: -1000
-  mapMaxX: 1000
-  mapMinZ: -1000
-  mapMaxZ: 1000
 --- !u!223 &5614769946881736992
 Canvas:
   m_ObjectHideFlags: 0

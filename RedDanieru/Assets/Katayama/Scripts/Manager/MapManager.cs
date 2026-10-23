@@ -147,6 +147,9 @@ public class MapManager : MonoBehaviour
     [Header("カメラ移動制限")]
     [SerializeField] private float cameraMoveLimit = 5f;
 
+    // カメラの初期位置
+    private Vector3 cameraBasePosition;
+
     [Header("リスポーン")]
     [SerializeField] private GameObject respawnPointPrefab;
     [SerializeField] private GameObject respawnAreaPrefab;
@@ -208,6 +211,9 @@ public class MapManager : MonoBehaviour
 
 
 
+
+
+
     private void Update()
     {
         if (mapCamera == null || !mapCamera.orthographic)
@@ -246,11 +252,10 @@ public class MapManager : MonoBehaviour
 
             mapCamera.transform.position += move;
 
-            // カメラの移動範囲を制限
             ClampCameraPosition();
         }
 
-        // マップ中心基準のズーム
+        // ズーム
         float scroll = Input.mouseScrollDelta.y;
 
         if (Mathf.Abs(scroll) < 0.01f)
@@ -271,14 +276,14 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // マップの中心座標
+        // マップ中心
         Vector3 mapCenter = new Vector3(
             (width - 1) * wallSpacing * 0.5f,
             0f,
             (depth - 1) * wallSpacing * 0.5f
         );
 
-        // マップ中心までの画面上の距離
+        // マップ中心を基準にズーム
         Vector3 toCenter =
             mapCenter - mapCamera.transform.position;
 
@@ -290,18 +295,17 @@ public class MapManager : MonoBehaviour
 
         float ratio = newSize / oldSize;
 
-        // マップ中心の画面位置を維持
         mapCamera.transform.position +=
             right * centerX * (1f - ratio)
             + up * centerY * (1f - ratio);
 
         mapCamera.orthographicSize = newSize;
 
-        // ズーム後も移動範囲を制限
+        // ズーム後の移動範囲を制限
         ClampCameraPosition();
     }
 
-    // カメラの移動範囲を制限
+    // カメラ移動制限
     private void ClampCameraPosition()
     {
         if (mapCamera == null)
@@ -309,19 +313,50 @@ public class MapManager : MonoBehaviour
             return;
         }
 
+        // マップ中心
+        Vector3 mapCenter = new Vector3(
+            (width - 1) * wallSpacing * 0.5f,
+            0f,
+            (depth - 1) * wallSpacing * 0.5f
+        );
+
+        // 最大縮小時を基準に移動量を計算
+        float zoomRate = Mathf.InverseLerp(
+            maxZoomSize,
+            minZoomSize,
+            mapCamera.orthographicSize
+        );
+
+        // 縮小するほど移動可能範囲を狭くする
+        float moveLimit = cameraMoveLimit * zoomRate;
+
+        // ズームに応じたカメラの基準位置
+        float sizeRate = mapCamera.orthographicSize / maxZoomSize;
+
+        Vector3 targetPosition = Vector3.Lerp(
+            mapCenter,
+            cameraBasePosition,
+            sizeRate
+        );
+
         Vector3 pos = mapCamera.transform.position;
 
-        float minX = -cameraMoveLimit;
-        float maxX = (width - 1) * wallSpacing + cameraMoveLimit;
+        // 基準位置からの移動量を制限
+        pos.x = Mathf.Clamp(
+            pos.x,
+            targetPosition.x - moveLimit,
+            targetPosition.x + moveLimit
+        );
 
-        float minZ = -cameraMoveLimit;
-        float maxZ = (depth - 1) * wallSpacing + cameraMoveLimit;
-
-        pos.x = Mathf.Clamp(pos.x, minX, maxX);
-        pos.z = Mathf.Clamp(pos.z, minZ, maxZ);
+        pos.z = Mathf.Clamp(
+            pos.z,
+            targetPosition.z - moveLimit,
+            targetPosition.z + moveLimit
+        );
 
         mapCamera.transform.position = pos;
     }
+
 
 
 
@@ -2969,6 +3004,7 @@ public class MapManager : MonoBehaviour
     //==================================================
 
 
+
     public void AdjustCamera()
     {
         if (mapCamera == null)
@@ -2976,44 +3012,36 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // マップサイズに合わせたズーム倍率
-        float currentMapSize =
-            Mathf.Max(width, depth);
+        float currentMapSize = Mathf.Max(width, depth);
+        float scale = currentMapSize / baseMapSize;
 
-        float scale =
-            currentMapSize / baseMapSize;
+        float centerX = (width - 1) * wallSpacing * 0.5f;
+        float centerZ = (depth - 1) * wallSpacing * 0.5f;
 
-        // マップ中央の座標
-        float centerX =
-            (width - 1) * wallSpacing * 0.5f;
+        mapCamera.transform.eulerAngles = cameraRotation;
 
-        float centerZ =
-            (depth - 1) * wallSpacing * 0.5f;
+        Vector3 mapCenter = new Vector3(
+            centerX,
+            baseCameraPosition.y * scale,
+            centerZ
+        );
 
-        // カメラの角度を設定
-        mapCamera.transform.eulerAngles =
-            cameraRotation;
-
-        // マップ中央の基準位置
-        Vector3 mapCenter =
-            new Vector3(
-                centerX,
-                baseCameraPosition.y * scale,
-                centerZ
-            );
-
-        // マップを画面右下へ移動する
         Vector3 screenOffset =
             -mapCamera.transform.right * mapScreenOffsetX
             + mapCamera.transform.up * mapScreenOffsetY;
 
-        // カメラ位置
-        mapCamera.transform.position =
-            mapCenter + screenOffset;
+        mapCamera.transform.position = mapCenter + screenOffset;
 
-        // マップサイズに応じた初期ズーム
+        // 初期位置を保存
+        cameraBasePosition = mapCamera.transform.position;
+
+        // 初期ズーム
         mapCamera.orthographicSize = maxZoomSize;
+
+        // 移動状態をリセット
+        isDraggingCamera = false;
     }
+
 
 
     //==================================================
