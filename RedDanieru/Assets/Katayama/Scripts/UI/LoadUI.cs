@@ -305,7 +305,7 @@ public class LoadUI : MonoBehaviour
         }
     }
 
-    public void SearchDungeon(string stageName, string creatorName,HashSet<string> tags)
+    public bool SearchDungeon(string stageName, string creatorName,HashSet<string> tags)
     {
         foreach (Transform child in content)
         {
@@ -404,6 +404,8 @@ public class LoadUI : MonoBehaviour
         {
             Debug.Log("Œ©‚Â‚©‚ç‚È‚¢");
         }
+
+        return found;
     }
 
     public bool ExistsDungeon(
