@@ -7827,6 +7827,9 @@ MonoBehaviour:
   scrollRect: {fileID: 1556035668}
   noConnectionObj: {fileID: 731489794}
   loadingObj: {fileID: 1896328187}
+  stageSearchButton: {fileID: 485418388}
+  refreshButton: {fileID: 1228485551}
+  roomSearchButton: {fileID: 749212706}
 --- !u!4 &509992270
 Transform:
   m_ObjectHideFlags: 0
