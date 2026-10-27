@@ -146,8 +146,7 @@ public class LoadUI : MonoBehaviour
                 "HARD"
             };
 
-            ui.tagText.text =
-                tags[Random.Range(0, tags.Length)];
+            ui.tagText.text =dungeon.tag;
 
             ui.likeCountText.text =
                 "GOOD:" + dungeon.like_count;
@@ -306,7 +305,7 @@ public class LoadUI : MonoBehaviour
         }
     }
 
-    public void SearchDungeon(string stageName, string creatorName,HashSet<string> tags)
+    public bool SearchDungeon(string stageName, string creatorName,HashSet<string> tags)
     {
         foreach (Transform child in content)
         {
@@ -405,6 +404,8 @@ public class LoadUI : MonoBehaviour
         {
             Debug.Log("Œ©‚Â‚©‚ç‚È‚¢");
         }
+
+        return found;
     }
 
     public bool ExistsDungeon(

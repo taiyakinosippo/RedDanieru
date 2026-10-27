@@ -700,4 +700,15 @@ public class EnemyBase : MonoBehaviour
         if (enemyAttackEndTime < 0)
             enemyAttackEndTime = 0;
     }
+
+    //リトライ開始までEnemyStop
+    public void StopEnemy()
+    {
+        if (agent != null)
+        {
+            agent.enabled = false;
+        }
+
+        enabled = false;
+    }
 }

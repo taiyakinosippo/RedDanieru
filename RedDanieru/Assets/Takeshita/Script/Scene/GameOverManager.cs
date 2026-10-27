@@ -144,6 +144,14 @@ public class GameOverManager : MonoBehaviour
             gameOverPanel.SetActive(true);
         }
 
+        EnemyBase[] enemies =
+    FindObjectsOfType<EnemyBase>();
+
+        foreach (EnemyBase enemy in enemies)
+        {
+            enemy.StopEnemy();
+        }
+
         Debug.Log("GAME OVER");
     }
 

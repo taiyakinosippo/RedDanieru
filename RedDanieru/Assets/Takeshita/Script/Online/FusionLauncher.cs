@@ -505,6 +505,14 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         RestartMatch();
+
+        if (NetworkGameState.Instance != null &&
+      NetworkGameState.Instance.HasStateAuthority)
+        {
+            NetworkGameState.Instance.IsRetrying = false;
+
+            Debug.Log("IsRetrying FALSE");
+        }
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }
