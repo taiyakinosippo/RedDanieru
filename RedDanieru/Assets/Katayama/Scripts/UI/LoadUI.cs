@@ -43,6 +43,17 @@ public class LoadUI : MonoBehaviour
         noConnectionObj.SetActive(false);
     }
 
+    private void Update()
+    {
+        bool isLoading =
+            loadingObj != null &&
+            loadingObj.activeInHierarchy;
+
+        refreshButton.interactable = !isLoading;
+        roomSearchButton.interactable = !isLoading;
+        stageSearchButton.interactable = !isLoading;
+    }
+
     private void OnEnable()
     {
         loadingObj.SetActive(true);
@@ -110,9 +121,9 @@ public class LoadUI : MonoBehaviour
 
             yield return request.SendWebRequest();
 
-            Debug.Log("result = " + request.result);
-            Debug.Log("response = " + request.responseCode);
-            Debug.Log("body = " + request.downloadHandler.text);
+            //Debug.Log("result = " + request.result);
+            //Debug.Log("response = " + request.responseCode);
+            //Debug.Log("body = " + request.downloadHandler.text);
 
             if (request.result != UnityWebRequest.Result.Success)
             {
@@ -130,8 +141,25 @@ public class LoadUI : MonoBehaviour
                 yield break;
             }
 
-            string json =
-                request.downloadHandler.text;
+            string json = request.downloadHandler.text.Trim();
+
+            if (string.IsNullOrEmpty(json))
+            {
+                loadingObj.SetActive(false);
+                noConnectionObj.SetActive(true);
+                yield break;
+            }
+
+            // JSONでなければ接続エラー扱い
+            if (!json.StartsWith("{"))
+            {
+                Debug.LogError("JSONではありません: " + json);
+
+                loadingObj.SetActive(false);
+                noConnectionObj.SetActive(true);
+
+                yield break;
+            }
 
             DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
 
@@ -146,12 +174,6 @@ public class LoadUI : MonoBehaviour
             refreshButton.interactable=true;
             roomSearchButton.interactable = true;
             stageSearchButton.interactable =true;
-
-            Debug.Log("ボタン有効化");
-            Debug.Log(refreshButton.interactable);
-            Debug.Log(roomSearchButton.interactable);
-            Debug.Log(stageSearchButton.interactable);
-
 
             noConnectionObj.SetActive(false);
             loadingObj.SetActive(false);
