@@ -19,12 +19,13 @@ namespace Player
         // 攻撃中に回避入力があったかどうか
         public bool IsCancelAttackByEvade { get; private set; } = false;
 
-        public bool _
         private PlayerAttack _playerAttack;
         private void Start()
         {
             _playerAttack = GetComponent<PlayerAttack>();
         }
+
+
         //-----------------------------------------------------------
         //入力を取得する関数
         //-----------------------------------------------------------
@@ -38,23 +39,39 @@ namespace Player
                 _input.evade = false;
             }
 
-            //コンボ攻撃のためにアタックの状態がつづいているのなら他のアクションを優先してアクションする
-            else if (currentActionType == ActionType.Attack && _playerAttack.IsFirstAttack)
+            // 攻撃中は移動できないようにする
+            if (currentActionType == ActionType.Attack)
             {
-                //回避が押されてのならば回避を優先する
-                if (_input.evade　&& Grounded)
+                // 移動入力を無効にする
+                _input.move = Vector2.zero;
+
+                // 1段目の攻撃中は回避でキャンセルできる
+                if (_playerAttack.IsFirstAttack && _input.evade && Grounded)
                 {
+                    _playerAttack.CancelAttack();
+
                     currentActionType = ActionType.Evade;
                     IsCancelAttackByEvade = true;
+
                     actionQueue.Clear();
+                    _input.attack = false;
+
                     return;
                 }
 
-                // 押された入力は溜めずに捨てる
+                // 攻撃中のその他の入力は受け付けない
                 _input.jump = false;
                 _input.sticker = false;
                 actionQueue.Clear();
+
                 return;
+            }
+
+            // 歩行中・回避中は攻撃入力を受け付けない
+            if (currentActionType == ActionType.Move ||
+                currentActionType == ActionType.Evade)
+            {
+                _input.attack = false;
             }
 
             // 攻撃中以外は中断フラグを解除する
@@ -86,6 +103,7 @@ namespace Player
             }
 
         }
+
 
         //-----------------------------------------------------------
         //アクションの優先度を取得する関数
@@ -119,6 +137,7 @@ namespace Player
             return 0;
         }
 
+
         //--------------------------------------------------------------
         //優先度の高いアクションを優先する
         //--------------------------------------------------------------
@@ -137,6 +156,7 @@ namespace Player
                 // 現在の行動を切り替える
                 currentActionType = nextActionType;
             }
+
             else
             {
                 // 優先度が低いので待機

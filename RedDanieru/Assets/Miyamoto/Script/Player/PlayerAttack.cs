@@ -27,17 +27,17 @@ namespace Player
 
         private bool _isAttackHitActive;
 
-        public bool IsFirstAttack =>
-            _comboController != null && _comboController.IsFirstAttack;
+        public bool IsFirstAttack => _comboController != null && _comboController.IsFirstAttack;
 
         private void Awake()
         {
+
             _playerAnimation = GetComponent<PlayerAnimation>();
             _playerStatus = GetComponent<PlayerStatus>();
             _actionPriority = GetComponent<PlayerInputPriority>();
-
             _comboController = GetComponent<PlayerComboController>();
             _attackHitbox = GetComponent<PlayerAttackHitbox>();
+
         }
 
         private void FixedUpdate()
@@ -146,7 +146,7 @@ namespace Player
                 _currentAttackData,
                 _playerStatus);
         }
-
+        
         /// <summary>
         /// アニメーションイベントから呼び出す攻撃判定の開始
         /// </summary>
@@ -154,6 +154,7 @@ namespace Player
         {
             _isAttackHitActive = true;
         }
+
 
         /// <summary>
         /// アニメーションイベントから呼び出すコンボ入力受付の開始
@@ -163,6 +164,7 @@ namespace Player
             _comboController?.OpenComboInputWindow();
         }
 
+
         /// <summary>
         /// アニメーションイベントから呼び出すコンボ入力受付の終了
         /// </summary>
@@ -170,6 +172,7 @@ namespace Player
         {
             _comboController?.CloseComboInputWindow();
         }
+
 
         /// <summary>
         /// 攻撃アニメーション終了時に呼び出す
@@ -202,15 +205,19 @@ namespace Player
             _actionPriority?.EndAction();
         }
 
+
         /// <summary>
         /// 回避などによって攻撃を中断する
         /// </summary>
+
         public void CancelAttack()
         {
             _isAttackHitActive = false;
             _currentAttackData = null;
 
             _attackHitbox?.EndHit();
+
+            // コンボの進行と予約をリセットする
             _comboController?.CancelCombo();
 
             Debug.Log("攻撃を中断しました");

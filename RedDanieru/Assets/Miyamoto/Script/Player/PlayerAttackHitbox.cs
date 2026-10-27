@@ -66,9 +66,7 @@ namespace Player
                     continue;
                 }
 
-                int damage =
-                    attackData.additionalDamage +
-                    playerStatus.CurrentAttack;
+                int damage =attackData.additionalDamage + playerStatus.CurrentAttack;
 
                 NetworkGameState.DamageEnemy(enemy, damage);
             }
