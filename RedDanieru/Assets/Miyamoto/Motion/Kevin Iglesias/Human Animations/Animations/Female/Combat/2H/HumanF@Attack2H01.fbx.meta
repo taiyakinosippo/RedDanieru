@@ -76,14 +76,14 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.5527132
+      - time: 0.67670363
         functionName: OnAttackAnimationEnd
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 6fb0f831c7d602545973be8e26325a30, type: 3}
         floatParameter: 0
         intParameter: 2
         messageOptions: 0
-      - time: 0.7145086
+      - time: 0.7541282
         functionName: CloseComboInputWindow
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: fc1925cdfa685064eb00d19a296087c5, type: 3}

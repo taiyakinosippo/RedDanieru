@@ -135,6 +135,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerArmature (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1202312565277189992, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: _wallLayer.m_Bits
+      value: 2560
+      objectReference: {fileID: 0}
     - target: {fileID: 2697843322473174110, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: attackData.Array.size
       value: 3

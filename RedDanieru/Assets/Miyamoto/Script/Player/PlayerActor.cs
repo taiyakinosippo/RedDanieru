@@ -197,7 +197,13 @@ namespace Player
 
                 if (_actionPriority.currentActionType == ActionType.Evade)
                 {
-                    // プレイヤーの回避処理
+                    // 攻撃中に回避した場合だけ攻撃を中断する
+                    if (_actionPriority.IsCancelAttackByEvade)
+                    {
+                        _playerAttack.CancelAttack();
+                    }
+
+                    // 回避処理
                     _playerEvade.Evade(_input);
                 }
 
