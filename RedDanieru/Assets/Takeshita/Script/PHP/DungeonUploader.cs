@@ -8,17 +8,18 @@ public class DungeonUploader : MonoBehaviour
     [SerializeField]
     private DungeonUIManager dungeonUIManager;
 
-    public void UploadDungeon( string dungeonName, string creatorName)
+    public void UploadDungeon( string dungeonName, string creatorName, string tag)
     {
         StartCoroutine(
             UploadCoroutine(
                 dungeonName,
-                creatorName
+                creatorName,
+                tag
             )
         );
     }
 
-    private IEnumerator UploadCoroutine(string dungeonName,  string creatorName)
+    private IEnumerator UploadCoroutine(string dungeonName,  string creatorName,string tag)
     {
         if (string.IsNullOrEmpty(SaveManager.LastDungeonId))
         {
@@ -66,14 +67,6 @@ public class DungeonUploader : MonoBehaviour
         form.AddField("creatorName", creatorName);
 
         form.AddField("jsonData", jsonData);
-
-        // タグ未設定の場合はNORMAL
-        string tag = "NORMAL";
-
-        if (dungeonUIManager != null)
-        {
-            tag = dungeonUIManager.UploadTag;
-        }
 
         form.AddField("tag", tag);
 

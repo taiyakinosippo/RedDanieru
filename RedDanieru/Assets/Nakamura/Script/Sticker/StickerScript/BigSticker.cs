@@ -1,12 +1,13 @@
 using System.Collections;
 using UnityEngine;
 using Player;
+using UnityEngine.AI;
 
 public class BigSticker : StickerBase
 {
     private float bigScale = 3.0f;  //拡大率
     private float playerScale = 2.0f; //プレイヤー拡大率
-    //private float scaleTime = 2.0f;  //拡大縮小時間
+    private float scaleTime = 1.0f;  //拡大縮小時間
     private int addPower = 100;  //攻撃力の拡大率
     private float addSearchScale = 1.0f;  //索敵範囲の拡大率
     private float addAttackScale = 1.0f;  //攻撃範囲の拡大率
@@ -14,41 +15,22 @@ public class BigSticker : StickerBase
     private float setSpeed = 1.0f;  //移動速度の変化量
     private float saveSpeed;  //保存する速度
     private int saveAttack; //保存する攻撃力
+    private int defaultAgentTypeId;  //NavMeshAgentのデフォルトのエージェントタイプIDを保存する変数
+    private int bigAgentTypeId;  //NavMeshAgentの巨大化用のエージェントタイプIDを保存する変数
 
+    private NavMeshAgent agent;
     private PlayerCamera playerCamera;
     private PlayerStatus playerStatus;
-
-    //public override StickerState.State OnEnemyUpdate(GameObject enemy, StickerState.State state)
-    //{
-    //    switch (state)
-    //    {
-    //        case StickerState.State.Growing:
-    //            //徐々に拡大
-    //            float scale = Mathf.MoveTowards(enemy.transform.localScale.x, bigScale, scaleTime * Time.deltaTime);
-    //            enemy.transform.localScale = new Vector3(scale, scale, scale);
-
-    //            if (enemy.transform.localScale.x >= bigScale) 
-    //                return StickerState.State.Active; //拡大率を超えたら処理を終了
-
-    //            break;
-    //        case StickerState.State.Shrinking:
-    //            // 縮小処理
-    //            scale = Mathf.MoveTowards(enemy.transform.localScale.x, 1.0f, scaleTime * Time.deltaTime);
-    //            enemy.transform.localScale = new Vector3(scale, scale, scale);
-
-    //            if (enemy.transform.localScale.x <= 1.0f)
-    //                return StickerState.State.None; //縮小率を下回ったら処理を終了
-    //            break;
-    //    }
-
-    //    return state;
-    //}
 
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
     {
+        agent = GetComponent<NavMeshAgent>();
+        defaultAgentTypeId = agent.agentTypeID;  //デフォルトのエージェントタイプIDを保存
+        bigAgentTypeId = NavMesh.GetSettingsByIndex(1).agentTypeID;  //巨大化用のエージェントタイプIDを取得
+
         //スケールを拡大
-        transform.localScale = new Vector3(bigScale, bigScale, bigScale);
+        StartCoroutine(Grow(bigScale));
 
         //敵の攻撃力、攻撃範囲、攻撃クールタイムを増加
         enemyScript.AddEnemyPower(addPower);
@@ -57,10 +39,12 @@ public class BigSticker : StickerBase
         enemyScript.AddEnemyAttackCoolTime(addAttackCoolTime);
         saveSpeed = enemyScript.SetEnemyMoveSpeed(setSpeed);
     }
-    
+
     //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
+        agent.agentTypeID = defaultAgentTypeId;  //エージェントタイプIDを元に戻す
+
         //スケールを元に戻す
         transform.localScale = new Vector3(1f, 1f, 1.0f);
 
@@ -85,7 +69,7 @@ public class BigSticker : StickerBase
     public override void OnTrapApply()
     {
         //スケールを拡大
-        transform.localScale = new Vector3(bigScale, bigScale, bigScale);
+        StartCoroutine(Grow(bigScale));
     }
 
     //ステッカーが物から剥がれたときの処理
@@ -97,11 +81,7 @@ public class BigSticker : StickerBase
 
     public override void OnPlayerApply()
     {
-        //スケールを拡大
-        transform.localScale = new Vector3(bigScale, bigScale, bigScale);
-
-        playerStatus =
-            GetComponent<PlayerStatus>();
+        playerStatus = GetComponent<PlayerStatus>();
 
         if (playerStatus != null)
         {
@@ -110,10 +90,12 @@ public class BigSticker : StickerBase
                     Mathf.RoundToInt(
                         playerStatus._playerAttack * 1.5f));
 
-            saveSpeed =
-                playerStatus.SetMoveSpeed(
-                    playerStatus._playerMoveSpeed);
+            saveSpeed = playerStatus.SetMoveSpeed(
+                playerStatus._playerMoveSpeed);
         }
+
+        //スケールを拡大
+        StartCoroutine(Grow(playerScale));
 
         playerCamera =
     GetComponent<PlayerCamera>();
@@ -149,5 +131,75 @@ public class BigSticker : StickerBase
         }
 
         Debug.Log("Big解除");
+    }
+
+    //徐々に拡大
+    private IEnumerator Grow(float targetScale)
+    {
+        Vector3 startScale = transform.localScale;
+        Vector3 endScale = Vector3.one * targetScale;
+
+        Collider col = GetComponent<Collider>();
+
+        if (col == null)
+        {
+            Debug.LogWarning("BigSticker: Colliderが見つかりません");
+            yield break;
+        }
+
+        if (agent != null)
+        {
+            //移動を完全に停止し、経路をクリアする
+            agent.isStopped = true;
+            agent.ResetPath();
+            agent.enabled = false;  //NavMeshAgentを無効化
+        }
+
+        //拡大開始時の底面の高さ
+        float originalBottomY = col.bounds.min.y;
+
+        float elapsed = 0f;
+
+        while (elapsed < scaleTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / scaleTime);
+
+            transform.localScale = Vector3.Lerp(startScale, endScale, t);
+
+            //拡大によって下がった底面を元の高さまで戻す
+            float diff = originalBottomY - col.bounds.min.y;
+
+            if (diff > 0f)
+            {
+                transform.position += Vector3.up * diff;
+            }
+
+            yield return null;
+        }
+
+        transform.localScale = endScale;
+
+        //巨大化用のエージェントタイプIDに変更
+        agent.agentTypeID = bigAgentTypeId;  
+
+        // 4. 重要：大きくなったことで壁に埋まっていないかチェックし、座標を補正
+        // 自身の周囲（拡大後の半径分）のNavMesh上の最も近い安全なポイントを探す
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, agent.radius * 2f, NavMesh.AllAreas))
+        {
+            transform.position = hit.position;
+        }
+
+        // 5. エージェントを再有効化して移動を再開
+        agent.enabled = true;
+        agent.isStopped = false;
+
+        //最後にもう一度底面の高さを補正
+        float finalDiff = originalBottomY - col.bounds.min.y;
+
+        if (finalDiff > 0f)
+        {
+            transform.position += Vector3.up * finalDiff;
+        }
     }
 }

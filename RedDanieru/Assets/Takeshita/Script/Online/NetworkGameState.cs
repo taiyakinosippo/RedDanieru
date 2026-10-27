@@ -22,6 +22,16 @@ public partial class NetworkGameState : NetworkBehaviour
 
     [Networked] public int SharedCoin { get; private set; } = 10000;
 
+    [Networked] public int RetryVoteCount { get; set; }
+
+    [Networked] public int RetryCountdown { get; set; }
+
+    [Networked] private TickTimer RetryTimer { get; set; }
+
+    [Networked] public NetworkBool RetryCountdownStarted { get; set; }
+
+    [Networked] public NetworkBool IsRetrying { get; set; }
+    
     private bool localStartHandled;
     private bool localClearHandled;
     private float localStartTime;
@@ -49,11 +59,41 @@ public partial class NetworkGameState : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (HasStateAuthority)
+        if (!HasStateAuthority)
+            return;
+
+        WriteEnemyStates();
+
+        if (!RetryCountdownStarted &&RetryVoteCount >= Runner.ActivePlayers.Count())
         {
-            WriteEnemyStates();
+            RetryCountdownStarted = true;
+
+            RetryCountdown = 5;
+
+            RetryTimer =
+                TickTimer.CreateFromSeconds(
+                    Runner,
+                    1f
+                );
+        }
+
+        if (RetryCountdown > 0 &&RetryTimer.Expired(Runner))
+        {
+            RetryCountdown--;
+
+            RetryTimer =
+                TickTimer.CreateFromSeconds(
+                    Runner,
+                    1f
+                );
+
+            if (RetryCountdown <= 0)
+            {
+                RPC_StartRetry();
+            }
         }
     }
+
 
     public override void Render()
     {
@@ -71,6 +111,14 @@ public partial class NetworkGameState : NetworkBehaviour
             localClearHandled = true;
 
             ShowClearLocal();
+        }
+
+        RetryButton retryButton =
+      FindObjectOfType<RetryButton>();
+
+        if (retryButton != null)
+        {
+            retryButton.UpdateRetryText();
         }
 
         RenderEnemyStates();
@@ -100,8 +148,6 @@ public partial class NetworkGameState : NetworkBehaviour
             Runner.SessionInfo.IsOpen = false;
             Runner.SessionInfo.IsVisible = false;
         }
-
-        Debug.Log($"ゲーム開始 StartPlayerCount={StartPlayerCount}");
     }
 
     //==================================================
@@ -121,7 +167,6 @@ public partial class NetworkGameState : NetworkBehaviour
 
         IsCleared = true;
 
-        Debug.Log($"クリア確定 Goal={info.Source}");
     }
 
     private void ShowClearLocal()
@@ -146,10 +191,6 @@ public partial class NetworkGameState : NetworkBehaviour
     public void RPC_PlayerDied()
     {
         DeadPlayerCount++;
-
-        Debug.Log(
-            $"DeadPlayerCount={DeadPlayerCount}"
-        );
     }
 
     /// <summary>
@@ -180,5 +221,78 @@ public partial class NetworkGameState : NetworkBehaviour
         SharedCoin -= price;
 
         Debug.Log($"購入後コイン: {SharedCoin}");
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_AddRetryVote()
+    {
+        RetryVoteCount++;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_ResetRetryVote()
+    {
+        RetryVoteCount = 0;
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void RPC_StartRetry()
+    {
+        if (HasStateAuthority)
+        {
+            IsRetrying = true;
+
+            Debug.Log("IsRetrying TRUE");
+
+            IsCleared = false;
+
+            GameStarted = false;
+
+            RetryVoteCount = 0;
+            RetryCountdown = 0;
+            RetryCountdownStarted = false;
+
+            DeadPlayerCount = 0;
+        }
+
+        localClearHandled = false;
+        localStartHandled = false;
+
+        GoalClear goalClear =
+            FindObjectOfType<GoalClear>();
+
+        if (goalClear != null)
+        {
+            goalClear.ResetClearState();
+        }
+
+        GameOverManager gameOverManager =
+            FindObjectOfType<GameOverManager>();
+
+        if (gameOverManager != null)
+        {
+            gameOverManager.ResetGameOverState();
+        }
+
+        RetryButton[] buttons =
+       FindObjectsOfType<RetryButton>(true);
+
+        foreach (RetryButton button in buttons)
+        {
+            button.ResetRetryState();
+        }
+
+        NetworkAuthorityController[] players =
+      FindObjectsOfType<NetworkAuthorityController>();
+
+        foreach (NetworkAuthorityController player in players)
+        {
+            player.ResetDeadState();
+        }
+
+        GameStopManager gsm =
+    FindObjectOfType<GameStopManager>(true);
+
+        FusionLauncher.Instance.StartRetryWithMap();
     }
 }

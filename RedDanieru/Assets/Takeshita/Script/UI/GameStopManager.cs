@@ -17,6 +17,8 @@ public class GameStopManager: MonoBehaviour
 
     private void Update()
     {
+        Debug.Log($"ESC CanOpenPauseMenu={CanOpenPauseMenu}");
+        
         if (!CanOpenPauseMenu)
             return;
 
@@ -91,9 +93,7 @@ public class GameStopManager: MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
 
         GameStopUI.SetActive(false);
-        Debug.Log("Pause解除");
-        Debug.Log(IsPaused);
-    }
+      }
 
     public void SettingUIButton()
     {

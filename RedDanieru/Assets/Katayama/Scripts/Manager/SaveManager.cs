@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,25 +35,14 @@ public class SaveManager : MonoBehaviour
 
     private Image saveButtonImage;
 
-
-    //==================================================
-    // Start
-    //==================================================
-
     private void Start()
     {
         if (saveButton != null)
-        {
-            saveButtonImage =
-                saveButton.GetComponent<Image>();
-        }
+            saveButtonImage = saveButton.GetComponent<Image>();
 
-        // 起動直後は未保存変更なし
         hasUnsavedChanges = false;
-
         UpdateSaveButton();
     }
-
 
     //==================================================
     // 未保存変更があるか
@@ -61,6 +53,14 @@ public class SaveManager : MonoBehaviour
         return hasUnsavedChanges;
     }
 
+    // ダンジョン読み込み完了時に未保存状態を解除する
+    public void SetMapLoadedClean()
+    {
+        hasUnsavedChanges = false;
+        testPlayCleared = false;
+        clearedMapRevision = -1;
+        UpdateSaveButton();
+    }
 
     //==================================================
     // テストプレイクリア
@@ -70,25 +70,16 @@ public class SaveManager : MonoBehaviour
     {
         if (mapManager == null)
         {
-            Debug.LogError(
-                "MapManagerが設定されていません。"
-            );
-
+            Debug.LogError("MapManagerが設定されていません。");
             return;
         }
 
         testPlayCleared = true;
-
-        clearedMapRevision =
-            mapManager.MapRevision;
-
+        clearedMapRevision = mapManager.MapRevision;
         UpdateSaveButton();
 
-        Debug.Log(
-            "テストプレイクリア。"
-        );
+        Debug.Log("テストプレイクリア。");
     }
-
 
     //==================================================
     // マップ変更
@@ -98,17 +89,11 @@ public class SaveManager : MonoBehaviour
     {
         testPlayCleared = false;
         clearedMapRevision = -1;
-
-        // セーブ後に変更された
         hasUnsavedChanges = true;
-
         UpdateSaveButton();
 
-        Debug.Log(
-            "マップが変更されました。"
-        );
+        Debug.Log("マップが変更されました。");
     }
-
 
     //==================================================
     // Saveボタン更新
@@ -117,26 +102,16 @@ public class SaveManager : MonoBehaviour
     private void UpdateSaveButton()
     {
         if (saveButton == null)
-        {
             return;
-        }
 
-        // ローカル保存はいつでも可能
         saveButton.interactable = true;
 
         if (saveButtonImage == null)
-        {
-            saveButtonImage =
-                saveButton.GetComponent<Image>();
-        }
+            saveButtonImage = saveButton.GetComponent<Image>();
 
         if (saveButtonImage != null)
-        {
-            saveButtonImage.color =
-                enabledColor;
-        }
+            saveButtonImage.color = enabledColor;
     }
-
 
     //==================================================
     // テストプレイをクリア済みか
@@ -144,387 +119,259 @@ public class SaveManager : MonoBehaviour
 
     public bool IsTestPlayCleared()
     {
-        if (!testPlayCleared)
-        {
+        if (!testPlayCleared || mapManager == null)
             return false;
-        }
 
-        if (mapManager == null)
-        {
-            return false;
-        }
-
-        if (
-            clearedMapRevision !=
-            mapManager.MapRevision
-        )
+        if (clearedMapRevision != mapManager.MapRevision)
         {
             testPlayCleared = false;
             clearedMapRevision = -1;
 
-            Debug.Log(
-                "クリア後にマップが変更されています。"
-            );
-
+            Debug.Log("クリア後にマップが変更されています。");
             return false;
         }
 
         return true;
     }
-
 
     //==================================================
     // 新規保存
     //==================================================
 
-    public bool Save(
-        string dungeonName
-    )
+    public bool Save(string dungeonName)
     {
         if (mapManager == null)
         {
-            Debug.LogError(
-                "MapManagerが設定されていません。"
-            );
-
+            Debug.LogError("MapManagerが設定されていません。");
             return false;
         }
 
-        dungeonName =
-            CleanDungeonName(
-                dungeonName
-            );
+        dungeonName = CleanDungeonName(dungeonName);
 
-        if (string.IsNullOrWhiteSpace(
-            dungeonName
-        ))
+        if (string.IsNullOrWhiteSpace(dungeonName))
         {
-            Debug.LogError(
-                "ダンジョン名が入力されていません。"
-            );
-
+            Debug.LogError("ダンジョン名が入力されていません。");
             return false;
         }
 
-        string path =
-            GetDungeonPath(
-                dungeonName
-            );
+        string path = GetDungeonPath(dungeonName);
 
-        // 同じ名前が存在する場合は新規保存しない
         if (File.Exists(path))
         {
             Debug.LogWarning(
-                "同じ名前のダンジョンが既に存在します : "
-                + dungeonName
+                "同じ名前のダンジョンが既に存在します : " + dungeonName
             );
-
             return false;
         }
 
-        // 現在のマップデータを作成
-        DungeonMapData dungeonData =
-            mapManager.CreateSaveData();
+        DungeonMapData dungeonData = mapManager.CreateSaveData();
 
-        // 新しいIDを作成
-        string dungeonId =
-            System.Guid.NewGuid().ToString();
+        if (dungeonData == null)
+        {
+            Debug.LogError("保存データを作成できませんでした。");
+            return false;
+        }
 
-        dungeonData.dungeonId =
-            dungeonId;
+        string dungeonId = Guid.NewGuid().ToString();
 
-        dungeonData.dungeonName =
-            dungeonName;
+        dungeonData.dungeonId = dungeonId;
+        dungeonData.dungeonName = dungeonName;
 
-        LastDungeonId =
-            dungeonId;
+        LastDungeonId = dungeonId;
+        LastDungeonName = dungeonName;
 
-        LastDungeonName =
-            dungeonName;
+        string json = JsonUtility.ToJson(dungeonData, true);
+        File.WriteAllText(path, json);
 
-        // JSON化
-        string json =
-            JsonUtility.ToJson(
-                dungeonData,
-                true
-            );
-
-        // 保存
-        File.WriteAllText(
-            path,
-            json
-        );
-
-        // セーブ成功
         hasUnsavedChanges = false;
 
-        Debug.Log(
-            "ローカル保存完了 : "
-            + dungeonName
-        );
-
-        Debug.Log(
-            "保存先 : "
-            + path
-        );
+        Debug.Log("ローカル保存完了 : " + dungeonName);
+        Debug.Log("保存先 : " + path);
 
         return true;
     }
-
 
     //==================================================
     // 上書き保存
     //==================================================
 
-    public bool Overwrite(
-        string dungeonName
-    )
+    public bool Overwrite(string dungeonName)
     {
         if (mapManager == null)
         {
-            Debug.LogError(
-                "MapManagerが設定されていません。"
-            );
-
+            Debug.LogError("MapManagerが設定されていません。");
             return false;
         }
 
-        dungeonName =
-            CleanDungeonName(
-                dungeonName
-            );
+        dungeonName = CleanDungeonName(dungeonName);
 
-        if (string.IsNullOrWhiteSpace(
-            dungeonName
-        ))
+        if (string.IsNullOrWhiteSpace(dungeonName))
         {
-            Debug.LogError(
-                "ダンジョン名がありません。"
-            );
-
+            Debug.LogError("ダンジョン名がありません。");
             return false;
         }
 
-        string path =
-            GetDungeonPath(
-                dungeonName
-            );
+        string path = GetDungeonPath(dungeonName);
 
         if (!File.Exists(path))
         {
-            Debug.LogError(
-                "上書き対象が存在しません : "
-                + dungeonName
-            );
-
+            Debug.LogError("上書き対象が存在しません : " + dungeonName);
             return false;
         }
 
-        // 既存データを読み込む
-        string oldJson =
-            File.ReadAllText(
-                path
-            );
+        DungeonMapData oldData;
 
-        DungeonMapData oldData =
-            JsonUtility.FromJson<DungeonMapData>(
-                oldJson
-            );
+        try
+        {
+            string oldJson = File.ReadAllText(path);
+            oldData = JsonUtility.FromJson<DungeonMapData>(oldJson);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("既存データの読み込みに失敗しました: " + e.Message);
+            return false;
+        }
 
         if (oldData == null)
         {
-            Debug.LogError(
-                "既存のダンジョンデータを読み込めませんでした。"
-            );
-
+            Debug.LogError("既存のダンジョンデータを読み込めませんでした。");
             return false;
         }
 
-        // 現在のマップデータを取得
-        DungeonMapData newData =
-            mapManager.CreateSaveData();
+        DungeonMapData newData = mapManager.CreateSaveData();
 
-        // 既存のIDを維持
-        newData.dungeonId =
-            oldData.dungeonId;
-
-        // 古いデータでIDが無い場合は新しく作成
-        if (string.IsNullOrEmpty(newData.dungeonId))
+        if (newData == null)
         {
-            newData.dungeonId =
-                System.Guid.NewGuid().ToString();
+            Debug.LogError("保存データを作成できませんでした。");
+            return false;
         }
 
-        newData.dungeonName =
-            dungeonName;
+        // 既存のIDを維持する
+        newData.dungeonId = oldData.dungeonId;
 
-        LastDungeonId =
-            newData.dungeonId;
+        if (string.IsNullOrEmpty(newData.dungeonId))
+            newData.dungeonId = Guid.NewGuid().ToString();
 
-        LastDungeonName =
-            dungeonName;
+        newData.dungeonName = dungeonName;
 
-        // JSON化
-        string json =
-            JsonUtility.ToJson(
-                newData,
-                true
-            );
+        LastDungeonId = newData.dungeonId;
+        LastDungeonName = dungeonName;
 
-        // 上書き
-        File.WriteAllText(
-            path,
-            json
-        );
+        try
+        {
+            string json = JsonUtility.ToJson(newData, true);
+            File.WriteAllText(path, json);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("上書き保存に失敗しました: " + e.Message);
+            return false;
+        }
 
-        // セーブ成功
         hasUnsavedChanges = false;
 
-        Debug.Log(
-            "ローカル上書き保存完了 : "
-            + dungeonName
-        );
-
-        Debug.Log(
-            "保存先 : "
-            + path
-        );
+        Debug.Log("ローカル上書き保存完了 : " + dungeonName);
+        Debug.Log("保存先 : " + path);
 
         return true;
     }
 
-
     //==================================================
-    // 保存済みダンジョン名を取得
+    // 保存済みダンジョン名を登録日時の古い順に取得
     //==================================================
 
     public string[] GetSavedDungeonNames()
     {
-        string[] files =
-            Directory.GetFiles(
-                Application.persistentDataPath,
-                "*.json"
-            );
+        string[] files = Directory.GetFiles(
+            Application.persistentDataPath,
+            "*.json"
+        );
 
-        List<string> dungeonNames =
-            new List<string>();
+        List<(string dungeonName, DateTime registeredAt)> dungeonList =
+            new List<(string, DateTime)>();
 
         foreach (string file in files)
         {
             try
             {
-                string json =
-                    File.ReadAllText(
-                        file
-                    );
+                string json = File.ReadAllText(file);
 
                 DungeonMapData data =
-                    JsonUtility.FromJson<DungeonMapData>(
-                        json
-                    );
+                    JsonUtility.FromJson<DungeonMapData>(json);
 
-                if (
-                    data != null &&
-                    !string.IsNullOrWhiteSpace(
-                        data.dungeonName
-                    )
-                )
+                if (data == null ||
+                    string.IsNullOrWhiteSpace(data.dungeonName))
                 {
-                    dungeonNames.Add(
-                        data.dungeonName
-                    );
+                    continue;
                 }
+
+                // ファイルの作成日時を登録日時として使用する
+                DateTime registeredAt = File.GetCreationTime(file);
+
+                dungeonList.Add((
+                    data.dungeonName,
+                    registeredAt
+                ));
             }
-            catch
+            catch (Exception e)
             {
                 Debug.LogWarning(
                     "ダンジョンデータを読み込めませんでした : "
-                    + file
+                    + file + "\n" + e.Message
                 );
             }
         }
 
-        return dungeonNames.ToArray();
+        // 古い登録日時を先に表示する
+        return dungeonList
+            .OrderBy(dungeon => dungeon.registeredAt)
+            .ThenBy(dungeon => dungeon.dungeonName)
+            .Select(dungeon => dungeon.dungeonName)
+            .ToArray();
     }
-
 
     //==================================================
     // ダンジョン削除
     //==================================================
 
-    public void Delete(
-        string dungeonName
-    )
+    public void Delete(string dungeonName)
     {
-        if (string.IsNullOrWhiteSpace(
-            dungeonName
-        ))
-        {
+        if (string.IsNullOrWhiteSpace(dungeonName))
             return;
-        }
 
-        string path =
-            GetDungeonPath(
-                dungeonName
-            );
+        string path = GetDungeonPath(dungeonName);
 
         if (!File.Exists(path))
         {
-            Debug.LogWarning(
-                "削除するダンジョンがありません : "
-                + dungeonName
-            );
-
+            Debug.LogWarning("削除するダンジョンがありません : " + dungeonName);
             return;
         }
 
         File.Delete(path);
 
-        Debug.Log(
-            "ローカルダンジョンを削除しました : "
-            + dungeonName
-        );
+        Debug.Log("ローカルダンジョンを削除しました : " + dungeonName);
     }
-
 
     //==================================================
     // ダンジョン名を整理
     //==================================================
 
-    private string CleanDungeonName(
-        string dungeonName
-    )
+    private string CleanDungeonName(string dungeonName)
     {
-        if (string.IsNullOrWhiteSpace(
-            dungeonName
-        ))
-        {
+        if (string.IsNullOrWhiteSpace(dungeonName))
             return "";
-        }
 
-        foreach (
-            char c
-            in Path.GetInvalidFileNameChars()
-        )
-        {
-            dungeonName =
-                dungeonName.Replace(
-                    c.ToString(),
-                    ""
-                );
-        }
+        foreach (char c in Path.GetInvalidFileNameChars())
+            dungeonName = dungeonName.Replace(c.ToString(), "");
 
         return dungeonName.Trim();
     }
-
 
     //==================================================
     // 保存パス
     //==================================================
 
-    private string GetDungeonPath(
-        string dungeonName
-    )
+    private string GetDungeonPath(string dungeonName)
     {
         return Path.Combine(
             Application.persistentDataPath,

@@ -176,9 +176,13 @@ public class SaveUI : MonoBehaviour
 
         // ダンジョンを投稿
         uploader.UploadDungeon(
-            dungeonName,
-            creatorName
-        );
+      dungeonName,
+      creatorName,
+      DifficultyManager.Instance
+          .CurrentDifficulty
+          .ToString()
+          .ToUpper()
+  );
 
         // 保存パネルを閉じる
         if (savePanel != null)

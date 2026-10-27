@@ -27,6 +27,8 @@ public class GameOverManager : MonoBehaviour
 
     public bool IsGameOver => isGameOver;
 
+    private GameObject spawnedGameOverCamera;
+
     // プレイヤーが毎フレーム参照するので、探さずに済むようにしておく
     public static GameOverManager Instance { get; private set; }
 
@@ -69,17 +71,21 @@ public class GameOverManager : MonoBehaviour
         }
     }
 
-    public void ResetGameOverState()
+  public void ResetGameOverState()
+{
+
+    isGameOver = false;
+    gameOverShown = false;
+
+    if (gameOverPanel != null)
     {
-        isGameOver = false;
-
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(false);
-        }
-
-        Time.timeScale = 1f;
+        gameOverPanel.SetActive(false);
     }
+
+    DestroyGameOverCamera();
+
+    Time.timeScale = 1f;
+}
 
     public void GameOver()
     {
@@ -138,6 +144,14 @@ public class GameOverManager : MonoBehaviour
             gameOverPanel.SetActive(true);
         }
 
+        EnemyBase[] enemies =
+    FindObjectsOfType<EnemyBase>();
+
+        foreach (EnemyBase enemy in enemies)
+        {
+            enemy.StopEnemy();
+        }
+
         Debug.Log("GAME OVER");
     }
 
@@ -146,15 +160,16 @@ public class GameOverManager : MonoBehaviour
         if (gameOverCameraPrefab == null)
             return;
 
-        GameObject cameraObject =
-            Instantiate(gameOverCameraPrefab);
+        spawnedGameOverCamera =
+     Instantiate(gameOverCameraPrefab);
 
         Camera gameOverCamera =
-            cameraObject.GetComponentInChildren<Camera>();
+            spawnedGameOverCamera.GetComponentInChildren<Camera>();
 
         if (gameOverCamera == null)
         {
-            Destroy(cameraObject);
+            Destroy(spawnedGameOverCamera);
+            spawnedGameOverCamera = null;
             return;
         }
 
@@ -220,4 +235,14 @@ public class GameOverManager : MonoBehaviour
             );
         }
     }
+
+    public void DestroyGameOverCamera()
+    {
+        if (spawnedGameOverCamera != null)
+        {
+            Destroy(spawnedGameOverCamera);
+            spawnedGameOverCamera = null;
+        }
+    }
+
 }

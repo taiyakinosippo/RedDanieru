@@ -27,11 +27,9 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField]
     private PlayerSpawner playerSpawner;
 
-    [SerializeField]
-    private NetworkGameState networkGameStatePrefab;
+    [SerializeField] private NetworkGameState networkGameStatePrefab;
 
-    [SerializeField]
-    private DungeonImporter importer;
+    [SerializeField] private DungeonImporter importer;
 
     private NetworkRunner runner;
 
@@ -126,20 +124,39 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     public void StartSolo()
     {
-        Debug.Log("StartSolo");
-
+        Debug.Log("StartSolo呼び出し");
         StartCoroutine(StartSoloWhenStageReady());
     }
 
     private IEnumerator StartSoloWhenStageReady()
     {
-        // ステージを読み込み終わってからスタート地点に出す
         if (importer != null)
         {
-            yield return importer.WaitUntilLoaded(RoomInfo.SelectedDungeon);
+            yield return importer.WaitUntilLoaded(
+                RoomInfo.SelectedDungeon
+            );
         }
 
-        Pose pose = PlayerSpawnPoint.GetSpawnPose(spawnPoint, 0, 1);
+        Debug.Log("マップ読込完了");
+
+        // 既存プレイヤーを全削除
+        Player.PlayerMovement[] players =
+            FindObjectsOfType<Player.PlayerMovement>(true);
+
+        foreach (var oldPlayer in players)
+        {
+            Destroy(oldPlayer.gameObject);
+        }
+
+        yield return null;
+
+        Pose pose = PlayerSpawnPoint.GetSpawnPose(
+            spawnPoint,
+            0,
+            1
+        );
+
+        Debug.Log("SpawnPos = " + pose.position);
 
         GameObject player = Instantiate(
             soloPlayerPrefab,
@@ -147,10 +164,21 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             pose.rotation
         );
 
-        // CharacterControllerの内部位置を出現位置に合わせる
-        PlayerSpawnPoint.Teleport(player, pose);
+        Debug.Log("Player生成成功 : " + player.name);
 
-        // カーソルを非表示にする
+        PlayerSpawnPoint.Teleport(
+            player,
+            pose
+        );
+
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+        }
+
         _cursorController.HideCursor();
     }
 
@@ -415,6 +443,76 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         Debug.LogWarning($"サーバーから切断 : {reason}");
+    }
+
+    public void RestartMatch()
+    {
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
+
+        if (gameStopManager != null)
+        {
+            gameStopManager.EnablePauseMenu();
+
+            Debug.Log("PauseMenu Enable");
+        }
+
+        if (Runner != null &&
+            playerSpawner != null)
+        {
+            playerSpawner.SpawnLocalPlayer(
+                Runner
+            );
+        }
+    }
+
+    public void DespawnLocalPlayer()
+    {
+        if (Runner != null &&
+            playerSpawner != null)
+        {
+            playerSpawner.DespawnLocalPlayer(
+                Runner
+            );
+        }
+    }
+
+    public void StartRetryWithMap()
+    {
+        StartCoroutine(
+            RetryWithMapCoroutine()
+        );
+    }
+
+    private IEnumerator RetryWithMapCoroutine()
+    {
+        DespawnLocalPlayer();
+
+        yield return null;
+
+        DungeonImporter importer =
+            FindObjectOfType<DungeonImporter>();
+
+        if (importer != null)
+        {
+            importer.ImportDungeon(
+                RoomInfo.SelectedDungeon
+            );
+
+            yield return importer.WaitUntilLoaded(
+                RoomInfo.SelectedDungeon
+            );
+        }
+
+        RestartMatch();
+
+        if (NetworkGameState.Instance != null &&
+      NetworkGameState.Instance.HasStateAuthority)
+        {
+            NetworkGameState.Instance.IsRetrying = false;
+
+            Debug.Log("IsRetrying FALSE");
+        }
     }
 
     public void OnConnectedToServer(NetworkRunner runner) { }

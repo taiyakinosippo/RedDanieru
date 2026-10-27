@@ -38,11 +38,7 @@ public class StickerState : MonoBehaviour
         if (!isSpecialMove || currentStickerScript == null)
             return;
 
-        if (gameObject.CompareTag("Enemy"))
-        {
-            currentStickerScript.OnEnemyUpdate();
-        }
-        else if (gameObject.CompareTag("Player"))
+        if (gameObject.CompareTag("Player"))
         {
             if (NetworkGameState.Instance != null)
             {
@@ -58,7 +54,7 @@ public class StickerState : MonoBehaviour
 
             currentStickerScript.OnPlayerUpdate();
         }
-        else
+        else if (gameObject.CompareTag("Trap"))
         {
             currentStickerScript.OnTrapUpdate();
         }
@@ -96,6 +92,9 @@ public class StickerState : MonoBehaviour
             case Sticker.Explosion:
                 currentStickerScript = gameObject.AddComponent<ExplosionSticker>();
                 break;
+            case Sticker.Cactus:
+                currentStickerScript = gameObject.AddComponent<CactusSticker>();
+                break;
         }
 
         // ステッカー表示
@@ -105,23 +104,26 @@ public class StickerState : MonoBehaviour
         }
 
         // Apply関数実行
-        if (gameObject.CompareTag("Enemy"))
+        switch (gameObject.tag)
         {
-            currentStickerScript?.GetEnemyScript();
-            currentStickerScript?.OnEnemyApply();
-        }
-        else if (gameObject.CompareTag("Trap"))
-        {
-            currentStickerScript?.OnTrapApply();
-        }
-        else if (gameObject.CompareTag("Player"))
-        {
-            currentStickerScript?.GetPlayerScript();
-            currentStickerScript?.OnPlayerApply();
-        }
-        else{
-            Debug.LogError("ステッカーを貼る対象がEnemyでもTrapでもPlayerでもありません。");
-            currentStickerScript?.OnTrapApply();
+            case "Enemy":
+                currentStickerScript?.GetEnemyScript();
+                currentStickerScript?.OnEnemyApply();
+                break;
+            case "Trap":
+                currentStickerScript?.OnTrapApply();
+                break;
+            case "Player":
+                currentStickerScript?.GetPlayerScript();
+                currentStickerScript?.OnPlayerApply();
+                break;
+            case "Wall":
+                currentStickerScript?.OnWallApply();
+                break;
+            default:
+                Debug.LogError("ステッカーを貼る対象がEnemy,Trap,Player,Wallでもありません。");
+                currentStickerScript?.OnTrapApply();
+                break;
         }
     }
 
@@ -131,21 +133,28 @@ public class StickerState : MonoBehaviour
         if (currentStickerScript != null)
         {
             // Remove関数実行
-            if (gameObject.CompareTag("Enemy"))
+            switch (gameObject.tag)
             {
-                currentStickerScript?.OnEnemyRemove();
-            }
-            else if (gameObject.CompareTag("Trap"))
-                currentStickerScript?.OnTrapRemove();
-            else if (gameObject.CompareTag("Player"))
-                currentStickerScript?.OnPlayerRemove();
-            else{
-                Debug.LogError("ステッカーを剥がす対象がEnemyでもTrapでもPlayerでもありません。");
-                currentStickerScript?.OnTrapRemove();
+                case "Enemy":
+                    currentStickerScript?.OnEnemyRemove();
+                    break;
+                case "Trap":
+                    currentStickerScript?.OnTrapRemove();
+                    break;
+                case "Player":
+                    currentStickerScript?.OnPlayerRemove();
+                    break;
+                case "Wall":
+                    currentStickerScript?.OnWallRemove();
+                    break;
+                default:
+                    Debug.LogError("ステッカーを剥がす対象がEnemy,Trap,Player,Wallでもありません。");
+                    currentStickerScript?.OnTrapRemove();
+                    break;
             }
 
             //破棄
-            Destroy(currentStickerScript);
+            //Destroy(currentStickerScript);
         }
 
         //貼られていたステッカーを回収
@@ -207,7 +216,7 @@ public class StickerState : MonoBehaviour
             //効果のスクリプトだけ外す（剥がしたときの処理は呼ばない。種類と見た目は残す）
             if (currentStickerScript != null)
             {
-                Destroy(currentStickerScript);
+                //Destroy(currentStickerScript);
                 currentStickerScript = null;
             }
         }
