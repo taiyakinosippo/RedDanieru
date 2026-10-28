@@ -31711,9 +31711,17 @@ PrefabInstance:
       value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: respawnPointObject
+      value: 
+      objectReference: {fileID: 2385698833403189836}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: bigEnemyNavMeshSurface
       value: 
       objectReference: {fileID: 1965161945}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: defaultRespawnPointPosition.y
+      value: -3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2170924399791435939, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -34776,6 +34784,11 @@ PrefabInstance:
 --- !u!4 &2385698833403189835 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4856998441349253723, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
+  m_PrefabInstance: {fileID: 2385698833403189834}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2385698833403189836 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 41870112793961592, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
   m_PrefabInstance: {fileID: 2385698833403189834}
   m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
