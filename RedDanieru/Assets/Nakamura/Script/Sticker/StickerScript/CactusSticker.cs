@@ -1,12 +1,20 @@
 using Player;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CactusSticker : StickerBase
 {
-    private float needleAreaRadius = 2.0f; //針の範囲
-    private int needleGuardDamage = 10; //針バリアのダメージ量
-    private int needleDamage = 50; //針のダメージ量
-    private LayerMask enemyLayer = LayerMask.GetMask("Enemy");  //敵のレイヤー
+    private float needleAreaRadius = 2.0f;  //針の範囲
+    private int needleGuardDamage = 10;  //針バリアのダメージ量
+    private int needleDamage = 30;  //針のダメージ量
+    private Dictionary<EnemyBase, float> enemyDamageCooldowns = new Dictionary<EnemyBase, float>();  //敵ごとの次回ダメージ可能時刻
+    private float damageCooldown = 0.7f;  //ダメージのクールタイム（秒）
+    private LayerMask enemyLayer;  //敵のレイヤー
+
+    private void Start()
+    {
+        enemyLayer = LayerMask.GetMask("Enemy");
+    }
 
     private void Update()
     {
@@ -27,22 +35,33 @@ public class CactusSticker : StickerBase
 
     private void NeedleGuard()
     {
+        //針バリアの範囲内の敵を検索
         Collider[] searchHits = Physics.OverlapSphere(transform.position, needleAreaRadius, enemyLayer);
-        Debug.Log($"Enemy LayerMask: {enemyLayer.value}");
 
+        //敵ごとにダメージを与える処理
         foreach (Collider hit in searchHits)
         {
-            Debug.Log($"検出したオブジェクト: {hit.name}, Layer: {LayerMask.LayerToName(hit.gameObject.layer)}");
             EnemyBase enemy = hit.GetComponent<EnemyBase>();
-            if (enemy != null)
+
+            if (enemy == null)
             {
-                Debug.Log($"ダメージ実行: {enemy.name}");
-                enemy.AddEnemyCurrentHP(-needleGuardDamage);
+                continue;
             }
-            else
+
+            //敵ごとのクールタイムを確認
+            if (enemyDamageCooldowns.TryGetValue(enemy, out float nextDamageTime))
             {
-                Debug.Log("EnemyBase が見つからない");
+                if (Time.time < nextDamageTime)
+                {
+                    continue;
+                }
             }
+
+            //ダメージを与える
+            enemy.AddEnemyCurrentHP(-needleGuardDamage);
+
+            //この敵の次回ダメージ可能時刻を設定
+            enemyDamageCooldowns[enemy] = Time.time + damageCooldown;
         }
     }
 

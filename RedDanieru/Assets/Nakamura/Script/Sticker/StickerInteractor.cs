@@ -150,15 +150,6 @@ public class StickerInteractor : MonoBehaviour
         {
             Sticker sticker = holdSticker[holdIndex];
 
-            // ChargeDashは敵とプレイヤーのみ
-            if (sticker == Sticker.ChargeDash &&
-                !target.CompareTag("Enemy") &&
-                !target.CompareTag("Player"))
-            {
-                Debug.Log("ChargeDashは敵とプレイヤーにしか貼れません");
-                return;
-            }
-
             holdSticker[holdIndex] = Sticker.None;
 
             stickerSlotUI.SetStickerUI(holdIndex, Sticker.None);
