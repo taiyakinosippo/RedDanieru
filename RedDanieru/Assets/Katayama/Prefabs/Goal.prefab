@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4528838173901929987}
   - component: {fileID: 6278555398407174765}
   - component: {fileID: 6040196923031645254}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -147,7 +147,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7126599226955367998}
   - component: {fileID: 2932424932785281867}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: ForestFlag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9051891497166524066}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Bone.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -274,7 +274,7 @@ GameObject:
   - component: {fileID: 904859966037642823}
   - component: {fileID: 6617880239769949800}
   - component: {fileID: 2363787786420480351}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -373,7 +373,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3029726205684049644}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Bone.003_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -405,7 +405,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3751713133878907203}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Bone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -439,11 +439,13 @@ GameObject:
   - component: {fileID: 8768944060096825564}
   - component: {fileID: 2945743214040917359}
   - component: {fileID: 7334151094400583362}
-  - component: {fileID: -1455775471097500590}
   - component: {fileID: 3676658694269261431}
   - component: {fileID: 1866778882267512059}
   - component: {fileID: 4478139478669298859}
-  m_Layer: 0
+  - component: {fileID: 6848964835452455707}
+  - component: {fileID: 9139808919992526798}
+  - component: {fileID: -5164203918711700045}
+  m_Layer: 3
   m_Name: Goal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -521,20 +523,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-1455775471097500590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5839628444456617438}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e3f5edc356f5674b9c892b885492b5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  objectType: 6
-  selectColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &3676658694269261431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -569,7 +557,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -589,6 +577,73 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad599aec06ef18d429d34cfe5adbd4b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6848964835452455707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5839628444456617438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a43980467e61d6848bbcc8cbd60309d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyHP: 1000
+  enemyPower: 200
+  enemyDefense: 100
+  enemyMoveSpeed: 3
+  enemySearchArea: 6
+  enemyTrackingTime: 3
+  enemyAttackArea: 1.5
+  enemyAttackCoolTime: 1
+  enemyAttackStartTime: 1.2
+  enemyAttackEndTime: 0.3
+  currentState: 0
+  currentHp: 0
+  trackingTimer: 0
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 512
+  player: {fileID: 0}
+  goalMaxHP: 900
+--- !u!195 &9139808919992526798
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5839628444456617438}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 1
+  m_BaseOffset: 0.5
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &-5164203918711700045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5839628444456617438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632a81b4521940bd8d02e3fb8edcc6d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6479654475357674865
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,7 +655,7 @@ GameObject:
   - component: {fileID: 837480637915627899}
   - component: {fileID: 4807208038668427855}
   - component: {fileID: 2590707741868189355}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -735,7 +790,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1880270866255649111}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: FlagArm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -767,7 +822,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3837638638476318806}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Bone.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -801,13 +856,13 @@ GameObject:
   - component: {fileID: 4371587225355768794}
   - component: {fileID: 6029966008663165602}
   - component: {fileID: 7581453935535348560}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: GoalPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4371587225355768794
 RectTransform:
   m_ObjectHideFlags: 0
@@ -878,7 +933,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4893295952554180137}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Bone.003_end_end
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -912,7 +967,7 @@ GameObject:
   - component: {fileID: 5177826732407090167}
   - component: {fileID: 4992120377815042142}
   - component: {fileID: 6795475908137993144}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: StageSelect_return
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1042,7 +1097,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1026137552417884243}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Bone.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1153,9 +1208,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5234945423511218465, guid: 612db924f741154409d42f3f3bec6a38, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 7132532797540988163, guid: 612db924f741154409d42f3f3bec6a38, type: 3}
       propertyPath: m_Name
       value: GoodButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 7132532797540988163, guid: 612db924f741154409d42f3f3bec6a38, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1182,6 +1245,14 @@ PrefabInstance:
     - target: {fileID: 2147830017249777323, guid: e8a16de72669f4c48a0c09d64adc0841, type: 3}
       propertyPath: m_Name
       value: StageMorePlay
+      objectReference: {fileID: 0}
+    - target: {fileID: 2147830017249777323, guid: e8a16de72669f4c48a0c09d64adc0841, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3307027530285370769, guid: e8a16de72669f4c48a0c09d64adc0841, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4007277584975719754, guid: e8a16de72669f4c48a0c09d64adc0841, type: 3}
       propertyPath: m_Pivot.x
@@ -1282,6 +1353,10 @@ PrefabInstance:
     - target: {fileID: 7515429695939050844, guid: e8a16de72669f4c48a0c09d64adc0841, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: RetryButton, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 7715625995165273470, guid: e8a16de72669f4c48a0c09d64adc0841, type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

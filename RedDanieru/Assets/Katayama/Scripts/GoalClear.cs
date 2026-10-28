@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -33,13 +34,19 @@ public class GoalClear : MonoBehaviour
 
     private bool isCleared = false;
     private bool alreadyShown = false;
+
     private CursorController _cursorController;
 
     private GameObject spawnedClearCamera;
 
+    //==================================================
+    // 初期化
+    //==================================================
+
     private void Start()
     {
         _cursorController = GetComponent<CursorController>();
+
         ResetClearState();
     }
 
@@ -78,28 +85,51 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
-        // 他の人のキャラ（同期で動いているだけのもの）がゴールに入ったときは、
-        // そのキャラを操作している人の画面で判定するので何もしない
-        if (!NetworkAuthorityController.IsLocallyControlled(other.gameObject))
+        // 操作中のプレイヤーだけ判定
+        if (!NetworkAuthorityController.IsLocallyControlled(
+            other.gameObject))
         {
+            return;
+        }
+
+        // 通常のゴール接触
+        ClearByGoalDestroyed();
+    }
+
+    //==================================================
+    // ゴール破壊によるクリア
+    //==================================================
+
+    public void ClearByGoalDestroyed()
+    {
+        if (isCleared)
+        {
+            Debug.Log("クリア処理済み");
             return;
         }
 
         isCleared = true;
 
+        Debug.Log("ゴール破壊によるクリア開始");
+
         //==================================================
         // マルチプレイ
         //==================================================
 
-        // [Networked]の値はState Authority（ホスト）しか書き換えられないので、
-        // クリアをお願いする。確定したら全員の画面でShowClearが呼ばれる
-        NetworkGameState state = NetworkGameState.Instance;
+        NetworkGameState state =
+            NetworkGameState.Instance;
 
         if (state != null)
         {
+            Debug.Log("マルチプレイ：クリアを要求");
+
             state.RequestClear();
             return;
         }
+
+        //==================================================
+        // プレイヤー停止
+        //==================================================
 
         GameObject[] players =
             GameObject.FindGameObjectsWithTag("Player");
@@ -109,12 +139,12 @@ public class GoalClear : MonoBehaviour
             player.SetActive(false);
         }
 
+        //==================================================
+        // テストプレイ判定
+        //==================================================
+
         TestPlayManager testPlayManager =
             FindObjectOfType<TestPlayManager>();
-
-        //==================================================
-        // テストプレイ中
-        //==================================================
 
         if (testPlayManager != null &&
             testPlayManager.IsTestPlay)
@@ -128,11 +158,10 @@ public class GoalClear : MonoBehaviour
             }
 
             Debug.Log(
-                "テストプレイでGoalに到達しました"
+                "テストプレイでゴールを破壊しました"
             );
 
-            // シーン移動しない
-            // TestPlayManager側で投稿確認を表示する
+            // 投稿確認など既存処理へ
             testPlayManager.ClearTestPlay();
 
             return;
@@ -160,9 +189,8 @@ public class GoalClear : MonoBehaviour
             return;
         }
 
-
         spawnedClearCamera =
-     Instantiate(clearCameraPrefab);
+            Instantiate(clearCameraPrefab);
 
         Camera clearCamera =
             spawnedClearCamera.GetComponentInChildren<Camera>();
@@ -173,15 +201,13 @@ public class GoalClear : MonoBehaviour
                 "Clear Camera PrefabにCameraがありません。"
             );
 
-            if (spawnedClearCamera != null)
-            {
-                Destroy(spawnedClearCamera);
-                spawnedClearCamera = null;
-            }
+            Destroy(spawnedClearCamera);
+            spawnedClearCamera = null;
 
             return;
         }
 
+        // ほかのカメラを停止
         Camera[] cameras =
             FindObjectsOfType<Camera>();
 
@@ -207,14 +233,9 @@ public class GoalClear : MonoBehaviour
                 mapManager.depth - 1;
 
             float mapSize =
-                Mathf.Max(
-                    mapWidth,
-                    mapDepth
-                );
+                Mathf.Max(mapWidth, mapDepth);
 
-            scale =
-                mapSize /
-                baseMapSize;
+            scale = mapSize / baseMapSize;
 
             if (scale <= 0f)
             {
@@ -234,24 +255,19 @@ public class GoalClear : MonoBehaviour
                 baseMapSize / 2f;
 
             float offsetX =
-                clearCameraPosition.x -
-                baseCenterX;
+                clearCameraPosition.x - baseCenterX;
 
             float offsetZ =
-                clearCameraPosition.z -
-                baseCenterZ;
+                clearCameraPosition.z - baseCenterZ;
 
             float cameraX =
-                centerX +
-                offsetX * scale;
+                centerX + offsetX * scale;
 
             float cameraY =
-                clearCameraPosition.y *
-                scale;
+                clearCameraPosition.y * scale;
 
             float cameraZ =
-                centerZ +
-                offsetZ * scale;
+                centerZ + offsetZ * scale;
 
             clearCamera.transform.position =
                 new Vector3(
@@ -267,9 +283,7 @@ public class GoalClear : MonoBehaviour
         }
 
         clearCamera.transform.rotation =
-            Quaternion.Euler(
-                clearCameraRotation
-            );
+            Quaternion.Euler(clearCameraRotation);
 
         clearCamera.fieldOfView =
             Mathf.Clamp(
@@ -279,7 +293,12 @@ public class GoalClear : MonoBehaviour
             );
 
         clearCamera.gameObject.SetActive(true);
-        _cursorController.ShowCursor();
+
+        if (_cursorController != null)
+        {
+            _cursorController.ShowCursor();
+        }
+
         Debug.Log(
             "Clear Camera Position : " +
             clearCamera.transform.position
@@ -299,7 +318,6 @@ public class GoalClear : MonoBehaviour
     {
         Time.timeScale = 1f;
 
-
         FusionLauncher launcher =
             FusionLauncher.Instance;
 
@@ -318,30 +336,46 @@ public class GoalClear : MonoBehaviour
     }
 
     //==================================================
-    // クリア表示（マルチでは全員の画面でNetworkGameStateから呼ばれる）
+    // クリア表示
     //==================================================
 
     public void ShowClear()
     {
+        Debug.Log("ShowClear開始");
+
         if (alreadyShown)
         {
+            Debug.Log(
+                "ShowClear：すでに表示済み"
+            );
+
             return;
         }
 
+        // 二重表示を防止
+        alreadyShown = true;
+        isCleared = true;
+
+        Debug.Log("ShowClear：クリア処理開始");
+
         AddClearCount();
 
-        isCleared = true;
-        alreadyShown = true;
-
+        //==================================================
         // PauseUIを閉じる
+        //==================================================
+
         GameStopManager gameStopManager =
             FindObjectOfType<GameStopManager>();
 
         if (gameStopManager != null)
         {
+            // PauseUIだけ閉じる
             gameStopManager.DisablePauseMenu();
-            gameStopManager.GameReturnButton();
         }
+
+        //==================================================
+        // プレイヤー停止
+        //==================================================
 
         GameObject[] players =
             GameObject.FindGameObjectsWithTag("Player");
@@ -351,38 +385,69 @@ public class GoalClear : MonoBehaviour
             player.SetActive(false);
         }
 
+        //==================================================
+        // BGM復帰
+        //==================================================
+
         if (BGMManager_Takeshita.Instance != null)
         {
             BGMManager_Takeshita.Instance.PlayNormalBGM();
         }
 
-        // マルチで止めると通信で動いている物まで止まるので、ソロのときだけ止める
+        //==================================================
+        // ソロプレイのみ時間停止
+        //==================================================
+
         if (!GameModeManager.IsMultiplayer)
         {
             Time.timeScale = 0f;
         }
 
+        //==================================================
+        // カメラ生成
+        //==================================================
+
+        Debug.Log("ShowClear：カメラ生成前");
+
         SpawnClearCamera();
+
+        //==================================================
+        // UI表示
+        //==================================================
+
+        Debug.Log("ShowClear：UI表示前");
 
         if (clearPanel != null)
         {
             clearPanel.SetActive(true);
+
+            Debug.Log("クリアUI表示実行");
         }
         else
         {
-            Debug.LogWarning(
-                "Clear Panelが設定されていません"
+            Debug.LogError(
+                "ClearPanelが未設定"
             );
         }
 
+        //==================================================
+        // 敵停止
+        //==================================================
+
         EnemyBase[] enemies =
-    FindObjectsOfType<EnemyBase>();
+            FindObjectsOfType<EnemyBase>();
 
         foreach (EnemyBase enemy in enemies)
         {
             enemy.StopEnemy();
         }
+
+        Debug.Log("ShowClear終了");
     }
+
+    //==================================================
+    // クリア回数加算
+    //==================================================
 
     private void AddClearCount()
     {
@@ -406,6 +471,10 @@ public class GoalClear : MonoBehaviour
 
         yield return request.SendWebRequest();
     }
+
+    //==================================================
+    // クリアカメラ削除
+    //==================================================
 
     public void DestroyClearCamera()
     {

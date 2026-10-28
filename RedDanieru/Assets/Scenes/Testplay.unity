@@ -3255,11 +3255,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: depth
-      value: 25
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: width
-      value: 40
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: mapCamera
@@ -3274,9 +3274,17 @@ PrefabInstance:
       value: 24
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: respawnPointObject
+      value: 
+      objectReference: {fileID: 1657016101}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: bigEnemyNavMeshSurface
       value: 
       objectReference: {fileID: 1571710176}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: defaultRespawnPointPosition.y
+      value: -3.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: defaultRespawnPointPosition.z
       value: 12
@@ -3566,6 +3574,11 @@ PrefabInstance:
 --- !u!4 &1657016100 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3679073485761388598, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
+  m_PrefabInstance: {fileID: 1657016099}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1657016101 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 41870112793961592, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
   m_PrefabInstance: {fileID: 1657016099}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1740862194

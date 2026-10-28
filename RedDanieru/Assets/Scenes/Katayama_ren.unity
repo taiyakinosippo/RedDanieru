@@ -6173,7 +6173,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3679073485761388598, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 24
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3679073485761388598, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6897,6 +6897,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -97}
   m_SizeDelta: {x: 580, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &2096337194 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 41870112793961592, guid: 7466ccb257a8777489f9283ca9dd6dee, type: 3}
+  m_PrefabInstance: {fileID: 1669971902}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2122423595
 GameObject:
   m_ObjectHideFlags: 0
@@ -8968,19 +8973,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: mapScreenOffsetX
-      value: 10
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: mapScreenOffsetY
       value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: mapScreenOffsetZ
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: spawnMarkerPrefab
       value: 
       objectReference: {fileID: 7461072477327439928, guid: 71de1f033943d494083b84b295d25403, type: 3}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: respawnPointObject
+      value: 
+      objectReference: {fileID: 2096337194}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: respawnPointPrefab
+      value: 
+      objectReference: {fileID: 2096337194}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: baseCameraPosition.x
-      value: 9
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: baseCameraPosition.y
@@ -8999,6 +9016,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6589038455353898544}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: objectPrefabs.Array.size
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: defaultRespawnPointPosition.x
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: defaultRespawnPointPosition.y
+      value: -3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: defaultRespawnPointPosition.z
       value: 12
       objectReference: {fileID: 0}
@@ -9006,6 +9035,18 @@ PrefabInstance:
       propertyPath: spawnMarkerPrefabs.Array.size
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: objectPrefabs.Array.data[8].type
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: objectPrefabs.Array.data[2].prefab
+      value: 
+      objectReference: {fileID: 187918, guid: 77a599bd67f72e24999e1d5d60f433d0, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: objectPrefabs.Array.data[8].prefab
+      value: 
+      objectReference: {fileID: 3579314766830224434, guid: 7961808ec5f49664f82576143a146109, type: 3}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: spawnMarkerPrefabs.Array.data[1].type
       value: 3
