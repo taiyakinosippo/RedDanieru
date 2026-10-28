@@ -28,10 +28,10 @@ EditorBuildSettings:
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
     path: Assets/Scenes/TestCheck/Copy_Katayama.unity
-    guid: 8ed069fb9cd482d4c8c77a3f5b7fc36f
+    guid: 54239509a02e2d24bbb98fdc4598db5d
   - enabled: 1
     path: Assets/Scenes/TestCheck/Copy_Test.unity
-    guid: d7d9b1604c1962c45ab79dbfe83bb32b
+    guid: d9da35df97b55a64299b1ec712bafd45
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
