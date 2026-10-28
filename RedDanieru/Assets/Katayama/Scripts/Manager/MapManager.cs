@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.AI;
@@ -47,17 +48,18 @@ public class MapManager : MonoBehaviour
     [SerializeField][Min(0.01f)] private float objectSpacing = 1f;
     [SerializeField] private float objectYOffset = 0f;
 
+    [Header("ゴール警告UI")]
+    [SerializeField] private GameObject goalWarningUI;
+    [SerializeField] private TMP_Text goalWarningText;
+    [SerializeField] private float goalWarningDuration = 2f;
+
+
     [Header("Prefab")]
     public GameObject wallPrefab;
 
     [SerializeField] private GameObject diagonalWallPrefab;
 
     [SerializeField] private GameObject floorPrefab;
-
-    [Header("ゴール警告UI")]
-    [SerializeField] private GameObject goalWarningUI;
-    [SerializeField] private TMP_Text goalWarningText;
-    [SerializeField] private float goalWarningDuration = 2f;
 
     [Header("床上ランダム装飾")]
     [SerializeField] private GameObject[] floorDecorationPrefabs;
@@ -85,29 +87,31 @@ public class MapManager : MonoBehaviour
 
     [SerializeField] private PlaceObjectPrefab[] objectPrefabs;
 
-    [System.Serializable]
-    public class SpawnMarkerPrefab
-    {
-        public PlaceObjectType type;
-        public GameObject prefab;
-    }
-
-    [Header("種類ごとのスポーンポイント")]
-    [Tooltip("編集画面で表示するマーカーを、配置オブジェクトの種類ごとに設定")]
-    [SerializeField] private SpawnMarkerPrefab[] spawnMarkerPrefabs;
-
-    [Tooltip("マーカーを表示する編集シーン名")]
-    [SerializeField] private string mapCreateSceneName = "Katayama_ren";
-
     [Header("NavMesh")]
-    [Tooltip("通常の敵（NormalEnemy）用NavMeshSurface")]
     [SerializeField] private NavMeshSurface navMeshSurface;
-
-    [Tooltip("BigEnemy専用NavMeshSurface")]
-    [SerializeField] private NavMeshSurface bigEnemyNavMeshSurface;
 
     [Header("カメラ設定")]
     [SerializeField] private Camera mapCamera;
+
+    [Header("カメラ操作")]
+    [SerializeField] private float zoomSpeed = 2f;
+    [SerializeField] private float minZoomSize = 3f;
+    [SerializeField] private float maxZoomSize = 100f;
+
+    // マップ範囲からカメラを移動できる距離
+    [SerializeField] private float cameraMoveLimit = 5f;
+
+    // マップ表示位置の補正
+    [SerializeField] private float mapScreenOffsetX = 2f;
+    [SerializeField] private float mapScreenOffsetZ = 2f;
+
+    // カメラ操作用
+    private Vector3 cameraBasePosition;
+    private bool isDraggingCamera;
+    private Vector3 lastMousePosition;
+
+    // ゴール警告
+    private Coroutine goalWarningCoroutine;
 
     [Tooltip("32×32マップ時のカメラ位置")]
     [SerializeField]
@@ -127,31 +131,8 @@ public class MapManager : MonoBehaviour
     [SerializeField]
     private float baseMapSize = 31f;
 
-    [Header("カメラ拡大・縮小")]
-    [Tooltip("マウスホイールで拡大・縮小する速さ")]
-    [SerializeField][Min(0.1f)] private float zoomSpeed = 2f;
-
-    [Tooltip("最も拡大したときのOrthographic Size")]
-    [SerializeField][Min(0.1f)] private float minZoomSize = 3f;
-
-    [Tooltip("最も縮小したときのOrthographic Size")]
-    [SerializeField][Min(1f)] private float maxZoomSize = 100f;
-
-    [Header("編集画面でのマップ表示位置")]
-    [Tooltip("プラスでマップを画面右へ移動")]
-    [SerializeField] private float mapScreenOffsetX = 2f;
-
-    [Tooltip("プラスでマップを画面下へ移動")]
-    [SerializeField] private float mapScreenOffsetY = 2f;
-
-    [Header("カメラ移動制限")]
-    [SerializeField] private float cameraMoveLimit = 5f;
-
-    // カメラの初期位置
-    private Vector3 cameraBasePosition;
-
     [Header("リスポーン")]
-    [SerializeField] private GameObject respawnPointPrefab;
+    [SerializeField] private GameObject respawnPointObject;
     [SerializeField] private GameObject respawnAreaPrefab;
 
     [Header("リスポーン初期位置")]
@@ -168,7 +149,6 @@ public class MapManager : MonoBehaviour
     private Vector3 defaultRespawnAreaScale =
         new Vector3(3f, 1f, 3f);
 
-    private GameObject respawnPointObject;
     private GameObject respawnAreaObject;
 
     private TileType[,,] map;
@@ -183,12 +163,6 @@ public class MapManager : MonoBehaviour
     private bool[,,] diagonalWallFloor;
 
     private int mapRevision = 0;
-
-    // ダンジョン読み込み中は変更通知を行わない。
-    private bool isLoadingDungeon = false;
-
-    private bool isDraggingCamera = false;
-    private Vector3 lastMousePosition;
 
     public int MapRevision
     {
@@ -207,105 +181,140 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    // マウスホイールで編集カメラを拡大・縮小
-
-
-
-
+    //==================================================
+    // カメラ操作
+    //==================================================
 
 
     private void Update()
     {
-        if (mapCamera == null || !mapCamera.orthographic)
+        if (mapCamera == null)
         {
             return;
         }
 
-        // カメラ移動開始（中ボタン・右クリック）
-        if (Input.GetMouseButtonDown(2) || Input.GetMouseButtonDown(1))
+        // マウスホイールでズーム
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        if (Mathf.Abs(scroll) > 0.001f)
+        {
+            // ズーム前のカメラ位置
+            Vector3 previousPosition =
+                mapCamera.transform.position;
+
+            // ズーム前の表示サイズ
+            float previousSize =
+                mapCamera.orthographicSize;
+
+            // ズーム後の表示サイズ
+            float newSize =
+                previousSize -
+                scroll * zoomSpeed * 10f;
+
+            newSize = Mathf.Clamp(
+                newSize,
+                minZoomSize,
+                maxZoomSize
+            );
+
+            mapCamera.orthographicSize = newSize;
+
+            // 縮小したときだけ中央方向へ戻す
+            if (newSize > previousSize)
+            {
+                // マップの中央
+                Vector3 mapCenter = new Vector3(
+                    (width - 1) * wallSpacing * 0.5f,
+                    0f,
+                    (depth - 1) * wallSpacing * 0.5f
+                );
+
+                // 中央に戻すカメラ位置
+                Vector3 targetPosition = new Vector3(
+                    mapCenter.x + mapScreenOffsetX,
+                    previousPosition.y,
+                    mapCenter.z + mapScreenOffsetZ
+                );
+
+                // 縮小量に応じて中央に近づける
+                float returnRate = Mathf.Clamp01(
+                    (newSize - previousSize) / 5f
+                );
+
+                mapCamera.transform.position =
+                    Vector3.Lerp(
+                        previousPosition,
+                        targetPosition,
+                        returnRate
+                    );
+            }
+            else
+            {
+                // 拡大時はカメラ位置を維持
+                mapCamera.transform.position =
+                    previousPosition;
+            }
+
+            // 移動制限
+            ClampCameraPosition();
+        }
+
+        // 最大ズームではカメラ移動を禁止
+        bool canMoveCamera =
+            mapCamera.orthographicSize <
+            maxZoomSize - 0.01f;
+
+        // 中ボタンまたは右ボタンで移動
+        if (canMoveCamera &&
+            (Input.GetMouseButtonDown(2) ||
+             Input.GetMouseButtonDown(1)))
         {
             isDraggingCamera = true;
             lastMousePosition = Input.mousePosition;
         }
 
-        // カメラ移動終了
-        if (Input.GetMouseButtonUp(2) || Input.GetMouseButtonUp(1))
+        // ボタンを離したら移動終了
+        if (Input.GetMouseButtonUp(2) ||
+            Input.GetMouseButtonUp(1))
         {
             isDraggingCamera = false;
         }
 
-        // カメラ移動中
-        if (isDraggingCamera &&
-            (Input.GetMouseButton(2) || Input.GetMouseButton(1)))
+        // カメラ移動
+        if (isDraggingCamera && canMoveCamera)
         {
-            Vector3 mouseDelta =
-                Input.mousePosition - lastMousePosition;
+            Vector3 currentMousePosition =
+                Input.mousePosition;
 
-            lastMousePosition = Input.mousePosition;
+            Vector3 delta =
+                currentMousePosition - lastMousePosition;
 
-            float moveScale =
-                mapCamera.orthographicSize * 2f / Screen.height;
+            float moveFactor =
+                mapCamera.orthographicSize * 0.002f;
+
+            Vector3 right =
+                mapCamera.transform.right;
+
+            Vector3 up =
+                mapCamera.transform.up;
 
             Vector3 move =
-                -mapCamera.transform.right * mouseDelta.x * moveScale
-                - mapCamera.transform.up * mouseDelta.y * moveScale;
+                -right * delta.x * moveFactor
+                - up * delta.y * moveFactor;
 
             mapCamera.transform.position += move;
 
+            lastMousePosition = currentMousePosition;
+
             ClampCameraPosition();
         }
-
-        // ズーム
-        float scroll = Input.mouseScrollDelta.y;
-
-        if (Mathf.Abs(scroll) < 0.01f)
-        {
-            return;
-        }
-
-        float oldSize = mapCamera.orthographicSize;
-
-        float newSize = Mathf.Clamp(
-            oldSize - scroll * zoomSpeed,
-            minZoomSize,
-            maxZoomSize
-        );
-
-        if (Mathf.Approximately(oldSize, newSize))
-        {
-            return;
-        }
-
-        // マップ中心
-        Vector3 mapCenter = new Vector3(
-            (width - 1) * wallSpacing * 0.5f,
-            0f,
-            (depth - 1) * wallSpacing * 0.5f
-        );
-
-        // マップ中心を基準にズーム
-        Vector3 toCenter =
-            mapCenter - mapCamera.transform.position;
-
-        Vector3 right = mapCamera.transform.right;
-        Vector3 up = mapCamera.transform.up;
-
-        float centerX = Vector3.Dot(toCenter, right);
-        float centerY = Vector3.Dot(toCenter, up);
-
-        float ratio = newSize / oldSize;
-
-        mapCamera.transform.position +=
-            right * centerX * (1f - ratio)
-            + up * centerY * (1f - ratio);
-
-        mapCamera.orthographicSize = newSize;
-
-        // ズーム後の移動範囲を制限
-        ClampCameraPosition();
     }
 
+
+    //==================================================
     // カメラ移動制限
+    //==================================================
+
     private void ClampCameraPosition()
     {
         if (mapCamera == null)
@@ -313,52 +322,51 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // マップ中心
-        Vector3 mapCenter = new Vector3(
-            (width - 1) * wallSpacing * 0.5f,
-            0f,
-            (depth - 1) * wallSpacing * 0.5f
-        );
+        // マップの中心座標
+        float mapCenterX =
+            (width - 1) * wallSpacing * 0.5f;
 
-        // 最大縮小時を基準に移動量を計算
-        float zoomRate = Mathf.InverseLerp(
-            maxZoomSize,
-            minZoomSize,
-            mapCamera.orthographicSize
-        );
+        float mapCenterZ =
+            (depth - 1) * wallSpacing * 0.5f;
 
-        // 縮小するほど移動可能範囲を狭くする
-        float moveLimit = cameraMoveLimit * zoomRate;
+        // カメラの現在位置
+        Vector3 position =
+            mapCamera.transform.position;
 
-        // ズームに応じたカメラの基準位置
-        float sizeRate = mapCamera.orthographicSize / maxZoomSize;
+        // マップ中心を基準に移動範囲を設定
+        float moveRange = cameraMoveLimit;
 
-        Vector3 targetPosition = Vector3.Lerp(
-            mapCenter,
-            cameraBasePosition,
-            sizeRate
-        );
+        float minX =
+            mapCenterX - moveRange;
 
-        Vector3 pos = mapCamera.transform.position;
+        float maxX =
+            mapCenterX + moveRange;
 
-        // 基準位置からの移動量を制限
-        pos.x = Mathf.Clamp(
-            pos.x,
-            targetPosition.x - moveLimit,
-            targetPosition.x + moveLimit
-        );
+        float minZ =
+            mapCenterZ - moveRange;
 
-        pos.z = Mathf.Clamp(
-            pos.z,
-            targetPosition.z - moveLimit,
-            targetPosition.z + moveLimit
-        );
+        float maxZ =
+            mapCenterZ + moveRange;
 
-        mapCamera.transform.position = pos;
+        // 左右の移動制限
+        position.x =
+            Mathf.Clamp(
+                position.x,
+                minX,
+                maxX
+            );
+
+        // 前後の移動制限
+        position.z =
+            Mathf.Clamp(
+                position.z,
+                minZ,
+                maxZ
+            );
+
+        mapCamera.transform.position =
+            position;
     }
-
-
-
 
     //==================================================
     // 座標
@@ -461,11 +469,6 @@ public class MapManager : MonoBehaviour
 
     private void MarkMapChanged()
     {
-        if (isLoadingDungeon)
-        {
-            return;
-        }
-
         mapRevision++;
 
         SaveManager saveManager =
@@ -487,6 +490,9 @@ public class MapManager : MonoBehaviour
         CreateMap();
         CreateDefaultRespawnObjects();
         CreateOuterBoundaryWalls();
+
+        // スタート地点を外周壁の開口部に合わせる
+        UpdateStartPointPosition();
 
         AdjustCamera();
 
@@ -1237,47 +1243,116 @@ public class MapManager : MonoBehaviour
 
     private void CreateDefaultRespawnObjects()
     {
-        if (respawnPointPrefab != null)
-        {
-            respawnPointObject =
-                Instantiate(
-                    respawnPointPrefab,
-                    defaultRespawnPointPosition,
-                    Quaternion.identity,
-                    transform
-                );
+        // 入口の開口部にスタート地点を配置する。
+        // 入口を使わない場合は従来の初期位置を使用する。
+        Vector3 spawnPosition = enableStartEntrance
+            ? GetStartPointPosition()
+            : defaultRespawnPointPosition;
 
-            respawnPointObject.name =
-                "RespawnPoint";
+        Vector3 areaOffset =
+            defaultRespawnAreaPosition - defaultRespawnPointPosition;
+
+        if (respawnPointObject != null)
+        {
+            respawnPointObject.transform.position = spawnPosition;
         }
         else
         {
-            Debug.LogError(
-                "Respawn Point Prefabが設定されていません。"
-            );
+            Debug.LogWarning("Hierarchyのスタート地点オブジェクトをInspectorに設定してください。");
         }
 
         if (respawnAreaPrefab != null)
         {
-            respawnAreaObject =
-                Instantiate(
-                    respawnAreaPrefab,
-                    defaultRespawnAreaPosition,
-                    Quaternion.identity,
-                    transform
-                );
+            respawnAreaObject = Instantiate(
+                respawnAreaPrefab,
+                spawnPosition + areaOffset,
+                Quaternion.identity,
+                transform
+            );
 
-            respawnAreaObject.name =
-                "RespawnArea";
-
-            respawnAreaObject.transform.localScale =
-                defaultRespawnAreaScale;
+            respawnAreaObject.name = "RespawnArea";
+            respawnAreaObject.transform.localScale = defaultRespawnAreaScale;
         }
         else
         {
-            Debug.LogError(
-                "Respawn Area Prefabが設定されていません。"
-            );
+            Debug.LogError("Respawn Area Prefabが設定されていません。");
+        }
+    }
+
+    // 外周壁の開口部に対応するスタート地点のワールド座標
+    private Vector3 GetStartPointPosition()
+    {
+        int max =
+            entranceDirection == EntranceDirection.Left ||
+            entranceDirection == EntranceDirection.Right
+                ? depth - 1
+                : width - 1;
+
+        if (max < 0)
+        {
+            return defaultRespawnPointPosition;
+        }
+
+        int widthClamped = Mathf.Clamp(entranceWidth, 1, max + 1);
+        int center = Mathf.Clamp(entrancePosition, 0, max);
+
+        int start = center - Mathf.FloorToInt(widthClamped / 2f);
+        start = Mathf.Clamp(start, 0, max - widthClamped + 1);
+
+        // 外周壁生成のIsEntranceCellと同じ計算で開口部の中央を求める。
+        int entranceCenter = start + (widthClamped - 1) / 2;
+
+        switch (entranceDirection)
+        {
+            case EntranceDirection.Left:
+                return new Vector3(
+                    -3f,
+                    defaultRespawnPointPosition.y,
+                    entranceCenter * wallSpacing
+                );
+
+            case EntranceDirection.Right:
+                return new Vector3(
+                    width * wallSpacing,
+                    defaultRespawnPointPosition.y,
+                    entranceCenter * wallSpacing
+                );
+
+            case EntranceDirection.Top:
+                return new Vector3(
+                    entranceCenter * wallSpacing,
+                    defaultRespawnPointPosition.y,
+                    depth * wallSpacing
+                );
+
+            case EntranceDirection.Bottom:
+                return new Vector3(
+                    entranceCenter * wallSpacing,
+                    defaultRespawnPointPosition.y,
+                    -wallSpacing
+                );
+        }
+
+        return defaultRespawnPointPosition;
+    }
+
+    // 現在のスタート地点を入口に合わせる
+    private void UpdateStartPointPosition()
+    {
+        if (respawnPointObject == null || !enableStartEntrance)
+        {
+            return;
+        }
+
+        Vector3 oldPosition = respawnPointObject.transform.position;
+        Vector3 newPosition = GetStartPointPosition();
+        Vector3 offset = newPosition - oldPosition;
+
+        respawnPointObject.transform.position = newPosition;
+
+        if (respawnAreaObject != null)
+        {
+            respawnAreaObject.transform.position += offset;
         }
     }
 
@@ -2006,9 +2081,6 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // 復元中の PlaceObject などで未保存扱いにならないようにする。
-        isLoadingDungeon = true;
-
         width = data.width;
         height = data.height;
         depth = data.depth;
@@ -2094,7 +2166,7 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        respawnPointObject = null;
+        // Hierarchyで指定したスタート地点オブジェクトは保持する。
         respawnAreaObject = null;
 
         // タイルを復元
@@ -2182,19 +2254,19 @@ public class MapManager : MonoBehaviour
         CreateRespawnObjects(data);
         CreateOuterBoundaryWalls();
 
-        //AdjustCamera();
+        // 読み込み後もスタート地点を入口に合わせる
+        UpdateStartPointPosition();
+
+        AdjustCamera();
 
         mapRevision++;
-
-        // 読み込みによる生成・復元は編集扱いにしない。
-        isLoadingDungeon = false;
 
         SaveManager saveManager =
             FindObjectOfType<SaveManager>();
 
         if (saveManager != null)
         {
-            saveManager.SetMapLoadedClean();
+            saveManager.SetMapModified();
         }
 
         Debug.Log(
@@ -2206,10 +2278,18 @@ public class MapManager : MonoBehaviour
     // 配置オブジェクト
     //==================================================
 
+
     public void PlaceObject(
         Vector3Int pos,
         PlaceObjectType type)
     {
+        // Goalは1つしか配置できない
+        if (type == PlaceObjectType.Goal && HasGoal())
+        {
+            ShowGoalPlacementWarning();
+            return;
+        }
+
         if (!IsInsideMap(pos))
         {
             return;
@@ -2247,56 +2327,17 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        if (
-            type == PlaceObjectType.Goal &&
-            HasGoal()
-        )
+        GameObject prefab =
+            GetObjectPrefab(type);
+
+        if (prefab == null)
         {
-            ShowGoalWarning(
-                "すでにゴールは置いてあります。"
+            Debug.LogError(
+                type +
+                " のPrefabが設定されていません。"
             );
 
             return;
-        }
-
-        // 編集画面では実体を生成せず、配置位置を示すマーカーを生成する。
-        // テストプレイ画面では、登録された本物のPrefabを生成する。
-        bool isMapCreateScene =
-            string.Equals(
-                SceneManager.GetActiveScene().name,
-                mapCreateSceneName,
-                System.StringComparison.OrdinalIgnoreCase
-            );
-
-        GameObject prefab;
-
-        if (isMapCreateScene)
-        {
-            prefab = GetSpawnMarkerPrefab(type);
-
-            if (prefab == null)
-            {
-                Debug.LogError(
-                    type +
-                    " のスポーンポイント用Prefabが設定されていません。MapManagerのInspectorで種類ごとのスポーンポイントを設定してください。"
-                );
-
-                return;
-            }
-        }
-        else
-        {
-            prefab = GetObjectPrefab(type);
-
-            if (prefab == null)
-            {
-                Debug.LogError(
-                    type +
-                    " のPrefabが設定されていません。"
-                );
-
-                return;
-            }
         }
 
         Vector3 spawnPosition;
@@ -2320,7 +2361,21 @@ public class MapManager : MonoBehaviour
                 transform
             );
 
-        if (isMapCreateScene || type != PlaceObjectType.Enemy)
+        //// 敵ならリスポーン位置を設定
+        //if (obj.CompareTag("Enemy"))
+        //{
+        //    EnemyBase enemyBase =
+        //        obj.GetComponent<EnemyBase>();
+
+        //    if (enemyBase != null)
+        //    {
+        //        enemyBase.SetRespawnPos(
+        //            spawnPosition
+        //        );
+        //    }
+        //}
+
+        if (type != PlaceObjectType.Enemy)
         {
             SetObjectScale(obj);
 
@@ -2330,46 +2385,35 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // 編集画面ではゴールマーカーを横向きにして見やすくする。
+        // MapエディターではGoalを横に倒す
         if (
-            isMapCreateScene &&
-            type == PlaceObjectType.Goal
+            type == PlaceObjectType.Goal &&
+            SceneManager.GetActiveScene().name == "Katayama_ren"
         )
         {
             obj.transform.rotation =
-                Quaternion.Euler(90f, 0f, 0f);
-
-            obj.transform.position += Vector3.forward * 1f;
+                Quaternion.Euler(0f, 0f, 0f);
         }
 
         Rigidbody[] rigidbodies =
-            obj.GetComponentsInChildren<Rigidbody>(true);
+            obj.GetComponentsInChildren<Rigidbody>();
 
-        if (isMapCreateScene)
+        foreach (Rigidbody rb in rigidbodies)
         {
-            // 編集画面の仮素材では Rigidbody コンポーネント自体を無効にする。
-            foreach (Rigidbody rb in rigidbodies)
-            {
-                rb.isKinematic = true;
-                rb.useGravity = false;
-                rb.detectCollisions = false;
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-                rb.constraints = RigidbodyConstraints.FreezeAll;
-            }
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.constraints =
+                RigidbodyConstraints.FreezeAll;
         }
-        // テストプレイでは本物のオブジェクトの Rigidbody 設定を変更しない。
 
         NavMeshAgent[] agents =
-            obj.GetComponentsInChildren<NavMeshAgent>(true);
+            obj.GetComponentsInChildren<NavMeshAgent>();
 
-        // NavMeshAgent は仮素材では無効にする。
-        if (isMapCreateScene)
+        foreach (NavMeshAgent agent in agents)
         {
-            foreach (NavMeshAgent agent in agents)
-            {
-                agent.enabled = false;
-            }
+            agent.enabled = false;
         }
 
         placedObjects[
@@ -2384,12 +2428,6 @@ public class MapManager : MonoBehaviour
             pos.z
         ] = type;
 
-        // 実体を生成するテストプレイ側だけにネットワーク同期IDを割り当てる。
-        if (!isMapCreateScene)
-        {
-            NetworkSyncId.Assign(obj, pos);
-        }
-
         PlaceObject placeObject =
             obj.GetComponent<PlaceObject>();
 
@@ -2400,6 +2438,7 @@ public class MapManager : MonoBehaviour
 
         MarkMapChanged();
     }
+
 
     //==================================================
     // オブジェクトの底面を床に合わせる
@@ -2605,25 +2644,6 @@ public class MapManager : MonoBehaviour
     // Prefab取得
     //==================================================
 
-    private GameObject GetSpawnMarkerPrefab(
-        PlaceObjectType type)
-    {
-        if (spawnMarkerPrefabs == null)
-        {
-            return null;
-        }
-
-        foreach (SpawnMarkerPrefab data in spawnMarkerPrefabs)
-        {
-            if (data != null && data.type == type)
-            {
-                return data.prefab;
-            }
-        }
-
-        return null;
-    }
-
     private GameObject GetObjectPrefab(
         PlaceObjectType type)
     {
@@ -2731,6 +2751,77 @@ public class MapManager : MonoBehaviour
     }
 
     //==================================================
+    // ゴール警告UI
+    //==================================================
+
+    public bool ValidateGoalForTestPlay()
+    {
+        // ゴールがあるなら開始を許可
+        if (HasGoal())
+        {
+            return true;
+        }
+
+        // ゴールがなければ警告
+        ShowGoalWarning();
+
+        return false;
+    }
+
+    //==================================================
+    // 警告表示
+    //==================================================
+
+    private void ShowGoalWarning()
+    {
+        if (goalWarningUI == null)
+        {
+            Debug.LogWarning(
+                "ゴール警告UIが設定されていません。"
+            );
+
+            return;
+        }
+
+        if (goalWarningText != null)
+        {
+            goalWarningText.text =
+                "ゴールを配置してください。";
+        }
+
+        goalWarningUI.SetActive(true);
+
+        // 連続クリック時は表示時間をリセット
+        if (goalWarningCoroutine != null)
+        {
+            StopCoroutine(goalWarningCoroutine);
+        }
+
+        goalWarningCoroutine =
+            StartCoroutine(
+                HideGoalWarning()
+            );
+    }
+
+    //==================================================
+    // 警告を非表示
+    //==================================================
+
+    private IEnumerator HideGoalWarning()
+    {
+        yield return new WaitForSeconds(
+            goalWarningDuration
+        );
+
+        if (goalWarningUI != null)
+        {
+            goalWarningUI.SetActive(false);
+        }
+
+        goalWarningCoroutine = null;
+    }
+
+    //==================================================
     // リスポーン
     //==================================================
 
@@ -2752,41 +2843,17 @@ public class MapManager : MonoBehaviour
     private void CreateRespawnObjects(
         DungeonMapData data)
     {
-        if (
-            data.hasRespawnPoint &&
-            respawnPointPrefab != null
-        )
+        if (data.hasRespawnPoint && respawnPointObject != null)
         {
-            Vector3 position =
-                new Vector3(
-                    data.spawnPointX,
-                    data.spawnPointY,
-                    data.spawnPointZ
-                );
+            respawnPointObject.transform.position = new Vector3(
+                data.spawnPointX,
+                data.spawnPointY,
+                data.spawnPointZ
+            );
 
-            respawnPointObject =
-                Instantiate(
-                    respawnPointPrefab,
-                    position,
-                    Quaternion.identity,
-                    transform
-                );
-
-            respawnPointObject.name =
-                "RespawnPoint";
-
-            Vector3 rotation =
-                respawnPointObject
-                    .transform
-                    .eulerAngles;
-
-            rotation.y =
-                data.spawnPointRotY;
-
-            respawnPointObject
-                .transform
-                .eulerAngles =
-                rotation;
+            Vector3 rotation = respawnPointObject.transform.eulerAngles;
+            rotation.y = data.spawnPointRotY;
+            respawnPointObject.transform.eulerAngles = rotation;
         }
 
         if (
@@ -2946,28 +3013,16 @@ public class MapManager : MonoBehaviour
 
     public void BuildNavigation()
     {
-        bool builtAny = false;
-
-        // 通常の敵用NavMeshを更新
-        if (navMeshSurface != null)
-        {
-            navMeshSurface.BuildNavMesh();
-            builtAny = true;
-        }
-
-        // BigEnemy専用NavMeshを更新
-        if (bigEnemyNavMeshSurface != null)
-        {
-            bigEnemyNavMeshSurface.BuildNavMesh();
-            builtAny = true;
-        }
-
-        if (!builtAny)
+        if (navMeshSurface == null)
         {
             Debug.LogWarning(
-                "NavMeshSurfaceが設定されていません。MapManagerのInspectorで通常敵用とBigEnemy用のNavMeshSurfaceを設定してください。"
+                "NavMeshSurfaceが設定されていません。"
             );
+
+            return;
         }
+
+        navMeshSurface.BuildNavMesh();
     }
 
     public void EnableEnemyMovement()
@@ -3004,44 +3059,44 @@ public class MapManager : MonoBehaviour
     //==================================================
 
 
-
     public void AdjustCamera()
     {
-        if (mapCamera == null)
-        {
-            return;
-        }
+        if (mapCamera == null) return;
 
+        // マップサイズに合わせた拡大率
         float currentMapSize = Mathf.Max(width, depth);
         float scale = currentMapSize / baseMapSize;
 
-        float centerX = (width - 1) * wallSpacing * 0.5f;
-        float centerZ = (depth - 1) * wallSpacing * 0.5f;
-
+        // カメラ角度
         mapCamera.transform.eulerAngles = cameraRotation;
 
+        // マップ中心
         Vector3 mapCenter = new Vector3(
-            centerX,
-            baseCameraPosition.y * scale,
-            centerZ
+            (width - 1) * wallSpacing * 0.5f,
+            0f,
+            (depth - 1) * wallSpacing * 0.5f
         );
 
-        Vector3 screenOffset =
-            -mapCamera.transform.right * mapScreenOffsetX
-            + mapCamera.transform.up * mapScreenOffsetY;
+        // 初期カメラ位置を基準にする
+        Vector3 initialPosition = new Vector3(
+            mapCenter.x + mapScreenOffsetX,
+            baseCameraPosition.y * scale,
+            mapCenter.z + mapScreenOffsetZ
+        );
 
-        mapCamera.transform.position = mapCenter + screenOffset;
+        // 初期表示位置
+        mapCamera.transform.position = initialPosition;
 
-        // 初期位置を保存
-        cameraBasePosition = mapCamera.transform.position;
+        // 初期表示倍率
+        mapCamera.orthographicSize =
+            baseOrthographicSize * scale;
 
-        // 初期ズーム
-        mapCamera.orthographicSize = maxZoomSize;
+        // 初期位置をカメラ操作の基準として保存
+        cameraBasePosition = initialPosition;
 
-        // 移動状態をリセット
+        // 初期位置ではズーム補正をかけない
         isDraggingCamera = false;
     }
-
 
 
     //==================================================
@@ -3091,42 +3146,32 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    //==================================================
-    // ゴール警告表示
-    //==================================================
-
-    private void ShowGoalWarning(string message)
+    // Goalを複数配置しようとしたときの警告
+    private void ShowGoalPlacementWarning()
     {
         if (goalWarningUI == null)
         {
-            Debug.LogError(
-                "Goal Warning UIが設定されていません。"
+            Debug.LogWarning(
+                "ゴール警告UIが設定されていません。"
             );
-
             return;
         }
 
         if (goalWarningText != null)
         {
-            goalWarningText.text = message;
-            goalWarningText.color = Color.red;
+            goalWarningText.text =
+                "すでにゴールは置いてあります。";
         }
 
         goalWarningUI.SetActive(true);
 
-        CancelInvoke(nameof(HideGoalWarning));
-
-        Invoke(
-            nameof(HideGoalWarning),
-            goalWarningDuration
-        );
-    }
-
-    private void HideGoalWarning()
-    {
-        if (goalWarningUI != null)
+        // 連続表示時は時間をリセットする
+        if (goalWarningCoroutine != null)
         {
-            goalWarningUI.SetActive(false);
+            StopCoroutine(goalWarningCoroutine);
         }
+
+        goalWarningCoroutine =
+            StartCoroutine(HideGoalWarning());
     }
 }
