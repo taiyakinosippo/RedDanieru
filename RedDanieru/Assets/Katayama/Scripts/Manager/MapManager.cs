@@ -1938,6 +1938,18 @@ public class MapManager : MonoBehaviour
         data.height = height;
         data.depth = depth;
 
+        // 松明の保存データを作成
+        TorchLight torchLight = FindObjectOfType<TorchLight>();
+
+        if (torchLight != null)
+        {
+            data.torchData = torchLight.CreateTorchSaveData();
+        }
+        else
+        {
+            data.torchData = new TorchSaveData();
+        }
+
         data.tiles =
             new byte[
                 width *
@@ -2256,6 +2268,13 @@ public class MapManager : MonoBehaviour
 
         // 読み込み後もスタート地点を入口に合わせる
         UpdateStartPointPosition();
+
+        // 松明を復元
+        TorchLight torchLight = FindObjectOfType<TorchLight>();
+        if (torchLight != null)
+        {
+            torchLight.LoadTorches(data.torchData);
+        }
 
         AdjustCamera();
 

@@ -1,5 +1,7 @@
+
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [Serializable]
 public class DungeonMapData
@@ -8,7 +10,7 @@ public class DungeonMapData
     public int height;
     public int depth;
 
-    //ダンジョン情報
+    // ダンジョン情報
     public string dungeonId;
     public string dungeonName;
 
@@ -36,6 +38,9 @@ public class DungeonMapData
     // リスポーンObjectの有無
     public bool hasRespawnPoint;
     public bool hasRespawnArea;
+
+    // 松明データ
+    public TorchSaveData torchData = new TorchSaveData();
 }
 
 [Serializable]
