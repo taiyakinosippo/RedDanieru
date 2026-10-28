@@ -5269,6 +5269,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1270333237}
   m_CullTransparentMesh: 1
+--- !u!1 &1272316103
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1272316105}
+  - component: {fileID: 1272316104}
+  m_Layer: 0
+  m_Name: SetTorch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1272316104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272316103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf42601bc8b65e4fa22ff55f9cef2e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  torch:
+    type: 12
+    prefab: {fileID: 820004888849100490, guid: ecb4544a8596a004fa3de776b35c867f, type: 3}
+--- !u!4 &1272316105
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1272316103}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 19.531141, y: 6.0677013, z: 9.794416}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4030087331295678382}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1285132187
 GameObject:
   m_ObjectHideFlags: 0
@@ -6437,6 +6484,7 @@ GameObject:
   - component: {fileID: 1828661523}
   - component: {fileID: 1828661522}
   - component: {fileID: 1828661521}
+  - component: {fileID: 1828661524}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -6547,6 +6595,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1828661524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1828661520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3ee1ee9bc5381445acdac0af20b80ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1900883766
 GameObject:
   m_ObjectHideFlags: 0
@@ -9017,7 +9077,7 @@ PrefabInstance:
       objectReference: {fileID: 6589038455353898544}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: objectPrefabs.Array.size
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: defaultRespawnPointPosition.x
@@ -9037,7 +9097,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: objectPrefabs.Array.data[8].type
-      value: 11
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: objectPrefabs.Array.data[2].prefab
@@ -9046,7 +9106,7 @@ PrefabInstance:
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: objectPrefabs.Array.data[8].prefab
       value: 
-      objectReference: {fileID: 3579314766830224434, guid: 7961808ec5f49664f82576143a146109, type: 3}
+      objectReference: {fileID: 820004888849100490, guid: ecb4544a8596a004fa3de776b35c867f, type: 3}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: spawnMarkerPrefabs.Array.data[1].type
       value: 3
@@ -11337,6 +11397,7 @@ Transform:
   - {fileID: 8307231973536639563}
   - {fileID: 5820216511303296695}
   - {fileID: 7564032643032742781}
+  - {fileID: 1272316105}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4038617851974789679
