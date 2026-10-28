@@ -29,10 +29,35 @@ public class LoadUI : MonoBehaviour
 
     [SerializeField] private ScrollRect scrollRect;
 
+    [SerializeField] private GameObject noConnectionObj;
+    [SerializeField] private GameObject loadingObj;
+
+    [SerializeField] private Button stageSearchButton;
+    [SerializeField] private Button refreshButton;
+    [SerializeField] private Button roomSearchButton;
+
     private DungeonListItem[] cachedDungeons;
+
+    public void Start()
+    {
+        noConnectionObj.SetActive(false);
+    }
+
+    private void Update()
+    {
+        bool isLoading =
+            loadingObj != null &&
+            loadingObj.activeInHierarchy;
+
+        refreshButton.interactable = !isLoading;
+        roomSearchButton.interactable = !isLoading;
+        stageSearchButton.interactable = !isLoading;
+    }
 
     private void OnEnable()
     {
+        loadingObj.SetActive(true);
+
         StartCoroutine(GetDungeonList());
     }
 
@@ -74,6 +99,7 @@ public class LoadUI : MonoBehaviour
 
     private IEnumerator GetDungeonList()
     {
+       
         foreach (Transform child in content)
         {
             Destroy(child.gameObject);
@@ -95,14 +121,45 @@ public class LoadUI : MonoBehaviour
 
             yield return request.SendWebRequest();
 
+            //Debug.Log("result = " + request.result);
+            //Debug.Log("response = " + request.responseCode);
+            //Debug.Log("body = " + request.downloadHandler.text);
+
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError(request.error);
+
+                yield return new WaitForSeconds(2f);
+
+                loadingObj.SetActive(false);
+                noConnectionObj.SetActive(true);
+
+                refreshButton.interactable = false;
+                roomSearchButton.interactable = false;
+                stageSearchButton.interactable = false;
+
                 yield break;
             }
 
-            string json =
-                request.downloadHandler.text;
+            string json = request.downloadHandler.text.Trim();
+
+            if (string.IsNullOrEmpty(json))
+            {
+                loadingObj.SetActive(false);
+                noConnectionObj.SetActive(true);
+                yield break;
+            }
+
+            // JSONÇ≈Ç»ÇØÇÍÇŒê⁄ë±ÉGÉâÅ[àµÇ¢
+            if (!json.StartsWith("{"))
+            {
+                Debug.LogError("JSONÇ≈ÇÕÇ†ÇËÇ‹ÇπÇÒ: " + json);
+
+                loadingObj.SetActive(false);
+                noConnectionObj.SetActive(true);
+
+                yield break;
+            }
 
             DungeonNameArray data = JsonUtility.FromJson<DungeonNameArray>(json);
 
@@ -113,6 +170,13 @@ public class LoadUI : MonoBehaviour
             }
 
             cachedDungeons = data.dungeons;
+
+            refreshButton.interactable=true;
+            roomSearchButton.interactable = true;
+            stageSearchButton.interactable =true;
+
+            noConnectionObj.SetActive(false);
+            loadingObj.SetActive(false);
         }
 
         foreach (var dungeon in cachedDungeons)
@@ -194,6 +258,8 @@ public class LoadUI : MonoBehaviour
 
     public void RefreshButton()
     {
+        dungeonUIManager.HideNoResult();
+
         if (cachedDungeons == null)
             return;
 
@@ -443,4 +509,22 @@ public class LoadUI : MonoBehaviour
             tags.Contains(d.tag)
         ));
     }
+
+
+    public void ShowConnectionError()
+    {
+        if (noConnectionObj != null)
+        {
+            noConnectionObj.SetActive(true);
+        }
+    }
+
+    public void HideConnectionError()
+    {
+        if (noConnectionObj != null)
+        {
+            noConnectionObj.SetActive(false);
+        }
+    }
+
 }
