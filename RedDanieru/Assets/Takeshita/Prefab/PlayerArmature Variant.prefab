@@ -56,6 +56,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: TotalWords
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: StateHashes.Array.size
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: TriggerHashes.Array.size
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[17]'
+      value: 321101326
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[18]'
+      value: -51004022
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[19]'
+      value: 1680125592
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'StateHashes.Array.data[20]'
+      value: -1947038436
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'TriggerHashes.Array.data[5]'
+      value: 1680125592
+      objectReference: {fileID: 0}
+    - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'TriggerHashes.Array.data[6]'
+      value: 321101326
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -16,25 +16,21 @@ namespace Player
         // 待機中のアクション
         private Queue<ActionType> actionQueue = new Queue<ActionType>();
 
+        // 攻撃中に回避入力があったかどうか
+        public bool IsCancelAttackByEvade { get; private set; } = false;
+
+        private PlayerAttack _playerAttack;
+        private void Start()
+        {
+            _playerAttack = GetComponent<PlayerAttack>();
+        }
+
 
         //-----------------------------------------------------------
         //入力を取得する関数
         //-----------------------------------------------------------
         public void CheckInput(StarterAssetsInputs _input, bool Grounded)
         {
-            //アクションが続いているなら判定を行わない
-            if (IsLocked(currentActionType))
-            {
-                // 押された入力は溜めずに捨てる
-                _input.jump = false;
-                _input.sticker = false;
-                _input.evade = false;
-
-                // 攻撃中のattackだけは、コンボの先行入力として PlayerAttack が使うので残す
-                if (currentActionType != ActionType.Attack) _input.attack = false;
-
-                return;
-            }
             // 空中で押した攻撃は無効
             if (!Grounded)
             {
@@ -42,6 +38,44 @@ namespace Player
                 _input.sticker = false;
                 _input.evade = false;
             }
+
+            // 攻撃中は移動できないようにする
+            if (currentActionType == ActionType.Attack)
+            {
+                // 移動入力を無効にする
+                _input.move = Vector2.zero;
+
+                // 1段目の攻撃中は回避でキャンセルできる
+                if (_playerAttack.IsFirstAttack && _input.evade && Grounded)
+                {
+                    _playerAttack.CancelAttack();
+
+                    currentActionType = ActionType.Evade;
+                    IsCancelAttackByEvade = true;
+
+                    actionQueue.Clear();
+                    _input.attack = false;
+
+                    return;
+                }
+
+                // 攻撃中のその他の入力は受け付けない
+                _input.jump = false;
+                _input.sticker = false;
+                actionQueue.Clear();
+
+                return;
+            }
+
+            // 歩行中・回避中は攻撃入力を受け付けない
+            if (currentActionType == ActionType.Move ||
+                currentActionType == ActionType.Evade)
+            {
+                _input.attack = false;
+            }
+
+            // 攻撃中以外は中断フラグを解除する
+            IsCancelAttackByEvade = false;
 
             if (_input.attack && Grounded)
             {
@@ -69,6 +103,7 @@ namespace Player
             }
 
         }
+
 
         //-----------------------------------------------------------
         //アクションの優先度を取得する関数
@@ -102,6 +137,7 @@ namespace Player
             return 0;
         }
 
+
         //--------------------------------------------------------------
         //優先度の高いアクションを優先する
         //--------------------------------------------------------------
@@ -120,6 +156,7 @@ namespace Player
                 // 現在の行動を切り替える
                 currentActionType = nextActionType;
             }
+
             else
             {
                 // 優先度が低いので待機
@@ -129,14 +166,6 @@ namespace Player
             return currentActionType;
         }
 
-        //-----------------------------------------------------------------
-        //アクションが続いているかどうかを判定する
-        //-----------------------------------------------------------------
-        private bool IsLocked(ActionType action)
-        {
-            return action != ActionType.None && action != ActionType.Move;
-
-        }
         //--------------------------------------------------------------
         //アクションをもとに戻す
         //--------------------------------------------------------------
