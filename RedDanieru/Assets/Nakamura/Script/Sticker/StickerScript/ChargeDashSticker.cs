@@ -8,6 +8,7 @@ public class ChargeDashSticker : StickerBase
     private Rigidbody rb;
     protected NavMeshAgent agent;
     private Transform target;
+    private EnemyAnimationBase enemyAnimation;
 
     private enum DashState
     {
@@ -33,6 +34,7 @@ public class ChargeDashSticker : StickerBase
         rb = GetComponent<Rigidbody>();
         stickerState = GetComponent<StickerState>();
         agent = GetComponent<NavMeshAgent>();
+        enemyAnimation = GetComponent<EnemyAnimationBase>();
         stickerState.isSpecialMove = true;  //特殊行動ON
 
         state = DashState.Charge;
@@ -113,6 +115,10 @@ public class ChargeDashSticker : StickerBase
             //溜めエフェクト再生
             Instantiate(StickerEffectManager.Instance.ChargeEffect, transform.position + effectOffset, Quaternion.identity, transform);
             chargeEffectPlayed = true;
+
+            //溜めアニメーション開始
+            if (enemyAnimation != null)
+                enemyAnimation.ChargeAnimation();
         }
 
         //プレイヤーの方を向く
@@ -142,6 +148,10 @@ public class ChargeDashSticker : StickerBase
             state = DashState.Dash;
             timer = dashTime;
             chargeEffectPlayed = false;
+
+            //突進アニメーション開始
+            if (enemyAnimation != null)
+                enemyAnimation.ChargeDashAnimation(true);
         }
     }
 
@@ -200,6 +210,10 @@ public class ChargeDashSticker : StickerBase
         //敵スクリプト側の初期化とか
         agent.enabled = true;
         enemyScript.EndSpecial();
+
+        //突進アニメーション終了
+        if (enemyAnimation != null)
+            enemyAnimation.ChargeDashAnimation(false);
     }
 
     //Rigidbodyの制約を解除して動けるようにする
