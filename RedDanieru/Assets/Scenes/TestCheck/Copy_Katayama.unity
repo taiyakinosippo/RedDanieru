@@ -6607,19 +6607,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ee1ee9bc5381445acdac0af20b80ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxCost: 200
-  blockCost: 1
-  wallCost: 1
-  chestCost: 10
-  enemyCost: 20
-  trapCost: 15
-  doorCost: 5
-  spawnPointCost: 0
-  goalCost: 50
-  tentativeEnemyCost: 20
-  chargeEnemyCost: 25
-  tortoiseCost: 30
-  leglessArcherCost: 20
+  initialCost: 500
+  currentCost: 500
 --- !u!1 &1900883766
 GameObject:
   m_ObjectHideFlags: 0
