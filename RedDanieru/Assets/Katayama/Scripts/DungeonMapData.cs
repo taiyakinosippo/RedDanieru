@@ -14,6 +14,9 @@ public class DungeonMapData
     public string dungeonId;
     public string dungeonName;
 
+    // ダンジョンコスト
+    public int dungeonCost;
+
     // 壁・床情報
     public byte[] tiles;
 
@@ -51,4 +54,7 @@ public class ObjectData
     public int z;
 
     public PlaceObjectType type;
+
+    // 配置時に適用したコスト変化
+    public int costChange;
 }
