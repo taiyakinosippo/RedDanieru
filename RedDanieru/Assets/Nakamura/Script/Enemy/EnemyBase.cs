@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Player;
 using System.Runtime.InteropServices;
 using Unity.VisualScripting;
@@ -30,7 +31,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    protected enemyState currentState;  //現在の状態
+    [SerializeField] protected enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
@@ -172,7 +173,6 @@ public class EnemyBase : MonoBehaviour
                 break;
 
             case enemyState.Dead:  //死亡状態
-                Dead();
                 break;
         }
 
@@ -424,10 +424,21 @@ public class EnemyBase : MonoBehaviour
     //特殊攻撃の処理
     public virtual void SpecialAttack()
     {
+        //特殊行動できない場合の初期化
         if (stickerState.currentStickerScript == null)
         {
             currentState = enemyState.Idle;
+
+            //特殊攻撃停止時のアニメーション初期化
+            if (enemyAnimation != null)
+            {
+                enemyAnimation.SpecialStopAnimation();
+                enemyAnimation.ChargeDashAnimation(false);
+            }
+
+            return;
         }
+
         stickerState.currentStickerScript.OnEnemyUpdate();
     }
 
@@ -479,23 +490,23 @@ public class EnemyBase : MonoBehaviour
     public virtual void Damage(int playerPow)
     {
         //ダメージ中はダメージを受けない
-        if (currentState == enemyState.Damage)
+        if (currentState == enemyState.Damage || currentState == enemyState.Dead)
             return;
 
         Debug.Log("Enemy hit");
         //ダメージ計算
         int damage = playerPow - enemyDefense;
-        if (damage > 0) currentHp -= damage;
+        if (damage > 0) 
+            currentHp -= damage;
 
         //UIにダメージを表示にするために値を渡す
         if (UIManager.Instance != null)
             UIManager.Instance.ShowDamage(damage, transform.position);
+
         if (currentHp <= 0)
         {
             //死亡処理
-            currentState = enemyState.Dead;
-            if (enemyAnimation != null)
-                enemyAnimation.DeathAnimation();
+            Dead().Forget();
         }
         else
         {
@@ -524,9 +535,16 @@ public class EnemyBase : MonoBehaviour
         Debug.Log("敵がスタンしました。スタン時間: " + stunDuration);
     }
 
-    public virtual void Dead()
+    public virtual async UniTask Dead()
     {
         Debug.Log("敵が死亡しました。");
+
+        currentState = enemyState.Dead;
+
+        //死亡アニメーションを再生してからオブジェクトを破壊する
+        if (enemyAnimation != null)
+            await enemyAnimation.DeathAnimation();
+
         Destroy(gameObject);
     }
 

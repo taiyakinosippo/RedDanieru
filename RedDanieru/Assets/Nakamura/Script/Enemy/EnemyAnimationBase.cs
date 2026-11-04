@@ -56,11 +56,17 @@ public class EnemyAnimationBase : MonoBehaviour
         animator.SetBool("StunEnd", isStunEnd);
     }
 
-    public virtual void DeathAnimation()
+    public virtual async UniTask DeathAnimation()
     {
         if (animator == null) return;
 
         animator.SetTrigger("Death");
+
+        //死亡ステートに遷移するまで待機
+        await UniTask.WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("Death"));
+
+        //死亡アニメーションが終了するまで待機
+        await UniTask.WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f);
     }
 
     public virtual void ChargeAnimation()
@@ -75,5 +81,12 @@ public class EnemyAnimationBase : MonoBehaviour
         if (animator == null) return;
 
         animator.SetBool("ChargeDash", isDashing);
+    }
+
+    public virtual void SpecialStopAnimation()
+    {
+        if (animator == null) return;
+
+        animator.SetTrigger("SpecialStop");
     }
 }
