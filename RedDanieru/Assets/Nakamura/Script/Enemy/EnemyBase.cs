@@ -45,6 +45,7 @@ public class EnemyBase : MonoBehaviour
     protected private float specialInterval = 4.0f;  //特殊行動のクールタイム
 
     protected StickerState stickerState;
+    protected EnemyAnimationBase enemyAnimation;
     protected Rigidbody rb;
     [SerializeField] protected LayerMask playerLayer;  //プレイヤーのレイヤー
     [SerializeField] protected LayerMask obstacleLayer;  //障害物のレイヤー
@@ -70,6 +71,7 @@ public class EnemyBase : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
         chasePath = new NavMeshPath();
+        enemyAnimation = GetComponent<EnemyAnimationBase>();
     }
 
     // リスポーン位置を設定
@@ -160,6 +162,8 @@ public class EnemyBase : MonoBehaviour
                     //スタンモーションが終了したら通常状態に戻す
                     currentState = enemyState.Idle;
                     stunTimer = 0f;
+                    if (enemyAnimation != null)
+                        enemyAnimation.StunAnimationEnd(true);
                 }
                 else
                 {
@@ -217,6 +221,10 @@ public class EnemyBase : MonoBehaviour
             //追跡時間をリセット
             trackingTimer = enemyTrackingTime + playerLostTime;
 
+            //プレイヤー見失ったアニメーション終わり
+            if (enemyAnimation != null)
+                enemyAnimation.PlayerLostAnimation(false);
+
             //プレイヤーの方向を向く
             //Vector3 direction = (player.position - transform.position).normalized;
             //direction.y = 0;  //水平方向のみ回転
@@ -239,6 +247,10 @@ public class EnemyBase : MonoBehaviour
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
             if (distanceToPlayer <= enemyAttackArea)
             {
+                //攻撃範囲内に入ったらWalkAnimationをfalseにする
+                if (enemyAnimation != null)
+                    enemyAnimation.WalkAnimation(false);
+
                 //攻撃範囲内なら常に停止
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -253,6 +265,10 @@ public class EnemyBase : MonoBehaviour
             //攻撃範囲じゃない場合は追跡する
             else
             {
+                //追跡中のアニメーションを再生
+                if (enemyAnimation != null)
+                    enemyAnimation.WalkAnimation(true);
+
                 //プレイヤーに向かって移動
                 agent.CalculatePath(player.position, chasePath);
 
@@ -275,6 +291,12 @@ public class EnemyBase : MonoBehaviour
             //プレイヤーを見失った場合の処理
             PlayerLostMove();
         }
+        //プレイヤーが見つからない場合
+        else if (currentState != enemyState.Back)
+        {
+            if (enemyAnimation != null)
+                enemyAnimation.WalkAnimation(false);
+        }
     }
 
     //プレイヤーを見失った場合の処理
@@ -296,6 +318,8 @@ public class EnemyBase : MonoBehaviour
             {
                 agent.isStopped = true;
                 agent.ResetPath();
+                if (enemyAnimation != null)
+                    enemyAnimation.WalkAnimation(false);
                 return;
             }
 
@@ -305,9 +329,11 @@ public class EnemyBase : MonoBehaviour
         }
         else if (trackingTimer > 0f)
         {
-            //追跡時間が終わったら停止
+            //追跡時間が終わったら停止、プレイヤーを見失ったアニメーションを再生する
             agent.isStopped = true;
             agent.ResetPath();
+            if (enemyAnimation != null)
+                enemyAnimation.PlayerLostAnimation(true);
         }
         else
         {
@@ -341,6 +367,8 @@ public class EnemyBase : MonoBehaviour
 
         //特別攻撃にならなかった場合は通常攻撃
         currentState = enemyState.Attack;
+        if (enemyAnimation != null)
+            enemyAnimation.AttackAnimation(enemyAttackStartTime - 0.3f);
     }
 
     //ステッカーによる特殊行動のクールタイム
@@ -443,6 +471,8 @@ public class EnemyBase : MonoBehaviour
         //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
         agent.isStopped = false;
         agent.SetDestination(respawnPos);
+        if (enemyAnimation != null)
+            enemyAnimation.PlayerLostAnimation(false);
     }
 
     //ダメージ処理
@@ -464,11 +494,15 @@ public class EnemyBase : MonoBehaviour
         {
             //死亡処理
             currentState = enemyState.Dead;
+            if (enemyAnimation != null)
+                enemyAnimation.DeathAnimation();
         }
         else
         {
             //ダメージ処理
             currentState = enemyState.Damage;
+            if (enemyAnimation != null)
+                enemyAnimation.DamageAnimation();
             //ステッカーにダメージを感知
             if (stickerState.currentSticker != Sticker.None)
                 stickerState.OnHit();
@@ -485,6 +519,8 @@ public class EnemyBase : MonoBehaviour
         //スタン処理
         currentState = enemyState.Stun;
         stunTimer = stunDuration;
+        if (enemyAnimation != null)
+            enemyAnimation.StunAnimation();
         Debug.Log("敵がスタンしました。スタン時間: " + stunDuration);
     }
 
