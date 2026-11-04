@@ -44,7 +44,7 @@ public class TorchLight : MonoBehaviour
 
         GameObject newTorch = Instantiate(
             torch.prefab,
-            hit.point,
+            new Vector3(hit.point.x, 0f, hit.point.z),
             Quaternion.identity
         );
 
