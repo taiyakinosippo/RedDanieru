@@ -22,13 +22,18 @@ public class PlacementCategoryUI : MonoBehaviour
     [Header("一覧の配置設定")]
     [SerializeField] private float panelSpacing = 8f;
 
+    // 現在のカテゴリ
     private Category currentCategory = Category.Object;
+
+    // 全一覧表示中か
     private bool isShowingAllPanels;
 
+    // 各パネルのRectTransform
     private RectTransform objectRect;
     private RectTransform enemyRect;
     private RectTransform trapRect;
 
+    // 初期位置
     private Vector2 objectOriginalPosition;
     private Vector2 enemyOriginalPosition;
     private Vector2 trapOriginalPosition;
@@ -52,6 +57,7 @@ public class PlacementCategoryUI : MonoBehaviour
         UpdateCategory();
     }
 
+    // 初期位置を保存
     private void SaveOriginalPosition()
     {
         if (objectRect != null)
@@ -76,14 +82,13 @@ public class PlacementCategoryUI : MonoBehaviour
         }
         else
         {
-            // 現在のカテゴリだけ表示
             UpdateCategory();
         }
 
         UpdateCategoryText();
     }
 
-    // 全一覧を縦に並べる
+    // 3つの一覧を縦に並べる
     private void ArrangeAllPanels()
     {
         if (objectRect == null ||
@@ -114,23 +119,25 @@ public class PlacementCategoryUI : MonoBehaviour
         );
     }
 
-    // カテゴリ選択ボタン
+    // オブジェクトカテゴリ
     public void SelectObject()
     {
         ChangeCategory(Category.Object);
     }
 
+    // エネミーカテゴリ
     public void SelectEnemy()
     {
         ChangeCategory(Category.Enemy);
     }
 
+    // トラップカテゴリ
     public void SelectTrap()
     {
         ChangeCategory(Category.Trap);
     }
 
-    // 配置ボタンから呼び出すカテゴリ切り替え
+    // 配置ボタンから呼ぶカテゴリ切り替え
     public void ShowObjectCategory()
     {
         ChangeCategory(Category.Object);
@@ -146,20 +153,92 @@ public class PlacementCategoryUI : MonoBehaviour
         ChangeCategory(Category.Trap);
     }
 
+    // オブジェクト一覧右側のボタン
+    public void OnObjectPanelButton()
+    {
+        OnPanelButton(Category.Object);
+    }
+
+    // エネミー一覧右側のボタン
+    public void OnEnemyPanelButton()
+    {
+        OnPanelButton(Category.Enemy);
+    }
+
+    // トラップ一覧右側のボタン
+    public void OnTrapPanelButton()
+    {
+        OnPanelButton(Category.Trap);
+    }
+
+    // 各一覧右側のボタン処理
+    private void OnPanelButton(Category category)
+    {
+        // 全一覧表示中なら押したカテゴリだけ表示
+        if (isShowingAllPanels)
+        {
+            ChangeCategory(category);
+            return;
+        }
+
+        // 表示中のカテゴリと同じなら全一覧を表示
+        if (currentCategory == category)
+        {
+            SwitchCategory();
+            return;
+        }
+
+        // 別カテゴリを指定された場合
+        ChangeCategory(category);
+    }
+
     // カテゴリ変更
     private void ChangeCategory(Category category)
     {
         currentCategory = category;
 
-        // カテゴリを切り替える
+        // 全一覧表示を解除
         isShowingAllPanels = false;
 
-        // パネル位置は変更しない
+        // 選択カテゴリだけ表示
         UpdateCategory();
+
         UpdateCategoryText();
     }
 
-    // 全パネルの表示変更
+    // 掘削成功時に呼び出す
+    public void CloseAllPanelsForDig()
+    {
+        if (!isShowingAllPanels)
+            return;
+
+        isShowingAllPanels = false;
+
+        // 現在のカテゴリだけ表示
+        UpdateCategory();
+
+        UpdateCategoryText();
+
+        Debug.Log("掘削成功：配置一覧を閉じました。");
+    }
+
+    // 配置成功時に呼び出す
+    public void CloseAllPanelsForPlacement()
+    {
+        if (!isShowingAllPanels)
+            return;
+
+        isShowingAllPanels = false;
+
+        // 現在のカテゴリだけ表示
+        UpdateCategory();
+
+        UpdateCategoryText();
+
+        Debug.Log("配置完了：配置一覧を閉じました。");
+    }
+
+    // 全パネル表示
     private void SetAllPanelsActive(bool active)
     {
         if (objectPanel != null)
@@ -190,6 +269,7 @@ public class PlacementCategoryUI : MonoBehaviour
         UpdateCategoryText();
     }
 
+    // カテゴリ名更新
     private void UpdateCategoryText()
     {
         if (categoryText == null)
@@ -204,15 +284,15 @@ public class PlacementCategoryUI : MonoBehaviour
         switch (currentCategory)
         {
             case Category.Object:
-                categoryText.text = "オブジェクト";
+                categoryText.text = "オブジェクト一覧";
                 break;
 
             case Category.Enemy:
-                categoryText.text = "エネミー";
+                categoryText.text = "エネミー一覧";
                 break;
 
             case Category.Trap:
-                categoryText.text = "トラップ";
+                categoryText.text = "トラップ一覧";
                 break;
         }
     }
