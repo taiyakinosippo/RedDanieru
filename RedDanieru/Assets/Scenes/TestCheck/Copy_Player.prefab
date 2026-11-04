@@ -3130,6 +3130,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7521083552134930087, guid: af51cd27fd427d342bb289b7f729d716, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7521083552134930087, guid: af51cd27fd427d342bb289b7f729d716, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7521083552134930087, guid: af51cd27fd427d342bb289b7f729d716, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7521083552134930087, guid: af51cd27fd427d342bb289b7f729d716, type: 3}
+      propertyPath: m_Intensity
+      value: 1.2
+      objectReference: {fileID: 0}
     - target: {fileID: 8708088273994890038, guid: af51cd27fd427d342bb289b7f729d716, type: 3}
       propertyPath: m_Name
       value: TestPlayerLight
