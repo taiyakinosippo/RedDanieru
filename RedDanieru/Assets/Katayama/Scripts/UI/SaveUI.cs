@@ -25,6 +25,10 @@ public class SaveUI : MonoBehaviour
     // セーブ＆ロード管理
     [SerializeField] private SaveLoadUI saveLoadUI;
 
+    //マップデータスクリーンショット
+    [SerializeField]
+    private DungeonThumbnailCapture thumbnailCapture;
+
     private void Start()
     {
         if (cautionObj != null)
@@ -175,14 +179,7 @@ public class SaveUI : MonoBehaviour
         }
 
         // ダンジョンを投稿
-        uploader.UploadDungeon(
-      dungeonName,
-      creatorName,
-      DifficultyManager.Instance
-          .CurrentDifficulty
-          .ToString()
-          .ToUpper()
-  );
+        UploadWithThumbnail(dungeonName, creatorName);
 
         // 保存パネルを閉じる
         if (savePanel != null)
@@ -235,6 +232,24 @@ public class SaveUI : MonoBehaviour
         {
             cautionObj.SetActive(false);
         }
+    }
+
+    private void UploadWithThumbnail(
+      string dungeonName,
+      string creatorName)
+    {
+        string thumbnail =
+            thumbnailCapture.CaptureBase64();
+
+        uploader.UploadDungeon(
+            dungeonName,
+            creatorName,
+            DifficultyManager.Instance
+                .CurrentDifficulty
+                .ToString()
+                .ToUpper(),
+            thumbnail
+        );
     }
 
     //==================================================

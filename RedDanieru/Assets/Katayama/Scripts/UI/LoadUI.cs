@@ -196,7 +196,11 @@ public class LoadUI : MonoBehaviour
             DungeonButtonUI ui =
                 button.GetComponent<DungeonButtonUI>();
 
-         
+
+            SetThumbnail(
+                ui.thumbnailImage,
+                dungeon.thumbnail);
+
             ui.stageNameText.text =
                 "DUNGEON:" + dungeon.dungeonName;
 
@@ -282,6 +286,11 @@ public class LoadUI : MonoBehaviour
 
             DungeonButtonUI ui =
                 button.GetComponent<DungeonButtonUI>();
+
+
+            SetThumbnail(
+                ui.thumbnailImage,
+                dungeon.thumbnail);
 
             ui.stageNameText.text =
                 "DUNGEON:" + dungeon.dungeonName;
@@ -417,6 +426,11 @@ public class LoadUI : MonoBehaviour
             DungeonButtonUI ui =
                 button.GetComponent<DungeonButtonUI>();
 
+
+            SetThumbnail(
+                ui.thumbnailImage,
+                dungeon.thumbnail);
+
             ui.stageNameText.text =
                 "DUNGEON:" + dungeon.dungeonName;
 
@@ -510,6 +524,50 @@ public class LoadUI : MonoBehaviour
         ));
     }
 
+    private void SetThumbnail(
+    Image image,
+    string base64)
+    {
+        if (image == null)
+            return;
+
+        if (string.IsNullOrEmpty(base64))
+            return;
+
+        try
+        {
+            byte[] bytes =
+                System.Convert.FromBase64String(
+                    base64
+                );
+
+            Texture2D texture =
+                new Texture2D(2, 2);
+
+            texture.LoadImage(bytes);
+
+            Sprite sprite =
+                Sprite.Create(
+                    texture,
+                    new Rect(
+                        0,
+                        0,
+                        texture.width,
+                        texture.height
+                    ),
+                    new Vector2(0.5f, 0.5f)
+                );
+
+            image.sprite = sprite;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(
+                "ÉTÉÄÉlÉCÉãì«çûé∏îs : " +
+                e.Message
+            );
+        }
+    }
 
     public void ShowConnectionError()
     {
