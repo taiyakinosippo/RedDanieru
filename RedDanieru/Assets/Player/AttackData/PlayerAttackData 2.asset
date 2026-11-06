@@ -23,3 +23,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   attackType: 0
+  comboInputStartDelay: 0.1
+  comboInputDuration: 1

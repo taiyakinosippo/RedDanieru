@@ -27,6 +27,12 @@ namespace Player
 
         private bool _isAttackHitActive;
 
+        // コンボ入力受付時間の計測
+        private float _comboElapsedTime;
+
+        // コンボ入力受付時間を計測中か
+        private bool _comboTimerActive;
+
         public bool IsFirstAttack => _comboController != null && _comboController.IsFirstAttack;
 
         private void Awake()
@@ -46,6 +52,8 @@ namespace Player
             {
                 AttackHit();
             }
+
+            UpdateComboInputTimer();
         }
 
         /// <summary>
@@ -80,13 +88,6 @@ namespace Player
                 return;
             }
 
-            // 攻撃データが設定されていない場合は開始しない
-            if (attackData == null || attackData.Count == 0)
-            {
-                Debug.LogWarning("PlayerAttack：攻撃データが設定されていません。", this);
-                return;
-            }
-
             if (!_comboController.StartCombo())
             {
                 return;
@@ -116,6 +117,9 @@ namespace Player
 
             _attackHitbox.BeginHit();
 
+            _comboElapsedTime = 0f;
+            _comboTimerActive = true;
+
             Debug.Log($"{comboIndex + 1}段目の攻撃を開始");
 
             if (_playerAnimation != null)
@@ -126,6 +130,44 @@ namespace Player
             {
                 Debug.LogError("PlayerAttack：PlayerAnimation が見つかりません。", this);
                 CancelAttack();
+            }
+        }
+
+        private void UpdateComboInputTimer()
+        {
+            if (!_comboTimerActive || _currentAttackData == null)
+                return;
+
+            _comboElapsedTime += Time.deltaTime;
+
+            float startDelay = _currentAttackData.comboInputStartDelay;
+            float duration = _currentAttackData.comboInputDuration;
+
+            // 入力受付開始
+            if (!_comboController.IsComboInputWindowOpen &&
+                _comboElapsedTime >= startDelay)
+            {
+                _comboController.OpenComboInputWindow();
+                Debug.Log("コンボ入力受付開始");
+            }
+
+            // 入力受付終了
+            if (_comboElapsedTime >= startDelay + duration)
+            {
+                _comboController.CloseComboInputWindow();
+
+                _comboTimerActive = false;
+
+                Debug.Log("コンボ入力受付終了");
+
+                // 入力が予約されている場合だけ次の攻撃へ
+                if (_comboController.HasQueuedComboInput)
+                {
+                    if (_comboController.TryAdvanceCombo(attackData.Count))
+                    {
+                        BeginAttack();
+                    }
+                }
             }
         }
 
@@ -182,24 +224,21 @@ namespace Player
             _isAttackHitActive = false;
             _currentAttackData = null;
 
+            _comboTimerActive = false;
+
             _attackHitbox?.EndHit();
 
             if (_comboController == null)
-            {
                 return;
-            }
 
-            // 入力が予約されていれば、次の段の攻撃を開始する
             if (_comboController.TryAdvanceCombo(attackData.Count))
             {
-                Debug.Log(
-                    $"{_comboController.ComboIndex + 1}段目のコンボ攻撃へ移行");
+                Debug.Log($"{_comboController.ComboIndex + 1}段目へ移行");
 
                 BeginAttack();
                 return;
             }
 
-            // 次の攻撃がなければコンボを終了する
             _comboController.FinishCombo();
 
             _actionPriority?.EndAction();

@@ -156,15 +156,15 @@ namespace Player
             switch (comboIndex)
             {
                 case 0:
-                    SetTriggerSynced(_animIDAttack);
+                    _animator.CrossFade(_animIDAttack, 0.1f);
                     break;
 
                 case 1:
-                    _animator.SetTrigger(_animIDAttack2);
+                    _animator.CrossFade(_animIDAttack2, 0.1f);
                     break;
 
                 case 2:
-                    _animator.SetTrigger(_animIDAttack3);
+                    _animator.CrossFade(_animIDAttack3, 0.1f);
                     break;
             }
         }
@@ -177,15 +177,15 @@ namespace Player
             switch (comboIndex)
             {
                 case 0:
-                    _animator.ResetTrigger(_animIDAttack);
+                    _animator.CrossFade(_animIDAttack, 0.1f);
                     break;
 
                 case 1:
-                    _animator.ResetTrigger(_animIDAttack2);
+                    _animator.CrossFade(_animIDAttack2, 0.1f);
                     break;
 
                 case 2:
-                    _animator.ResetTrigger(_animIDAttack3);
+                    _animator.CrossFade(_animIDAttack3, 0.1f);
                     break;
             }
 

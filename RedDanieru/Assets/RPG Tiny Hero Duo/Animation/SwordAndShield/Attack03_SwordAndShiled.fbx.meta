@@ -65,13 +65,6 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0
-        functionName: OpenComboInputWindow
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: fc1925cdfa685064eb00d19a296087c5, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
       - time: 0.030382562
         functionName: StartAttackHit
         data: 
@@ -85,13 +78,6 @@ ModelImporter:
         objectReferenceParameter: {fileID: 11500000, guid: 6fb0f831c7d602545973be8e26325a30, type: 3}
         floatParameter: 0
         intParameter: 1
-        messageOptions: 0
-      - time: 0.13260534
-        functionName: CloseComboInputWindow
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: fc1925cdfa685064eb00d19a296087c5, type: 3}
-        floatParameter: 0
-        intParameter: 0
         messageOptions: 0
       transformMask:
       - path: 
