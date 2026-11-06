@@ -156,6 +156,8 @@ public class DungeonUIManager : MonoBehaviour
     [SerializeField] private PublicRoomList publicRoomList;
     [SerializeField] private LoadUI loadUI;
 
+    [SerializeField] private ShopManager shopManager;
+
     private HashSet<string> selectedTags =new HashSet<string>();
 
     [Header("数値")]
@@ -363,7 +365,7 @@ public class DungeonUIManager : MonoBehaviour
 
         GameModeManager.IsMultiplayer = false;
 
-        GameStopManager gameStopManager =FindObjectOfType<GameStopManager>();
+        GameStopManager gameStopManager = FindObjectOfType<GameStopManager>();
 
         if (gameStopManager != null)
         {
@@ -376,7 +378,21 @@ public class DungeonUIManager : MonoBehaviour
             RoomInfo.SelectedDungeon
         );
 
-        fusionLauncher.StartSolo();
+        StartCoroutine(OpenShopForSolo());
+    }
+
+    private IEnumerator OpenShopForSolo()
+    {
+        fusionLauncher.StartSoloFusion();
+
+        while (NetworkGameState.Instance == null)
+        {
+            yield return null;
+        }
+
+        Time.timeScale = 0f;
+
+        shopManager.ShopWindowActiveButton();
     }
 
     public void MultiMode()
@@ -649,7 +665,7 @@ public class DungeonUIManager : MonoBehaviour
 
         GameStartbutton.interactable = false;
 
-        NetworkGameState.Instance.RequestStartGame();
+        NetworkGameState.Instance.RequestOpenShop();
     }
 
     private void OnGameStarted()

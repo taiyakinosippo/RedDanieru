@@ -182,6 +182,44 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
         _cursorController.HideCursor();
     }
 
+    public async void StartSoloFusion()
+    {
+        if (IsStarting || Runner != null)
+            return;
+
+        IsStarting = true;
+
+        try
+        {
+            await ShutdownRunner();
+
+            runner = CreateRunner();
+
+            StartGameResult result =
+                await runner.StartGame(
+                    new StartGameArgs()
+                    {
+                        GameMode = GameMode.Single
+                    });
+
+            if (!result.Ok)
+            {
+                Debug.LogError("ソロ開始失敗");
+                return;
+            }
+
+            runner.Spawn(
+                networkGameStatePrefab,
+                Vector3.zero,
+                Quaternion.identity
+            );
+        }
+        finally
+        {
+            IsStarting = false;
+        }
+    }
+
     //==================================================
     // マルチ
     //==================================================
