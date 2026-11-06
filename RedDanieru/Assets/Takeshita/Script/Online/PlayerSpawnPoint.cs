@@ -30,15 +30,15 @@ public static class PlayerSpawnPoint
         }
 
         // スタート地点の目印（当たり判定付きのキューブ）にプレイヤーが埋まらないようにする
-        foreach (Collider marker in point.GetComponentsInChildren<Collider>())
-        {
-            marker.enabled = false;
-        }
+        //foreach (Collider marker in point.GetComponentsInChildren<Collider>())
+        //{
+        //    marker.enabled = false;
+        //}
 
-        foreach (Renderer marker in point.GetComponentsInChildren<Renderer>())
-        {
-            marker.enabled = false;
-        }
+        //foreach (Renderer marker in point.GetComponentsInChildren<Renderer>())
+        //{
+        //    marker.enabled = false;
+        //}
 
         pose = new Pose(
             point.transform.position,

@@ -31719,6 +31719,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1965161945}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: defaultRespawnAreaPosition.x
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: defaultRespawnAreaPosition.y
+      value: -3.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: defaultRespawnPointPosition.y
       value: -3.5
       objectReference: {fileID: 0}
