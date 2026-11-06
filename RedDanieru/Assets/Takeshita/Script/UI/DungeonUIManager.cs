@@ -724,22 +724,15 @@ public class DungeonUIManager : MonoBehaviour
 
         if (!found)
         {
-            StartCoroutine(ShowNoResult());
+            noResultObj.SetActive(true);
+            StageSearchObj.SetActive(false);
+            StageSearchLaycast.SetActive(false);
             return;
         }
 
+        noResultObj.SetActive(false);
         StageSearchObj.SetActive(false);
         StageSearchLaycast.SetActive(false);
-    }
-
-    private IEnumerator ShowNoResult()
-    {
-        noResultObj.SetActive(true);
-        
-        yield return new WaitForSeconds(2f);
-
-            noResultObj.SetActive(false);
-        
     }
 
     public void StageSearchButton()
@@ -1077,6 +1070,14 @@ public class DungeonUIManager : MonoBehaviour
         get
         {
             return privatePasswordInput.text;
+        }
+    }
+
+    public void HideNoResult()
+    {
+        if (noResultObj != null)
+        {
+            noResultObj.SetActive(false);
         }
     }
 

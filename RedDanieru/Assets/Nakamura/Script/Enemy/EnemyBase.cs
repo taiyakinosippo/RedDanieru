@@ -6,7 +6,7 @@ using UnityEngine.AI;
 
 public class EnemyBase : MonoBehaviour
 {
-    public enum enemyState
+    protected enum enemyState
     {
         Idle,
         Move,
@@ -30,12 +30,12 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    public enemyState currentState;  //現在の状態
+    protected enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
     protected float playerLostTime = 3.5f;  //プレイヤーを見失い立ち尽くす時間
-    protected Vector3 respawnPos;  //敵のリスポーン位置
+    [SerializeField] protected Vector3 respawnPos;  //敵のリスポーン位置
     protected float attackCoolTimer;  //現在の攻撃クールタイム
     protected float attackTimer;  //現在の攻撃開始タイマー
     protected float damageTimer;  //現在のダメージタイマー
@@ -72,14 +72,34 @@ public class EnemyBase : MonoBehaviour
         chasePath = new NavMeshPath();
     }
 
+    // リスポーン位置を設定
+    public void SetRespawnPos(Vector3 position)
+    {
+        Debug.Log("EnemyBase: リスポーン位置を設定しました: " + position);
+        respawnPos = position;
+    }
+
+    //2140// 敵ならリスポーン位置を設定
+    //    if (obj.CompareTag("Enemy"))
+    //    {
+    //        EnemyBase enemyBase = obj.GetComponent<EnemyBase>();
+
+    //        if (enemyBase != null)
+    //        {
+    //            enemyBase.SetRespawnPos(spawnPosition);
+    //        }
+    //    }
+
+
     public virtual void Start()
     {
         //マルチで先にホストからHPが届いていたら上書きしない
         if (!networkHpApplied)
             currentHp = enemyHP;
 
-        //リスポーン位置を初期化
-        respawnPos = transform.position;
+        if (respawnPos == Vector3.zero)
+            respawnPos = transform.position;
+        //Debug.LogError("EnemyBase: respawnPosが設定されていません。");
 
         attackCoolTimer = enemyAttackCoolTime;
         attackTimer = enemyAttackStartTime + enemyAttackEndTime;
