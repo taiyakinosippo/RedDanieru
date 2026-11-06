@@ -179,6 +179,7 @@ GameObject:
   - component: {fileID: 1474482268859146282}
   - component: {fileID: 8634089565551350300}
   - component: {fileID: 5658604645467551867}
+  - component: {fileID: 7112973832627584278}
   m_Layer: 3
   m_Name: WildBoar
   m_TagString: Enemy
@@ -227,6 +228,8 @@ MonoBehaviour:
   enemyAttackStartTime: 0.9
   enemyAttackEndTime: 0.3
   currentHp: 0
+  trackingTimer: 0
+  respawnPos: {x: 0, y: 0, z: 0}
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -335,6 +338,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectType: 8
   selectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &7112973832627584278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5009899248836205637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2111269502596063630
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -468,7 +483,7 @@ PrefabInstance:
     - target: {fileID: 95457531584545886, guid: 928a1377c1cd4515b208fef3a396b8ea, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 9100000, guid: 9bbcf96c9a254c5ba654027c656d7b39, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
