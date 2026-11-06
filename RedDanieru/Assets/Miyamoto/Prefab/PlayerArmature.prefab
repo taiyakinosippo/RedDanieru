@@ -682,9 +682,9 @@ MonoBehaviour:
   Animator: {fileID: 4508827298624980741}
   ApplyTiming: 2
   SyncSettings: 79
-  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f773a94f8f575d87d
-  TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea0745396d
-  TotalWords: 3
+  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f773a94f8f575d87d0e9e23138abdf5fc98ae24641c8df28b
+  TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea0745396d98ae24640e9e2313
+  TotalWords: 4
 --- !u!114 &4848678109406426361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -713,6 +713,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   EnemyPushOutSpeed: 6
+  IsDashLocked: 0
 --- !u!114 &6575345361052619142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,6 +763,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 513
   _attackPoint: {fileID: 2325853284761564942}
+  actionstop: 0.5
+  _isLastAttackEnd: 0
 --- !u!114 &7366741231797108926
 MonoBehaviour:
   m_ObjectHideFlags: 0
