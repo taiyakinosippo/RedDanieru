@@ -1,3 +1,6 @@
+
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,13 +13,24 @@ public class ObjectPaletteManager : MonoBehaviour
 
     public PlaceObjectType CurrentObject { get; private set; }
 
-    [Header("オブジェクト選択ボタン")]
-    [SerializeField] private Button[] objectButtons;
+    [Serializable]
+    private class ObjectButtonEntry
+    {
+        public PlaceObjectType type;
+        public Button button;
+    }
+
+    [Header("配置タイプとボタンの対応")]
+    [SerializeField] private ObjectButtonEntry[] objectButtonEntries;
 
     [Header("ボタンカラー")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color selectedColor = Color.yellow;
 
+    // 配置タイプとボタンの対応表
+    private Dictionary<PlaceObjectType, Button> buttonMap;
+
+    // 現在選択中のボタン
     private Button currentObjectButton;
 
     private void Awake()
@@ -29,6 +43,8 @@ public class ObjectPaletteManager : MonoBehaviour
 
         Instance = this;
 
+        BuildButtonMap();
+
         CurrentObject = PlaceObjectType.Chest;
     }
 
@@ -37,42 +53,76 @@ public class ObjectPaletteManager : MonoBehaviour
         ResetSelection();
     }
 
+    private void BuildButtonMap()
+    {
+        buttonMap = new Dictionary<PlaceObjectType, Button>();
+
+        if (objectButtonEntries == null)
+            return;
+
+        foreach (ObjectButtonEntry entry in objectButtonEntries)
+        {
+            if (entry == null || entry.button == null)
+                continue;
+
+            if (buttonMap.ContainsKey(entry.type))
+            {
+                Debug.LogWarning(
+                    $"配置タイプが重複しています: {entry.type}");
+                continue;
+            }
+
+            buttonMap.Add(entry.type, entry.button);
+        }
+    }
+
     /// <summary>
     /// 配置するオブジェクトを変更
+    /// ButtonのOnClickから呼び出す
     /// </summary>
     public void SelectObject(int type)
     {
-        CurrentObject = (PlaceObjectType)type;
+        SelectObject((PlaceObjectType)type);
+    }
 
-        // 前に選択していたボタンを通常状態に戻す
+    /// <summary>
+    /// 配置タイプを指定して選択
+    /// </summary>
+    public void SelectObject(PlaceObjectType type)
+    {
+        CurrentObject = type;
+
+        // 前のボタンを通常色に戻す
         if (currentObjectButton != null)
         {
-            SetButtonColor(
-                currentObjectButton,
-                normalColor
-            );
+            SetButtonColor(currentObjectButton, normalColor);
         }
 
-        // 新しく選択したボタンを黄色にする
-        if (objectButtons != null &&
-            type >= 0 &&
-            type < objectButtons.Length)
+        // 新しく選択したボタンを取得
+        currentObjectButton = null;
+
+        if (buttonMap != null &&
+            buttonMap.TryGetValue(type, out Button selectedButton))
         {
-            currentObjectButton = objectButtons[type];
+            currentObjectButton = selectedButton;
 
             SetButtonColor(
                 currentObjectButton,
                 selectedColor
             );
         }
+        else
+        {
+            Debug.LogWarning(
+                $"選択タイプのボタンが登録されていません: {type}");
+        }
 
-        // オブジェクトを選択したら配置モードにする
+        // 配置モードに切り替える
         if (EditModeManager.Instance != null)
         {
             EditModeManager.Instance.SetPlaceMode();
 
-            // SetPlaceModeでモードボタンが通常色になるため、
-            // オブジェクトボタンの選択状態をもう一度設定する
+            // モード切替後に選択色を再設定
             if (currentObjectButton != null)
             {
                 SetButtonColor(
@@ -90,14 +140,14 @@ public class ObjectPaletteManager : MonoBehaviour
     /// </summary>
     public void ResetSelection()
     {
-        if (objectButtons != null)
+        if (objectButtonEntries != null)
         {
-            for (int i = 0; i < objectButtons.Length; i++)
+            foreach (ObjectButtonEntry entry in objectButtonEntries)
             {
-                SetButtonColor(
-                    objectButtons[i],
-                    normalColor
-                );
+                if (entry == null || entry.button == null)
+                    continue;
+
+                SetButtonColor(entry.button, normalColor);
             }
         }
 
@@ -105,7 +155,7 @@ public class ObjectPaletteManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ボタンの状態ごとの色を設定
+    /// ボタンの色を設定
     /// </summary>
     private void SetButtonColor(Button button, Color color)
     {
@@ -114,18 +164,11 @@ public class ObjectPaletteManager : MonoBehaviour
 
         ColorBlock colors = button.colors;
 
-        // 通常時
         colors.normalColor = color;
-
-        // マウスを乗せたとき
         colors.highlightedColor =
             Color.Lerp(color, Color.white, 0.2f);
-
-        // 押しているとき
         colors.pressedColor =
             Color.Lerp(color, Color.black, 0.25f);
-
-        // 選択状態
         colors.selectedColor = color;
 
         button.colors = colors;
