@@ -31,7 +31,15 @@ public partial class NetworkGameState : NetworkBehaviour
     [Networked] public NetworkBool RetryCountdownStarted { get; set; }
 
     [Networked] public NetworkBool IsRetrying { get; set; }
-    
+
+    [Networked] public NetworkBool ShopOpened { get; set; }
+
+    [Networked] public int ShopReadyCount { get; set; }
+
+    [Networked] public int StartCountdown { get; set; }
+
+    [Networked] private TickTimer StartTimer { get; set; }
+
     private bool localStartHandled;
     private bool localClearHandled;
     private float localStartTime;
@@ -90,6 +98,23 @@ public partial class NetworkGameState : NetworkBehaviour
             if (RetryCountdown <= 0)
             {
                 RPC_StartRetry();
+            }
+        }
+
+        if (StartCountdown > 0 &&
+    StartTimer.Expired(Runner))
+        {
+            StartCountdown--;
+
+            StartTimer =
+                TickTimer.CreateFromSeconds(
+                    Runner,
+                    1f
+                );
+
+            if (StartCountdown <= 0)
+            {
+                RequestStartGame();
             }
         }
     }
@@ -220,7 +245,6 @@ public partial class NetworkGameState : NetworkBehaviour
 
         SharedCoin -= price;
 
-        Debug.Log($"購入後コイン: {SharedCoin}");
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
@@ -294,5 +318,38 @@ public partial class NetworkGameState : NetworkBehaviour
     FindObjectOfType<GameStopManager>(true);
 
         FusionLauncher.Instance.StartRetryWithMap();
+    }
+
+    public void RequestOpenShop()
+    {
+        RPC_OpenShop();
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    private void RPC_OpenShop()
+    {
+        ShopOpened = true;
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_AddShopReady()
+    {
+        if (StartCountdown > 0)
+            return;
+
+        ShopReadyCount++;
+
+        if (ShopReadyCount >= Runner.ActivePlayers.Count())
+        {
+            ShopReadyCount = 0;
+
+            StartCountdown = 3;
+
+            StartTimer =
+                TickTimer.CreateFromSeconds(
+                    Runner,
+                    1f
+                );
+        }
     }
 }
