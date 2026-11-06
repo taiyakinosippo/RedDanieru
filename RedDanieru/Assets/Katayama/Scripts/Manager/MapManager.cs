@@ -104,6 +104,10 @@ public class MapManager : MonoBehaviour
     [SerializeField]
     private DungeonCostManager dungeonCostManager;
 
+    [Header("配置カテゴリUI")]
+    [SerializeField]
+    private PlacementCategoryUI placementCategoryUI;
+
     [Header("NavMesh")]
     [SerializeField] private NavMeshSurface navMeshSurface;
 
@@ -2549,6 +2553,7 @@ public class MapManager : MonoBehaviour
             placeObject.GridPosition = pos;
         }
 
+
         // 配置成功後にコストを適用
         if (!ApplyPlacementCost(costChange))
         {
@@ -2558,9 +2563,28 @@ public class MapManager : MonoBehaviour
         }
 
         MarkMapChanged();
+
+        // 配置成功後に一覧を閉じる
+        ClosePlacementList();
+
     }
 
+    // 配置成功後に一覧を閉じる
+    private void ClosePlacementList()
+    {
+        // ダンジョン読み込み中は閉じない
+        if (isLoadingDungeon)
+        {
+            return;
+        }
 
+        if (placementCategoryUI == null)
+        {
+            return;
+        }
+
+        placementCategoryUI.CloseAllPanelsForPlacement();
+    }
 
     //==================================================
     // オブジェクトの底面を床に合わせる
@@ -2786,6 +2810,9 @@ public class MapManager : MonoBehaviour
         BuildNavigation();
 
         MarkMapChanged();
+
+        // 配置成功後に一覧を閉じる
+        ClosePlacementList();
     }
 
     //==================================================
