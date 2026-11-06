@@ -8,18 +8,19 @@ public class DungeonUploader : MonoBehaviour
     [SerializeField]
     private DungeonUIManager dungeonUIManager;
 
-    public void UploadDungeon( string dungeonName, string creatorName, string tag)
+    public void UploadDungeon( string dungeonName, string creatorName, string tag, string thumbnail)
     {
         StartCoroutine(
             UploadCoroutine(
                 dungeonName,
                 creatorName,
-                tag
+                tag,
+                thumbnail
             )
         );
     }
 
-    private IEnumerator UploadCoroutine(string dungeonName,  string creatorName,string tag)
+    private IEnumerator UploadCoroutine(string dungeonName,  string creatorName,string tag, string thumbnail)
     {
         if (string.IsNullOrEmpty(SaveManager.LastDungeonId))
         {
@@ -69,6 +70,8 @@ public class DungeonUploader : MonoBehaviour
         form.AddField("jsonData", jsonData);
 
         form.AddField("tag", tag);
+
+        form.AddField("thumbnail", thumbnail);
 
         UnityWebRequest request =
             UnityWebRequest.Post(

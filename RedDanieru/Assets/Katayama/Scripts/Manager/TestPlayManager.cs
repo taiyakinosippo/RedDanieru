@@ -56,6 +56,8 @@ public class TestPlayManager : MonoBehaviour
     [SerializeField] private TMP_Text goalWarningText;
     [SerializeField] private float goalWarningDuration = 2f;
 
+    [SerializeField] private DungeonThumbnailCapture thumbnailCapture;
+
     //==================================================
     // テストプレイ用データ
     //==================================================
@@ -732,13 +734,11 @@ public class TestPlayManager : MonoBehaviour
             dungeonName
         );
 
-        dungeonUploader.UploadDungeon(
-     dungeonName,
-     creatorName,
-     DifficultyManager.Instance
-         .CurrentDifficulty
-         .ToString()
-         .ToUpper()
+        StartCoroutine(
+     UploadWithThumbnail(
+         dungeonName,
+         creatorName
+     )
  );
     }
 
@@ -887,5 +887,32 @@ public class TestPlayManager : MonoBehaviour
         {
             goalWarningUI.SetActive(false);
         }
+    }
+
+    private IEnumerator UploadWithThumbnail(
+      string dungeonName,
+      string creatorName)
+    {
+        if (thumbnailCapture == null)
+        {
+            Debug.LogError(
+                "DungeonThumbnailCapture が設定されていません"
+            );
+
+            yield break;
+        }
+
+        string thumbnail =
+            thumbnailCapture.CaptureBase64();
+
+        dungeonUploader.UploadDungeon(
+            dungeonName,
+            creatorName,
+            DifficultyManager.Instance
+                .CurrentDifficulty
+                .ToString()
+                .ToUpper(),
+            thumbnail
+        );
     }
 }
