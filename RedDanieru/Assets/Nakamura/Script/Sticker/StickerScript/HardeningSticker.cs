@@ -25,7 +25,7 @@ public class HardeningSticker : StickerBase
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
     {
-        stickerState.isSpecialMove = true;  //特殊行動ON
+        stickerState.isSpecialAttack = true;  //特殊行動ON
         //初期化
         hardeningTimer = hardeningDuration;
         attackRate = 100;
@@ -65,7 +65,7 @@ public class HardeningSticker : StickerBase
     //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
-        stickerState.isSpecialMove = false;
+        stickerState.isSpecialAttack = false;
         
         //硬化中なら防御力を元に戻す
         if (isHardening)
@@ -143,7 +143,7 @@ public class HardeningSticker : StickerBase
         playerStatus =
             GetComponent<PlayerStatus>();
 
-        stickerState.isSpecialMove = true;
+        stickerState.isSpecialAttack = true;
 
         hardeningTimer = hardeningDuration;
         damageCounter = 0;
@@ -153,7 +153,7 @@ public class HardeningSticker : StickerBase
     //プレイヤー用剥がされたとき
     public override void OnPlayerRemove()
     {
-        stickerState.isSpecialMove = false;
+        stickerState.isSpecialAttack = false;
 
         if (isHardening && playerStatus != null)
         {
