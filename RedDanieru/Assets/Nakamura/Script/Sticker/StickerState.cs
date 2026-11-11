@@ -5,9 +5,9 @@ public class StickerState : MonoBehaviour
     public Sticker currentSticker = Sticker.None;
     public StickerBase currentStickerScript;
     private StickerDisplay stickerDisplay;
-
+    
+    public bool isSpecialAttack = false;  //ステッカーによる特殊攻撃の有無
     public bool isSpecialMove = false;  //ステッカーによる特殊行動の有無
-
     //trueのときは見た目だけ（マルチで他の人の画面の敵。効果はホストの画面で動く）
     public bool IsVisualOnly { get; private set; }
 
@@ -35,7 +35,7 @@ public class StickerState : MonoBehaviour
 
     private void Update()
     {
-        if (!isSpecialMove || currentStickerScript == null)
+        if (!isSpecialAttack || currentStickerScript == null)
             return;
 
         if (gameObject.CompareTag("Player"))
@@ -94,6 +94,7 @@ public class StickerState : MonoBehaviour
                 break;
             case Sticker.Cactus:
                 currentStickerScript = gameObject.AddComponent<CactusSticker>();
+                
                 break;
         }
 

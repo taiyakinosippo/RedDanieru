@@ -35,7 +35,7 @@ public class ChargeDashSticker : StickerBase
         stickerState = GetComponent<StickerState>();
         agent = GetComponent<NavMeshAgent>();
         enemyAnimation = GetComponent<EnemyAnimationBase>();
-        stickerState.isSpecialMove = true;  //特殊行動ON
+        stickerState.isSpecialAttack = true;  //特殊行動ON
 
         state = DashState.Charge;
         timer = chargeTime;
@@ -65,7 +65,7 @@ public class ChargeDashSticker : StickerBase
     //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
-        stickerState.isSpecialMove = false;
+        stickerState.isSpecialAttack = false;
         agent.enabled = true;
     }
 
@@ -74,7 +74,7 @@ public class ChargeDashSticker : StickerBase
     {
         rb = GetComponent<Rigidbody>();
         stickerState = GetComponent<StickerState>();
-        stickerState.isSpecialMove = true;  //特殊行動ON
+        stickerState.isSpecialAttack = true;  //特殊行動ON
         target = GameObject.FindGameObjectWithTag("Player").transform;  //プレイヤー取得
 
         state = DashState.Charge;
@@ -98,7 +98,7 @@ public class ChargeDashSticker : StickerBase
     //ステッカーが物から剥がれたときの処理
     public override void OnTrapRemove()
     {
-        stickerState.isSpecialMove = false;
+        stickerState.isSpecialAttack = false;
         stickerState.currentSticker = Sticker.None;
     }
 
