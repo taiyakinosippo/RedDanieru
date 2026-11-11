@@ -216,12 +216,24 @@ PrefabInstance:
       value: "\u7A81\u304D\u523A\u3057"
       objectReference: {fileID: 0}
     - target: {fileID: 7489732825488192994, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: attackData.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7489732825488192994, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: 'attackData.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: bf5e341aa010bb448bcda4dbb663926d, type: 2}
+    - target: {fileID: 7489732825488192994, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'attackData.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 6dfcc78475f8196488788fa58960f00e, type: 2}
+    - target: {fileID: 7489732825488192994, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
+      propertyPath: 'attackData.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 95950352e1ce2974cb5a12cea997ce43, type: 2}
     - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: TotalWords
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: StateHashes.Array.size
@@ -229,7 +241,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: TriggerHashes.Array.size
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8290669454086937819, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: 'StateHashes.Array.data[9]'

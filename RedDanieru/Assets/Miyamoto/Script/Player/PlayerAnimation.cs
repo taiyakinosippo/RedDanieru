@@ -156,15 +156,15 @@ namespace Player
             switch (comboIndex)
             {
                 case 0:
-                    _animator.CrossFade(_animIDAttack, 0.1f);
+                    SetTriggerSynced(_animIDAttack);
                     break;
 
                 case 1:
-                    _animator.CrossFade(_animIDAttack2, 0.1f);
+                    _animator.SetTrigger(_animIDAttack2);
                     break;
 
                 case 2:
-                    _animator.CrossFade(_animIDAttack3, 0.1f);
+                    _animator.SetTrigger(_animIDAttack3);
                     break;
             }
         }
@@ -177,15 +177,15 @@ namespace Player
             switch (comboIndex)
             {
                 case 0:
-                    _animator.CrossFade(_animIDAttack, 0.1f);
+                    _animator.ResetTrigger(_animIDAttack);
                     break;
 
                 case 1:
-                    _animator.CrossFade(_animIDAttack2, 0.1f);
+                    _animator.ResetTrigger(_animIDAttack2);
                     break;
 
                 case 2:
-                    _animator.CrossFade(_animIDAttack3, 0.1f);
+                    _animator.ResetTrigger(_animIDAttack3);
                     break;
             }
 
@@ -194,7 +194,6 @@ namespace Player
                 return;
 
             Debug.Log("Attack animation end");
-            _playerAttack.AttackEnd();
         }
 
         //----------------------------------------------------------

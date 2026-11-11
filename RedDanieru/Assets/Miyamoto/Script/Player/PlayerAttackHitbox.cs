@@ -16,6 +16,7 @@ namespace Player
         public void BeginHit()
         {
             _hitEnemies.Clear();
+            Debug.Log("BeginHit：命中済み敵をリセットしました");
         }
 
         public void AttackHit(
@@ -63,9 +64,10 @@ namespace Player
                 // Add が false なら、同じ攻撃ですでに命中している
                 if (!_hitEnemies.Add(enemy))
                 {
+                    Debug.Log("この攻撃では既に命中しています");
                     continue;
                 }
-
+                Debug.Log("敵にダメージを与えます");
                 int damage =attackData.additionalDamage + playerStatus.CurrentAttack;
 
                 NetworkGameState.DamageEnemy(enemy, damage);

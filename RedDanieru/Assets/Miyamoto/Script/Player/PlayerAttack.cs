@@ -35,6 +35,9 @@ namespace Player
 
         public bool IsFirstAttack => _comboController != null && _comboController.IsFirstAttack;
 
+        private bool _isAttackAnimationEnded;
+        private bool _isComboInputDeadlineEnded;
+
         private void Awake()
         {
 
@@ -120,6 +123,9 @@ namespace Player
             _comboElapsedTime = 0f;
             _comboTimerActive = true;
 
+            _isAttackAnimationEnded = false;
+            _isComboInputDeadlineEnded = false;
+
             Debug.Log($"{comboIndex + 1}段目の攻撃を開始");
 
             if (_playerAnimation != null)
@@ -144,8 +150,7 @@ namespace Player
             float duration = _currentAttackData.comboInputDuration;
 
             // 入力受付開始
-            if (!_comboController.IsComboInputWindowOpen &&
-                _comboElapsedTime >= startDelay)
+            if (!_comboController.IsComboInputWindowOpen && _comboElapsedTime >= startDelay)
             {
                 _comboController.OpenComboInputWindow();
                 Debug.Log("コンボ入力受付開始");
@@ -158,17 +163,35 @@ namespace Player
 
                 _comboTimerActive = false;
 
+                _isComboInputDeadlineEnded = true;
+
+                _isAttackAnimationEnded = true;
+
                 Debug.Log("コンボ入力受付終了");
 
-                // 入力が予約されている場合だけ次の攻撃へ
-                if (_comboController.HasQueuedComboInput)
-                {
-                    if (_comboController.TryAdvanceCombo(attackData.Count))
-                    {
-                        BeginAttack();
-                    }
-                }
+                TryCompleteAttack();
             }
+        }
+
+        private void TryCompleteAttack()
+        {
+            if (!_isAttackAnimationEnded)
+                return;
+
+            if (!_isComboInputDeadlineEnded)
+                return;
+
+            if (_comboController.TryAdvanceCombo(attackData.Count))
+            {
+                BeginAttack();
+                return;
+            }
+
+            _currentAttackData = null;
+
+            _comboController.FinishCombo();
+
+            _actionPriority?.EndAction();
         }
 
         /// <summary>
@@ -219,30 +242,20 @@ namespace Player
         /// <summary>
         /// 攻撃アニメーション終了時に呼び出す
         /// </summary>
-        public void AttackEnd()
+        public void EndAttackHit()
         {
             _isAttackHitActive = false;
-            _currentAttackData = null;
-
-            _comboTimerActive = false;
-
             _attackHitbox?.EndHit();
-
-            if (_comboController == null)
-                return;
-
-            if (_comboController.TryAdvanceCombo(attackData.Count))
-            {
-                Debug.Log($"{_comboController.ComboIndex + 1}段目へ移行");
-
-                BeginAttack();
-                return;
-            }
-
-            _comboController.FinishCombo();
-
-            _actionPriority?.EndAction();
         }
+
+        //public void AttackAnimationEnd()
+        //{
+        //    Debug.Log("攻撃アニメーション終了");
+
+        //    _isAttackAnimationEnded = true;
+
+        //    TryCompleteAttack();
+        //}
 
 
         /// <summary>
