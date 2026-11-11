@@ -15,4 +15,6 @@ public enum PlaceObjectType : byte
     LeglessArcher,  // 11
     Torch,          // 12
     Poison,         // 13
+    Cactus,         // 14
+
 }
