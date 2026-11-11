@@ -24,4 +24,4 @@ MonoBehaviour:
     m_Bits: 8
   attackType: 0
   comboInputStartDelay: 0
-  comboInputDuration: 0.6
+  comboInputDuration: 0.8

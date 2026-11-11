@@ -187,9 +187,11 @@ namespace Player
                 return;
             }
 
+            float duration = _currentAttackData.comboInputDuration;
+
             _currentAttackData = null;
 
-            _comboController.FinishCombo();
+            _comboController.FinishCombo(duration);
 
             _actionPriority?.EndAction();
         }

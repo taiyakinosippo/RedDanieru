@@ -18,6 +18,8 @@ namespace Player
 
         public bool IsFirstAttack => ComboIndex == 0;
 
+        private float _actionStopDuration;
+
         private float _actionStopTimer;
 
         private void Update()
@@ -120,20 +122,19 @@ namespace Player
         /// <summary>
         /// コンボを終了する
         /// </summary>
-        public void FinishCombo()
+        public void FinishCombo(float actionStopDuration)
         {
-            bool wasThirdAttack = ComboIndex == 2;
-
             IsAttacking = false;
             IsComboInputWindowOpen = false;
             HasQueuedComboInput = false;
             ComboIndex = 0;
 
-            if (wasThirdAttack && thirdAttackActionStop > 0f)
-            {
-                IsActionLocked = true;
-                _actionStopTimer = 0f;
-            }
+            // 攻撃データから取得した時間を設定
+            _actionStopDuration = actionStopDuration;
+            _actionStopTimer = 0f;
+
+            // 待機時間が0より大きければアクションを制限する
+            IsActionLocked = _actionStopDuration > 0f;
         }
 
         /// <summary>
