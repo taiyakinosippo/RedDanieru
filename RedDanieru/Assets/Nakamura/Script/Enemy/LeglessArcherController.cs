@@ -39,6 +39,13 @@ public class LeglessArcherController : EnemyBase
 
         if (searchHits.Length > 0)
         {
+            //ステッカーによる特殊な行動パターン
+            if (stickerState.isSpecialMove)
+            {
+                stickerState.currentStickerScript.OnEnemyUpdate();
+                return;
+            }
+
             player = searchHits[0].transform;
 
             //プレイヤーが見えるかどうかを判定
