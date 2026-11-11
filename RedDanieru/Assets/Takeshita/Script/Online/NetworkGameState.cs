@@ -20,7 +20,7 @@ public partial class NetworkGameState : NetworkBehaviour
 
     [Networked] public int StartPlayerCount { get; set; }
 
-    [Networked] public int SharedCoin { get; private set; } = 10000;
+    [Networked] public int SharedCoin { get; private set; } = 1000;
 
     [Networked] public int RetryVoteCount { get; set; }
 
@@ -47,6 +47,11 @@ public partial class NetworkGameState : NetworkBehaviour
     public override void Spawned()
     {
         Instance = this;
+
+        if (HasStateAuthority)
+        {
+            SharedCoin = 1000;
+        }
 
         Debug.Log(
             $"NetworkGameStateは {gameObject.name} に付いています"
