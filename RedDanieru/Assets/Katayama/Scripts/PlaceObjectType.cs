@@ -13,5 +13,6 @@ public enum PlaceObjectType : byte
     Wall,           // 9
     Tortoise,       // 10
     LeglessArcher,  // 11
-    Torch           // 12
+    Torch,          // 12
+    Poison,         // 13
 }
