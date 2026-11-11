@@ -298,14 +298,36 @@ public class CactusSticker : StickerBase
         //HPを15%減らす
         enemyScript.AddEnemyCurrentHP(-(int)(enemyScript.GetEnemyMaxHP() * 0.15f));
 
+        //オブジェクトプールからサボテンを取得
         GameObject cactus = waitingCuctuses.Dequeue();
 
+        //サボテンの位置を設定してアクティブ化
         cactus.transform.position = targetPosition;
         cactus.SetActive(true);
 
+        //アクティブなサボテンリストに追加
         activeCuctuses.Add(cactus);
 
+        //サボテンのCactusスクリプトにCactusStickerを設定
+        cactus.GetComponent<Cactus>().SetCactusSticker(this);
+
         currentState = CactusState.SelectPosition;
+    }
+
+    //サボテンをオブジェクトプールに戻す
+    public void ReturnCactusToPool(GameObject cactus)
+    {
+        //サボテンをオブジェクトプールに戻す
+        if (waitingCuctuses.Count < poolCount)
+        {
+            cactus.SetActive(false);
+            waitingCuctuses.Enqueue(cactus);
+            activeCuctuses.Remove(cactus);
+            return;
+        }
+        //オブジェクトプールがいっぱいの場合はサボテンを破棄
+        Destroy(cactus);
+        activeCuctuses.Remove(cactus);
     }
 
     //初期化
@@ -329,13 +351,13 @@ public class CactusSticker : StickerBase
         }
 
         // 設置済みサボテンを破棄
-        foreach (GameObject cactus in activeCuctuses)
-        {
-            if (cactus != null)
-            {
-                Destroy(cactus);
-            }
-        }
+        //foreach (GameObject cactus in activeCuctuses)
+        //{
+        //    if (cactus != null)
+        //    {
+        //        Destroy(cactus);
+        //    }
+        //}
 
         // 待機中サボテンを破棄
         while (waitingCuctuses != null &&
@@ -349,7 +371,7 @@ public class CactusSticker : StickerBase
             }
         }
 
-        activeCuctuses.Clear();
+        //activeCuctuses.Clear();
     }
 
     private void NeedleGuard()
