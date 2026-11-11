@@ -29,7 +29,7 @@ public class ShopManager: MonoBehaviour
         HostShopButton.interactable = false;
         JoinShopButton.interactable = false;
 
-        coinText.text = "10,000";
+        coinText.text = "1,000";
 
         if (FusionLauncher.Instance != null)
         {
