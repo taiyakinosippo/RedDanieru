@@ -648,10 +648,11 @@ MonoBehaviour:
   enemyMoveSpeed: 3
   enemySearchArea: 6
   enemyTrackingTime: 3
-  enemyAttackArea: 1.5
+  enemyAttackArea: 0
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
+  currentState: 0
   currentHp: 0
   trackingTimer: 0
   respawnPos: {x: 0, y: 0, z: 0}
