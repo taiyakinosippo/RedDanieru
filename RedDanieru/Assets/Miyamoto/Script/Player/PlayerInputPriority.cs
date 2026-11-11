@@ -42,9 +42,6 @@ namespace Player
             // 攻撃中は移動できないようにする
             if (currentActionType == ActionType.Attack)
             {
-                // 移動入力を無効にする
-                _input.move = Vector2.zero;
-
                 // 1段目の攻撃中は回避でキャンセルできる
                 if (_playerAttack.IsFirstAttack && _input.evade && Grounded)
                 {

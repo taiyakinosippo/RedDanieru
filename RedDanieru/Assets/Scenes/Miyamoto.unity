@@ -213,7 +213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7489732825488192994, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: debugAttackName
-      value: "\u7A81\u304D\u523A\u3057"
+      value: "\u56DE\u8EE2\u5207\u308A"
       objectReference: {fileID: 0}
     - target: {fileID: 7489732825488192994, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
       propertyPath: attackData.Array.size
