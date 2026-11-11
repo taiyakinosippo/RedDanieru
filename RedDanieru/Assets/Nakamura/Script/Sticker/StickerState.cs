@@ -155,7 +155,7 @@ public class StickerState : MonoBehaviour
             }
 
             //破棄
-            //Destroy(currentStickerScript);
+            Destroy(currentStickerScript);
         }
 
         //貼られていたステッカーを回収

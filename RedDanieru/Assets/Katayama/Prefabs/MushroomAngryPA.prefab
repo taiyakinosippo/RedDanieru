@@ -234,6 +234,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 5
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!114 &2517222310554416964
 MonoBehaviour:
@@ -261,7 +262,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65723433b49bef743a0a298dddd0de89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  activationRange: 3
   poisonRange: 3
+  warningDuration: 1
+  sprayingDuration: 10
+  cooldownDuration: 5
   gasDamage: 50
   gasDamageInterval: 1
   poisonGasEffectPrefab: {fileID: 100002, guid: 6a6450d1b39d99545be383e7549fd7d0, type: 3}
@@ -269,8 +274,6 @@ MonoBehaviour:
   accumulationDecreaseSpeed: 0.5
   poisonStatusDamage: 10
   poisonStatusDuration: 60
-  affectEnemy: 1
-  affectPlayer: 1
 --- !u!136 &3441380885310142993
 CapsuleCollider:
   m_ObjectHideFlags: 0
