@@ -48,13 +48,14 @@ public class CactusSticker : StickerBase
 
     private void Update()
     {
-        if (gameObject.CompareTag("Player"))
+        if (gameObject.CompareTag("Player") && Input.GetKeyDown(KeyCode.Q))
         {
-            NeedleGuard();
+            PlaceCactus(transform.position);
         }
         else if (gameObject.CompareTag("Trap") || gameObject.CompareTag("Wall"))
         {
             //トラップや壁に貼られている場合の処理
+            NeedleGuard();
         }
     }
 
@@ -64,21 +65,28 @@ public class CactusSticker : StickerBase
 
         agent = enemyScript.GetComponent<NavMeshAgent>();
 
+        placementBlockerMask = LayerMask.GetMask("Player", "Enemy", "Wall", "Default");
+
+        //サボテンのプールを作成
+        CactusPoolCreate(poolCount);
+
+        currentState = CactusState.SelectPosition;
+    }
+
+    private void CactusPoolCreate(int poolSize)
+    {
         waitingCuctuses = new Queue<GameObject>();
         activeCuctuses = new List<GameObject>();
 
-        placementBlockerMask = LayerMask.GetMask("Player", "Enemy", "Wall", "Default");
         cactusPrefab = StickerEffectManager.Instance.CactusPrefab;
 
         //サボテンのプールを作成
-        for (int i = 0; i < poolCount; i++)
+        for (int i = 0; i < poolSize; i++)
         {
             GameObject cactus = Instantiate(cactusPrefab);
             cactus.SetActive(false);
             waitingCuctuses.Enqueue(cactus);
         }
-
-        currentState = CactusState.SelectPosition;
     }
 
     public override void OnEnemyUpdate()
@@ -108,7 +116,13 @@ public class CactusSticker : StickerBase
                 break;
 
             case CactusState.PlaceCactus:
-                PlaceCactus();
+
+                //HPを15%減らす
+                enemyScript.AddEnemyCurrentHP(-(int)(enemyScript.GetEnemyMaxHP() * 0.15f));
+
+                PlaceCactus(targetPosition);
+
+                currentState = CactusState.SelectPosition;
                 break;
         }
     }
@@ -293,16 +307,13 @@ public class CactusSticker : StickerBase
     }
 
     //サボテン設置
-    private void PlaceCactus()
+    private void PlaceCactus(Vector3 position)
     {
-        //HPを15%減らす
-        enemyScript.AddEnemyCurrentHP(-(int)(enemyScript.GetEnemyMaxHP() * 0.15f));
-
         //オブジェクトプールからサボテンを取得
         GameObject cactus = waitingCuctuses.Dequeue();
 
         //サボテンの位置を設定してアクティブ化
-        cactus.transform.position = targetPosition;
+        cactus.transform.position = position;
         cactus.SetActive(true);
 
         //アクティブなサボテンリストに追加
@@ -310,8 +321,6 @@ public class CactusSticker : StickerBase
 
         //サボテンのCactusスクリプトにCactusStickerを設定
         cactus.GetComponent<Cactus>().SetCactusSticker(this);
-
-        currentState = CactusState.SelectPosition;
     }
 
     //サボテンをオブジェクトプールに戻す
@@ -350,6 +359,12 @@ public class CactusSticker : StickerBase
             agent.ResetPath();
         }
 
+        //待機サボテンを破棄
+        CactusReset();
+    }
+
+    private void CactusReset()
+    {
         // 設置済みサボテンを破棄
         //foreach (GameObject cactus in activeCuctuses)
         //{
@@ -372,6 +387,16 @@ public class CactusSticker : StickerBase
         }
 
         //activeCuctuses.Clear();
+    }
+
+    public override void OnPlayerApply()
+    {
+        CactusPoolCreate(poolCount);
+    }
+
+    public override void OnPlayerRemove()
+    {
+        CactusReset();
     }
 
     private void NeedleGuard()
