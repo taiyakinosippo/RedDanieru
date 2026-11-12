@@ -6,75 +6,158 @@ public class PlacementCategoryUI : MonoBehaviour
 {
     public enum Category
     {
-        Enemy,
         Object,
+        Enemy,
         Trap
     }
 
     [Header("カテゴリ別パネル")]
-    [SerializeField] private GameObject enemyPanel;
     [SerializeField] private GameObject objectPanel;
+    [SerializeField] private GameObject enemyPanel;
     [SerializeField] private GameObject trapPanel;
 
     [Header("カテゴリ表示")]
     [SerializeField] private TMP_Text categoryText;
 
-    [Header("一覧の配置設定")]
+    [Header("全一覧表示設定")]
     [SerializeField] private float panelSpacing = 8f;
 
-    // 現在のカテゴリ
-    private Category currentCategory = Category.Object;
+    [Header("カテゴリ設定")]
+    [SerializeField] private Category currentCategory = Category.Object;
 
-    // 全一覧表示中か
-    private bool isShowingAllPanels;
+    private bool isShowingAllPanels = false;
 
-    // 各パネルのRectTransform
     private RectTransform objectRect;
     private RectTransform enemyRect;
     private RectTransform trapRect;
 
-    // 初期位置
     private Vector2 objectOriginalPosition;
     private Vector2 enemyOriginalPosition;
     private Vector2 trapOriginalPosition;
 
+    // テストプレイ後も選択カテゴリを保持する
+    private static Category savedCategory = Category.Object;
+    private static bool hasSavedCategory = false;
+
+    public Category CurrentCategory => currentCategory;
+
     private void Awake()
     {
-        if (objectPanel != null)
-            objectRect = objectPanel.GetComponent<RectTransform>();
+        CachePanelPositions();
+    }
 
-        if (enemyPanel != null)
-            enemyRect = enemyPanel.GetComponent<RectTransform>();
+    private void Start()
+    {
+        if (hasSavedCategory)
+        {
+            currentCategory = savedCategory;
+        }
+        else
+        {
+            currentCategory = Category.Object;
+            SaveCurrentCategory();
+        }
 
-        if (trapPanel != null)
-            trapRect = trapPanel.GetComponent<RectTransform>();
-
-        SaveOriginalPosition();
-
-        currentCategory = Category.Object;
         isShowingAllPanels = false;
 
         UpdateCategory();
     }
 
-    // 初期位置を保存
-    private void SaveOriginalPosition()
+    // パネルの初期位置を保存
+    private void CachePanelPositions()
     {
-        if (objectRect != null)
-            objectOriginalPosition = objectRect.anchoredPosition;
+        if (objectPanel != null)
+        {
+            objectRect = objectPanel.GetComponent<RectTransform>();
 
-        if (enemyRect != null)
-            enemyOriginalPosition = enemyRect.anchoredPosition;
+            if (objectRect != null)
+                objectOriginalPosition = objectRect.anchoredPosition;
+        }
 
-        if (trapRect != null)
-            trapOriginalPosition = trapRect.anchoredPosition;
+        if (enemyPanel != null)
+        {
+            enemyRect = enemyPanel.GetComponent<RectTransform>();
+
+            if (enemyRect != null)
+                enemyOriginalPosition = enemyRect.anchoredPosition;
+        }
+
+        if (trapPanel != null)
+        {
+            trapRect = trapPanel.GetComponent<RectTransform>();
+
+            if (trapRect != null)
+                trapOriginalPosition = trapRect.anchoredPosition;
+        }
     }
 
-    // 全一覧の表示切り替え
-    public void SwitchCategory()
+    // カテゴリを切り替える
+    public void SwitchCategory(Category category)
     {
-        isShowingAllPanels = !isShowingAllPanels;
+        currentCategory = category;
 
+        isShowingAllPanels = false;
+
+        SaveCurrentCategory();
+
+        UpdateCategory();
+    }
+
+    // オブジェクトボタン
+    public void OnObjectPanelButton()
+    {
+        SwitchCategory(Category.Object);
+    }
+
+    // エネミーボタン
+    public void OnEnemyPanelButton()
+    {
+        SwitchCategory(Category.Enemy);
+    }
+
+    // トラップボタン
+    public void OnTrapPanelButton()
+    {
+        SwitchCategory(Category.Trap);
+    }
+
+    // パネルクリック
+    public void OnPanelClick(Category category)
+    {
+        if (!isShowingAllPanels)
+            return;
+
+        currentCategory = category;
+
+        isShowingAllPanels = false;
+
+        SaveCurrentCategory();
+
+        UpdateCategory();
+    }
+
+    // 全一覧表示に切り替える
+    // 配置一覧の表示・非表示を切り替える
+    public void ShowAllPanels()
+    {
+        if (isShowingAllPanels)
+        {
+            // 全一覧を閉じて、最後に選択していたカテゴリに戻す
+            isShowingAllPanels = false;
+        }
+        else
+        {
+            // 全一覧を表示する
+            isShowingAllPanels = true;
+        }
+
+        SaveCurrentCategory();
+        UpdateCategory();
+    }
+
+    // 全パネルの表示を更新
+    private void UpdateCategory()
+    {
         if (isShowingAllPanels)
         {
             SetAllPanelsActive(true);
@@ -82,149 +165,32 @@ public class PlacementCategoryUI : MonoBehaviour
         }
         else
         {
-            UpdateCategory();
+            SetAllPanelsActive(false);
+            RestorePanelPositions();
+
+            switch (currentCategory)
+            {
+                case Category.Object:
+                    if (objectPanel != null)
+                        objectPanel.SetActive(true);
+                    break;
+
+                case Category.Enemy:
+                    if (enemyPanel != null)
+                        enemyPanel.SetActive(true);
+                    break;
+
+                case Category.Trap:
+                    if (trapPanel != null)
+                        trapPanel.SetActive(true);
+                    break;
+            }
         }
 
         UpdateCategoryText();
     }
 
-    // 3つの一覧を縦に並べる
-    private void ArrangeAllPanels()
-    {
-        if (objectRect == null ||
-            enemyRect == null ||
-            trapRect == null)
-        {
-            Debug.LogError("一覧パネルの設定を確認してください。");
-            return;
-        }
-
-        objectRect.anchoredPosition = objectOriginalPosition;
-
-        float objectHeight = objectRect.rect.height;
-        float enemyHeight = enemyRect.rect.height;
-
-        enemyRect.anchoredPosition = new Vector2(
-            objectOriginalPosition.x,
-            objectOriginalPosition.y - objectHeight - panelSpacing
-        );
-
-        trapRect.anchoredPosition = new Vector2(
-            objectOriginalPosition.x,
-            objectOriginalPosition.y
-                - objectHeight
-                - panelSpacing
-                - enemyHeight
-                - panelSpacing
-        );
-    }
-
-    // オブジェクトカテゴリ
-    public void SelectObject()
-    {
-        ChangeCategory(Category.Object);
-    }
-
-    // エネミーカテゴリ
-    public void SelectEnemy()
-    {
-        ChangeCategory(Category.Enemy);
-    }
-
-    // トラップカテゴリ
-    public void SelectTrap()
-    {
-        ChangeCategory(Category.Trap);
-    }
-
-    // 配置ボタンから呼ぶカテゴリ切り替え
-    public void ShowObjectCategory()
-    {
-        ChangeCategory(Category.Object);
-    }
-
-    public void ShowEnemyCategory()
-    {
-        ChangeCategory(Category.Enemy);
-    }
-
-    public void ShowTrapCategory()
-    {
-        ChangeCategory(Category.Trap);
-    }
-
-    // オブジェクト一覧の枠クリック
-    public void OnObjectPanelButton()
-    {
-        OnPanelClick(Category.Object);
-    }
-
-    // エネミー一覧の枠クリック
-    public void OnEnemyPanelButton()
-    {
-        OnPanelClick(Category.Enemy);
-    }
-
-    // トラップ一覧の枠クリック
-    public void OnTrapPanelButton()
-    {
-        OnPanelClick(Category.Trap);
-    }
-
-    // 配置一覧表示中のみ枠クリックを受け付ける
-    private void OnPanelClick(Category category)
-    {
-        // 全一覧表示中でなければ何もしない
-        if (!isShowingAllPanels)
-            return;
-
-        // クリックしたカテゴリだけ表示
-        ChangeCategory(category);
-    }
-
-    // カテゴリ変更
-    private void ChangeCategory(Category category)
-    {
-        currentCategory = category;
-
-        // 全一覧表示を解除
-        isShowingAllPanels = false;
-
-        // 選択カテゴリだけ表示
-        UpdateCategory();
-
-        UpdateCategoryText();
-    }
-
-    // 掘削成功時に呼び出す
-    public void CloseAllPanelsForDig()
-    {
-        if (!isShowingAllPanels)
-            return;
-
-        isShowingAllPanels = false;
-
-        UpdateCategory();
-        UpdateCategoryText();
-
-        Debug.Log("掘削成功：配置一覧を閉じました。");
-    }
-
-    // 配置成功時に呼び出す
-    public void CloseAllPanelsForPlacement()
-    {
-        if (!isShowingAllPanels)
-            return;
-
-        isShowingAllPanels = false;
-
-        UpdateCategory();
-        UpdateCategoryText();
-
-        Debug.Log("配置完了：配置一覧を閉じました。");
-    }
-
-    // 全パネル表示
+    // 全パネルの表示状態を変更
     private void SetAllPanelsActive(bool active)
     {
         if (objectPanel != null)
@@ -237,25 +203,47 @@ public class PlacementCategoryUI : MonoBehaviour
             trapPanel.SetActive(active);
     }
 
-    // 現在のカテゴリだけ表示
-    private void UpdateCategory()
+    // 全一覧を縦に配置
+    private void ArrangeAllPanels()
     {
-        if (objectPanel != null)
-            objectPanel.SetActive(
-                currentCategory == Category.Object);
+        RestorePanelPositions();
 
-        if (enemyPanel != null)
-            enemyPanel.SetActive(
-                currentCategory == Category.Enemy);
+        float currentY = 0f;
 
-        if (trapPanel != null)
-            trapPanel.SetActive(
-                currentCategory == Category.Trap);
-
-        UpdateCategoryText();
+        ArrangePanel(objectRect, ref currentY);
+        ArrangePanel(enemyRect, ref currentY);
+        ArrangePanel(trapRect, ref currentY);
     }
 
-    // カテゴリ名更新
+    private void ArrangePanel(RectTransform rect, ref float currentY)
+    {
+        if (rect == null)
+            return;
+
+        float height = rect.rect.height;
+
+        Vector2 position = rect.anchoredPosition;
+        position.y = -currentY;
+
+        rect.anchoredPosition = position;
+
+        currentY += height + panelSpacing;
+    }
+
+    // パネル位置を元に戻す
+    private void RestorePanelPositions()
+    {
+        if (objectRect != null)
+            objectRect.anchoredPosition = objectOriginalPosition;
+
+        if (enemyRect != null)
+            enemyRect.anchoredPosition = enemyOriginalPosition;
+
+        if (trapRect != null)
+            trapRect.anchoredPosition = trapOriginalPosition;
+    }
+
+    // カテゴリ名を更新
     private void UpdateCategoryText()
     {
         if (categoryText == null)
@@ -281,5 +269,32 @@ public class PlacementCategoryUI : MonoBehaviour
                 categoryText.text = "トラップ";
                 break;
         }
+    }
+
+    // 掘削時に全一覧を終了
+    public void CloseAllPanelsForDig()
+    {
+        isShowingAllPanels = false;
+
+        SaveCurrentCategory();
+
+        UpdateCategory();
+    }
+
+    // 配置成功時に全一覧を終了
+    public void CloseAllPanelsForPlacement()
+    {
+        isShowingAllPanels = false;
+
+        SaveCurrentCategory();
+
+        UpdateCategory();
+    }
+
+    // 現在のカテゴリを保存
+    public void SaveCurrentCategory()
+    {
+        savedCategory = currentCategory;
+        hasSavedCategory = true;
     }
 }
