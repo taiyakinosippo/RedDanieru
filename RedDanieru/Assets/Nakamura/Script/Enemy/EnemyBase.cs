@@ -29,9 +29,9 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
     [SerializeField] protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
-    protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
+    protected float enemyDamageTime = 0.4f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    [SerializeField] protected enemyState currentState;  //現在の状態
+    protected enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
@@ -208,7 +208,15 @@ public class EnemyBase : MonoBehaviour
         //プレイヤーが見つかった場合の処理
         if (searchHits.Length > 0)
         {
+            //プレイヤーを取得
             player = searchHits[0].transform;
+
+            //ステッカーによる特殊な行動パターン
+            if (stickerState.isSpecialMove)
+            {
+                stickerState.currentStickerScript.OnEnemyUpdate();
+                return;
+            }
 
             if (!CanSeePlayer(player))
             {
@@ -313,13 +321,14 @@ public class EnemyBase : MonoBehaviour
                 return;
 
             //有効な経路がない場合は停止
-            if (!agent.hasPath ||
-                agent.pathStatus != NavMeshPathStatus.PathComplete)
+            if (!agent.hasPath || agent.pathStatus != NavMeshPathStatus.PathComplete)
             {
                 agent.isStopped = true;
                 agent.ResetPath();
+
                 if (enemyAnimation != null)
                     enemyAnimation.WalkAnimation(false);
+
                 return;
             }
 
@@ -347,7 +356,7 @@ public class EnemyBase : MonoBehaviour
     public virtual void AttackSelect()
     {
         //特別攻撃用のステッカーがあるか
-        if (stickerState.currentStickerScript != null && stickerState.isSpecialMove)
+        if (stickerState.currentStickerScript != null && stickerState.isSpecialAttack)
         {
             //特別攻撃のクールタイムが終わっているか
             if (specialCoolTimer <= 0f)
@@ -642,6 +651,16 @@ public class EnemyBase : MonoBehaviour
         currentState = enemyState.Attack;
     }
 
+    public int GetEnemyCurrentHP()
+    {
+        return (int)currentHp;
+    }
+
+    public int GetEnemyMaxHP()
+    {
+        return enemyHP;
+    }
+
     //敵のHPを変動させる
     public void AddEnemyCurrentHP(int value)
     {
@@ -656,12 +675,30 @@ public class EnemyBase : MonoBehaviour
         if (currentHp <= 0)
         {
             //死亡処理
-            currentState = enemyState.Dead;
+            Dead().Forget();
         }
         else
         {
             //ダメージ処理
             currentState = enemyState.Damage;
+        }
+    }
+
+    //毒ダメージ処理
+    public void AddEnemySlipDamage(int value)
+    {
+        currentHp += value;
+        if (currentHp < 0)
+            currentHp = 0;
+
+        //現在のHPが最大HPを超えないようにする
+        if (currentHp > enemyHP)
+            currentHp = enemyHP;
+
+        if (currentHp <= 0)
+        {
+            //死亡処理
+            Dead().Forget();
         }
     }
 

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2170924399791435939}
   - component: {fileID: 1735006584476019472}
   - component: {fileID: 6193073721833458505}
+  - component: {fileID: 7255259616830158991}
   m_Layer: 0
   m_Name: MapManager
   m_TagString: Untagged
@@ -26,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6324050047287330535}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -46,9 +47,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   createOnStart: 1
-  width: 32
+  width: 80
   height: 1
-  depth: 32
+  depth: 50
   wallSize: 1
   wallSpacing: 1
   normalWallYOffset: -2.5
@@ -61,6 +62,9 @@ MonoBehaviour:
   objectSize: 1
   objectSpacing: 1
   objectYOffset: 1.5
+  goalWarningUI: {fileID: 0}
+  goalWarningText: {fileID: 0}
+  goalWarningDuration: 2
   wallPrefab: {fileID: 6935681925559738843, guid: 9090dfe2bb858f8458fb9275a1c6e090, type: 3}
   diagonalWallPrefab: {fileID: 4674926397749201956, guid: a9fb09caddf3d504a859a9c5d2fa80cc, type: 3}
   floorPrefab: {fileID: 6644410685189140245, guid: 109845b2f9372fa4595fcfb23069f441, type: 3}
@@ -79,7 +83,7 @@ MonoBehaviour:
   outerWallYOffset: -2.5
   enableStartEntrance: 1
   entranceDirection: 0
-  entrancePosition: 4
+  entrancePosition: 24
   entranceWidth: 9
   objectPrefabs:
   - type: 0
@@ -98,15 +102,49 @@ MonoBehaviour:
     prefab: {fileID: 7228817060988096996, guid: e7214bfec4e0ec040808bec80c2376b8, type: 3}
   - type: 11
     prefab: {fileID: 3579314766830224434, guid: 7961808ec5f49664f82576143a146109, type: 3}
+  - type: 12
+    prefab: {fileID: 820004888849100490, guid: ecb4544a8596a004fa3de776b35c867f, type: 3}
+  - type: 13
+    prefab: {fileID: 4245915190017150719, guid: cbc814ca6b730954b8a5e3641bde01c9, type: 3}
+  objectCosts:
+  - type: 0
+    costChange: 0
+  - type: 3
+    costChange: 0
+  - type: 6
+    costChange: 0
+  - type: 7
+    costChange: -15
+  - type: 8
+    costChange: -20
+  - type: 9
+    costChange: 0
+  - type: 10
+    costChange: -15
+  - type: 11
+    costChange: -30
+  - type: 12
+    costChange: 0
+  - type: 13
+    costChange: -100
+  dungeonCostManager: {fileID: 0}
+  placementCategoryUI: {fileID: 0}
   navMeshSurface: {fileID: 6193073721833458505}
+  bigEnemyNavMeshSurface: {fileID: 7255259616830158991}
   mapCamera: {fileID: 0}
-  baseCameraPosition: {x: 5, y: 35, z: 18.5}
+  zoomSpeed: 3
+  minZoomSize: 10
+  maxZoomSize: 40
+  cameraMoveLimit: 30
+  mapScreenOffsetX: -10
+  mapScreenOffsetZ: 8
+  baseCameraPosition: {x: 20, y: 35, z: 13}
   cameraRotation: {x: 90, y: 0, z: 0}
-  baseOrthographicSize: 20
+  baseOrthographicSize: 16
   baseMapSize: 32
   respawnPointObject: {fileID: 0}
   respawnAreaPrefab: {fileID: 75136431443110141, guid: 8eb4dfa1cb83ff245ad221c1333df8d9, type: 3}
-  defaultRespawnPointPosition: {x: -3, y: 1.2, z: 4.5}
+  defaultRespawnPointPosition: {x: -5, y: -3.5, z: 12}
   defaultRespawnAreaPosition: {x: 11, y: -7, z: 16}
   defaultRespawnAreaScale: {x: 100, y: 1, z: 100}
 --- !u!114 &6193073721833458505
@@ -123,6 +161,38 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SerializedVersion: 0
   m_AgentTypeID: 0
+  m_CollectObjects: 2
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  m_UseGeometry: 1
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 1
+  m_VoxelSize: 0.1
+  m_MinRegionArea: 0
+  m_NavMeshData: {fileID: 0}
+  m_BuildHeightMesh: 0
+--- !u!114 &7255259616830158991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6324050047287330535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_AgentTypeID: -1372625422
   m_CollectObjects: 2
   m_Size: {x: 10, y: 10, z: 10}
   m_Center: {x: 0, y: 2, z: 0}

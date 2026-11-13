@@ -617,7 +617,7 @@ MonoBehaviour:
   clearCameraRotation: {x: 90, y: 0, z: 0}
   baseFieldOfView: 60
   baseMapSize: 32
-  titleSceneName: TitleScene
+  titleSceneName: Takeshita_Matching
 --- !u!114 &-5517740153107657724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -648,10 +648,11 @@ MonoBehaviour:
   enemyMoveSpeed: 3
   enemySearchArea: 6
   enemyTrackingTime: 3
-  enemyAttackArea: 1.5
+  enemyAttackArea: 0
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
+  currentState: 0
   currentHp: 0
   trackingTimer: 0
   respawnPos: {x: 0, y: 0, z: 0}
@@ -1098,7 +1099,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 7074581819769507037}
         m_TargetAssemblyTypeName: GoalClear, Assembly-CSharp
         m_MethodName: ReturnToTitle
         m_Mode: 1
