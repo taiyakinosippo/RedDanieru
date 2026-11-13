@@ -664,6 +664,9 @@ public class EnemyBase : MonoBehaviour
     //敵のHPを変動させる
     public void AddEnemyCurrentHP(int value)
     {
+        if (currentState == enemyState.Dead)
+            return;
+
         currentHp += value;
         if (currentHp < 0)
             currentHp = 0;
@@ -687,6 +690,9 @@ public class EnemyBase : MonoBehaviour
     //毒ダメージ処理
     public void AddEnemySlipDamage(int value)
     {
+        if (currentState == enemyState.Dead)
+            return;
+
         currentHp += value;
         if (currentHp < 0)
             currentHp = 0;
