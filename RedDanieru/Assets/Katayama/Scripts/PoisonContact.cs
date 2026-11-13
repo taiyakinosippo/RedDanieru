@@ -50,23 +50,25 @@ public class PoisonContact : MonoBehaviour
     // キャラクターに直接貼られた場合のダメージタイマー
     private float characterDamageTimer;
 
-    // 対象ごとの毒蓄積情報
     private class TargetData
     {
         public float accumulation;
     }
 
     // 全毒ガスで共有する対象情報
-    private static Dictionary<GameObject, TargetData> sharedTargets =
+    private static readonly Dictionary<GameObject, TargetData> sharedTargets =
         new Dictionary<GameObject, TargetData>();
 
     // 全毒ガスで共有するダメージタイマー
-    private static Dictionary<GameObject, float> gasDamageTimers =
+    private static readonly Dictionary<GameObject, float> gasDamageTimers =
         new Dictionary<GameObject, float>();
 
     // 有効な毒ガス一覧
     private static readonly List<PoisonContact> activeGasContacts =
         new List<PoisonContact>();
+
+    // LateUpdateの重複実行防止
+    private static int lastProcessedFrame = -1;
 
     private void Awake()
     {
@@ -121,7 +123,6 @@ public class PoisonContact : MonoBehaviour
 
             // 貼られている間だけ継続ダメージ
             UpdateCharacterDamage(character);
-
             return;
         }
 
@@ -148,7 +149,7 @@ public class PoisonContact : MonoBehaviour
         UpdatePoisonEffect(currentState == GasState.Spraying);
     }
 
-    // PlayerまたはEnemyのルートオブジェクトを取得
+    // PlayerまたはEnemyのオブジェクトを取得
     private GameObject GetCharacterRoot()
     {
         Transform current = transform;
@@ -175,7 +176,6 @@ public class PoisonContact : MonoBehaviour
         if (characterDamageTimer > 0f)
             return;
 
-        // 毒状態を付与せず直接ダメージだけを与える
         DamageTarget(target, gasDamage);
 
         characterDamageTimer = Mathf.Max(
@@ -194,20 +194,19 @@ public class PoisonContact : MonoBehaviour
         }
     }
 
-    // 発動予兆：1秒間
+    // 発動予兆
     private void UpdateWarning()
     {
         stateTimer -= Time.deltaTime;
 
         if (stateTimer <= 0f)
         {
-            // 予兆開始後はPlayerが離れても発射する
             currentState = GasState.Spraying;
             stateTimer = sprayingDuration;
         }
     }
 
-    // 毒ガス噴射：10秒間
+    // 毒ガス噴射
     private void UpdateSpraying()
     {
         stateTimer -= Time.deltaTime;
@@ -221,7 +220,7 @@ public class PoisonContact : MonoBehaviour
         }
     }
 
-    // クールタイム：5秒間
+    // クールタイム
     private void UpdateCooldown()
     {
         stateTimer -= Time.deltaTime;
@@ -236,11 +235,10 @@ public class PoisonContact : MonoBehaviour
     // Playerが起動範囲内にいるか確認
     private bool IsPlayerInActivationRange()
     {
-        Collider[] nearbyObjects =
-            Physics.OverlapSphere(
-                transform.position,
-                activationRange
-            );
+        Collider[] nearbyObjects = Physics.OverlapSphere(
+            transform.position,
+            activationRange
+        );
 
         foreach (Collider col in nearbyObjects)
         {
@@ -258,16 +256,22 @@ public class PoisonContact : MonoBehaviour
         return false;
     }
 
-    // 毒ガスの効果を全体でまとめて管理
+    // 毒ガスの対象処理
     private void LateUpdate()
     {
+        // 複数のPoisonContactから同じフレームに実行されないようにする
+        if (lastProcessedFrame == Time.frameCount)
+            return;
+
+        lastProcessedFrame = Time.frameCount;
+
         if (activeGasContacts.Count == 0)
             return;
 
         Dictionary<GameObject, PoisonContact> insideTargets =
             new Dictionary<GameObject, PoisonContact>();
 
-        // 噴射中の毒ガスだけ範囲判定する
+        // 噴射中の毒ガスの範囲内にいる対象を取得
         foreach (PoisonContact gas in activeGasContacts)
         {
             if (gas == null ||
@@ -280,11 +284,10 @@ public class PoisonContact : MonoBehaviour
                 continue;
             }
 
-            Collider[] nearbyObjects =
-                Physics.OverlapSphere(
-                    gas.transform.position,
-                    gas.poisonRange
-                );
+            Collider[] nearbyObjects = Physics.OverlapSphere(
+                gas.transform.position,
+                gas.poisonRange
+            );
 
             foreach (Collider col in nearbyObjects)
             {
@@ -320,10 +323,9 @@ public class PoisonContact : MonoBehaviour
             // 毒ガスによる継続ダメージ
             ApplySharedGasDamage(target, gas);
 
-            PoisonStatus status =
-                target.GetComponent<PoisonStatus>();
+            PoisonStatus status = target.GetComponent<PoisonStatus>();
 
-            // すでに毒状態なら蓄積を増やさない
+            // すでに毒状態なら蓄積しない
             if (status != null && status.IsPoisoned)
             {
                 data.accumulation = 0f;
@@ -333,7 +335,6 @@ public class PoisonContact : MonoBehaviour
             // 毒状態でなければ蓄積する
             data.accumulation += Time.deltaTime;
 
-            // 5秒蓄積したら毒状態
             if (data.accumulation >= gas.poisonAccumulationTime)
             {
                 if (status == null)
@@ -351,8 +352,7 @@ public class PoisonContact : MonoBehaviour
         }
 
         // 毒ガスの範囲外にいる対象の蓄積を減らす
-        List<GameObject> removeTargets =
-            new List<GameObject>();
+        List<GameObject> removeTargets = new List<GameObject>();
 
         foreach (var pair in sharedTargets)
         {
@@ -371,12 +371,13 @@ public class PoisonContact : MonoBehaviour
                 pair.Value.accumulation -=
                     decreaseSpeed * Time.deltaTime;
 
-                pair.Value.accumulation =
-                    Mathf.Max(0f, pair.Value.accumulation);
+                pair.Value.accumulation = Mathf.Max(
+                    0f,
+                    pair.Value.accumulation
+                );
             }
         }
 
-        // 削除対象を整理
         foreach (GameObject target in removeTargets)
         {
             sharedTargets.Remove(target);
@@ -384,7 +385,7 @@ public class PoisonContact : MonoBehaviour
         }
     }
 
-    // ColliderからPlayerまたはEnemyのルートを取得
+    // ColliderからPlayerまたはEnemyのオブジェクトを取得
     private GameObject FindDamageTarget(Transform current)
     {
         while (current != null)
@@ -453,10 +454,12 @@ public class PoisonContact : MonoBehaviour
 
         if (enemy != null)
         {
-            enemy.AddEnemyCurrentHP(-damage);
+            // EnemyのHPを直接減らす
+            enemy.AddEnemySlipDamage(-damage);
         }
         else if (player != null)
         {
+            //Playerの通常ダメージ処理
             player.Damage(damage);
         }
     }
@@ -557,7 +560,8 @@ public class PoisonStatus : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.AddEnemyCurrentHP(-damage);
+                // 毒状態のダメージも通常ダメージ処理を使用
+                enemy.Damage(damage);
             }
             else if (player != null)
             {
