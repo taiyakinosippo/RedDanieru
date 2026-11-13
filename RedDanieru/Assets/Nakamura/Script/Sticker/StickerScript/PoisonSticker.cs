@@ -41,7 +41,7 @@ public class PoisonSticker : StickerBase
         {
             //毒ダメージを与える
             if (enemyScript != null)
-                enemyScript.AddEnemyCurrentHP(-poisonDamage);
+                enemyScript.AddEnemySlipDamage(-poisonDamage);
             else if (playerStatus != null)
                 playerStatus.Damage(poisonDamage);
 

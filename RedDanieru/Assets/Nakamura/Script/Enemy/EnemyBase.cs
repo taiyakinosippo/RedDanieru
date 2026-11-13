@@ -684,6 +684,24 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
+    //毒ダメージ処理
+    public void AddEnemySlipDamage(int value)
+    {
+        currentHp += value;
+        if (currentHp < 0)
+            currentHp = 0;
+
+        //現在のHPが最大HPを超えないようにする
+        if (currentHp > enemyHP)
+            currentHp = enemyHP;
+
+        if (currentHp <= 0)
+        {
+            //死亡処理
+            Dead().Forget();
+        }
+    }
+
     //敵の攻撃力を変動させる
     public void AddEnemyPower(int value)
     {
