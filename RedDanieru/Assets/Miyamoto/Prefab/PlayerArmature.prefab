@@ -860,8 +860,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerName: 
   PlayerHP: 1500
-  PlayerAttack: 0
-  PlayerDefense: 1000
+  PlayerAttack: 300
+  PlayerDefense: 0
   PlayerMoveSpeed: 5
   PlayerEvadeSpeed: 10
   PlayerSticker: 
