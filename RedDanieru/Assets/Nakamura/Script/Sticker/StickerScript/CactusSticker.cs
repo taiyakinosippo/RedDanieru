@@ -24,7 +24,7 @@ public class CactusSticker : StickerBase
     private Vector3 movePosition;
     private float standOffDistance = 1.0f;
     private LayerMask placementBlockerMask;  //設置を妨げるLayer
-    private LayerMask playerLayer = LayerMask.GetMask("Player");
+    private LayerMask playerLayer;
 
     private Queue<GameObject> waitingCuctuses;
     private List<GameObject> activeCuctuses = new();
@@ -37,13 +37,14 @@ public class CactusSticker : StickerBase
     private float needleAreaRadius = 2.0f;  //針の範囲
     private int needleGuardDamage = 10;  //針バリアのダメージ量
     private int needleDamage = 30;  //針のダメージ量
+    private Vector3 needlePos;  //針の位置
     private Dictionary<EnemyBase, float> enemyDamageCooldowns = new Dictionary<EnemyBase, float>();  //敵ごとの次回ダメージ可能時刻
+    private Dictionary<PlayerStatus, float> playerDamageCooldowns = new Dictionary<PlayerStatus, float>();  //プレイヤーごとの次回ダメージ可能時刻
     private float damageCooldown = 0.7f;  //ダメージのクールタイム（秒）
-    private LayerMask enemyLayer;  //敵のレイヤー
+    private LayerMask hitLayer;  //敵のレイヤー
 
     private void Start()
     {
-        enemyLayer = LayerMask.GetMask("Enemy");
     }
 
     private void Update()
@@ -66,6 +67,7 @@ public class CactusSticker : StickerBase
         agent = enemyScript.GetComponent<NavMeshAgent>();
 
         placementBlockerMask = LayerMask.GetMask("Player", "Enemy", "Wall", "Default");
+        playerLayer = LayerMask.GetMask("Player");
 
         //サボテンのプールを作成
         CactusPoolCreate(poolCount);
@@ -399,63 +401,95 @@ public class CactusSticker : StickerBase
         CactusReset();
     }
 
+    public override void OnTrapApply()
+    {
+        hitLayer = LayerMask.GetMask("Enemy", "Player");
+        needlePos = transform.position;
+    }
+
+    public override void OnWallApply()
+    {
+        OnTrapApply();
+        needlePos += Vector3.down * 4.0f;
+    }
+
     private void NeedleGuard()
     {
         //針バリアの範囲内の敵を検索
-        Collider[] searchHits = Physics.OverlapSphere(transform.position, needleAreaRadius, enemyLayer);
+        Collider[] searchHits = Physics.OverlapSphere(needlePos, needleAreaRadius, hitLayer);
 
         //敵ごとにダメージを与える処理
         foreach (Collider hit in searchHits)
         {
-            EnemyBase enemy = hit.GetComponent<EnemyBase>();
+            Debug.Log($"CactusSticker");
 
-            if (enemy == null)
+            if (hit.CompareTag("Enemy"))
             {
-                continue;
-            }
+                EnemyBase enemy = hit.GetComponent<EnemyBase>();
 
-            //敵ごとのクールタイムを確認
-            if (enemyDamageCooldowns.TryGetValue(enemy, out float nextDamageTime))
-            {
-                if (Time.time < nextDamageTime)
+                //敵ごとのクールタイムを確認
+                if (enemyDamageCooldowns.TryGetValue(enemy, out float nextDamageTime))
                 {
-                    continue;
+                    if (Time.time < nextDamageTime)
+                    {
+                        continue;
+                    }
                 }
+                Debug.Log($"CactusSticker: {enemy.name}に{needleDamage}のダメージを与えました。");
+                //ダメージを与える
+                enemy.AddEnemyCurrentHP(-needleGuardDamage);
+
+                //この敵の次回ダメージ可能時刻を設定
+                enemyDamageCooldowns[enemy] = Time.time + damageCooldown;
             }
+            else if (hit.CompareTag("Player"))
+            {
+                PlayerStatus playerStatus = hit.GetComponent<PlayerStatus>();
 
-            //ダメージを与える
-            enemy.AddEnemyCurrentHP(-needleGuardDamage);
+                //プレイヤーごとのクールタイムを確認
+                if (playerDamageCooldowns.TryGetValue(playerStatus, out float nextDamageTime))
+                {
+                    if (Time.time < nextDamageTime)
+                    {
+                        continue;
+                    }
+                }
+                Debug.Log($"CactusSticker: {playerStatus.name}に{needleDamage}のダメージを与えました。");
+                playerStatus.Damage(needleGuardDamage);
 
-            //この敵の次回ダメージ可能時刻を設定
-            enemyDamageCooldowns[enemy] = Time.time + damageCooldown;
+                //このプレイヤーの次回ダメージ可能時刻を設定
+                playerDamageCooldowns[playerStatus] = Time.time + damageCooldown;
+            }
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        //トラップや壁に貼られている場合のみ処理を行う
-        if (!gameObject.CompareTag("Trap") && !gameObject.CompareTag("Wall"))
-            return;
+    //private void OnCollisionStay(Collision collision)
+    //{
+        ////トラップや壁に貼られている場合のみ処理を行う
+        //if (!gameObject.CompareTag("Trap") && !gameObject.CompareTag("Wall"))
+        //    return;
 
-        if (collision.gameObject.CompareTag("Enemy"))
-        {
-            EnemyBase enemy = collision.gameObject.GetComponent<EnemyBase>();
+        //if (collision.gameObject.CompareTag("Enemy"))
+        //{
+        //    EnemyBase enemy = collision.gameObject.GetComponent<EnemyBase>();
 
-            if (enemy != null)
-            {
-                //敵にダメージを与える処理
-                NetworkGameState.DamageEnemy(enemy, needleDamage);
-            }
-        }
-        else if (collision.gameObject.CompareTag("Player"))
-        {
-            PlayerStatus playerStatus = collision.gameObject.GetComponent<PlayerStatus>();
+        //    if (enemy != null)
+        //    {
+        //        Debug.Log($"CactusSticker: {enemy.name}に{needleDamage}のダメージを与えました。");
+        //        //敵にダメージを与える処理
+        //        NetworkGameState.DamageEnemy(enemy, needleDamage);
+        //    }
+        //}
+        //else if (collision.gameObject.CompareTag("Player"))
+        //{
+        //    PlayerStatus playerStatus = collision.gameObject.GetComponent<PlayerStatus>();
 
-            if (playerStatus != null && !playerStatus.isInvincible)
-            {
-                //プレイヤーにダメージを与える処理
-                playerStatus.Damage(needleDamage);
-            }
-        }
-    }
+        //    if (playerStatus != null && !playerStatus.isInvincible)
+        //    {
+        //        Debug.Log($"CactusSticker: {playerStatus.name}に{needleDamage}のダメージを与えました。");
+        //        //プレイヤーにダメージを与える処理
+        //        playerStatus.Damage(needleDamage);
+        //    }
+        //}
+    //}
 }
