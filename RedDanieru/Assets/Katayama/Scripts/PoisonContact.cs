@@ -555,16 +555,18 @@ public class PoisonStatus : MonoBehaviour
 
         if (damageTimer <= 0f)
         {
+            // 毒状態によるダメージ処理
             EnemyBase enemy = GetComponent<EnemyBase>();
             PlayerStatus player = GetComponent<PlayerStatus>();
 
             if (enemy != null)
             {
-                // 毒状態のダメージも通常ダメージ処理を使用
-                enemy.Damage(damage);
+                // Enemyは防御力計算を通さず直接HPを減らす
+                enemy.AddEnemySlipDamage(-damage);
             }
             else if (player != null)
             {
+                // Playerは通常のダメージ処理
                 player.Damage(damage);
             }
 
