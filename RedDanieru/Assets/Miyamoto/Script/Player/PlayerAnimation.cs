@@ -160,11 +160,11 @@ namespace Player
                     break;
 
                 case 1:
-                    _animator.SetTrigger(_animIDAttack2);
+                    SetTriggerSynced(_animIDAttack2);
                     break;
 
                 case 2:
-                    _animator.SetTrigger(_animIDAttack3);
+                    SetTriggerSynced(_animIDAttack3);
                     break;
             }
         }

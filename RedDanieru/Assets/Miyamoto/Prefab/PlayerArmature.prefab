@@ -405,6 +405,8 @@ GameObject:
   - component: {fileID: 1790086913376040861}
   - component: {fileID: 7230966508778375844}
   - component: {fileID: 4860834705221685714}
+  - component: {fileID: 5589897157290320674}
+  - component: {fileID: 1202312565277189992}
   m_Layer: 6
   m_Name: PlayerArmature
   m_TagString: Player
@@ -683,7 +685,7 @@ MonoBehaviour:
   Animator: {fileID: 4508827298624980741}
   ApplyTiming: 2
   SyncSettings: 79
-  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd0d286c404e865f439b5344a059218502db8fa9ea35ed619f773a94f8f575d87d0e9e23138abdf5fc98ae24641c8df28b
+  StateHashes: 0000000084ca1cc0f9c6230b1c6a54339e2518b671a7e1076b36dbedb1afdc305a6c54cd9b5344a059218502db8fa9ea35ed619f773a94f8f575d87d0e9e23138abdf5fc0d286c404e865f4398ae24641c8df28b
   TriggerHashes: 000000000d286c40dd2e87bfdb8fa9ea0745396d98ae24640e9e2313
   TotalWords: 4
 --- !u!114 &4848678109406426361
@@ -742,7 +744,7 @@ MonoBehaviour:
   _forwardFollowSpeed: 1
   _backFollowSpeed: 10
   _playerRayOffset: {x: 0, y: 1, z: 0}
-  _cameraRadius: 0.1
+  _cameraRadius: 0.03
   _deadCameraTopClamp: 90
   _deadCameraBottomClamp: -50
   _initialHeight: 0
@@ -760,12 +762,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackData:
   - {fileID: 11400000, guid: 6dfcc78475f8196488788fa58960f00e, type: 2}
-  _wallLayer:
-    serializedVersion: 2
-    m_Bits: 513
+  - {fileID: 11400000, guid: bf5e341aa010bb448bcda4dbb663926d, type: 2}
+  - {fileID: 11400000, guid: 95950352e1ce2974cb5a12cea997ce43, type: 2}
   _attackPoint: {fileID: 2325853284761564942}
-  actionstop: 0.5
-  _isLastAttackEnd: 0
 --- !u!114 &7366741231797108926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -843,8 +842,10 @@ MonoBehaviour:
   defenseText: {fileID: 1191036048434081672}
   speedText: {fileID: 5576782769004045964}
   attackData:
+  - {fileID: 11400000, guid: bf5e341aa010bb448bcda4dbb663926d, type: 2}
   - {fileID: 11400000, guid: 6dfcc78475f8196488788fa58960f00e, type: 2}
-  debugAttackName: "\u30CE\u30FC\u30DE\u30EB\u30A2\u30C3\u30BF\u30AF"
+  - {fileID: 11400000, guid: 95950352e1ce2974cb5a12cea997ce43, type: 2}
+  debugAttackName: "\u56DE\u8EE2\u5207\u308A"
 --- !u!114 &3244406581610145446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -859,8 +860,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerName: 
   PlayerHP: 1500
-  PlayerAttack: 300
-  PlayerDefense: 0
+  PlayerAttack: 0
+  PlayerDefense: 1000
   PlayerMoveSpeed: 5
   PlayerEvadeSpeed: 10
   PlayerSticker: 
@@ -923,6 +924,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _evadeTime: 0.2
   _decelerationTime: 0.2
+  _rotationSmoothTime: 0.1
 --- !u!114 &7230966508778375844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -937,6 +939,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 0
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!114 &4860834705221685714
 MonoBehaviour:
@@ -954,6 +957,34 @@ MonoBehaviour:
   _hideDistance: 1
   _showDistance: 2
   _playerOffset: {x: 0, y: 1, z: 0}
+--- !u!114 &5589897157290320674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010391631509636739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25575565eeb01064680ce58cb0e30d59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  thirdAttackActionStop: 0.5
+--- !u!114 &1202312565277189992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010391631509636739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51802dae03f43454ab814a406ef3e889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 2560
 --- !u!1 &1461936469673327131
 GameObject:
   m_ObjectHideFlags: 0
