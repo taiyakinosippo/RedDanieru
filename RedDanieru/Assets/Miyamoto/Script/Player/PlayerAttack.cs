@@ -1,171 +1,281 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-///<summry>
-///プレイヤーの攻撃を制御するためのスクリプト
-///</summry>
 namespace Player
 {
+    /// <summary>
+    /// 攻撃開始と、各攻撃機能の連携を管理する
+    /// </summary>
+    [RequireComponent(typeof(PlayerComboController))]
+    [RequireComponent(typeof(PlayerAttackHitbox))]
     public class PlayerAttack : MonoBehaviour
     {
-        [SerializeField] List<PlayerAttackData> attackData = new ();  // このlistの中から攻撃データを選択するようにする
-        [SerializeField] LayerMask _wallLayer;                        // 攻撃する際に壁があるかどうかを判定するためのレイヤー
-        public  Transform _attackPoint;                               // 当たり判定の位置を決めるためのTransform
+        [Header("攻撃データ")]
+        [SerializeField] private List<PlayerAttackData> attackData = new();
 
-        private PlayerAnimation _playerAnimation;                     // プレイヤーのアニメーションを制御するためのスクリプト
-        private PlayerStatus _playerStatus;                           // プレイヤーのステータスを管理するためのスクリプト
-        private PlayerAttackData _currentAttackData;                  // 現在の攻撃データを格納する変数
-        private PlayerInputPriority _actionPriority;                  // プレイヤーのアクションの優先度を管理するためのスクリプト
-        private HashSet<EnemyBase> hitEnemies = new();                // 今回の攻撃で当たった敵を格納するためのHashSet
+        [Header("攻撃位置")]
+        [SerializeField] public Transform _attackPoint;
 
-        private bool _isAttackHitActive = false;　　　　　　　　　　　　
-        private Vector3 _attackPosition;                               // 攻撃の当たる位置と回転を計算するための格納変数
-        private Quaternion _attackRotation;                            // 攻撃の当たる位置と回転を計算するための格納変数
+        private PlayerAnimation _playerAnimation;
+        private PlayerStatus _playerStatus;
+        private PlayerInputPriority _actionPriority;
 
+        private PlayerComboController _comboController;
+        private PlayerAttackHitbox _attackHitbox;
 
-        //-----------------------------------------------------
-        //初期化
-        //-----------------------------------------------------
-        void Start()
+        private PlayerAttackData _currentAttackData;
+
+        private bool _isAttackHitActive;
+
+        // コンボ入力受付時間の計測
+        private float _comboElapsedTime;
+
+        // コンボ入力受付時間を計測中か
+        private bool _comboTimerActive;
+
+        public bool IsFirstAttack => _comboController != null && _comboController.IsFirstAttack;
+
+        private bool _isAttackAnimationEnded;
+        private bool _isComboInputDeadlineEnded;
+
+        private void Awake()
         {
+
             _playerAnimation = GetComponent<PlayerAnimation>();
             _playerStatus = GetComponent<PlayerStatus>();
             _actionPriority = GetComponent<PlayerInputPriority>();
+            _comboController = GetComponent<PlayerComboController>();
+            _attackHitbox = GetComponent<PlayerAttackHitbox>();
+
         }
 
-        //-----------------------------------------------------
-        //攻撃したときのここにUpdateで攻撃入力を受け取り続けるようにする
-        //-----------------------------------------------------
-        void Update()
+        private void FixedUpdate()
         {
             if (_isAttackHitActive)
             {
                 AttackHit();
             }
+
+            UpdateComboInputTimer();
         }
 
-        //------------------------------------------------------
-        //プレイヤーの攻撃アニメーションを再生させるかどうか
-        //------------------------------------------------------
-        public void Attack(StarterAssetsInputs _input)
+        /// <summary>
+        /// 攻撃入力を処理する
+        /// </summary>
+        public void Attack(StarterAssetsInputs input)
         {
-            if (!_input.attack)
-                return;
-
-            //ここでアクションン
-            _input.attack = false;
-
-            //当たり判定をここで有効にする
-            _isAttackHitActive = false;
-
-            // 攻撃データを決定
-            _currentAttackData = attackData[0];
-
-            // 今回の攻撃で当たった敵をリセット
-            hitEnemies.Clear();
-
-            //アッタクモーション
-            _playerAnimation.PlayerAttackAnimator();
-            
-        }
-
-        //------------------------------------------------------
-        //プレイヤーの攻撃があたった場合の(ダメージ、属性)
-        //------------------------------------------------------
-        public void AttackHit()
-        {
-            if (_currentAttackData != null)
+            if (input == null || !input.attack)
             {
-                //攻撃の当たる位置を計算する
-                _attackPosition =
-    　　　　　　_attackPoint.position +
-    　　　　　　_attackPoint.rotation * _currentAttackData.attackOffset;
+                return;
+            }
 
-                //攻撃の当たり判定の回転を計算する
-                _attackRotation =
-    　　　　　　_attackPoint.rotation *
-    　　　　　　Quaternion.Euler(_currentAttackData.attackRotation);
+            // 入力を消費し、押しっぱなしで再入力されないようにする
+            input.attack = false;
 
-                //攻撃があったかどうかを判定する
-                Collider[] hitColliders =
-                Physics.OverlapBox(
-                _attackPosition,
-                _currentAttackData.playerAttackRadius,
-                _attackRotation,
-                _currentAttackData.hitLayer,
-                QueryTriggerInteraction.Ignore);
+            if (_comboController == null)
+            {
+                return;
+            }
 
-                //攻撃があたった場合の処理
-                foreach (Collider collider in hitColliders)
-                {
-                    EnemyBase enemy = collider.GetComponent<EnemyBase>();
+            // 3段目終了後などのアクション制限中は受け付けない
+            if (_comboController.IsActionLocked)
+            {
 
-                    if (enemy == null) continue;
+                return;
+            }
 
-                    if (IsWallInFront(enemy)) continue;
+            // 攻撃中なら、コンボ入力として受付を試みる
+            if (_comboController.IsAttacking)
+            {
+                _comboController.TryQueueComboInput(attackData.Count);
+                return;
+            }
 
-                    // すでに今回の攻撃で攻撃済みなら無視
-                    if (hitEnemies.Contains(enemy))continue;
+            if (!_comboController.StartCombo())
+            {
+                return;
+            }
 
-                    hitEnemies.Add(enemy);
+            BeginAttack();
+        }
 
-                    // 今のところ仕様が決まっていないので、ダメージはプレイヤーの攻撃力と攻撃モーションによって決まるようにする
-                    int damage =_currentAttackData.additionalDamage + _playerStatus.CurrentAttack;
+        /// <summary>
+        /// 現在のコンボ段数の攻撃を開始する
+        /// </summary>
+        private void BeginAttack()
+        {
+            int comboIndex = _comboController.ComboIndex;
 
-                    // マルチでは全員の画面の敵にダメージが入るようにNetworkGameStateを通す
-                    NetworkGameState.DamageEnemy(enemy, damage);
+            if (comboIndex < 0 || comboIndex >= attackData.Count)
+            {
+                Debug.LogError("PlayerAttack：コンボ段数に対応する攻撃データがありません。", this);
+                CancelAttack();
+                return;
+            }
 
-                }
+            _comboController.BeginCurrentAttack();
+
+            _isAttackHitActive = false;
+            _currentAttackData = attackData[comboIndex];
+
+            _attackHitbox.BeginHit();
+
+            _comboElapsedTime = 0f;
+            _comboTimerActive = true;
+
+            _isAttackAnimationEnded = false;
+            _isComboInputDeadlineEnded = false;
+
+            Debug.Log($"{comboIndex + 1}段目の攻撃を開始");
+
+            if (_playerAnimation != null)
+            {
+                _playerAnimation.PlayerAttackAnimator(comboIndex);
+            }
+            else
+            {
+                Debug.LogError("PlayerAttack：PlayerAnimation が見つかりません。", this);
+                CancelAttack();
             }
         }
+
+        private void UpdateComboInputTimer()
+        {
+            if (!_comboTimerActive || _currentAttackData == null)
+                return;
+
+            _comboElapsedTime += Time.deltaTime;
+
+            float startDelay = _currentAttackData.comboInputStartDelay;
+            float duration = _currentAttackData.comboInputDuration;
+
+            // 入力受付開始
+            if (!_comboController.IsComboInputWindowOpen && _comboElapsedTime >= startDelay)
+            {
+                _comboController.OpenComboInputWindow();
+                Debug.Log("コンボ入力受付開始");
+            }
+
+            // 入力受付終了
+            if (_comboElapsedTime >= startDelay + duration)
+            {
+                _comboController.CloseComboInputWindow();
+
+                _comboTimerActive = false;
+
+                _isComboInputDeadlineEnded = true;
+
+                _isAttackAnimationEnded = true;
+
+                Debug.Log("コンボ入力受付終了");
+
+                TryCompleteAttack();
+            }
+        }
+
+        private void TryCompleteAttack()
+        {
+            if (!_isAttackAnimationEnded)
+                return;
+
+            if (!_isComboInputDeadlineEnded)
+                return;
+
+            if (_comboController.TryAdvanceCombo(attackData.Count))
+            {
+                BeginAttack();
+                return;
+            }
+
+            float duration = _currentAttackData.comboInputDuration;
+
+            _currentAttackData = null;
+
+            _comboController.FinishCombo(duration);
+
+            _actionPriority?.EndAction();
+        }
+
+        /// <summary>
+        /// 攻撃判定を実行する
+        /// </summary>
+        public void AttackHit()
+        {
+            if (!_isAttackHitActive ||
+                _currentAttackData == null ||
+                _attackHitbox == null)
+            {
+                return;
+            }
+
+            _attackHitbox.AttackHit(
+                _attackPoint,
+                _currentAttackData,
+                _playerStatus);
+        }
         
-        //--------------------------------------------------
-        //Animation Eventで攻撃判定開始
-        //--------------------------------------------------
+        /// <summary>
+        /// アニメーションイベントから呼び出す攻撃判定の開始
+        /// </summary>
         public void StartAttackHit()
         {
             _isAttackHitActive = true;
         }
 
 
-        //------------------------------------------------------
-        //プレイヤーの攻撃アニメーションが終わるときに呼び出される
-        //------------------------------------------------------
-        public void AttackEnd()
+        /// <summary>
+        /// アニメーションイベントから呼び出すコンボ入力受付の開始
+        /// </summary>
+        public void OpenComboInputWindow()
+        {
+            _comboController?.OpenComboInputWindow();
+        }
+
+
+        /// <summary>
+        /// アニメーションイベントから呼び出すコンボ入力受付の終了
+        /// </summary>
+        public void CloseComboInputWindow()
+        {
+            _comboController?.CloseComboInputWindow();
+        }
+
+
+        /// <summary>
+        /// 攻撃アニメーション終了時に呼び出す
+        /// </summary>
+        public void EndAttackHit()
+        {
+            _isAttackHitActive = false;
+            _attackHitbox?.EndHit();
+        }
+
+        //public void AttackAnimationEnd()
+        //{
+        //    Debug.Log("攻撃アニメーション終了");
+
+        //    _isAttackAnimationEnded = true;
+
+        //    TryCompleteAttack();
+        //}
+
+
+        /// <summary>
+        /// 回避などによって攻撃を中断する
+        /// </summary>
+
+        public void CancelAttack()
         {
             _isAttackHitActive = false;
             _currentAttackData = null;
 
-            hitEnemies.Clear();
+            _attackHitbox?.EndHit();
 
-            // プレイヤーのAttackアクション終了
-            _actionPriority.EndAction();
+            // コンボの進行と予約をリセットする
+            _comboController?.CancelCombo();
+
+            Debug.Log("攻撃を中断しました");
         }
 
-        //------------------------------------------------------
-        //プレイヤーの前に壁があるかどうかを判定する
-        //------------------------------------------------------
-        private bool IsWallInFront(EnemyBase enemy)
-        {
-            Vector3 PlayerPosition = transform.position;
-            Vector3 targetPosition = enemy.transform.position;
-
-            Vector3 direction = targetPosition - PlayerPosition;
-            float distance = direction.magnitude;
-
-            return Physics.Raycast(
-                PlayerPosition,
-                direction.normalized,
-                distance,
-                _wallLayer,
-                QueryTriggerInteraction.Ignore
-            );
-        }
     }
-
-    
-
-
 }
-
-
