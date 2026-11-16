@@ -10344,6 +10344,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: MapManager
       objectReference: {fileID: 0}
+    - target: {fileID: 7255259616830158991, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: m_AgentTypeID
+      value: -1372625422
+      objectReference: {fileID: 0}
+    - target: {fileID: 7255259616830158991, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: m_NavMeshData
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13849,6 +13857,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapCreateSceneName: Katayama_ren
   testPlaySceneName: Testplay
+  keepEditSceneLoaded: 1
   playerPrefab: {fileID: 1010391631509636739, guid: 936e8d781bab5ee40aaef89b30a096e9, type: 3}
   startPoint: {fileID: 0}
   mapManager: {fileID: 2089892387724033268}
