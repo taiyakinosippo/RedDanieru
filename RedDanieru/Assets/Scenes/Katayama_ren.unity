@@ -10310,7 +10310,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: objectCosts.Array.data[10].type
-      value: 13
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: objectPrefabs.Array.data[10].type
