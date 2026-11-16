@@ -10300,30 +10300,6 @@ PrefabInstance:
       propertyPath: placementCategoryUI
       value: 
       objectReference: {fileID: 7615674705698890258}
-    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
-      propertyPath: objectCosts.Array.size
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
-      propertyPath: objectPrefabs.Array.size
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
-      propertyPath: objectCosts.Array.data[10].type
-      value: 14
-      objectReference: {fileID: 0}
-    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
-      propertyPath: objectPrefabs.Array.data[10].type
-      value: 14
-      objectReference: {fileID: 0}
-    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
-      propertyPath: objectPrefabs.Array.data[10].prefab
-      value: 
-      objectReference: {fileID: 5132490353647150370, guid: a8da217fe5c34494b882e92efe4f478a, type: 3}
-    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
-      propertyPath: objectCosts.Array.data[10].costChange
-      value: -100
-      objectReference: {fileID: 0}
     - target: {fileID: 2170924399791435939, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
