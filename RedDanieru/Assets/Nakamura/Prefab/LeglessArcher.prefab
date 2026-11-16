@@ -179,6 +179,7 @@ GameObject:
   - component: {fileID: 2124128738187579061}
   - component: {fileID: 7290488620132254286}
   - component: {fileID: 3812360961753854230}
+  - component: {fileID: 1407935232114016640}
   m_Layer: 3
   m_Name: LeglessArcher
   m_TagString: Enemy
@@ -186,6 +187,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1407935232114016640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3579314766830224434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &37434704901308122
 Transform:
   m_ObjectHideFlags: 0
@@ -392,7 +405,7 @@ PrefabInstance:
     - target: {fileID: 8735932539965035658, guid: cc2904f8420d54e45b80616562ff859c, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 9100000, guid: ae3704d6f101480bbce0f63a9a971eca, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
