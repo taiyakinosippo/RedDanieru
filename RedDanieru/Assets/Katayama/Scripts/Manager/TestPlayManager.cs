@@ -770,6 +770,7 @@ public class TestPlayManager : MonoBehaviour
     // 編集マップを復元
     //==================================================
 
+
     private IEnumerator RestoreEditMap()
     {
         Debug.Log("================================");
@@ -778,8 +779,7 @@ public class TestPlayManager : MonoBehaviour
 
         yield return null;
 
-        mapManager =
-            FindObjectOfType<MapManager>();
+        mapManager = FindObjectOfType<MapManager>();
 
         if (mapManager == null)
         {
@@ -799,6 +799,7 @@ public class TestPlayManager : MonoBehaviour
             yield break;
         }
 
+        // 編集マップを復元
         mapManager.LoadDungeon(
             pendingEditData,
             false
@@ -806,47 +807,58 @@ public class TestPlayManager : MonoBehaviour
 
         yield return null;
 
+        // UI設定
         if (mapCreateUI != null)
-        {
             mapCreateUI.SetActive(true);
-        }
 
         if (otherEditUI != null)
-        {
             otherEditUI.SetActive(true);
-        }
 
         if (testPlayUI != null)
-        {
             testPlayUI.SetActive(false);
-        }
 
         if (postConfirmUI != null)
-        {
             postConfirmUI.SetActive(false);
-        }
 
         if (postSettingUI != null)
-        {
             postSettingUI.SetActive(false);
-        }
 
+        // カメラ設定
         if (editCamera != null)
-        {
             editCamera.gameObject.SetActive(true);
-        }
 
         if (playerCamera != null)
-        {
             playerCamera.gameObject.SetActive(false);
+
+        // 削除管理スクリプトを再取得
+        ObjectDeleteManager deleteManager =
+            FindObjectOfType<ObjectDeleteManager>(true);
+
+        if (deleteManager != null)
+        {
+            deleteManager.enabled = true;
+
+            deleteManager.ResetDeleteState();
+
+            Debug.Log(
+                "ObjectDeleteManagerを復帰しました"
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "ObjectDeleteManagerが見つかりません"
+            );
         }
 
+        // 編集画面への復帰完了
         returnToEdit = false;
 
         Debug.Log(
             "編集画面への復帰完了"
         );
     }
+
 
     //==================================================
     // ゴール警告表示

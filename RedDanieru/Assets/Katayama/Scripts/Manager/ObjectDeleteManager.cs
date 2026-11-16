@@ -53,6 +53,12 @@ public class ObjectDeleteManager : MonoBehaviour
     /// </summary>
     private void HighlightObject()
     {
+        if (mainCamera == null || mapManager == null)
+        {
+            ClearSelection();
+            return;
+        }
+
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
         if (!Physics.Raycast(ray, out RaycastHit hit))
@@ -142,5 +148,23 @@ public class ObjectDeleteManager : MonoBehaviour
             currentObject.Deselect();
             currentObject = null;
         }
+    }
+
+    /// <summary>
+    /// •ÒW‰æ–Ê•œ‹A‚Ì‰Šú‰»
+    /// </summary>
+    public void ResetDeleteState()
+    {
+        ClearSelection();
+
+        lastDeletePos = new Vector3Int(
+            int.MinValue,
+            int.MinValue,
+            int.MinValue
+        );
+
+        isEditing = false;
+
+        Debug.Log("íœó‘Ô‚ğ‰Šú‰»‚µ‚Ü‚µ‚½");
     }
 }

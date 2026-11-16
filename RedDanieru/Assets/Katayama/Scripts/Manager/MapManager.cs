@@ -2214,87 +2214,67 @@ public class MapManager : MonoBehaviour
     //==================================================
 
 
+
     public void LoadDungeon(
         DungeonMapData data,
         bool enableEnemyMovement = true)
     {
         if (data == null)
         {
-            Debug.LogError(
-                "DungeonMapDataがnullです。"
-            );
-
+            Debug.LogError("DungeonMapDataがnullです。");
             return;
         }
 
         // ダンジョン読み込み開始
         isLoadingDungeon = true;
 
-        width = data.width;
-        height = data.height;
-        depth = data.depth;
+        //==================================================
+        // 古い配置オブジェクトを削除
+        //==================================================
 
-        map =
-            new TileType[
-                width,
-                height,
-                depth
-            ];
+        // 配列を初期化する前に古いオブジェクトを取得する
+        HashSet<GameObject> oldObjects = new HashSet<GameObject>();
 
-        placedObjectTypes =
-            new PlaceObjectType[
-                width,
-                height,
-                depth
-            ];
+        if (placedObjects != null)
+        {
+            for (int x = 0; x < placedObjects.GetLength(0); x++)
+            {
+                for (int y = 0; y < placedObjects.GetLength(1); y++)
+                {
+                    for (int z = 0; z < placedObjects.GetLength(2); z++)
+                    {
+                        GameObject obj = placedObjects[x, y, z];
 
-        wallObjects =
-            new GameObject[
-                width,
-                height,
-                depth
-            ];
+                        if (obj != null)
+                        {
+                            oldObjects.Add(obj);
+                        }
+                    }
+                }
+            }
+        }
 
-        floorObjects =
-            new GameObject[
-                width,
-                height,
-                depth
-            ];
+        // 複数マスに登録されている同一オブジェクトも1回だけ削除
+        foreach (GameObject obj in oldObjects)
+        {
+            if (obj != null)
+            {
+                obj.SetActive(false);
+                Destroy(obj);
+            }
+        }
 
-        placedObjects =
-            new GameObject[
-                width,
-                height,
-                depth
-            ];
-
-        diagonalWallFloor =
-            new bool[
-                width,
-                height,
-                depth
-            ];
-
-        placedObjectCostChanges =
-            new int[
-                width,
-                height,
-                depth
-            ];
-
+        //==================================================
         // 敵を停止
+        //==================================================
+
         GameObject[] enemies =
-            GameObject.FindGameObjectsWithTag(
-                "Enemy"
-            );
+            GameObject.FindGameObjectsWithTag("Enemy");
 
         foreach (GameObject enemy in enemies)
         {
             NavMeshAgent[] agents =
-                enemy.GetComponentsInChildren<
-                    NavMeshAgent
-                >();
+                enemy.GetComponentsInChildren<NavMeshAgent>(true);
 
             foreach (NavMeshAgent agent in agents)
             {
@@ -2310,20 +2290,36 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // 現在のマップを削除
-        for (
-            int i = transform.childCount - 1;
-            i >= 0;
-            i--
-        )
+        //==================================================
+        // MapManagerの子オブジェクトを削除
+        //==================================================
+
+        for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            Destroy(
-                transform.GetChild(i).gameObject
-            );
+            GameObject child = transform.GetChild(i).gameObject;
+
+            child.SetActive(false);
+            Destroy(child);
         }
 
         // Hierarchyで指定したスタート地点オブジェクトは保持する
         respawnAreaObject = null;
+
+        //==================================================
+        // マップサイズと配列を初期化
+        //==================================================
+
+        width = data.width;
+        height = data.height;
+        depth = data.depth;
+
+        map = new TileType[width, height, depth];
+        placedObjectTypes = new PlaceObjectType[width, height, depth];
+        wallObjects = new GameObject[width, height, depth];
+        floorObjects = new GameObject[width, height, depth];
+        placedObjects = new GameObject[width, height, depth];
+        diagonalWallFloor = new bool[width, height, depth];
+        placedObjectCostChanges = new int[width, height, depth];
 
         //==================================================
         // タイルを復元
@@ -2337,15 +2333,9 @@ public class MapManager : MonoBehaviour
             {
                 for (int x = 0; x < width; x++)
                 {
-                    map[x, y, z] =
-                        (TileType)data.tiles[index++];
+                    map[x, y, z] = (TileType)data.tiles[index++];
 
-                    Vector3Int pos =
-                        new Vector3Int(
-                            x,
-                            y,
-                            z
-                        );
+                    Vector3Int pos = new Vector3Int(x, y, z);
 
                     if (map[x, y, z] == TileType.Wall)
                     {
@@ -2359,7 +2349,6 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // 斜め壁を再判定
         UpdateDiagonalWalls();
 
         //==================================================
@@ -2370,31 +2359,24 @@ public class MapManager : MonoBehaviour
         {
             foreach (ObjectData objData in data.objects)
             {
-                Vector3Int pos =
-                    new Vector3Int(
-                        objData.x,
-                        objData.y,
-                        objData.z
-                    );
+                Vector3Int pos = new Vector3Int(
+                    objData.x,
+                    objData.y,
+                    objData.z
+                );
 
                 if (!IsInsideMap(pos))
                 {
                     continue;
                 }
 
-                // すでに占有されている場合はスキップ
                 if (placedObjects[pos.x, pos.y, pos.z] != null)
                 {
                     continue;
                 }
 
-                // 基準マスから配置
-                PlaceObject(
-                    pos,
-                    objData.type
-                );
+                PlaceObject(pos, objData.type);
 
-                // 実際に配置できたか確認
                 GameObject placedObject =
                     placedObjects[pos.x, pos.y, pos.z];
 
@@ -2403,18 +2385,12 @@ public class MapManager : MonoBehaviour
                     Debug.LogWarning(
                         "オブジェクトの復元に失敗しました: " + pos
                     );
-
                     continue;
                 }
 
-                // 保存された占有マス数を取得
-                int savedWidth =
-                    Mathf.Max(1, objData.gridWidth);
+                int savedWidth = Mathf.Max(1, objData.gridWidth);
+                int savedDepth = Mathf.Max(1, objData.gridDepth);
 
-                int savedDepth =
-                    Mathf.Max(1, objData.gridDepth);
-
-                // 配置Prefabの占有サイズと保存データを確認
                 PlaceObject placeObject =
                     placedObject.GetComponent<PlaceObject>();
 
@@ -2431,7 +2407,6 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // 配置したWallを含めて再判定
         UpdateDiagonalWalls();
 
         //==================================================
@@ -2442,27 +2417,24 @@ public class MapManager : MonoBehaviour
         {
             foreach (ObjectData objData in data.objects)
             {
-                Vector3Int pos =
-                    new Vector3Int(
-                        objData.x,
-                        objData.y,
-                        objData.z
-                    );
+                Vector3Int pos = new Vector3Int(
+                    objData.x,
+                    objData.y,
+                    objData.z
+                );
 
                 if (!IsInsideMap(pos))
                 {
                     continue;
                 }
 
-                GameObject obj =
-                    placedObjects[pos.x, pos.y, pos.z];
+                GameObject obj = placedObjects[pos.x, pos.y, pos.z];
 
                 if (obj == null)
                 {
                     continue;
                 }
 
-                // 実際の占有範囲を取得
                 PlaceObject placeObject =
                     obj.GetComponent<PlaceObject>();
 
@@ -2475,24 +2447,18 @@ public class MapManager : MonoBehaviour
                     gridDepth = placeObject.GridDepth;
                 }
 
-                // 占有するすべてのマスにコストを登録
+                Vector3Int startPos =
+                    GetFootprintStartPosition(pos, gridWidth, gridDepth);
+
                 for (int x = 0; x < gridWidth; x++)
                 {
                     for (int z = 0; z < gridDepth; z++)
                     {
-                        Vector3Int startPos =
-                        GetFootprintStartPosition(
-                            pos,
-                            gridWidth,
-                            gridDepth
+                        Vector3Int checkPos = new Vector3Int(
+                            startPos.x + x,
+                            pos.y,
+                            startPos.z + z
                         );
-
-                        Vector3Int checkPos =
-                            new Vector3Int(
-                                startPos.x + x,
-                                pos.y,
-                                startPos.z + z
-                            );
 
                         if (!IsInsideMap(checkPos))
                         {
@@ -2519,13 +2485,17 @@ public class MapManager : MonoBehaviour
         }
 
         //==================================================
-        // 保存されていた現在コストを復元
+        // コストを復元
         //==================================================
 
         if (dungeonCostManager != null)
         {
             dungeonCostManager.SetCost(data.dungeonCost);
         }
+
+        //==================================================
+        // NavMesh
+        //==================================================
 
         BuildNavigation();
 
@@ -2534,18 +2504,19 @@ public class MapManager : MonoBehaviour
             EnableEnemyMovement();
         }
 
+        //==================================================
+        // リスポーン
+        //==================================================
+
         CreateRespawnObjects(data);
         CreateOuterBoundaryWalls();
-
-        // 読み込み後もスタート地点を入口に合わせる
         UpdateStartPointPosition();
 
         //==================================================
-        // 松明を復元
+        // 松明
         //==================================================
 
-        TorchLight torchLight =
-            FindObjectOfType<TorchLight>();
+        TorchLight torchLight = FindObjectOfType<TorchLight>();
 
         if (torchLight != null)
         {
@@ -2556,8 +2527,7 @@ public class MapManager : MonoBehaviour
 
         mapRevision++;
 
-        SaveManager saveManager =
-            FindObjectOfType<SaveManager>();
+        SaveManager saveManager = FindObjectOfType<SaveManager>();
 
         if (saveManager != null)
         {
@@ -2567,10 +2537,9 @@ public class MapManager : MonoBehaviour
         // ダンジョン読み込み終了
         isLoadingDungeon = false;
 
-        Debug.Log(
-            "ダンジョン復元完了"
-        );
+        Debug.Log("ダンジョン復元完了");
     }
+
 
 
     //==================================================
@@ -2581,27 +2550,24 @@ public class MapManager : MonoBehaviour
 
 
 
+
     public void PlaceObject(Vector3Int pos, PlaceObjectType type)
     {
-        // マップ外なら配置しない
         if (!IsInsideMap(pos))
             return;
 
-        // Goalは1つだけ配置可能
         if (type == PlaceObjectType.Goal && HasGoal())
         {
             Debug.LogWarning("Goalは1つしか配置できません");
             return;
         }
 
-        // 壁は従来どおり1マスで配置
         if (type == PlaceObjectType.Wall)
         {
             PlaceDiggableWall(pos);
             return;
         }
 
-        // Prefabを取得
         GameObject prefab = GetObjectPrefab(type);
 
         if (prefab == null)
@@ -2610,34 +2576,30 @@ public class MapManager : MonoBehaviour
             return;
         }
 
-        // Prefabから占有マス数を取得
         int gridWidth;
         int gridDepth;
 
         GetObjectFootprint(type, out gridWidth, out gridDepth);
 
-        // 配置範囲全体を確認
         if (!CanPlaceObjectArea(pos, type))
             return;
 
-        // 配置コストを取得
         int costChange = GetObjectCostChange(type);
 
-        // 通常配置時のみコストを確認
         if (!isLoadingDungeon)
         {
             if (!CanPayPlacementCost(costChange))
                 return;
         }
 
-        // オブジェクトを生成
+        // MapManagerの子として生成する
         GameObject obj = Instantiate(
             prefab,
             GetObjectWorldPosition(pos),
-            Quaternion.identity
+            Quaternion.identity,
+            transform
         );
 
-        // Enemyの場合
         if (type == PlaceObjectType.Enemy)
         {
             EnemyBase enemy = obj.GetComponent<EnemyBase>();
@@ -2649,19 +2611,16 @@ public class MapManager : MonoBehaviour
         }
         else
         {
-            // オブジェクトの位置と床への位置合わせ
             obj.transform.localScale = prefab.transform.localScale;
             AlignObjectToFloor(obj, pos);
         }
 
-        // Goalの向き
         if (type == PlaceObjectType.Goal &&
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Katayama_ren")
+            SceneManager.GetActiveScene().name == "Katayama_ren")
         {
             obj.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
 
-        // Rigidbodyを固定
         Rigidbody[] rigidbodies =
             obj.GetComponentsInChildren<Rigidbody>(true);
 
@@ -2670,16 +2629,14 @@ public class MapManager : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        // NavMeshAgentを無効化
-        UnityEngine.AI.NavMeshAgent[] agents =
-            obj.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
+        NavMeshAgent[] agents =
+            obj.GetComponentsInChildren<NavMeshAgent>(true);
 
-        foreach (UnityEngine.AI.NavMeshAgent agent in agents)
+        foreach (NavMeshAgent agent in agents)
         {
             agent.enabled = false;
         }
 
-        // 基準マスを設定
         PlaceObject placeObject = obj.GetComponent<PlaceObject>();
 
         if (placeObject != null)
@@ -2687,14 +2644,9 @@ public class MapManager : MonoBehaviour
             placeObject.GridPosition = pos;
         }
 
-        // 中心基準の占有範囲を取得
-        Vector3Int startPos = GetFootprintStartPosition(
-            pos,
-            gridWidth,
-            gridDepth
-        );
+        Vector3Int startPos =
+            GetFootprintStartPosition(pos, gridWidth, gridDepth);
 
-        // 占有範囲の全マスにオブジェクトを登録
         for (int x = 0; x < gridWidth; x++)
         {
             for (int z = 0; z < gridDepth; z++)
@@ -2709,15 +2661,16 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // コストを反映
         if (!isLoadingDungeon)
         {
             ApplyPlacementCost(costChange);
         }
 
-        // マップ変更を通知
         MarkMapChanged();
+
+        ClosePlacementList();
     }
+
 
 
 
@@ -2999,28 +2952,27 @@ public class MapManager : MonoBehaviour
 
 
 
+
     public void DeleteObject(Vector3Int pos)
     {
-        // マップ外なら削除しない
         if (!IsInsideMap(pos))
-        {
             return;
-        }
 
-        // クリックしたマスのオブジェクトを取得
         GameObject targetObject =
             placedObjects[pos.x, pos.y, pos.z];
 
         if (targetObject == null)
-        {
             return;
-        }
 
-        // 削除対象のコストを取得
         int costChange =
             placedObjectCostChanges[pos.x, pos.y, pos.z];
 
-        // 配置されているすべてのマスを確認して解放
+        Debug.Log(
+            $"削除対象: {targetObject.name} / " +
+            $"InstanceID: {targetObject.GetInstanceID()}"
+        );
+
+        // 占有しているすべてのマスの登録を解除
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -3037,7 +2989,8 @@ public class MapManager : MonoBehaviour
             }
         }
 
-        // オブジェクトを削除
+        // 表示を即座に消してから破棄
+        targetObject.SetActive(false);
         Destroy(targetObject);
 
         // コストを返却
@@ -3046,12 +2999,13 @@ public class MapManager : MonoBehaviour
             ApplyPlacementCost(-costChange);
         }
 
-        // 周囲の斜め壁を更新
         UpdateDiagonalWall(pos);
 
-        // マップ変更を通知
         MarkMapChanged();
+
+        Debug.Log("オブジェクト削除完了");
     }
+
 
 
 
