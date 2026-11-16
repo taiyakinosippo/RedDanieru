@@ -193,9 +193,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4718867276245286036}
   - {fileID: 1578851261135212671}
   - {fileID: 7325292885556588501}
+  - {fileID: 4718867276245286036}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &7442050115661319743
@@ -274,6 +274,7 @@ MonoBehaviour:
   accumulationDecreaseSpeed: 0.5
   poisonStatusDamage: 10
   poisonStatusDuration: 60
+  sourceStickerState: {fileID: 0}
 --- !u!136 &3441380885310142993
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -696,7 +697,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1324908003623559813, guid: 98620238af6d1fd498ed663bb9a11795, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.1
+      value: -0.100000024
       objectReference: {fileID: 0}
     - target: {fileID: 1324908003623559813, guid: 98620238af6d1fd498ed663bb9a11795, type: 3}
       propertyPath: m_LocalRotation.w

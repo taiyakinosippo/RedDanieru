@@ -106,6 +106,8 @@ MonoBehaviour:
     prefab: {fileID: 820004888849100490, guid: ecb4544a8596a004fa3de776b35c867f, type: 3}
   - type: 13
     prefab: {fileID: 4245915190017150719, guid: cbc814ca6b730954b8a5e3641bde01c9, type: 3}
+  - type: 14
+    prefab: {fileID: 5132490353647150370, guid: a8da217fe5c34494b882e92efe4f478a, type: 3}
   objectCosts:
   - type: 0
     costChange: 0
@@ -126,6 +128,8 @@ MonoBehaviour:
   - type: 12
     costChange: 0
   - type: 13
+    costChange: -100
+  - type: 14
     costChange: -100
   dungeonCostManager: {fileID: 0}
   placementCategoryUI: {fileID: 0}

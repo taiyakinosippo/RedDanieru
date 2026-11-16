@@ -124,7 +124,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 5.076524, z: 3}
+  m_Size: {x: 2.5, y: 5.076524, z: 2.5}
   m_Center: {x: -0.03144926, y: 1.6447163, z: -0.022782564}
 --- !u!208 &7117611441404332581
 NavMeshObstacle:
@@ -136,11 +136,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 1.5, y: 2.538, z: 1.5}
+  m_Extents: {x: 1.32, y: 2.51, z: 1.36}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: -0.031000001, y: 1.6450001, z: -0.023000002}
+  m_Center: {x: -0.06, y: 1.6450001, z: -0.023000002}
   m_TimeToStationary: 0.5
 --- !u!114 &-6800754579986921972
 MonoBehaviour:
@@ -156,6 +156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 0
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!1001 &1552941180397555986
 PrefabInstance:

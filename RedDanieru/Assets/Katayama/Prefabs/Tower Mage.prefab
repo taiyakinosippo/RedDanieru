@@ -652,7 +652,6 @@ MonoBehaviour:
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
-  currentState: 0
   currentHp: 0
   trackingTimer: 0
   respawnPos: {x: 0, y: 0, z: 0}
@@ -663,7 +662,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   player: {fileID: 0}
-  goalMaxHP: 900
+  goalMaxHP: 1200
   destroyObjectsOnBreak:
   - {fileID: 186884}
 --- !u!195 &8446558480016789551

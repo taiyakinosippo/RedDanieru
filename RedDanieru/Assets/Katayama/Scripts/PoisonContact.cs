@@ -13,66 +13,66 @@ public class PoisonContact : MonoBehaviour
         Cooldown
     }
 
-    [Header("起動範囲設定")]
+    [Header("起動範囲")]
     [SerializeField] private float activationRange = 5f;
 
-    [Header("毒ガス範囲設定")]
+    [Header("毒ガス範囲")]
     [SerializeField] private float poisonRange = 5f;
 
-    [Header("発射時間設定")]
+    [Header("毒ガスの動作時間")]
     [SerializeField] private float warningDuration = 1f;
     [SerializeField] private float sprayingDuration = 10f;
     [SerializeField] private float cooldownDuration = 5f;
 
-    [Header("毒ガスダメージ設定")]
+    [Header("毒ガスダメージ")]
     [SerializeField] private int gasDamage = 50;
     [SerializeField] private float gasDamageInterval = 1f;
 
     [Header("毒ガスエフェクト")]
     [SerializeField] private GameObject poisonGasEffectPrefab;
 
-    [Header("毒の蓄積設定")]
+    [Header("毒状態設定")]
     [SerializeField] private float poisonAccumulationTime = 5f;
     [SerializeField] private float accumulationDecreaseSpeed = 0.5f;
-
-    [Header("毒状態設定")]
     [SerializeField] private int poisonStatusDamage = 10;
     [SerializeField] private float poisonStatusDuration = 60f;
 
-    private StickerState sourceStickerState;
-
-    private GameObject poisonGasEffectInstance;
+    [Header("ステッカー状態")]
+    [SerializeField] private StickerState sourceStickerState;
 
     private GasState currentState = GasState.Waiting;
 
     private float stateTimer;
-
-    // キャラクターに直接貼られた場合のダメージタイマー
     private float characterDamageTimer;
 
+    private GameObject poisonGasEffect;
+
+    // 毒ガスを発生させているオブジェクト
+    private static readonly List<PoisonContact> activeGasContacts =
+        new List<PoisonContact>();
+
+    // 対象ごとの毒蓄積時間
     private class TargetData
     {
         public float accumulation;
     }
 
-    // 全毒ガスで共有する対象情報
+    // 複数の毒ガスで蓄積時間を共有
     private static readonly Dictionary<GameObject, TargetData> sharedTargets =
         new Dictionary<GameObject, TargetData>();
 
-    // 全毒ガスで共有するダメージタイマー
+    // 複数の毒ガスでダメージ間隔を共有
     private static readonly Dictionary<GameObject, float> gasDamageTimers =
         new Dictionary<GameObject, float>();
 
-    // 有効な毒ガス一覧
-    private static readonly List<PoisonContact> activeGasContacts =
-        new List<PoisonContact>();
-
-    // LateUpdateの重複実行防止
     private static int lastProcessedFrame = -1;
 
     private void Awake()
     {
-        sourceStickerState = GetComponent<StickerState>();
+        if (sourceStickerState == null)
+        {
+            sourceStickerState = GetComponent<StickerState>();
+        }
     }
 
     private void OnEnable()
@@ -86,27 +86,21 @@ public class PoisonContact : MonoBehaviour
     private void OnDisable()
     {
         activeGasContacts.Remove(this);
-
-        currentState = GasState.Waiting;
-        stateTimer = 0f;
-        characterDamageTimer = 0f;
-
         UpdatePoisonEffect(false);
     }
 
     private void Update()
     {
-        bool hasPoison =
-            sourceStickerState != null &&
-            sourceStickerState.currentSticker == Sticker.Poison;
-
-        if (!hasPoison)
+        if (sourceStickerState == null)
         {
-            currentState = GasState.Waiting;
-            stateTimer = 0f;
-            characterDamageTimer = 0f;
+            sourceStickerState = GetComponent<StickerState>();
+        }
 
-            UpdatePoisonEffect(false);
+        // 毒ステッカー以外なら毒ガスを停止
+        if (sourceStickerState == null ||
+            sourceStickerState.currentSticker != Sticker.Poison)
+        {
+            ResetGas();
             return;
         }
 
@@ -115,47 +109,134 @@ public class PoisonContact : MonoBehaviour
 
         if (character != null)
         {
-            // キャラクターに貼られている場合は毒ガスを使用しない
-            currentState = GasState.Waiting;
-            stateTimer = 0f;
-
+            // キャラクターに直接貼られた場合は毒状態にしない
+            activeGasContacts.Remove(this);
             UpdatePoisonEffect(false);
 
-            // 貼られている間だけ継続ダメージ
-            UpdateCharacterDamage(character);
+            characterDamageTimer += Time.deltaTime;
+
+            if (characterDamageTimer >= gasDamageInterval)
+            {
+                characterDamageTimer = 0f;
+                DamageTarget(character, gasDamage);
+            }
+
             return;
         }
 
-        // オブジェクト・トラップの場合は毒ガスを起動
+        characterDamageTimer = 0f;
+
+        UpdateGasState();
+    }
+
+    //==================================================
+    // 毒ガス状態管理
+    //==================================================
+
+    private void UpdateGasState()
+    {
         switch (currentState)
         {
             case GasState.Waiting:
-                UpdateWaiting();
+
+                if (IsPlayerInActivationRange())
+                {
+                    currentState = GasState.Warning;
+                    stateTimer = 0f;
+                }
+
                 break;
 
             case GasState.Warning:
-                UpdateWarning();
+
+                stateTimer += Time.deltaTime;
+
+                if (stateTimer >= warningDuration)
+                {
+                    currentState = GasState.Spraying;
+                    stateTimer = 0f;
+
+                    if (!activeGasContacts.Contains(this))
+                    {
+                        activeGasContacts.Add(this);
+                    }
+
+                    UpdatePoisonEffect(true);
+                }
+
                 break;
 
             case GasState.Spraying:
-                UpdateSpraying();
+
+                stateTimer += Time.deltaTime;
+
+                UpdatePoisonEffect(true);
+
+                if (stateTimer >= sprayingDuration)
+                {
+                    currentState = GasState.Cooldown;
+                    stateTimer = 0f;
+
+                    activeGasContacts.Remove(this);
+                    UpdatePoisonEffect(false);
+                }
+
                 break;
 
             case GasState.Cooldown:
-                UpdateCooldown();
+
+                stateTimer += Time.deltaTime;
+
+                if (stateTimer >= cooldownDuration)
+                {
+                    currentState = GasState.Waiting;
+                    stateTimer = 0f;
+                }
+
                 break;
         }
-
-        UpdatePoisonEffect(currentState == GasState.Spraying);
     }
 
-    // PlayerまたはEnemyのオブジェクトを取得
+    //==================================================
+    // 起動範囲内にPlayerがいるか確認
+    //==================================================
+
+    private bool IsPlayerInActivationRange()
+    {
+        Collider[] colliders = Physics.OverlapSphere(
+            transform.position,
+            activationRange
+        );
+
+        foreach (Collider col in colliders)
+        {
+            if (col == null)
+                continue;
+
+            PlayerStatus player =
+                col.GetComponentInParent<PlayerStatus>();
+
+            if (player != null)
+                return true;
+        }
+
+        return false;
+    }
+
+    //==================================================
+    // キャラクターに直接貼られているか確認
+    //==================================================
+
     private GameObject GetCharacterRoot()
     {
         Transform current = transform;
 
         while (current != null)
         {
+            // ゴールはキャラクターとして扱わない
+            if (current.GetComponent<GoalEnemyBase>() != null)
+                return null;
+
             if (current.GetComponent<PlayerStatus>() != null ||
                 current.GetComponent<EnemyBase>() != null)
             {
@@ -168,193 +249,108 @@ public class PoisonContact : MonoBehaviour
         return null;
     }
 
-    // キャラクターに直接貼られた場合の継続ダメージ
-    private void UpdateCharacterDamage(GameObject target)
-    {
-        characterDamageTimer -= Time.deltaTime;
+    //==================================================
+    // 毒ガスの共有処理
+    //==================================================
 
-        if (characterDamageTimer > 0f)
-            return;
-
-        DamageTarget(target, gasDamage);
-
-        characterDamageTimer = Mathf.Max(
-            gasDamageInterval,
-            0.01f
-        );
-    }
-
-    // 待機中：Playerが起動範囲に入ったか確認
-    private void UpdateWaiting()
-    {
-        if (IsPlayerInActivationRange())
-        {
-            currentState = GasState.Warning;
-            stateTimer = warningDuration;
-        }
-    }
-
-    // 発動予兆
-    private void UpdateWarning()
-    {
-        stateTimer -= Time.deltaTime;
-
-        if (stateTimer <= 0f)
-        {
-            currentState = GasState.Spraying;
-            stateTimer = sprayingDuration;
-        }
-    }
-
-    // 毒ガス噴射
-    private void UpdateSpraying()
-    {
-        stateTimer -= Time.deltaTime;
-
-        if (stateTimer <= 0f)
-        {
-            currentState = GasState.Cooldown;
-            stateTimer = cooldownDuration;
-
-            UpdatePoisonEffect(false);
-        }
-    }
-
-    // クールタイム
-    private void UpdateCooldown()
-    {
-        stateTimer -= Time.deltaTime;
-
-        if (stateTimer <= 0f)
-        {
-            currentState = GasState.Waiting;
-            stateTimer = 0f;
-        }
-    }
-
-    // Playerが起動範囲内にいるか確認
-    private bool IsPlayerInActivationRange()
-    {
-        Collider[] nearbyObjects = Physics.OverlapSphere(
-            transform.position,
-            activationRange
-        );
-
-        foreach (Collider col in nearbyObjects)
-        {
-            Transform current = col.transform;
-
-            while (current != null)
-            {
-                if (current.CompareTag("Player"))
-                    return true;
-
-                current = current.parent;
-            }
-        }
-
-        return false;
-    }
-
-    // 毒ガスの対象処理
     private void LateUpdate()
     {
-        // 複数のPoisonContactから同じフレームに実行されないようにする
+        // 複数のPoisonContactから同じフレームに
+        // 重複して処理されることを防ぐ
         if (lastProcessedFrame == Time.frameCount)
             return;
 
         lastProcessedFrame = Time.frameCount;
 
-        if (activeGasContacts.Count == 0)
-            return;
+        ProcessSharedGasDamage();
+    }
 
-        Dictionary<GameObject, PoisonContact> insideTargets =
-            new Dictionary<GameObject, PoisonContact>();
+    private static void ProcessSharedGasDamage()
+    {
+        HashSet<GameObject> targetsInGas =
+            new HashSet<GameObject>();
 
-        // 噴射中の毒ガスの範囲内にいる対象を取得
-        foreach (PoisonContact gas in activeGasContacts)
+        // 現在噴射中の毒ガス範囲を調べる
+        for (int i = activeGasContacts.Count - 1; i >= 0; i--)
         {
-            if (gas == null ||
-                !gas.isActiveAndEnabled ||
-                gas.sourceStickerState == null ||
-                gas.sourceStickerState.currentSticker != Sticker.Poison ||
-                gas.currentState != GasState.Spraying ||
-                gas.GetCharacterRoot() != null)
+            PoisonContact contact = activeGasContacts[i];
+
+            if (contact == null || !contact.isActiveAndEnabled)
             {
+                activeGasContacts.RemoveAt(i);
                 continue;
             }
 
-            Collider[] nearbyObjects = Physics.OverlapSphere(
-                gas.transform.position,
-                gas.poisonRange
+            Collider[] colliders = Physics.OverlapSphere(
+                contact.transform.position,
+                contact.poisonRange
             );
 
-            foreach (Collider col in nearbyObjects)
+            foreach (Collider col in colliders)
             {
+                if (col == null)
+                    continue;
+
                 GameObject target = FindDamageTarget(col.transform);
 
                 if (target == null)
                     continue;
 
-                // 同じ対象は一度だけ登録する
-                if (!insideTargets.ContainsKey(target))
-                {
-                    insideTargets.Add(target, gas);
-                }
+                // ゴールは毒ガスの対象から除外
+                if (target.GetComponent<GoalEnemyBase>() != null)
+                    continue;
+
+                targetsInGas.Add(target);
             }
         }
 
-        // 毒ガスに入っている対象を処理
-        foreach (var pair in insideTargets)
-        {
-            GameObject target = pair.Key;
-            PoisonContact gas = pair.Value;
+        List<GameObject> removeTargets =
+            new List<GameObject>();
 
-            if (target == null || gas == null)
+        // 毒ガス内の対象を処理
+        foreach (GameObject target in targetsInGas)
+        {
+            if (target == null)
                 continue;
 
             if (!sharedTargets.ContainsKey(target))
             {
-                sharedTargets.Add(target, new TargetData());
+                sharedTargets[target] = new TargetData();
             }
 
             TargetData data = sharedTargets[target];
 
-            // 毒ガスによる継続ダメージ
-            ApplySharedGasDamage(target, gas);
-
-            PoisonStatus status = target.GetComponent<PoisonStatus>();
-
-            // すでに毒状態なら蓄積しない
-            if (status != null && status.IsPoisoned)
-            {
-                data.accumulation = 0f;
-                continue;
-            }
-
-            // 毒状態でなければ蓄積する
+            // 毒蓄積時間を加算
             data.accumulation += Time.deltaTime;
 
-            if (data.accumulation >= gas.poisonAccumulationTime)
+            // 毒ガスのダメージ間隔を共有
+            if (!gasDamageTimers.ContainsKey(target))
             {
-                if (status == null)
-                {
-                    status = target.AddComponent<PoisonStatus>();
-                }
+                gasDamageTimers[target] = 0f;
+            }
 
-                status.ApplyPoison(
-                    gas.poisonStatusDamage,
-                    gas.poisonStatusDuration
-                );
+            gasDamageTimers[target] += Time.deltaTime;
 
-                data.accumulation = 0f;
+            float interval = GetTargetGasDamageInterval(target);
+
+            if (gasDamageTimers[target] >= interval)
+            {
+                gasDamageTimers[target] = 0f;
+
+                int damage = GetTargetGasDamage(target);
+
+                DamageTarget(target, damage);
+            }
+
+            // 一定時間毒ガスを受けたら毒状態にする
+            if (data.accumulation >= GetTargetAccumulationTime(target))
+            {
+                ApplyPoisonStatus(target);
             }
         }
 
-        // 毒ガスの範囲外にいる対象の蓄積を減らす
-        List<GameObject> removeTargets = new List<GameObject>();
-
-        foreach (var pair in sharedTargets)
+        // 毒ガスの範囲外に出た対象の蓄積時間を減らす
+        foreach (KeyValuePair<GameObject, TargetData> pair in sharedTargets)
         {
             GameObject target = pair.Key;
 
@@ -364,20 +360,24 @@ public class PoisonContact : MonoBehaviour
                 continue;
             }
 
-            if (!insideTargets.ContainsKey(target))
+            if (targetsInGas.Contains(target))
+                continue;
+
+            float decreaseSpeed = GetDecreaseSpeed();
+
+            pair.Value.accumulation -=
+                decreaseSpeed * Time.deltaTime;
+
+            pair.Value.accumulation =
+                Mathf.Max(0f, pair.Value.accumulation);
+
+            if (pair.Value.accumulation <= 0f)
             {
-                float decreaseSpeed = GetDecreaseSpeed();
-
-                pair.Value.accumulation -=
-                    decreaseSpeed * Time.deltaTime;
-
-                pair.Value.accumulation = Mathf.Max(
-                    0f,
-                    pair.Value.accumulation
-                );
+                removeTargets.Add(target);
             }
         }
 
+        // 不要になった対象データを削除
         foreach (GameObject target in removeTargets)
         {
             sharedTargets.Remove(target);
@@ -385,16 +385,25 @@ public class PoisonContact : MonoBehaviour
         }
     }
 
-    // ColliderからPlayerまたはEnemyのオブジェクトを取得
-    private GameObject FindDamageTarget(Transform current)
+    //==================================================
+    // 対象の検索
+    //==================================================
+
+    private static GameObject FindDamageTarget(Transform current)
     {
         while (current != null)
         {
-            if (current.GetComponent<PlayerStatus>() != null)
+            // GoalEnemyBaseを最優先で確認
+            if (current.GetComponent<GoalEnemyBase>() != null)
+            {
                 return current.gameObject;
+            }
 
-            if (current.GetComponent<EnemyBase>() != null)
+            if (current.GetComponent<PlayerStatus>() != null ||
+                current.GetComponent<EnemyBase>() != null)
+            {
                 return current.gameObject;
+            }
 
             current = current.parent;
         }
@@ -402,97 +411,175 @@ public class PoisonContact : MonoBehaviour
         return null;
     }
 
-    // 複数の毒ガスでダメージが重複しないようにする
-    private void ApplySharedGasDamage(
-        GameObject target,
-        PoisonContact gas)
+    //==================================================
+    // 毒ガス設定の取得
+    //==================================================
+
+    private static int GetTargetGasDamage(GameObject target)
     {
-        if (gasDamageTimers.TryGetValue(
-            target,
-            out float nextDamageTime))
+        foreach (PoisonContact contact in activeGasContacts)
         {
-            if (Time.time < nextDamageTime)
-                return;
+            if (contact != null)
+                return contact.gasDamage;
         }
 
-        float interval = Mathf.Max(
-            gas.gasDamageInterval,
-            0.01f
-        );
-
-        gasDamageTimers[target] = Time.time + interval;
-
-        DamageTarget(target, gas.gasDamage);
+        return 50;
     }
 
-    // 毒ガスの蓄積減少速度を取得
-    private float GetDecreaseSpeed()
+    private static float GetTargetGasDamageInterval(GameObject target)
     {
-        foreach (PoisonContact gas in activeGasContacts)
+        foreach (PoisonContact contact in activeGasContacts)
         {
-            if (gas != null &&
-                gas.isActiveAndEnabled &&
-                gas.sourceStickerState != null &&
-                gas.sourceStickerState.currentSticker == Sticker.Poison &&
-                gas.GetCharacterRoot() == null)
-            {
-                return gas.accumulationDecreaseSpeed;
-            }
+            if (contact != null)
+                return Mathf.Max(0.01f, contact.gasDamageInterval);
         }
 
-        return accumulationDecreaseSpeed;
+        return 1f;
     }
 
-    // ダメージ処理
-    private void DamageTarget(GameObject target, int damage)
+    private static float GetTargetAccumulationTime(GameObject target)
+    {
+        foreach (PoisonContact contact in activeGasContacts)
+        {
+            if (contact != null)
+                return contact.poisonAccumulationTime;
+        }
+
+        return 5f;
+    }
+
+    private static float GetDecreaseSpeed()
+    {
+        foreach (PoisonContact contact in activeGasContacts)
+        {
+            if (contact != null)
+                return contact.accumulationDecreaseSpeed;
+        }
+
+        return 0.5f;
+    }
+
+    //==================================================
+    // 毒状態の付与
+    //==================================================
+
+    private static void ApplyPoisonStatus(GameObject target)
     {
         if (target == null)
             return;
 
-        EnemyBase enemy = target.GetComponent<EnemyBase>();
-        PlayerStatus player = target.GetComponent<PlayerStatus>();
+        // ゴールには毒状態を付与しない
+        if (target.GetComponent<GoalEnemyBase>() != null)
+            return;
+
+        PoisonStatus poisonStatus =
+            target.GetComponent<PoisonStatus>();
+
+        if (poisonStatus == null)
+        {
+            poisonStatus = target.AddComponent<PoisonStatus>();
+        }
+
+        foreach (PoisonContact contact in activeGasContacts)
+        {
+            if (contact == null)
+                continue;
+
+            poisonStatus.ApplyPoison(
+                contact.poisonStatusDamage,
+                contact.poisonStatusDuration
+            );
+
+            break;
+        }
+    }
+
+    //==================================================
+    // ダメージ処理
+    //==================================================
+
+    private static void DamageTarget(GameObject target, int damage)
+    {
+        if (target == null)
+            return;
+
+        // ゴールは毒ガス・毒状態のダメージを受けない
+        GoalEnemyBase goal =
+            target.GetComponentInParent<GoalEnemyBase>();
+
+        if (goal != null)
+            return;
+
+        EnemyBase enemy =
+            target.GetComponent<EnemyBase>();
+
+        PlayerStatus player =
+            target.GetComponent<PlayerStatus>();
 
         if (enemy != null)
         {
-            // EnemyのHPを直接減らす
+            // 通常Enemyは直接HPを減らす
             enemy.AddEnemySlipDamage(-damage);
         }
         else if (player != null)
         {
-            //Playerの通常ダメージ処理
+            // Playerは通常のダメージ処理
             player.Damage(damage);
         }
     }
 
-    // 毒ガスエフェクトの表示・非表示
-    private void UpdatePoisonEffect(bool shouldShow)
+    //==================================================
+    // 毒ガスエフェクト
+    //==================================================
+
+    private void UpdatePoisonEffect(bool active)
     {
-        if (shouldShow)
+        if (active)
         {
-            if (poisonGasEffectInstance == null &&
+            if (poisonGasEffect == null &&
                 poisonGasEffectPrefab != null)
             {
-                poisonGasEffectInstance = Instantiate(
+                poisonGasEffect = Instantiate(
                     poisonGasEffectPrefab,
-                    transform,
-                    false
+                    transform
                 );
 
-                poisonGasEffectInstance.transform.localPosition =
+                poisonGasEffect.transform.localPosition =
                     Vector3.zero;
 
-                // PrefabのX軸-90度の回転設定を維持する
+                // Prefabの回転をX=-90度に設定
+                poisonGasEffect.transform.localRotation =
+                    Quaternion.Euler(-90f, 0f, 0f);
             }
         }
         else
         {
-            if (poisonGasEffectInstance != null)
+            if (poisonGasEffect != null)
             {
-                Destroy(poisonGasEffectInstance);
-                poisonGasEffectInstance = null;
+                Destroy(poisonGasEffect);
+                poisonGasEffect = null;
             }
         }
     }
+
+    //==================================================
+    // 毒ガス停止
+    //==================================================
+
+    private void ResetGas()
+    {
+        activeGasContacts.Remove(this);
+
+        currentState = GasState.Waiting;
+        stateTimer = 0f;
+        characterDamageTimer = 0f;
+
+        UpdatePoisonEffect(false);
+    }
+
+    //==================================================
+    // Gizmo表示
+    //==================================================
 
     private void OnDrawGizmosSelected()
     {
@@ -513,67 +600,115 @@ public class PoisonContact : MonoBehaviour
     {
         activeGasContacts.Remove(this);
 
-        if (poisonGasEffectInstance != null)
-        {
-            Destroy(poisonGasEffectInstance);
-        }
+        UpdatePoisonEffect(false);
     }
 }
 
-// 毒状態を管理するコンポーネント
+//======================================================
+// 毒状態管理
+//======================================================
+
 public class PoisonStatus : MonoBehaviour
 {
     private int damage;
     private float duration;
-    private float timer;
+
+    private float durationTimer;
     private float damageTimer;
 
     public bool IsPoisoned { get; private set; }
 
+    //==================================================
+    // 毒状態付与
+    //==================================================
+
     public void ApplyPoison(int poisonDamage, float poisonDuration)
     {
-        // すでに毒状態なら再付与しない
+        // すでに毒状態なら重複させない
         if (IsPoisoned)
+            return;
+
+        // ゴールには毒状態を付与しない
+        if (GetComponentInParent<GoalEnemyBase>() != null)
             return;
 
         damage = poisonDamage;
         duration = poisonDuration;
 
-        timer = 0f;
+        durationTimer = 0f;
         damageTimer = 0f;
 
         IsPoisoned = true;
     }
+
+    //==================================================
+    // 毒状態更新
+    //==================================================
 
     private void Update()
     {
         if (!IsPoisoned)
             return;
 
-        timer += Time.deltaTime;
-        damageTimer -= Time.deltaTime;
-
-        if (damageTimer <= 0f)
+        // ゴールは毒ダメージを受けない
+        if (GetComponentInParent<GoalEnemyBase>() != null)
         {
-            EnemyBase enemy = GetComponent<EnemyBase>();
-            PlayerStatus player = GetComponent<PlayerStatus>();
+            EndPoison();
+            return;
+        }
+
+        durationTimer += Time.deltaTime;
+        damageTimer += Time.deltaTime;
+
+        // 毒状態の継続時間終了
+        if (durationTimer >= duration)
+        {
+            EndPoison();
+            return;
+        }
+
+        // ダメージ間隔
+        if (damageTimer >= 1f)
+        {
+            damageTimer = 0f;
+
+            // ゴール判定を再確認
+            if (GetComponentInParent<GoalEnemyBase>() != null)
+            {
+                EndPoison();
+                return;
+            }
+
+            EnemyBase enemy =
+                GetComponent<EnemyBase>();
+
+            PlayerStatus player =
+                GetComponent<PlayerStatus>();
 
             if (enemy != null)
             {
-                // 毒状態のダメージも通常ダメージ処理を使用
-                enemy.Damage(damage);
+                // 通常Enemyは直接HPを減らす
+                enemy.AddEnemySlipDamage(-damage);
             }
             else if (player != null)
             {
+                // Playerは通常のダメージ処理
                 player.Damage(damage);
             }
-
-            damageTimer = 1f;
         }
+    }
 
-        if (timer >= duration)
-        {
-            IsPoisoned = false;
-        }
+    //==================================================
+    // 毒状態終了
+    //==================================================
+
+    public void EndPoison()
+    {
+        IsPoisoned = false;
+
+        durationTimer = 0f;
+        damageTimer = 0f;
+
+        Destroy(this);
     }
 }
