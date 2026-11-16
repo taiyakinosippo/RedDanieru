@@ -4,6 +4,7 @@ using Unity.AI.Navigation;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 public class MapManager : MonoBehaviour
 {
@@ -1988,6 +1989,7 @@ public class MapManager : MonoBehaviour
     // 保存データ作成
     //==================================================
 
+
     public DungeonMapData CreateSaveData()
     {
         DungeonMapData data =
@@ -2016,6 +2018,7 @@ public class MapManager : MonoBehaviour
             data.torchData = new TorchSaveData();
         }
 
+        // タイル情報を保存
         data.tiles =
             new byte[
                 width *
@@ -2041,37 +2044,97 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        //==================================================
+        // オブジェクト情報を保存
+        //==================================================
+
+        // 同じオブジェクトの重複保存を防ぐ
+        HashSet<GameObject> savedObjects =
+            new HashSet<GameObject>();
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    if (placedObjects[
-                            x,
-                            y,
-                            z
-                        ] == null)
+                    GameObject obj =
+                        placedObjects[x, y, z];
+
+                    if (obj == null)
                     {
                         continue;
                     }
 
+                    // すでに保存したオブジェクトならスキップ
+                    if (!savedObjects.Add(obj))
+                    {
+                        continue;
+                    }
+
+                    // PlaceObjectコンポーネント取得
+                    PlaceObject placeObject =
+                        obj.GetComponent<PlaceObject>();
+
+                    // 基準マス
+                    Vector3Int savePos =
+                        new Vector3Int(x, y, z);
+
+                    if (placeObject != null)
+                    {
+                        savePos =
+                            placeObject.GridPosition;
+                    }
+
+                    // 占有マス数
+                    int gridWidth = 1;
+                    int gridDepth = 1;
+
+                    if (placeObject != null)
+                    {
+                        gridWidth =
+                            placeObject.GridWidth;
+
+                        gridDepth =
+                            placeObject.GridDepth;
+                    }
+
+                    PlaceObjectType type =
+                        placedObjectTypes[x, y, z];
+
+                    // 壁は従来どおり1マス
+                    if (type == PlaceObjectType.Wall)
+                    {
+                        gridWidth = 1;
+                        gridDepth = 1;
+                    }
+
+                    // 保存データに追加
                     data.objects.Add(
-                    new ObjectData()
+                        new ObjectData()
                         {
-                            x = x,
-                            y = y,
-                            z = z,
-                            type = placedObjectTypes[x, y, z],
+                            x = savePos.x,
+                            y = savePos.y,
+                            z = savePos.z,
+
+                            type = type,
 
                             // 配置時のコストを保存
                             costChange =
-                             placedObjectCostChanges[x, y, z]
+                                placedObjectCostChanges[x, y, z],
+
+                            // 占有マス数を保存
+                            gridWidth = gridWidth,
+                            gridDepth = gridDepth
                         }
                     );
                 }
             }
         }
+
+        //==================================================
+        // リスポーン地点を保存
+        //==================================================
 
         if (respawnPointObject != null)
         {
@@ -2100,6 +2163,10 @@ public class MapManager : MonoBehaviour
         {
             data.hasRespawnPoint = false;
         }
+
+        //==================================================
+        // リスポーンエリアを保存
+        //==================================================
 
         if (respawnAreaObject != null)
         {
@@ -2141,9 +2208,11 @@ public class MapManager : MonoBehaviour
         return data;
     }
 
+
     //==================================================
     // ダンジョン読み込み
     //==================================================
+
 
     public void LoadDungeon(
         DungeonMapData data,
@@ -2253,10 +2322,13 @@ public class MapManager : MonoBehaviour
             );
         }
 
-        // Hierarchyで指定したスタート地点オブジェクトは保持する。
+        // Hierarchyで指定したスタート地点オブジェクトは保持する
         respawnAreaObject = null;
 
+        //==================================================
         // タイルを復元
+        //==================================================
+
         int index = 0;
 
         for (int y = 0; y < height; y++)
@@ -2265,11 +2337,7 @@ public class MapManager : MonoBehaviour
             {
                 for (int x = 0; x < width; x++)
                 {
-                    map[
-                        x,
-                        y,
-                        z
-                    ] =
+                    map[x, y, z] =
                         (TileType)data.tiles[index++];
 
                     Vector3Int pos =
@@ -2279,23 +2347,11 @@ public class MapManager : MonoBehaviour
                             z
                         );
 
-                    if (
-                        map[
-                            x,
-                            y,
-                            z
-                        ] == TileType.Wall
-                    )
+                    if (map[x, y, z] == TileType.Wall)
                     {
                         CreateWall(pos);
                     }
-                    else if (
-                        map[
-                            x,
-                            y,
-                            z
-                        ] == TileType.Floor
-                    )
+                    else if (map[x, y, z] == TileType.Floor)
                     {
                         CreateFloor(pos);
                     }
@@ -2306,32 +2362,10 @@ public class MapManager : MonoBehaviour
         // 斜め壁を再判定
         UpdateDiagonalWalls();
 
+        //==================================================
         // 配置オブジェクトを復元
-        if (data.objects != null)
-        {
-            foreach (
-                ObjectData objData
-                in data.objects
-            )
-            {
-                Vector3Int pos =
-                    new Vector3Int(
-                        objData.x,
-                        objData.y,
-                        objData.z
-                    );
+        //==================================================
 
-                PlaceObject(
-                    pos,
-                    objData.type
-                );
-            }
-        }
-
-        // 配置したWallを含めて再判定
-        UpdateDiagonalWalls();
-
-        // 保存されていた配置コストを復元
         if (data.objects != null)
         {
             foreach (ObjectData objData in data.objects)
@@ -2348,25 +2382,146 @@ public class MapManager : MonoBehaviour
                     continue;
                 }
 
-                // 実際に配置されているオブジェクトのみ
-                if (placedObjects[
-                        pos.x,
-                        pos.y,
-                        pos.z
-                    ] == null)
+                // すでに占有されている場合はスキップ
+                if (placedObjects[pos.x, pos.y, pos.z] != null)
                 {
                     continue;
                 }
 
-                placedObjectCostChanges[
-                    pos.x,
-                    pos.y,
-                    pos.z
-                ] = objData.costChange;
+                // 基準マスから配置
+                PlaceObject(
+                    pos,
+                    objData.type
+                );
+
+                // 実際に配置できたか確認
+                GameObject placedObject =
+                    placedObjects[pos.x, pos.y, pos.z];
+
+                if (placedObject == null)
+                {
+                    Debug.LogWarning(
+                        "オブジェクトの復元に失敗しました: " + pos
+                    );
+
+                    continue;
+                }
+
+                // 保存された占有マス数を取得
+                int savedWidth =
+                    Mathf.Max(1, objData.gridWidth);
+
+                int savedDepth =
+                    Mathf.Max(1, objData.gridDepth);
+
+                // 配置Prefabの占有サイズと保存データを確認
+                PlaceObject placeObject =
+                    placedObject.GetComponent<PlaceObject>();
+
+                if (placeObject != null)
+                {
+                    if (placeObject.GridWidth != savedWidth ||
+                        placeObject.GridDepth != savedDepth)
+                    {
+                        Debug.LogWarning(
+                            "Prefabの占有マス数と保存データが異なります。Prefabの設定を使用します。"
+                        );
+                    }
+                }
             }
         }
 
+        // 配置したWallを含めて再判定
+        UpdateDiagonalWalls();
+
+        //==================================================
+        // 配置コストを復元
+        //==================================================
+
+        if (data.objects != null)
+        {
+            foreach (ObjectData objData in data.objects)
+            {
+                Vector3Int pos =
+                    new Vector3Int(
+                        objData.x,
+                        objData.y,
+                        objData.z
+                    );
+
+                if (!IsInsideMap(pos))
+                {
+                    continue;
+                }
+
+                GameObject obj =
+                    placedObjects[pos.x, pos.y, pos.z];
+
+                if (obj == null)
+                {
+                    continue;
+                }
+
+                // 実際の占有範囲を取得
+                PlaceObject placeObject =
+                    obj.GetComponent<PlaceObject>();
+
+                int gridWidth = 1;
+                int gridDepth = 1;
+
+                if (placeObject != null)
+                {
+                    gridWidth = placeObject.GridWidth;
+                    gridDepth = placeObject.GridDepth;
+                }
+
+                // 占有するすべてのマスにコストを登録
+                for (int x = 0; x < gridWidth; x++)
+                {
+                    for (int z = 0; z < gridDepth; z++)
+                    {
+                        Vector3Int startPos =
+                        GetFootprintStartPosition(
+                            pos,
+                            gridWidth,
+                            gridDepth
+                        );
+
+                        Vector3Int checkPos =
+                            new Vector3Int(
+                                startPos.x + x,
+                                pos.y,
+                                startPos.z + z
+                            );
+
+                        if (!IsInsideMap(checkPos))
+                        {
+                            continue;
+                        }
+
+                        if (placedObjects[
+                            checkPos.x,
+                            checkPos.y,
+                            checkPos.z
+                        ] != obj)
+                        {
+                            continue;
+                        }
+
+                        placedObjectCostChanges[
+                            checkPos.x,
+                            checkPos.y,
+                            checkPos.z
+                        ] = objData.costChange;
+                    }
+                }
+            }
+        }
+
+        //==================================================
         // 保存されていた現在コストを復元
+        //==================================================
+
         if (dungeonCostManager != null)
         {
             dungeonCostManager.SetCost(data.dungeonCost);
@@ -2385,8 +2540,13 @@ public class MapManager : MonoBehaviour
         // 読み込み後もスタート地点を入口に合わせる
         UpdateStartPointPosition();
 
+        //==================================================
         // 松明を復元
-        TorchLight torchLight = FindObjectOfType<TorchLight>();
+        //==================================================
+
+        TorchLight torchLight =
+            FindObjectOfType<TorchLight>();
+
         if (torchLight != null)
         {
             torchLight.LoadTorches(data.torchData);
@@ -2412,140 +2572,114 @@ public class MapManager : MonoBehaviour
         );
     }
 
+
     //==================================================
     // 配置オブジェクト
     //==================================================
 
 
 
-    public void PlaceObject(
-        Vector3Int pos,
-        PlaceObjectType type)
+
+
+    public void PlaceObject(Vector3Int pos, PlaceObjectType type)
     {
-        // Goalは1つしか配置できない
+        // マップ外なら配置しない
+        if (!IsInsideMap(pos))
+            return;
+
+        // Goalは1つだけ配置可能
         if (type == PlaceObjectType.Goal && HasGoal())
         {
-            ShowGoalPlacementWarning();
+            Debug.LogWarning("Goalは1つしか配置できません");
             return;
         }
 
-        if (!IsInsideMap(pos))
-        {
-            return;
-        }
-
+        // 壁は従来どおり1マスで配置
         if (type == PlaceObjectType.Wall)
         {
             PlaceDiggableWall(pos);
             return;
         }
 
-        if (map[pos.x, pos.y, pos.z] != TileType.Floor)
-        {
-            Debug.Log("床以外にはオブジェクトを配置できません。");
-            return;
-        }
-
-        if (placedObjects[pos.x, pos.y, pos.z] != null)
-        {
-            return;
-        }
-
+        // Prefabを取得
         GameObject prefab = GetObjectPrefab(type);
 
         if (prefab == null)
         {
-            Debug.LogError(
-                type + " のPrefabが設定されていません。"
-            );
+            Debug.LogWarning("配置するPrefabが設定されていません");
             return;
         }
+
+        // Prefabから占有マス数を取得
+        int gridWidth;
+        int gridDepth;
+
+        GetObjectFootprint(type, out gridWidth, out gridDepth);
+
+        // 配置範囲全体を確認
+        if (!CanPlaceObjectArea(pos, type))
+            return;
 
         // 配置コストを取得
         int costChange = GetObjectCostChange(type);
 
-        // 配置前にコスト確認
+        // 通常配置時のみコストを確認
         if (!isLoadingDungeon)
         {
             if (!CanPayPlacementCost(costChange))
-            {
                 return;
-            }
         }
 
-        Vector3 spawnPosition;
+        // オブジェクトを生成
+        GameObject obj = Instantiate(
+            prefab,
+            GetObjectWorldPosition(pos),
+            Quaternion.identity
+        );
 
+        // Enemyの場合
         if (type == PlaceObjectType.Enemy)
         {
-            spawnPosition = GetEnemyWorldPosition(pos);
+            EnemyBase enemy = obj.GetComponent<EnemyBase>();
+
+            if (enemy != null)
+            {
+                enemy.SetRespawnPos(GetEnemyWorldPosition(pos));
+            }
         }
         else
         {
-            spawnPosition = GetObjectWorldPosition(pos);
-        }
-
-        GameObject obj = Instantiate(
-            prefab,
-            spawnPosition,
-            Quaternion.identity,
-            transform
-        );
-
-        // 敵ならリスポーン位置を設定
-        if (obj.CompareTag("Enemy"))
-        {
-            EnemyBase enemyBase = obj.GetComponent<EnemyBase>();
-
-            if (enemyBase != null)
-            {
-                enemyBase.SetRespawnPos(spawnPosition);
-            }
-        }
-
-        if (type != PlaceObjectType.Enemy)
-        {
-            SetObjectScale(obj);
+            // オブジェクトの位置と床への位置合わせ
+            obj.transform.localScale = prefab.transform.localScale;
             AlignObjectToFloor(obj, pos);
         }
 
-        // MapエディターではGoalを横に倒す
+        // Goalの向き
         if (type == PlaceObjectType.Goal &&
-            SceneManager.GetActiveScene().name == "Katayama_ren")
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Katayama_ren")
         {
-            obj.transform.rotation =
-                Quaternion.Euler(0f, 0f, 0f);
+            obj.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
 
+        // Rigidbodyを固定
         Rigidbody[] rigidbodies =
-            obj.GetComponentsInChildren<Rigidbody>();
+            obj.GetComponentsInChildren<Rigidbody>(true);
 
         foreach (Rigidbody rb in rigidbodies)
         {
             rb.isKinematic = true;
-            rb.useGravity = false;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            rb.constraints = RigidbodyConstraints.FreezeAll;
         }
 
-        NavMeshAgent[] agents =
-            obj.GetComponentsInChildren<NavMeshAgent>();
+        // NavMeshAgentを無効化
+        UnityEngine.AI.NavMeshAgent[] agents =
+            obj.GetComponentsInChildren<UnityEngine.AI.NavMeshAgent>(true);
 
-        foreach (NavMeshAgent agent in agents)
+        foreach (UnityEngine.AI.NavMeshAgent agent in agents)
         {
             agent.enabled = false;
         }
 
-        placedObjects[pos.x, pos.y, pos.z] = obj;
-        placedObjectTypes[pos.x, pos.y, pos.z] = type;
-
-        // 配置時のコストを記録
-        placedObjectCostChanges[
-            pos.x,
-            pos.y,
-            pos.z
-        ] = costChange;
-
+        // 基準マスを設定
         PlaceObject placeObject = obj.GetComponent<PlaceObject>();
 
         if (placeObject != null)
@@ -2553,21 +2687,39 @@ public class MapManager : MonoBehaviour
             placeObject.GridPosition = pos;
         }
 
+        // 中心基準の占有範囲を取得
+        Vector3Int startPos = GetFootprintStartPosition(
+            pos,
+            gridWidth,
+            gridDepth
+        );
 
-        // 配置成功後にコストを適用
-        if (!ApplyPlacementCost(costChange))
+        // 占有範囲の全マスにオブジェクトを登録
+        for (int x = 0; x < gridWidth; x++)
         {
-            Debug.LogError(
-                "配置コストの適用に失敗しました。"
-            );
+            for (int z = 0; z < gridDepth; z++)
+            {
+                int targetX = startPos.x + x;
+                int targetY = pos.y;
+                int targetZ = startPos.z + z;
+
+                placedObjects[targetX, targetY, targetZ] = obj;
+                placedObjectTypes[targetX, targetY, targetZ] = type;
+                placedObjectCostChanges[targetX, targetY, targetZ] = costChange;
+            }
         }
 
+        // コストを反映
+        if (!isLoadingDungeon)
+        {
+            ApplyPlacementCost(costChange);
+        }
+
+        // マップ変更を通知
         MarkMapChanged();
-
-        // 配置成功後に一覧を閉じる
-        ClosePlacementList();
-
     }
+
+
 
     // 配置成功後に一覧を閉じる
     private void ClosePlacementList()
@@ -2846,45 +2998,217 @@ public class MapManager : MonoBehaviour
     //==================================================
 
 
+
     public void DeleteObject(Vector3Int pos)
     {
+        // マップ外なら削除しない
         if (!IsInsideMap(pos))
         {
             return;
         }
 
-        GameObject obj =
+        // クリックしたマスのオブジェクトを取得
+        GameObject targetObject =
             placedObjects[pos.x, pos.y, pos.z];
 
-        if (obj == null)
+        if (targetObject == null)
         {
             return;
         }
 
-        // 配置時に適用したコストを取得
+        // 削除対象のコストを取得
         int costChange =
-            placedObjectCostChanges[
-                pos.x,
-                pos.y,
-                pos.z
-            ];
+            placedObjectCostChanges[pos.x, pos.y, pos.z];
+
+        // 配置されているすべてのマスを確認して解放
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                for (int z = 0; z < depth; z++)
+                {
+                    if (placedObjects[x, y, z] == targetObject)
+                    {
+                        placedObjects[x, y, z] = null;
+                        placedObjectTypes[x, y, z] = default;
+                        placedObjectCostChanges[x, y, z] = 0;
+                    }
+                }
+            }
+        }
 
         // オブジェクトを削除
-        Destroy(obj);
+        Destroy(targetObject);
 
-        placedObjects[pos.x, pos.y, pos.z] = null;
-        placedObjectTypes[pos.x, pos.y, pos.z] = default;
-        placedObjectCostChanges[pos.x, pos.y, pos.z] = 0;
+        // コストを返却
+        if (!isLoadingDungeon && dungeonCostManager != null)
+        {
+            ApplyPlacementCost(-costChange);
+        }
 
-        // 配置時のコストを返却
-        RefundPlacementCost(costChange);
+        // 周囲の斜め壁を更新
+        UpdateDiagonalWall(pos);
 
-        UpdateDiagonalWalls();
-
-        BuildNavigation();
-
+        // マップ変更を通知
         MarkMapChanged();
     }
+
+
+
+    //==================================================
+    // オブジェクトの占有マス取得
+    //==================================================
+
+    public void GetObjectFootprint(
+        PlaceObjectType type,
+        out int gridWidth,
+        out int gridDepth)
+    {
+        // Wallは従来どおり1マス
+        if (type == PlaceObjectType.Wall)
+        {
+            gridWidth = 1;
+            gridDepth = 1;
+            return;
+        }
+
+        GameObject prefab = GetObjectPrefab(type);
+
+        if (prefab != null)
+        {
+            PlaceObject placeObject =
+                prefab.GetComponent<PlaceObject>();
+
+            if (placeObject != null)
+            {
+                gridWidth = placeObject.GridWidth;
+                gridDepth = placeObject.GridDepth;
+                return;
+            }
+        }
+
+        // PlaceObjectがない場合は1マス
+        gridWidth = 1;
+        gridDepth = 1;
+    }
+
+
+    /// <summary>
+    /// 中心を基準にした占有範囲の開始座標を取得
+    /// </summary>
+    public Vector3Int GetFootprintStartPosition(
+        Vector3Int centerPos,
+        int gridWidth,
+        int gridDepth)
+    {
+        int startX = centerPos.x - (gridWidth - 1) / 2;
+        int startZ = centerPos.z - (gridDepth - 1) / 2;
+
+        return new Vector3Int(
+            startX,
+            centerPos.y,
+            startZ
+        );
+    }
+
+
+    //==================================================
+    // 床マス取得
+    //==================================================
+
+    public FloorBlock GetFloorBlock(Vector3Int pos)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return null;
+        }
+
+        GameObject floor =
+            floorObjects[pos.x, pos.y, pos.z];
+
+        if (floor == null)
+        {
+            return null;
+        }
+
+        return floor.GetComponentInChildren<FloorBlock>();
+    }
+
+    //==================================================
+    // 複数マス配置可能判定
+    //==================================================
+
+
+    public bool CanPlaceObjectArea(
+        Vector3Int pos,
+        PlaceObjectType type)
+    {
+        if (!IsInsideMap(pos))
+        {
+            return false;
+        }
+
+        if (type == PlaceObjectType.Goal && HasGoal())
+        {
+            return false;
+        }
+
+        int gridWidth;
+        int gridDepth;
+
+        GetObjectFootprint(
+            type,
+            out gridWidth,
+            out gridDepth
+        );
+
+        Vector3Int startPos =
+            GetFootprintStartPosition(
+                pos,
+                gridWidth,
+                gridDepth
+            );
+
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int z = 0; z < gridDepth; z++)
+            {
+                Vector3Int checkPos =
+                    new Vector3Int(
+                        startPos.x + x,
+                        pos.y,
+                        startPos.z + z
+                    );
+
+                if (!IsInsideMap(checkPos))
+                    return false;
+
+                if (map[checkPos.x, checkPos.y, checkPos.z] != TileType.Floor)
+                    return false;
+
+                if (placedObjects[checkPos.x, checkPos.y, checkPos.z] != null)
+                    return false;
+            }
+        }
+
+        if (type != PlaceObjectType.Wall && GetObjectPrefab(type) == null)
+            return false;
+
+        if (!isLoadingDungeon)
+        {
+            if (dungeonCostManager == null)
+                return false;
+
+            int costChange = GetObjectCostChange(type);
+
+            if (costChange < 0 &&
+                dungeonCostManager.CurrentCost < -costChange)
+                return false;
+        }
+
+        return true;
+    }
+
 
 
     //==================================================

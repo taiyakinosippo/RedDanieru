@@ -1,3 +1,5 @@
+
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -21,6 +23,10 @@ public class PlaceManager : MonoBehaviour
 
     private FloorBlock currentFloor;
     private FloorBlock lastPlaceFloor;
+
+    // プレビュー表示中の床
+    private List<FloorBlock> previewedFloors =
+        new List<FloorBlock>();
 
     private bool isEditing = false;
 
@@ -75,6 +81,9 @@ public class PlaceManager : MonoBehaviour
 
         HighlightFloor();
 
+        // 複数マスの配置プレビュー
+        UpdatePlacementPreview();
+
         // マウスを押した瞬間
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
@@ -108,7 +117,7 @@ public class PlaceManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
             FloorBlock floor =
-                hit.collider.GetComponent<FloorBlock>();
+                hit.collider.GetComponentInParent<FloorBlock>();
 
             if (floor != currentFloor)
             {
@@ -132,6 +141,86 @@ public class PlaceManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 複数マスの配置プレビューを更新
+    /// </summary>
+
+    private void UpdatePlacementPreview()
+    {
+        ClearPreview();
+
+        if (currentFloor == null)
+            return;
+
+        if (ObjectPaletteManager.Instance == null)
+            return;
+
+        PlaceObjectType type =
+            ObjectPaletteManager.Instance.CurrentObject;
+
+        int gridWidth;
+        int gridDepth;
+
+        mapManager.GetObjectFootprint(
+            type,
+            out gridWidth,
+            out gridDepth
+        );
+
+        bool canPlace =
+            mapManager.CanPlaceObjectArea(
+                currentFloor.GridPosition,
+                type
+            );
+
+        Vector3Int startPos =
+            mapManager.GetFootprintStartPosition(
+                currentFloor.GridPosition,
+                gridWidth,
+                gridDepth
+            );
+
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int z = 0; z < gridDepth; z++)
+            {
+                Vector3Int checkPos =
+                    new Vector3Int(
+                        startPos.x + x,
+                        startPos.y,
+                        startPos.z + z
+                    );
+
+                FloorBlock floor =
+                    mapManager.GetFloorBlock(checkPos);
+
+                if (floor == null)
+                    continue;
+
+                floor.SetPreviewColor(canPlace);
+
+                previewedFloors.Add(floor);
+            }
+        }
+    }
+
+
+    /// <summary>
+    /// 配置プレビュー色を解除
+    /// </summary>
+    private void ClearPreview()
+    {
+        foreach (FloorBlock floor in previewedFloors)
+        {
+            if (floor != null)
+            {
+                floor.ClearPreviewColor();
+            }
+        }
+
+        previewedFloors.Clear();
+    }
+
+    /// <summary>
     /// オブジェクトを配置
     /// </summary>
     private void Place()
@@ -145,6 +234,17 @@ public class PlaceManager : MonoBehaviour
         // 同じ床には連続配置しない
         if (currentFloor == lastPlaceFloor)
             return;
+
+        PlaceObjectType type =
+            ObjectPaletteManager.Instance.CurrentObject;
+
+        // 配置可能か確認
+        if (!mapManager.CanPlaceObjectArea(
+            currentFloor.GridPosition,
+            type))
+        {
+            return;
+        }
 
         // 最初の配置時だけUndo編集開始
         if (!isEditing)
@@ -161,8 +261,11 @@ public class PlaceManager : MonoBehaviour
 
         mapManager.PlaceObject(
             currentFloor.GridPosition,
-            ObjectPaletteManager.Instance.CurrentObject
+            type
         );
+
+        // 配置後にプレビューを更新
+        UpdatePlacementPreview();
     }
 
     /// <summary>
@@ -188,6 +291,7 @@ public class PlaceManager : MonoBehaviour
     /// </summary>
     private void StopPlacing()
     {
+        ClearPreview();
         ClearSelection();
 
         if (isEditing)

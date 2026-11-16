@@ -139,9 +139,9 @@ MonoBehaviour:
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
-  currentState: 0
   currentHp: 0
   trackingTimer: 0
+  respawnPos: {x: 0, y: 0, z: 0}
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -163,6 +163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 1
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!54 &6832049853058329181
 Rigidbody:
@@ -249,6 +250,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectType: 7
+  gridWidth: 3
+  gridDepth: 3
   selectColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &8733923640097866391
 GameObject:

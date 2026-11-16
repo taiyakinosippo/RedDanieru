@@ -46,6 +46,7 @@ public class DungeonMapData
     public TorchSaveData torchData = new TorchSaveData();
 }
 
+
 [Serializable]
 public class ObjectData
 {
@@ -57,4 +58,9 @@ public class ObjectData
 
     // 配置時に適用したコスト変化
     public int costChange;
+
+    // オブジェクトが占有するマス数
+    public int gridWidth = 1;
+    public int gridDepth = 1;
 }
+
