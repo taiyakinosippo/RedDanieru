@@ -17,6 +17,9 @@ public class TestPlayManager : MonoBehaviour
     [SerializeField] private string mapCreateSceneName = "Katayama_ren";
     [SerializeField] private string testPlaySceneName = "Testplay";
 
+    [Tooltip("ON: テストプレイ中も編集シーンを読み込んだまま残す(戻るときの読み込みがなくなる)")]
+    [SerializeField] private bool keepEditSceneLoaded = true;
+
     [Header("プレイヤー")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform startPoint;
@@ -155,6 +158,13 @@ public class TestPlayManager : MonoBehaviour
         LoadSceneMode mode
     )
     {
+        // 自分のシーンの読み込みにだけ反応する
+        // (編集シーンを残したまま別シーンを追加で読み込むことがあるため)
+        if (scene != gameObject.scene || !isActiveAndEnabled)
+        {
+            return;
+        }
+
         if (string.Equals(
             scene.name,
             testPlaySceneName,
@@ -250,6 +260,15 @@ public class TestPlayManager : MonoBehaviour
         Debug.Log(
             "テストプレイを開始します。"
         );
+
+        // 編集シーンを残したままテストプレイシーンを追加で読み込む
+        if (keepEditSceneLoaded &&
+            TestPlaySceneKeeper.StartTestPlay(
+                gameObject.scene,
+                testPlaySceneName))
+        {
+            return;
+        }
 
         SceneManager.LoadScene(
             testPlaySceneName
@@ -662,6 +681,12 @@ public class TestPlayManager : MonoBehaviour
         // マウスカーソルを表示
         _cursorController.ShowCursor();
 
+        // 編集シーンを残してあれば、テストプレイシーンを破棄して再表示するだけ
+        if (TestPlaySceneKeeper.ReturnToEdit(gameObject.scene))
+        {
+            return;
+        }
+
         returnToEdit = true;
 
         SceneManager.LoadScene(
@@ -758,6 +783,12 @@ public class TestPlayManager : MonoBehaviour
 
         // マップ上のオブジェクトのRigidBodyをすべて凍結
         mapManager.ObjectsAllFreeze();
+
+        // 編集シーンを残してあれば、テストプレイシーンを破棄して再表示するだけ
+        if (TestPlaySceneKeeper.ReturnToEdit(gameObject.scene))
+        {
+            return;
+        }
 
         returnToEdit = true;
 
