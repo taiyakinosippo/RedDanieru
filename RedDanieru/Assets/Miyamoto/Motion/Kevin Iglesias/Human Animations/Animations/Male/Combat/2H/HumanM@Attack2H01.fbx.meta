@@ -69,13 +69,6 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.44157094
-        functionName: AttackAnimationEnd
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: 6fb0f831c7d602545973be8e26325a30, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
       - time: 0.48742306
         functionName: EndAttackHit
         data: 
@@ -83,10 +76,10 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.6685348
-        functionName: AttackAnimationEnd
+      - time: 0.5924263
+        functionName: OnAttackAnimationEnd
         data: 
-        objectReferenceParameter: {fileID: 11500000, guid: fc1925cdfa685064eb00d19a296087c5, type: 3}
+        objectReferenceParameter: {fileID: 11500000, guid: 6fb0f831c7d602545973be8e26325a30, type: 3}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
