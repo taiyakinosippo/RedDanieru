@@ -79,6 +79,8 @@ public class MapManager : MonoBehaviour
     [SerializeField][Min(0)] private int entrancePosition = 0;
     [SerializeField][Min(1)] private int entranceWidth = 1;
 
+    [SerializeField] private TorchManager torchManager;
+
     [System.Serializable]
     public class PlaceObjectPrefab
     {
@@ -210,6 +212,9 @@ public class MapManager : MonoBehaviour
         {
             CreateNewMap();
         }
+
+        torchManager.SetTorch();
+
     }
 
     //==================================================
@@ -219,6 +224,8 @@ public class MapManager : MonoBehaviour
 
     private void Update()
     {
+        torchManager.SetTorch();
+
         if (mapCamera == null)
         {
             return;
@@ -2600,6 +2607,8 @@ public class MapManager : MonoBehaviour
             transform
         );
 
+        NetworkSyncId.Assign(obj, pos);
+
         if (type == PlaceObjectType.Enemy)
         {
             EnemyBase enemy = obj.GetComponent<EnemyBase>();
@@ -2608,6 +2617,8 @@ public class MapManager : MonoBehaviour
             {
                 enemy.SetRespawnPos(GetEnemyWorldPosition(pos));
             }
+
+            NetworkSyncId.Assign(obj, pos);
         }
         else
         {

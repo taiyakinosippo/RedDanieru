@@ -21,6 +21,9 @@ public class RetryButton : MonoBehaviour
     private GameObject multiplayerText;
 
     [SerializeField]
+    private GameObject stageLoadingObj;
+
+    [SerializeField]
     private TextMeshProUGUI countdownText;
 
     [SerializeField]
@@ -91,13 +94,6 @@ public class RetryButton : MonoBehaviour
         }
     }
 
-    public void StartMultiplayerRetry()
-    {
-        StartCoroutine(
-            MultiplayerRetryCoroutine()
-        );
-    }
-
     private IEnumerator RetryCoroutine()
     {
         Time.timeScale = 1f;
@@ -114,11 +110,17 @@ public class RetryButton : MonoBehaviour
 
         yield return null;
 
+        stageLoadingObj.SetActive(true);
+
+        yield return null;
+
         dungeonImporter.ImportDungeon(
             RoomInfo.SelectedDungeon
         );
 
-        FusionLauncher.Instance.StartSolo();
+        yield return null;
+
+         FusionLauncher.Instance.StartSolo();
 
         // 最後にUIを閉じる
         switch (retryType)
@@ -174,53 +176,7 @@ public class RetryButton : MonoBehaviour
             $"{FusionLauncher.Instance.PlayerCount}";
     }
 
-    private IEnumerator MultiplayerRetryCoroutine()
-    {
-        Time.timeScale = 1f;
-
-        ResetCameras();
-
-        FusionLauncher.Instance
-            .DespawnLocalPlayer();
-
-        yield return null;
-
-        dungeonImporter.ImportDungeon(
-       RoomInfo.SelectedDungeon);
-
-        yield return new WaitForSeconds(1f);
-
-        FusionLauncher.Instance.RestartMatch();
-
-        switch (retryType)
-        {
-            case RetryType.Clear:
-                {
-                    GoalClear goalClear =
-                        FindObjectOfType<GoalClear>();
-
-                    if (goalClear != null)
-                    {
-                        goalClear.ResetClearState();
-                    }
-
-                    break;
-                }
-
-            case RetryType.GameOver:
-                {
-                    GameOverManager gameOverManager =
-                        FindObjectOfType<GameOverManager>();
-
-                    if (gameOverManager != null)
-                    {
-                        gameOverManager.ResetGameOverState();
-                    }
-
-                    break;
-                }
-        }
-    }
+ 
 
     private void ResetCameras()
     {

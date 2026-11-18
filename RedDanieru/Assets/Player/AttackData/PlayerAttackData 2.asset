@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerAttackData 2
   m_EditorClassIdentifier: 
   attackName: "\u56DE\u8EE2\u5207\u308A"
-  additionalDamage: 100
+  additionalDamage: 200
   playerAttackRadius: {x: 0.8, y: 0.4, z: 2}
   attackOffset: {x: 0.03, y: 0.05, z: 0.8}
   attackRotation: {x: 0, y: 0, z: 0}

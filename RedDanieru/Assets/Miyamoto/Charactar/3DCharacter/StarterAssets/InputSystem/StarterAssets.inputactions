@@ -282,7 +282,7 @@
                     "name": "",
                     "id": "f69fcd0c-a658-47bd-9128-e42bae3e546c",
                     "path": "<Mouse>/rightButton",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": ";KeyboardMouse",
                     "action": "sticker",
