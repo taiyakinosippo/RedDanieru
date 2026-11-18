@@ -2,6 +2,7 @@
 using Player;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PoisonContact : MonoBehaviour
 {
@@ -11,6 +12,15 @@ public class PoisonContact : MonoBehaviour
         Warning,
         Spraying,
         Cooldown
+    }
+
+    // 実際のマップクリエイト用シーン名に変更する
+    private const string MAP_CREATE_SCENE_NAME = "Katayama_ren";
+
+    // マップクリエイト中か判定
+    public static bool IsMapCreateScene()
+    {
+        return SceneManager.GetActiveScene().name == MAP_CREATE_SCENE_NAME;
     }
 
     [Header("起動範囲")]
@@ -77,7 +87,8 @@ public class PoisonContact : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!activeGasContacts.Contains(this))
+        if (!IsMapCreateScene() &&
+            !activeGasContacts.Contains(this))
         {
             activeGasContacts.Add(this);
         }
@@ -91,6 +102,13 @@ public class PoisonContact : MonoBehaviour
 
     private void Update()
     {
+        // マップクリエイト中は毒ガスを停止
+        if (IsMapCreateScene())
+        {
+            ResetGas();
+            return;
+        }
+
         if (sourceStickerState == null)
         {
             sourceStickerState = GetComponent<StickerState>();
@@ -126,6 +144,7 @@ public class PoisonContact : MonoBehaviour
 
         characterDamageTimer = 0f;
 
+        // オブジェクトやトラップの毒ガス処理
         UpdateGasState();
     }
 
@@ -255,6 +274,22 @@ public class PoisonContact : MonoBehaviour
 
     private void LateUpdate()
     {
+        // マップクリエイト中は共有処理を停止
+        if (IsMapCreateScene())
+        {
+            if (lastProcessedFrame != Time.frameCount)
+            {
+                activeGasContacts.Clear();
+                sharedTargets.Clear();
+                gasDamageTimers.Clear();
+
+                lastProcessedFrame = Time.frameCount;
+            }
+
+            UpdatePoisonEffect(false);
+            return;
+        }
+
         // 複数のPoisonContactから同じフレームに
         // 重複して処理されることを防ぐ
         if (lastProcessedFrame == Time.frameCount)
@@ -468,6 +503,9 @@ public class PoisonContact : MonoBehaviour
         if (target == null)
             return;
 
+        if (IsMapCreateScene())
+            return;
+
         // ゴールには毒状態を付与しない
         if (target.GetComponent<GoalEnemyBase>() != null)
             return;
@@ -503,6 +541,9 @@ public class PoisonContact : MonoBehaviour
         if (target == null)
             return;
 
+        if (IsMapCreateScene())
+            return;
+
         // ゴールは毒ガス・毒状態のダメージを受けない
         GoalEnemyBase goal =
             target.GetComponentInParent<GoalEnemyBase>();
@@ -518,12 +559,10 @@ public class PoisonContact : MonoBehaviour
 
         if (enemy != null)
         {
-            // 通常Enemyは直接HPを減らす
             enemy.AddEnemySlipDamage(-damage);
         }
         else if (player != null)
         {
-            // Playerは通常のダメージ処理
             player.Damage(damage);
         }
     }
@@ -547,7 +586,6 @@ public class PoisonContact : MonoBehaviour
                 poisonGasEffect.transform.localPosition =
                     Vector3.zero;
 
-                // Prefabの回転をX=-90度に設定
                 poisonGasEffect.transform.localRotation =
                     Quaternion.Euler(-90f, 0f, 0f);
             }
@@ -624,6 +662,9 @@ public class PoisonStatus : MonoBehaviour
 
     public void ApplyPoison(int poisonDamage, float poisonDuration)
     {
+        if (PoisonContact.IsMapCreateScene())
+            return;
+
         // すでに毒状態なら重複させない
         if (IsPoisoned)
             return;
@@ -647,6 +688,13 @@ public class PoisonStatus : MonoBehaviour
 
     private void Update()
     {
+        // マップクリエイト中は毒状態を終了
+        if (PoisonContact.IsMapCreateScene())
+        {
+            EndPoison();
+            return;
+        }
+
         if (!IsPoisoned)
             return;
 
@@ -672,7 +720,6 @@ public class PoisonStatus : MonoBehaviour
         {
             damageTimer = 0f;
 
-            // ゴール判定を再確認
             if (GetComponentInParent<GoalEnemyBase>() != null)
             {
                 EndPoison();
@@ -687,12 +734,10 @@ public class PoisonStatus : MonoBehaviour
 
             if (enemy != null)
             {
-                // 通常Enemyは直接HPを減らす
                 enemy.AddEnemySlipDamage(-damage);
             }
             else if (player != null)
             {
-                // Playerは通常のダメージ処理
                 player.Damage(damage);
             }
         }
