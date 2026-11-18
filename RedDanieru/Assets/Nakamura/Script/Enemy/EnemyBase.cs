@@ -29,9 +29,9 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackCoolTime = 1.0f;   //攻撃モーションを終了してから次の攻撃ができるまでの時間
     [SerializeField] protected float enemyAttackStartTime = 1.2f;  //攻撃モーションを再生してから実際に当たり判定が出るまでの時間
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
-    protected float enemyDamageTime = 0.8f;        //ダメージモーションを再生してから次の行動ができるまでの時間
+    protected float enemyDamageTime = 0.4f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    protected enemyState currentState;  //現在の状態
+    [SerializeField] protected enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
@@ -52,7 +52,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected LayerMask obstacleLayer;  //障害物のレイヤー
     public Transform player;
     protected NavMeshAgent agent;
-    private NavMeshPath chasePath;
+    protected NavMeshPath chasePath;
 
     //-----マルチプレイ用-----
     //マルチではホスト（マスタークライアント）の画面の敵だけAIを動かし、
@@ -664,6 +664,9 @@ public class EnemyBase : MonoBehaviour
     //敵のHPを変動させる
     public void AddEnemyCurrentHP(int value)
     {
+        if (currentState == enemyState.Dead)
+            return;
+
         currentHp += value;
         if (currentHp < 0)
             currentHp = 0;
@@ -675,12 +678,33 @@ public class EnemyBase : MonoBehaviour
         if (currentHp <= 0)
         {
             //死亡処理
-            currentState = enemyState.Dead;
+            Dead().Forget();
         }
         else
         {
             //ダメージ処理
             currentState = enemyState.Damage;
+        }
+    }
+
+    //毒ダメージ処理
+    public void AddEnemySlipDamage(int value)
+    {
+        if (currentState == enemyState.Dead)
+            return;
+
+        currentHp += value;
+        if (currentHp < 0)
+            currentHp = 0;
+
+        //現在のHPが最大HPを超えないようにする
+        if (currentHp > enemyHP)
+            currentHp = enemyHP;
+
+        if (currentHp <= 0)
+        {
+            //死亡処理
+            Dead().Forget();
         }
     }
 

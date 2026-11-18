@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class ObjectDeleteManager : MonoBehaviour
@@ -10,7 +11,8 @@ public class ObjectDeleteManager : MonoBehaviour
     private PlaceObject currentObject;
 
     // 最後に削除した座標
-    private Vector3Int lastDeletePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+    private Vector3Int lastDeletePos =
+        new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     // 編集中か
     private bool isEditing = false;
@@ -38,16 +40,25 @@ public class ObjectDeleteManager : MonoBehaviour
                 isEditing = false;
             }
 
-            lastDeletePos = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+            lastDeletePos = new Vector3Int(
+                int.MinValue,
+                int.MinValue,
+                int.MinValue
+            );
         }
     }
 
     /// <summary>
     /// マウス下のオブジェクトを選択
-    /// （床を指していても、そのマスのオブジェクトを取得）
     /// </summary>
     private void HighlightObject()
     {
+        if (mainCamera == null || mapManager == null)
+        {
+            ClearSelection();
+            return;
+        }
+
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
         if (!Physics.Raycast(ray, out RaycastHit hit))
@@ -58,8 +69,9 @@ public class ObjectDeleteManager : MonoBehaviour
 
         PlaceObject target = null;
 
-        // オブジェクトを直接指している
-        PlaceObject placeObject = hit.collider.GetComponent<PlaceObject>();
+        // オブジェクト本体または子Colliderから取得
+        PlaceObject placeObject =
+            hit.collider.GetComponentInParent<PlaceObject>();
 
         if (placeObject != null)
         {
@@ -67,12 +79,14 @@ public class ObjectDeleteManager : MonoBehaviour
         }
         else
         {
-            // 床を指している
-            FloorBlock floor = hit.collider.GetComponent<FloorBlock>();
+            // 床本体または子Colliderから取得
+            FloorBlock floor =
+                hit.collider.GetComponentInParent<FloorBlock>();
 
             if (floor != null)
             {
-                GameObject obj = mapManager.GetPlacedObject(floor.GridPosition);
+                GameObject obj =
+                    mapManager.GetPlacedObject(floor.GridPosition);
 
                 if (obj != null)
                 {
@@ -107,7 +121,7 @@ public class ObjectDeleteManager : MonoBehaviour
 
         Vector3Int pos = currentObject.GridPosition;
 
-        // 同じ場所は連続削除しない
+        // 同じオブジェクトの連続削除を防止
         if (pos == lastDeletePos)
             return;
 
@@ -134,5 +148,23 @@ public class ObjectDeleteManager : MonoBehaviour
             currentObject.Deselect();
             currentObject = null;
         }
+    }
+
+    /// <summary>
+    /// 編集画面復帰時の初期化
+    /// </summary>
+    public void ResetDeleteState()
+    {
+        ClearSelection();
+
+        lastDeletePos = new Vector3Int(
+            int.MinValue,
+            int.MinValue,
+            int.MinValue
+        );
+
+        isEditing = false;
+
+        Debug.Log("削除状態を初期化しました");
     }
 }

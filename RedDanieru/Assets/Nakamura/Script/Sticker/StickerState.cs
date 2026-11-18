@@ -94,7 +94,9 @@ public class StickerState : MonoBehaviour
                 break;
             case Sticker.Cactus:
                 currentStickerScript = gameObject.AddComponent<CactusSticker>();
-                
+                break;
+            case Sticker.Dragon:
+                currentStickerScript = gameObject.AddComponent<DragonSticker>();
                 break;
         }
 
@@ -155,7 +157,7 @@ public class StickerState : MonoBehaviour
             }
 
             //破棄
-            //Destroy(currentStickerScript);
+            Destroy(currentStickerScript);
         }
 
         //貼られていたステッカーを回収

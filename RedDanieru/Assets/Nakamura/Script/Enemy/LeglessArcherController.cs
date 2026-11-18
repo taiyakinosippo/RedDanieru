@@ -18,9 +18,8 @@ public class LeglessArcherController : EnemyBase
 
     public override void Awake()
     {
-        stickerState = GetComponent<StickerState>();
-        rb = GetComponent<Rigidbody>();
-        agent = GetComponent<NavMeshAgent>();
+        //共通の初期化（アニメーションの取得もここで行う）
+        base.Awake();
 
         //オブジェクトプールの初期化
         waitingArrows = new Queue<GameObject>();
