@@ -13,7 +13,7 @@ public class DragonController : EnemyBase
     }
     [SerializeField] private AttackType attackType;
 
-    [SerializeField] private Vector3 headPos;  //頭の位置
+    public Vector3 headPos;  //頭の位置
     private float stompRange = 2.5f;  //踏みつけ攻撃の射程
     private float biteRange = 0.5f;  //かみつき攻撃の射程
     private float fireBreathRange = 15f;  //炎ブレスの射程
@@ -144,7 +144,7 @@ public class DragonController : EnemyBase
         if (headDistance <= biteRange)
         {
             //竜化ステッカーがあるか
-            if (HasDragonSticker())
+            if (HasDragonSticker() && specialCoolTimer <= 0f)
             {
                 //40%で炎ブレス、60%でかみつき
                 int random = Random.Range(0, 100);
@@ -163,7 +163,7 @@ public class DragonController : EnemyBase
         if (distance <= fireBreathRange)
         {
             //竜化ステッカーがあるか
-            if (HasDragonSticker())
+            if (HasDragonSticker() && specialCoolTimer <= 0f)
             {
                 return AttackType.FireBreath;
             }
