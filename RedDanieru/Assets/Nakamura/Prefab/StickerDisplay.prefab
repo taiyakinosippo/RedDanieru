@@ -130,3 +130,7 @@ MonoBehaviour:
   explosionEffect: {fileID: 100008, guid: 06736895ea0a4ff408d25e6684dce797, type: 3}
   chargeEffect: {fileID: 1400834752714809453, guid: 859e5b2d8431a7c429fc653031724a95, type: 3}
   cactusPrefab: {fileID: 3467967641715800347, guid: 78614cd749eb3b640924e6f70d5b4ee7, type: 3}
+  stunStarEffect: {fileID: 5659291355382750488, guid: b3db7d4d711f94d4796743baa5ba7a38, type: 3}
+  stunStarHitEffect: {fileID: 3125908671876608230, guid: 2e07e5ba5a6e8b74d8206f9be0e29d37, type: 3}
+  stunStarHeight: 0.3
+  stunStarScale: 2
