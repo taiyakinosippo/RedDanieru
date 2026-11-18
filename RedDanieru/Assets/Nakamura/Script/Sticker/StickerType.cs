@@ -10,4 +10,5 @@ public enum Sticker
     Poison,
     Explosion,
     Cactus,
+    Dragon,
 }
