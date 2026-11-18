@@ -83,13 +83,6 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.4211088
-        functionName: AttackAnimationEnd
-        data: 
-        objectReferenceParameter: {fileID: 11500000, guid: fc1925cdfa685064eb00d19a296087c5, type: 3}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
       transformMask:
       - path: 
         weight: 1
