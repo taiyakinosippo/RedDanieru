@@ -31,6 +31,7 @@ public class LoadUI : MonoBehaviour
 
     [SerializeField] private GameObject noConnectionObj;
     [SerializeField] private GameObject loadingObj;
+    [SerializeField] private GameObject stageLoadingObj;
 
     [SerializeField] private Button stageSearchButton;
     [SerializeField] private Button refreshButton;
@@ -41,6 +42,8 @@ public class LoadUI : MonoBehaviour
     public void Start()
     {
         noConnectionObj.SetActive(false);
+
+        stageLoadingObj.SetActive(false);
     }
 
     private void Update()
@@ -231,8 +234,6 @@ public class LoadUI : MonoBehaviour
             button.GetComponent<Button>().onClick.AddListener(() =>
             {
                 ui.Toggle();
-
-                importer.ImportDungeon(selectedDungeonId);
             });
 
             ui.soloButton.onClick.AddListener(() =>
@@ -331,10 +332,6 @@ public class LoadUI : MonoBehaviour
             button.GetComponent<Button>().onClick.AddListener(() =>
             {
                 ui.Toggle();
-
-                importer.ImportDungeon(
-                    selectedDungeonId
-                );
             });
 
             ui.soloButton.onClick.AddListener(() =>
@@ -454,7 +451,6 @@ public class LoadUI : MonoBehaviour
             button.GetComponent<Button>().onClick.AddListener(() =>
             {
                 ui.Toggle();
-                importer.ImportDungeon(selectedDungeonId);
             });
 
             ui.soloButton.onClick.AddListener(() =>

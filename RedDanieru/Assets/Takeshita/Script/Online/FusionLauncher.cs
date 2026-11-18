@@ -31,6 +31,9 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     [SerializeField] private DungeonImporter importer;
 
+    [SerializeField]
+    private GameObject stageLoadingObj;
+
     private NetworkRunner runner;
 
     // 自分から抜けたときは「切断された」と表示しない
@@ -135,6 +138,11 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
             yield return importer.WaitUntilLoaded(
                 RoomInfo.SelectedDungeon
             );
+        }
+
+        if (stageLoadingObj != null)
+        {
+            stageLoadingObj.SetActive(false);
         }
 
         Debug.Log("マップ読込完了");
@@ -329,21 +337,60 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
     /// </summary>
     public void HandleGameStarted()
     {
+        StartCoroutine(
+            HandleGameStartedCoroutine()
+        );
+    }
+
+    private IEnumerator HandleGameStartedCoroutine()
+    {
+        if (!GameModeManager.IsMultiplayer)
+        {
+            yield break;
+        }
+
+        if (stageLoadingObj != null)
+        {
+            stageLoadingObj.SetActive(true);
+
+            yield return null;
+        }
+
+        if (importer != null)
+        {
+            importer.ImportDungeon(
+                RoomInfo.SelectedDungeon
+            );
+
+            yield return importer.WaitUntilLoaded(
+                RoomInfo.SelectedDungeon
+            );
+        }
+
+        if (stageLoadingObj != null)
+        {
+            stageLoadingObj.SetActive(false);
+        }
+
         if (BGMManager_Takeshita.Instance != null)
         {
             BGMManager_Takeshita.Instance.PlayBattleBGM();
         }
 
-        GameStopManager gameStopManager = FindObjectOfType<GameStopManager>();
+        GameStopManager gameStopManager =
+            FindObjectOfType<GameStopManager>();
 
         if (gameStopManager != null)
         {
             gameStopManager.EnablePauseMenu();
         }
 
-        if (Runner != null && playerSpawner != null)
+        if (Runner != null &&
+            playerSpawner != null)
         {
-            playerSpawner.SpawnLocalPlayer(Runner);
+            playerSpawner.SpawnLocalPlayer(
+                Runner
+            );
         }
 
         GameStarted?.Invoke();
@@ -524,25 +571,39 @@ public class FusionLauncher : MonoBehaviour, INetworkRunnerCallbacks
 
     private IEnumerator RetryWithMapCoroutine()
     {
+        Debug.Log("① Retry開始");
         DespawnLocalPlayer();
 
         yield return null;
 
+      
+            stageLoadingObj.SetActive(true);
+
+            yield return null;
+      
         DungeonImporter importer =
             FindObjectOfType<DungeonImporter>();
 
         if (importer != null)
         {
+            Debug.Log("③ ImportDungeon");
+
             importer.ImportDungeon(
                 RoomInfo.SelectedDungeon
             );
+
+            Debug.Log("④ WaitUntilLoaded開始");
 
             yield return importer.WaitUntilLoaded(
                 RoomInfo.SelectedDungeon
             );
         }
 
+            stageLoadingObj.SetActive(false);
+
         RestartMatch();
+        Debug.Log("⑧ RestartMatch終了");
+
 
         if (NetworkGameState.Instance != null &&
       NetworkGameState.Instance.HasStateAuthority)
