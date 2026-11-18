@@ -179,6 +179,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 0
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!1001 &3835879235193890801
 PrefabInstance:

@@ -1,11 +1,19 @@
+
 using UnityEngine;
 
 public class PlaceObject : MonoBehaviour
 {
     public PlaceObjectType objectType;
 
-    // 配置したマス
+    // 配置した基準マス
     public Vector3Int GridPosition { get; set; }
+
+    [Header("占有マス設定")]
+    [SerializeField, Min(1)] private int gridWidth = 1;
+    [SerializeField, Min(1)] private int gridDepth = 1;
+
+    public int GridWidth => Mathf.Max(1, gridWidth);
+    public int GridDepth => Mathf.Max(1, gridDepth);
 
     [Header("選択色")]
     [SerializeField] private Color selectColor = Color.red;
@@ -41,9 +49,6 @@ public class PlaceObject : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 選択
-    /// </summary>
     public void Select()
     {
         for (int i = 0; i < renderers.Length; i++)
@@ -58,9 +63,6 @@ public class PlaceObject : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 選択解除
-    /// </summary>
     public void Deselect()
     {
         for (int i = 0; i < renderers.Length; i++)
