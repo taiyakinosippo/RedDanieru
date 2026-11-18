@@ -362,6 +362,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: StickerDisplay
       objectReference: {fileID: 0}
+    - target: {fileID: 92169882089259308, guid: 98620238af6d1fd498ed663bb9a11795, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1324908003623559813, guid: 98620238af6d1fd498ed663bb9a11795, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.5

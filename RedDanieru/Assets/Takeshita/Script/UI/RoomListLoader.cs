@@ -294,10 +294,6 @@ public class RoomListLoader : MonoBehaviour
 
         joinMessage = null;
 
-        importer.ImportDungeon(
-            room.dungeon_id
-        );
-
         // 人数はホストが実際の接続数で更新するので、ここではDBの人数を増やさない
         fusionLauncher.StartMatch(
             room.room_id,

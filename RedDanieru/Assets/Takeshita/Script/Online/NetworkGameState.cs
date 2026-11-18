@@ -36,9 +36,9 @@ public partial class NetworkGameState : NetworkBehaviour
 
     [Networked] public int ShopReadyCount { get; set; }
 
-    [Networked] public int StartCountdown { get; set; }
+    //[Networked] public int StartCountdown { get; set; }
 
-    [Networked] private TickTimer StartTimer { get; set; }
+    //[Networked] private TickTimer StartTimer { get; set; }
 
     private bool localStartHandled;
     private bool localClearHandled;
@@ -106,22 +106,22 @@ public partial class NetworkGameState : NetworkBehaviour
             }
         }
 
-        if (StartCountdown > 0 &&
-    StartTimer.Expired(Runner))
-        {
-            StartCountdown--;
+    //    if (StartCountdown > 0 &&
+    //StartTimer.Expired(Runner))
+    //    {
+    //        StartCountdown--;
 
-            StartTimer =
-                TickTimer.CreateFromSeconds(
-                    Runner,
-                    1f
-                );
+    //        StartTimer =
+    //            TickTimer.CreateFromSeconds(
+    //                Runner,
+    //                1f
+    //            );
 
-            if (StartCountdown <= 0)
-            {
-                RequestStartGame();
-            }
-        }
+    //        if (StartCountdown <= 0)
+    //        {
+    //            RequestStartGame();
+    //        }
+    //    }
     }
 
 
@@ -339,22 +339,13 @@ public partial class NetworkGameState : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void RPC_AddShopReady()
     {
-        if (StartCountdown > 0)
-            return;
-
         ShopReadyCount++;
 
         if (ShopReadyCount >= Runner.ActivePlayers.Count())
         {
             ShopReadyCount = 0;
 
-            StartCountdown = 3;
-
-            StartTimer =
-                TickTimer.CreateFromSeconds(
-                    Runner,
-                    1f
-                );
+            RequestStartGame();
         }
     }
 }

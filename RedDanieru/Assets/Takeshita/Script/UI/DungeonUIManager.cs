@@ -374,10 +374,6 @@ public class DungeonUIManager : MonoBehaviour
 
         ScrolView.SetActive(false);
 
-        importer.ImportDungeon(
-            RoomInfo.SelectedDungeon
-        );
-
         StartCoroutine(OpenShopForSolo());
     }
 
