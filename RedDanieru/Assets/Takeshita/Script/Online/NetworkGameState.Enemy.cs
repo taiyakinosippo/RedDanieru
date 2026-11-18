@@ -289,6 +289,32 @@ public partial class NetworkGameState
     }
 
     //==================================================
+    // スタンの星（見た目だけ他の人の画面にも出す）
+    //==================================================
+
+    public static void NotifyStunStars(EnemyBase enemy, float duration)
+    {
+        int id = NetworkSyncId.Of(enemy);
+
+        if (!IsOnline(out NetworkGameState state) || !state.HasStateAuthority || id == 0)
+            return;
+
+        state.RPC_StunStars(id, duration);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_StunStars(int id, float duration)
+    {
+        if (HasStateAuthority)
+            return;
+
+        if (TryGetEnemy(id, out EnemyBase enemy))
+        {
+            StunStarEffect.Show(enemy, duration);
+        }
+    }
+
+    //==================================================
     // ステッカーの貼り剥がし
     //==================================================
 
