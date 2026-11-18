@@ -10,18 +10,36 @@ public class PoisonSticker : StickerBase
     public override void OnEnemyApply()
     {
         //
-        
     }
 
     //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
         //
-        
     }
 
     public override void OnWallApply()
     {
+        // Resourcesから床Prefabを取得
+        GameObject floorPrefab = Resources.Load<GameObject>("Ground_Mines_D");
+
+        if (floorPrefab == null)
+        {
+            Debug.LogError("Ground_Mines_Dが見つかりません。Resourcesフォルダを確認してください。");
+            return;
+        }
+
+        // 壁の位置から真下に1マス移動
+        Vector3 spawnPosition = transform.position + Vector3.down * 0.5f;
+
+        // 床を生成
+        Instantiate(
+            floorPrefab,
+            spawnPosition,
+            Quaternion.identity
+        );
+
+        // 壁を消す
         gameObject.SetActive(false);
     }
 
