@@ -111,6 +111,15 @@ public class MapManager : MonoBehaviour
     [SerializeField]
     private PlacementCategoryUI placementCategoryUI;
 
+    //==================================================
+    // MapCreateシーン判定
+    //==================================================
+
+    private bool IsMapCreateScene()
+    {
+        return SceneManager.GetActiveScene().name == "Katayama_ren";
+    }
+
     [Header("NavMesh")]
     [SerializeField] private NavMeshSurface navMeshSurface;
 
@@ -1411,13 +1420,9 @@ public class MapManager : MonoBehaviour
     // 掘削
     //==================================================
 
-    public void Dig(
-        Vector3Int pos)
+    public void Dig(Vector3Int pos)
     {
-        if (!IsInsideMap(pos))
-        {
-            return;
-        }
+        if (!IsInsideMap(pos)) return;
 
         bool changed = false;
 
@@ -1442,12 +1447,23 @@ public class MapManager : MonoBehaviour
 
         if (changed)
         {
+            // 斜め壁を更新
             UpdateDiagonalWalls();
 
-            BuildNavigation();
-
+            // マップ変更を記録
             MarkMapChanged();
+
+            // NavMeshはここでは再構築しない
         }
+    }
+
+    //==================================================
+    // NavMesh再構築
+    //==================================================
+
+    public void RebuildNavigation()
+    {
+        BuildNavigation();
     }
 
     private void DigSingleTile(
@@ -2504,12 +2520,12 @@ public class MapManager : MonoBehaviour
         // NavMesh
         //==================================================
 
-        BuildNavigation();
+        //BuildNavigation();
 
-        if (enableEnemyMovement)
-        {
-            EnableEnemyMovement();
-        }
+        //if (enableEnemyMovement)
+        //{
+        //    EnableEnemyMovement();
+        //}
 
         //==================================================
         // リスポーン
@@ -2528,6 +2544,19 @@ public class MapManager : MonoBehaviour
         if (torchLight != null)
         {
             torchLight.LoadTorches(data.torchData);
+        }
+
+        //==================================================
+        // NavMesh
+        //==================================================
+
+        // マップの読み込みが完了してから生成
+        BuildNavigation();
+
+        // NavMesh生成後に敵の移動を許可
+        if (enableEnemyMovement)
+        {
+            EnableEnemyMovement();
         }
 
         AdjustCamera();
@@ -2919,7 +2948,7 @@ public class MapManager : MonoBehaviour
 
         UpdateDiagonalWalls();
 
-        BuildNavigation();
+        //BuildNavigation();
 
         MarkMapChanged();
 
@@ -3472,9 +3501,14 @@ public class MapManager : MonoBehaviour
     // NavMesh
     //==================================================
 
-
     public void BuildNavigation()
     {
+        // MapCreateではNavMeshを生成しない
+        if (IsMapCreateScene())
+        {
+            return;
+        }
+
         // 通常敵用NavMeshを生成
         if (navMeshSurface != null)
         {
