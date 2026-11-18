@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7995564654663832033}
   - component: {fileID: 6069437454795958778}
   - component: {fileID: 1241740610563075456}
+  - component: {fileID: 2271561477233100774}
   m_Layer: 3
   m_Name: Tortoise
   m_TagString: Enemy
@@ -23,18 +24,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1241740610563075456
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7228817060988096996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &6468963083013083804
 Transform:
   m_ObjectHideFlags: 0
@@ -75,7 +64,10 @@ MonoBehaviour:
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.2
+  currentState: 0
   currentHp: 0
+  trackingTimer: 0
+  respawnPos: {x: 0, y: 0, z: 0}
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -97,6 +89,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 3
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!54 &1298840895569246200
 Rigidbody:
@@ -183,7 +176,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectType: 10
+  gridWidth: 1
+  gridDepth: 1
   selectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1241740610563075456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7228817060988096996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2271561477233100774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7228817060988096996}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632a81b4521940bd8d02e3fb8edcc6d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8518968586951529716
 GameObject:
   m_ObjectHideFlags: 0

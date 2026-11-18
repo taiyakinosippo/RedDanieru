@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 8908385486835622797}
   - component: {fileID: 8356968776438681485}
   - component: {fileID: 7235136664582013952}
+  - component: {fileID: 5265052006683946677}
   m_Layer: 3
   m_Name: TentativeEnemy
   m_TagString: Enemy
@@ -100,18 +101,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &7235136664582013952
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1986632935637041606}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &2485041316649320893
 Transform:
   m_ObjectHideFlags: 0
@@ -152,6 +141,7 @@ MonoBehaviour:
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
+  currentState: 0
   currentHp: 0
   trackingTimer: 0
   respawnPos: {x: 0, y: 0, z: 0}
@@ -266,6 +256,30 @@ MonoBehaviour:
   gridWidth: 3
   gridDepth: 3
   selectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &7235136664582013952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986632935637041606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5265052006683946677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986632935637041606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632a81b4521940bd8d02e3fb8edcc6d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8733923640097866391
 GameObject:
   m_ObjectHideFlags: 0
