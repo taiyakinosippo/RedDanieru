@@ -3459,68 +3459,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 903120223}
   m_CullTransparentMesh: 1
---- !u!1001 &907944302
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 4030087331295678382}
-    m_Modifications:
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 19.531141
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 6.0677013
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 9.794416
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4832960720288465224, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-      propertyPath: m_Name
-      value: SetTorch
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
---- !u!4 &907944303 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3606463324617922693, guid: b1f627077cf0a604088585d048ad03fd, type: 3}
-  m_PrefabInstance: {fileID: 907944302}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &962960021
 GameObject:
   m_ObjectHideFlags: 0
@@ -7568,6 +7506,7 @@ MonoBehaviour:
   savePanel: {fileID: 7420946853701431355}
   undoManager: {fileID: 8410757127297276586}
   reEditUI: {fileID: 4491096470633423031}
+  placementCategoryUI: {fileID: 0}
 --- !u!1 &403441977509801089
 GameObject:
   m_ObjectHideFlags: 0
@@ -8966,19 +8905,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1c88554ba15f4148a061a1eb8408f88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectButtons:
-  - {fileID: 6051235627348842717}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 5510411350004256612}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 6626659285174938689}
-  - {fileID: 3436000210469693220}
-  - {fileID: 3349518043716766593}
-  - {fileID: 6847121994274566144}
-  - {fileID: 599383769}
-  - {fileID: 1252145177}
+  objectButtonEntries: []
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!4 &1805119292202350450
@@ -9064,6 +8991,10 @@ PrefabInstance:
       propertyPath: spawnMarkerPrefab
       value: 
       objectReference: {fileID: 7461072477327439928, guid: 71de1f033943d494083b84b295d25403, type: 3}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: dungeonCostManager
+      value: 
+      objectReference: {fileID: 1828661524}
     - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: respawnPointObject
       value: 
@@ -11414,7 +11345,6 @@ Transform:
   - {fileID: 8307231973536639563}
   - {fileID: 5820216511303296695}
   - {fileID: 7564032643032742781}
-  - {fileID: 907944303}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4038617851974789679
@@ -12732,6 +12662,7 @@ MonoBehaviour:
   goalWarningUI: {fileID: 103296124}
   goalWarningText: {fileID: 1969406209}
   goalWarningDuration: 2
+  thumbnailCapture: {fileID: 0}
 --- !u!222 &5236109008810406224
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -16917,6 +16848,7 @@ MonoBehaviour:
   uploader: {fileID: 2518941604054129556}
   cautionObj: {fileID: 7574481822287559784}
   saveLoadUI: {fileID: 7722181649151125841}
+  thumbnailCapture: {fileID: 0}
 --- !u!4 &8307231973536639563
 Transform:
   m_ObjectHideFlags: 0
