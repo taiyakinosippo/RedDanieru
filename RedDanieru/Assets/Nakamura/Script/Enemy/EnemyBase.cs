@@ -66,6 +66,9 @@ public class EnemyBase : MonoBehaviour
     //ダメージ中・死亡中はダメージを受けない
     public bool CanTakeDamage => currentState != enemyState.Damage && currentState != enemyState.Dead;
 
+    //スタン中か（頭の上の星を消すタイミングに使う）
+    public bool IsStunned => currentState == enemyState.Stun;
+
     public virtual void Awake()
     {
         stickerState = GetComponent<StickerState>();
