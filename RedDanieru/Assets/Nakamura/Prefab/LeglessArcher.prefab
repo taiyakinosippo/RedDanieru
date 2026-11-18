@@ -180,6 +180,7 @@ GameObject:
   - component: {fileID: 7290488620132254286}
   - component: {fileID: 3812360961753854230}
   - component: {fileID: 1407935232114016640}
+  - component: {fileID: 9053933910512936060}
   m_Layer: 3
   m_Name: LeglessArcher
   m_TagString: Enemy
@@ -187,18 +188,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1407935232114016640
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3579314766830224434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &37434704901308122
 Transform:
   m_ObjectHideFlags: 0
@@ -239,7 +228,10 @@ MonoBehaviour:
   enemyAttackCoolTime: 2
   enemyAttackStartTime: 0.9
   enemyAttackEndTime: 0.3
+  currentState: 0
   currentHp: 0
+  trackingTimer: 0
+  respawnPos: {x: 0, y: 0, z: 0}
   playerLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -263,6 +255,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentSticker: 4
   currentStickerScript: {fileID: 0}
+  isSpecialAttack: 0
   isSpecialMove: 0
 --- !u!54 &916251822306548308
 Rigidbody:
@@ -349,7 +342,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectType: 11
+  gridWidth: 1
+  gridDepth: 1
   selectColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1407935232114016640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3579314766830224434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb9240bcb57d1649b5298ed7cfd848b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &9053933910512936060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3579314766830224434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632a81b4521940bd8d02e3fb8edcc6d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &281665797370519734
 PrefabInstance:
   m_ObjectHideFlags: 0

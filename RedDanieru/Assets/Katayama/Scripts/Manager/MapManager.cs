@@ -2607,6 +2607,8 @@ public class MapManager : MonoBehaviour
             transform
         );
 
+        NetworkSyncId.Assign(obj, pos);
+
         if (type == PlaceObjectType.Enemy)
         {
             EnemyBase enemy = obj.GetComponent<EnemyBase>();
@@ -2615,6 +2617,8 @@ public class MapManager : MonoBehaviour
             {
                 enemy.SetRespawnPos(GetEnemyWorldPosition(pos));
             }
+
+            NetworkSyncId.Assign(obj, pos);
         }
         else
         {
