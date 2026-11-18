@@ -80,7 +80,7 @@ namespace Player
             // 3段目終了後などのアクション制限中は受け付けない
             if (_comboController.IsActionLocked)
             {
-
+                _actionPriority?.EndAction();
                 return;
             }
 

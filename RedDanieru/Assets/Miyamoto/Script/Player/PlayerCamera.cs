@@ -208,6 +208,7 @@ namespace Player
 
             _hidePlayer.isWithinHideDistance(currentCamera);
         }
+
         public void DeadPlayerCameraMove(bool _IsCurrentDeviceMouse, StarterAssetsInputs _input)
         {
             if (GameStopManager.IsPaused)
