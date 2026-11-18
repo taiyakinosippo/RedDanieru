@@ -31,7 +31,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected float enemyAttackEndTime = 0.3f;    //攻撃モーションを再生してから当たり判定が消えるまでの時間
     protected float enemyDamageTime = 0.4f;        //ダメージモーションを再生してから次の行動ができるまでの時間
 
-    protected enemyState currentState;  //現在の状態
+    [SerializeField] protected enemyState currentState;  //現在の状態
     [SerializeField] protected float currentHp;  //現在のHP
     protected float enemyRotationSpeed = 5.0f;  //敵の回転速度
     [SerializeField] protected float trackingTimer = 0.0f;  //現在の追跡時間
@@ -52,7 +52,7 @@ public class EnemyBase : MonoBehaviour
     [SerializeField] protected LayerMask obstacleLayer;  //障害物のレイヤー
     public Transform player;
     protected NavMeshAgent agent;
-    private NavMeshPath chasePath;
+    protected NavMeshPath chasePath;
 
     //-----マルチプレイ用-----
     //マルチではホスト（マスタークライアント）の画面の敵だけAIを動かし、
@@ -65,6 +65,9 @@ public class EnemyBase : MonoBehaviour
 
     //ダメージ中・死亡中はダメージを受けない
     public bool CanTakeDamage => currentState != enemyState.Damage && currentState != enemyState.Dead;
+
+    //スタン中か（頭の上の星を消すタイミングに使う）
+    public bool IsStunned => currentState == enemyState.Stun;
 
     public virtual void Awake()
     {

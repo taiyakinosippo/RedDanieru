@@ -13,9 +13,12 @@ public class ShopManager: MonoBehaviour
     [SerializeField] private GameObject ShopBackCautionObj;
     [SerializeField] private Button HostShopButton;
     [SerializeField] private Button JoinShopButton;
+    [SerializeField] private GameObject stageLoadingObj;
 
     [SerializeField] private TextMeshProUGUI multiPlayerCountText;
-    [SerializeField] private TextMeshProUGUI GameStartCountText;
+    //[SerializeField] private TextMeshProUGUI GameStartCountText;
+
+    [SerializeField] private DungeonImporter importer;
 
     private bool opened;
     private bool isReady;
@@ -36,7 +39,7 @@ public class ShopManager: MonoBehaviour
             FusionLauncher.Instance.GameStarted += OnGameStarted;
         }
 
-        GameStartCountText.text = "ゲームスタート";
+        //GameStartCountText.text = "ゲームスタート";
     }
 
     private void OnDestroy()
@@ -93,19 +96,19 @@ public class ShopManager: MonoBehaviour
         if (GameModeManager.IsMultiplayer &&
     NetworkGameState.Instance != null)
         {
-            int countdown =
-                NetworkGameState.Instance.StartCountdown;
+            //int countdown =
+            //    NetworkGameState.Instance.StartCountdown;
 
-            if (countdown > 0)
-            {
-                GameStartCountText.text =
-                    countdown.ToString();
-            }
-            else
-            {
-                GameStartCountText.text =
-                    "ゲームスタート";
-            }
+            //if (countdown > 0)
+            //{
+            //    GameStartCountText.text =
+            //        countdown.ToString();
+            //}
+            //else
+            //{
+            //    GameStartCountText.text =
+            //        "ゲームスタート";
+            //}
         }
     }
 
@@ -135,13 +138,8 @@ public class ShopManager: MonoBehaviour
     {
         if (!GameModeManager.IsMultiplayer)
         {
-            ShopBackCautionObj.SetActive(false);
-            ShopWindowObj.SetActive(false);
-            MapSelectObj.SetActive(false);
+            StartCoroutine(StartSoloGame());
 
-            Time.timeScale = 1f;
-
-            FusionLauncher.Instance.StartSolo();
             return;
         }
 
@@ -155,6 +153,33 @@ public class ShopManager: MonoBehaviour
         //連打防止
         HostShopButton.interactable = false;
         JoinShopButton.interactable = false;
+    }
+
+    private IEnumerator StartSoloGame()
+    {
+        ShopBackCautionObj.SetActive(false);
+        ShopWindowObj.SetActive(false);
+        MapSelectObj.SetActive(false);
+
+        yield return null;
+
+        stageLoadingObj.SetActive(true);
+
+        yield return null;
+
+        importer.ImportDungeon(
+            RoomInfo.SelectedDungeon
+        );
+
+        yield return importer.WaitUntilLoaded(
+            RoomInfo.SelectedDungeon
+        );
+
+        stageLoadingObj.SetActive(false);
+
+        Time.timeScale = 1f;
+
+        FusionLauncher.Instance.StartSolo();
     }
 
     public void BuyItem(int price)

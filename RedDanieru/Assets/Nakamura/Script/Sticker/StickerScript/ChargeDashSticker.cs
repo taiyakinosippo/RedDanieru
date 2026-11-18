@@ -22,6 +22,7 @@ public class ChargeDashSticker : StickerBase
     private float trapDashSpeed = 20.0f;  //物の突進速度
     private float dashTime = 5.0f;  //突進時間
     private float chargeTime = 2.0f;  //溜め時間
+    private float stunTime = 6.0f;  //ぶつかったときのスタン時間
     private float timer = 0.0f;  //溜め時間のタイマー
     private bool chargeEffectPlayed = false;  //溜めエフェクトが再生されたかどうかのフラグ
     private Vector3 effectOffset = Vector3.zero;  //エフェクトの位置補正
@@ -274,8 +275,19 @@ public class ChargeDashSticker : StickerBase
             //一連の行動終了
             EndDash();
 
+            //壁やプレイヤーにぶつかってスタンし始めたときは頭の上に星を出す
+            bool showStars = !enemyScript.IsStunned;
+
             //6秒間スタン
-            enemyScript.Stun(6f);
+            enemyScript.Stun(stunTime);
+
+            if (showStars)
+            {
+                StunStarEffect.Show(enemyScript, stunTime);
+
+                //マルチでは他の人の画面にも星を出す
+                NetworkGameState.NotifyStunStars(enemyScript, stunTime);
+            }
         }
     }
 }
