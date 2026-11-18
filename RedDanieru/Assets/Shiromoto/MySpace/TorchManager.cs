@@ -27,7 +27,7 @@ public class TorchManager : MonoBehaviour
     }
 
 
-    private void SetTorch()
+    public void SetTorch()
     {
         walls.Clear();
         canSetPosition.Clear();
