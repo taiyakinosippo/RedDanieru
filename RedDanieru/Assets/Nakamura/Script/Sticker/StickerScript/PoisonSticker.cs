@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PoisonSticker : StickerBase
 {
-    private int poisonDamage = 10;  //毒ダメージ量
+    private int poisonDamage = 50;  //毒ダメージ量
     private float poisonInterval = 1.0f;  //毒ダメージの間隔
     private float poisonTimer = 0.0f;  //毒ダメージのタイマー
 
@@ -41,7 +41,7 @@ public class PoisonSticker : StickerBase
         {
             //毒ダメージを与える
             if (enemyScript != null)
-                enemyScript.AddEnemyCurrentHP(-poisonDamage);
+                enemyScript.AddEnemySlipDamage(-poisonDamage);
             else if (playerStatus != null)
                 playerStatus.Damage(poisonDamage);
 

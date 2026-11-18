@@ -29,4 +29,14 @@ public class PlayerAttackData : ScriptableObject
 
     // 攻撃の種類（近接攻撃、遠距離攻撃など）
     public AttackType attackType;
+
+    [Header("コンボ入力受付時間")]
+
+    [Tooltip("攻撃開始から入力受付を開始するまでの時間")]
+    [Min(0f)]
+    public float comboInputStartDelay = 0.3f;
+
+    [Tooltip("コンボ入力を受け付ける時間")]
+    [Min(0f)]
+    public float comboInputDuration = 0.3f;
 }

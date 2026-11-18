@@ -648,7 +648,7 @@ MonoBehaviour:
   enemyMoveSpeed: 3
   enemySearchArea: 6
   enemyTrackingTime: 3
-  enemyAttackArea: 1.5
+  enemyAttackArea: 0
   enemyAttackCoolTime: 1
   enemyAttackStartTime: 1.2
   enemyAttackEndTime: 0.3
@@ -662,7 +662,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   player: {fileID: 0}
-  goalMaxHP: 900
+  goalMaxHP: 1200
   destroyObjectsOnBreak:
   - {fileID: 186884}
 --- !u!195 &8446558480016789551

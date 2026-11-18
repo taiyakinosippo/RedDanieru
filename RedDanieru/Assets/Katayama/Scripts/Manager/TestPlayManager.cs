@@ -17,6 +17,9 @@ public class TestPlayManager : MonoBehaviour
     [SerializeField] private string mapCreateSceneName = "Katayama_ren";
     [SerializeField] private string testPlaySceneName = "Testplay";
 
+    [Tooltip("ON: テストプレイ中も編集シーンを読み込んだまま残す(戻るときの読み込みがなくなる)")]
+    [SerializeField] private bool keepEditSceneLoaded = true;
+
     [Header("プレイヤー")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private Transform startPoint;
@@ -155,6 +158,13 @@ public class TestPlayManager : MonoBehaviour
         LoadSceneMode mode
     )
     {
+        // 自分のシーンの読み込みにだけ反応する
+        // (編集シーンを残したまま別シーンを追加で読み込むことがあるため)
+        if (scene != gameObject.scene || !isActiveAndEnabled)
+        {
+            return;
+        }
+
         if (string.Equals(
             scene.name,
             testPlaySceneName,
@@ -250,6 +260,15 @@ public class TestPlayManager : MonoBehaviour
         Debug.Log(
             "テストプレイを開始します。"
         );
+
+        // 編集シーンを残したままテストプレイシーンを追加で読み込む
+        if (keepEditSceneLoaded &&
+            TestPlaySceneKeeper.StartTestPlay(
+                gameObject.scene,
+                testPlaySceneName))
+        {
+            return;
+        }
 
         SceneManager.LoadScene(
             testPlaySceneName
@@ -662,6 +681,12 @@ public class TestPlayManager : MonoBehaviour
         // マウスカーソルを表示
         _cursorController.ShowCursor();
 
+        // 編集シーンを残してあれば、テストプレイシーンを破棄して再表示するだけ
+        if (TestPlaySceneKeeper.ReturnToEdit(gameObject.scene))
+        {
+            return;
+        }
+
         returnToEdit = true;
 
         SceneManager.LoadScene(
@@ -759,6 +784,12 @@ public class TestPlayManager : MonoBehaviour
         // マップ上のオブジェクトのRigidBodyをすべて凍結
         mapManager.ObjectsAllFreeze();
 
+        // 編集シーンを残してあれば、テストプレイシーンを破棄して再表示するだけ
+        if (TestPlaySceneKeeper.ReturnToEdit(gameObject.scene))
+        {
+            return;
+        }
+
         returnToEdit = true;
 
         SceneManager.LoadScene(
@@ -770,6 +801,7 @@ public class TestPlayManager : MonoBehaviour
     // 編集マップを復元
     //==================================================
 
+
     private IEnumerator RestoreEditMap()
     {
         Debug.Log("================================");
@@ -778,8 +810,7 @@ public class TestPlayManager : MonoBehaviour
 
         yield return null;
 
-        mapManager =
-            FindObjectOfType<MapManager>();
+        mapManager = FindObjectOfType<MapManager>();
 
         if (mapManager == null)
         {
@@ -799,6 +830,7 @@ public class TestPlayManager : MonoBehaviour
             yield break;
         }
 
+        // 編集マップを復元
         mapManager.LoadDungeon(
             pendingEditData,
             false
@@ -806,47 +838,58 @@ public class TestPlayManager : MonoBehaviour
 
         yield return null;
 
+        // UI設定
         if (mapCreateUI != null)
-        {
             mapCreateUI.SetActive(true);
-        }
 
         if (otherEditUI != null)
-        {
             otherEditUI.SetActive(true);
-        }
 
         if (testPlayUI != null)
-        {
             testPlayUI.SetActive(false);
-        }
 
         if (postConfirmUI != null)
-        {
             postConfirmUI.SetActive(false);
-        }
 
         if (postSettingUI != null)
-        {
             postSettingUI.SetActive(false);
-        }
 
+        // カメラ設定
         if (editCamera != null)
-        {
             editCamera.gameObject.SetActive(true);
-        }
 
         if (playerCamera != null)
-        {
             playerCamera.gameObject.SetActive(false);
+
+        // 削除管理スクリプトを再取得
+        ObjectDeleteManager deleteManager =
+            FindObjectOfType<ObjectDeleteManager>(true);
+
+        if (deleteManager != null)
+        {
+            deleteManager.enabled = true;
+
+            deleteManager.ResetDeleteState();
+
+            Debug.Log(
+                "ObjectDeleteManagerを復帰しました"
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "ObjectDeleteManagerが見つかりません"
+            );
         }
 
+        // 編集画面への復帰完了
         returnToEdit = false;
 
         Debug.Log(
             "編集画面への復帰完了"
         );
     }
+
 
     //==================================================
     // ゴール警告表示
