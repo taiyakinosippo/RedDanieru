@@ -10,7 +10,7 @@ public class TorchManager : MonoBehaviour
     [SerializeField] private ObjectPrefab torch;
 
     private List<GameObject> walls = new List<GameObject>();
-    private List<Vector3> canSetPosition = new List<Vector3>();
+    private List<TorchPoint> canSetPosition = new List<TorchPoint>();
     private List<Vector3> lightList = new List<Vector3>();
 
     private float xMax;
@@ -24,6 +24,14 @@ public class TorchManager : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Q)) SetTorch();
+    }
+
+
+    public class TorchPoint
+    {
+        public Vector3 pos;
+        public GameObject wall;
+        public Vector3 dir;
     }
 
 
@@ -65,13 +73,13 @@ public class TorchManager : MonoBehaviour
 
     private void Action()
     {
-        foreach (Vector3 pos in canSetPosition)
+        foreach (TorchPoint csp in canSetPosition)
         {
             bool canPlace = true;
 
             foreach (Vector3 lightPos in lightList)
             {
-                if (Vector3.Distance(pos, lightPos) < lightDistance)
+                if (Vector3.Distance(csp.pos, lightPos) < lightDistance)
                 {
                     canPlace = false;
                     break;
@@ -82,12 +90,16 @@ public class TorchManager : MonoBehaviour
                 continue;
 
             Vector3 spawnPos =
-                new Vector3(pos.x, 0f, pos.z);
+                new Vector3(csp.pos.x, 0f, csp.pos.z);
 
-            Instantiate(
-                torch.prefab,
-                spawnPos,
-                Quaternion.identity);
+            GameObject newTorch =
+                Instantiate(
+                    torch.prefab,
+                    spawnPos,
+                    Quaternion.LookRotation(-csp.dir)
+                    * Quaternion.Euler(0, -90, 0));
+
+            newTorch.transform.SetParent(csp.wall.transform, true);
 
             lightList.Add(spawnPos);
         }
@@ -110,14 +122,14 @@ public class TorchManager : MonoBehaviour
 
             if (!Physics.Raycast(ray, out RaycastHit hit, 1.0f, LayerMask.GetMask("Wall")))
             {
-                IsInside(wall.transform.position, dir);
+                IsInside(wall.transform.position, dir, wall);
             }
         }
     }
 
-    private void IsInside(Vector3 pos, Vector3 dir)
+    private void IsInside(Vector3 pos, Vector3 dir, GameObject wall)
     {
-        Vector3 lightPos = pos + dir;
+        Vector3 lightPos = pos + dir * 0.7f;
 
         if (lightPos.x < xMin) return;
         if (lightPos.x > xMax) return;
@@ -125,11 +137,11 @@ public class TorchManager : MonoBehaviour
         if (lightPos.z < zMin) return;
         if (lightPos.z > zMax) return;
 
-        foreach(Vector3 csp in canSetPosition)
+        foreach(TorchPoint csp in canSetPosition)
         {
-            if (csp == lightPos) return;
+            if (csp.pos == lightPos) return;
         }
 
-        canSetPosition.Add(lightPos);
+        canSetPosition.Add(new TorchPoint { pos = lightPos, dir = dir, wall = wall });
     }
 }
