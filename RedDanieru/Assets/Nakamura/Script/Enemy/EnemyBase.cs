@@ -44,6 +44,8 @@ public class EnemyBase : MonoBehaviour
 
     protected private float specialCoolTimer = 0.0f;  //特殊行動のタイマー
     protected private float specialInterval = 4.0f;  //特殊行動のクールタイム
+    public bool isStickerStopped = false;  //ステッカーによる移動停止中かどうか
+    protected bool Stopped = false;  //移動停止中かどうか
 
     protected StickerState stickerState;
     protected EnemyAnimationBase enemyAnimation;
@@ -137,7 +139,7 @@ public class EnemyBase : MonoBehaviour
                 if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
                 {
                     currentState = enemyState.Idle;
-                    agent.isStopped = true;
+                    Stopped = true;
                     agent.ResetPath();
                 }
 
@@ -189,6 +191,19 @@ public class EnemyBase : MonoBehaviour
         if (specialCoolTimer > 0f)
         {
             specialCoolTimer -= Time.deltaTime;
+        }
+
+        //移動停止の制御
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            if ((isStickerStopped || Stopped) && !agent.isStopped)
+            {
+                agent.isStopped = true;
+            }
+            else if (!isStickerStopped && !Stopped && agent.isStopped)
+            {
+                agent.isStopped = false;
+            }
         }
     }
 
@@ -263,7 +278,7 @@ public class EnemyBase : MonoBehaviour
                     enemyAnimation.WalkAnimation(false);
 
                 //攻撃範囲内なら常に停止
-                agent.isStopped = true;
+                Stopped = true;
                 agent.ResetPath();
 
                 //クールタイムが終わっていれば攻撃
@@ -286,13 +301,13 @@ public class EnemyBase : MonoBehaviour
                 //経路がつながっていない場合は追跡しない
                 if (chasePath.status != NavMeshPathStatus.PathComplete)
                 {
-                    agent.isStopped = true;
+                    Stopped = true;
                     agent.ResetPath();
                     return;
                 }
 
                 currentState = enemyState.Move;
-                agent.isStopped = false;
+                Stopped = false;
                 agent.SetDestination(player.position);
             }
         }
@@ -326,7 +341,7 @@ public class EnemyBase : MonoBehaviour
             //有効な経路がない場合は停止
             if (!agent.hasPath || agent.pathStatus != NavMeshPathStatus.PathComplete)
             {
-                agent.isStopped = true;
+                Stopped = true;
                 agent.ResetPath();
 
                 if (enemyAnimation != null)
@@ -337,12 +352,12 @@ public class EnemyBase : MonoBehaviour
 
             //最後に設定された経路を追跡
             currentState = enemyState.Move;
-            agent.isStopped = false;
+            Stopped = false;
         }
         else if (trackingTimer > 0f)
         {
             //追跡時間が終わったら停止、プレイヤーを見失ったアニメーションを再生する
-            agent.isStopped = true;
+            Stopped = true;
             agent.ResetPath();
             if (enemyAnimation != null)
                 enemyAnimation.PlayerLostAnimation(true);
@@ -370,7 +385,7 @@ public class EnemyBase : MonoBehaviour
                 if (randomAttack <= stickerState.currentStickerScript.attackRate)
                 {
                     currentState = enemyState.Special;
-                    agent.isStopped = true;
+                    Stopped = true;
                     //agent.enabled = false;
                     return;
                 }
@@ -389,7 +404,7 @@ public class EnemyBase : MonoBehaviour
     //    if (specialCoolTimer <= 0f)
     //    {
     //        currentState = enemyState.Special;
-    //        agent.isStopped = true;
+    //        Stopped = true;
     //        agent.enabled = false;
     //        return;
     //    }
@@ -492,7 +507,7 @@ public class EnemyBase : MonoBehaviour
         Debug.Log("プレイヤーを見失ったのでリスポーン位置に戻ります。");
         currentState = enemyState.Back;
         //specialCoolTimer = specialInterval;  //特殊行動タイマーリセット
-        agent.isStopped = false;
+        Stopped = false;
         agent.SetDestination(respawnPos);
         if (enemyAnimation != null)
             enemyAnimation.PlayerLostAnimation(false);
@@ -587,7 +602,7 @@ public class EnemyBase : MonoBehaviour
                 if (agent.isOnNavMesh)
                 {
                     agent.Warp(transform.position);
-                    agent.isStopped = false;
+                    Stopped = false;
                 }
 
                 currentState = enemyState.Idle;
@@ -683,7 +698,7 @@ public class EnemyBase : MonoBehaviour
             //死亡処理
             Dead().Forget();
         }
-        else
+        else if(value < 0)  //ダメージを受けた場合)
         {
             //ダメージ処理
             currentState = enemyState.Damage;

@@ -8,12 +8,12 @@ public class DragonController : EnemyBase
     {
         Stomp,
         Biting,
-        FireBreath,
+        Special,
         Chase
     }
     [SerializeField] private AttackType attackType;
 
-    [SerializeField] private Vector3 headPos;  //頭の位置
+    public Vector3 headPos;  //頭の位置
     private float stompRange = 2.5f;  //踏みつけ攻撃の射程
     private float biteRange = 0.5f;  //かみつき攻撃の射程
     private float fireBreathRange = 15f;  //炎ブレスの射程
@@ -74,13 +74,13 @@ public class DragonController : EnemyBase
             //経路がつながっていない場合は追跡しない
             if (chasePath.status != NavMeshPathStatus.PathComplete)
             {
-                agent.isStopped = true;
+                Stopped = true;
                 agent.ResetPath();
                 return;
             }
 
             currentState = enemyState.Move;
-            agent.isStopped = false;
+            Stopped = false;
             agent.SetDestination(player.position);
         }
         //プレイヤーを見失った場合
@@ -106,19 +106,19 @@ public class DragonController : EnemyBase
         {
             case AttackType.Stomp:
                 currentState = enemyState.Attack;
-                agent.isStopped = true;
+                Stopped = true;
                 attackTimer = enemyAttackStartTime * stompAttackStartTime + enemyAttackEndTime * stompAttackEndTime;
                 break;
 
             case AttackType.Biting:
                 currentState = enemyState.Attack;
-                agent.isStopped = true;
+                Stopped = true;
                 attackTimer = enemyAttackStartTime * bitingAttackStartTime + enemyAttackEndTime * bitingAttackEndTime;
                 break;
 
-            case AttackType.FireBreath:
+            case AttackType.Special:
                 currentState = enemyState.Special;
-                agent.isStopped = true;
+                Stopped = true;
                 //agent.enabled = false;
                 break;
 
@@ -137,22 +137,31 @@ public class DragonController : EnemyBase
         //プレイヤーが足元にいるか
         if (distance <= stompRange)
         {
+            //特殊行動がONか(竜化以外)
+            if (stickerState.isSpecialAttack && specialCoolTimer <= 0f && !HasDragonSticker())
+            {
+                //4特殊行動の確率で特殊攻撃を選択
+                int randomAttack = Random.Range(1, 101);
+
+                if (randomAttack <= stickerState.currentStickerScript.attackRate)
+                    return AttackType.Special;
+            }
+
+            //ステッカーがなければ踏みつけ
             return AttackType.Stomp;
         }
 
         //プレイヤーが頭の範囲内にいるか
         if (headDistance <= biteRange)
         {
-            //竜化ステッカーがあるか
-            if (HasDragonSticker())
+            //特殊行動がONか
+            if (stickerState.isSpecialAttack && specialCoolTimer <= 0f)
             {
-                //40%で炎ブレス、60%でかみつき
-                int random = Random.Range(0, 100);
+                //4特殊行動の確率で特殊攻撃を選択
+                int randomAttack = Random.Range(1, 101);
 
-                if (random < 40)
-                    return AttackType.FireBreath;
-                else
-                    return AttackType.Biting;
+                if (randomAttack <= stickerState.currentStickerScript.attackRate)
+                    return AttackType.Special;
             }
 
             //ステッカーがなければかみつき
@@ -163,9 +172,9 @@ public class DragonController : EnemyBase
         if (distance <= fireBreathRange)
         {
             //竜化ステッカーがあるか
-            if (HasDragonSticker())
+            if (HasDragonSticker() && specialCoolTimer <= 0f)
             {
-                return AttackType.FireBreath;
+                return AttackType.Special;
             }
             else
             {
