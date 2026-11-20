@@ -1311,6 +1311,7 @@ MonoBehaviour:
   currentHp: 0
   trackingTimer: 0
   respawnPos: {x: 0, y: 0, z: 0}
+  isStickerStopped: 0
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -2512,10 +2513,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4781873944287144338, guid: 0d7d01074918cfc47840da5ae272a982, type: 3}
-      propertyPath: currentSticker
-      value: 8
-      objectReference: {fileID: 0}
     - target: {fileID: 4992007096777867708, guid: 0d7d01074918cfc47840da5ae272a982, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.9418316
@@ -2573,10 +2570,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 414457923433077952, guid: 8df721852a2830d439e7e9796476104e, type: 3}
-      propertyPath: currentSticker
-      value: 8
-      objectReference: {fileID: 0}
     - target: {fileID: 5428797215293234572, guid: 8df721852a2830d439e7e9796476104e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 7.01
