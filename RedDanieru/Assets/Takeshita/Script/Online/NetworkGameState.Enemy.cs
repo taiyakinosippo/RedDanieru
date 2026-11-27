@@ -250,6 +250,7 @@ public partial class NetworkGameState
         enemy.Damage(damage);
 
         RPC_ShowEnemyDamage(id, damage);
+        RPC_PlayEnemyDamageAnimation(id);
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -261,6 +262,24 @@ public partial class NetworkGameState
         if (TryGetEnemy(id, out EnemyBase enemy) && UIManager.Instance != null)
         {
             UIManager.Instance.ShowDamage(damage, enemy.transform.position);
+        }
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_PlayEnemyDamageAnimation(int id)
+    {
+        if (HasStateAuthority)
+            return;
+
+        if (TryGetEnemy(id, out EnemyBase enemy))
+        {
+            EnemyAnimationBase anim =
+                enemy.GetComponent<EnemyAnimationBase>();
+
+            if (anim != null)
+            {
+                anim.DamageAnimation();
+            }
         }
     }
 
