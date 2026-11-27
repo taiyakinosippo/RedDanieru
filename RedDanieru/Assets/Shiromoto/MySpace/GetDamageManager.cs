@@ -9,7 +9,7 @@ public class GetDamageManager : MonoBehaviour
     private Coroutine shakeCoroutine;
 
     [SerializeField] private Camera myCamera;
-    [SerializeField] private Renderer damageRenderer;
+    [SerializeField] private Material damageMaterial;
     private UniversalAdditionalCameraData cameraData;
 
     private List<RectTransform> shakeTargets = new();
@@ -23,6 +23,7 @@ public class GetDamageManager : MonoBehaviour
     {
         if (myCamera == null) myCamera = Camera.main;
         cameraData = myCamera.GetComponent<UniversalAdditionalCameraData>();
+        cameraData.SetRenderer(1);
 
         shakeTargets.Add(GameObject.Find("PlayerUI").GetComponent<RectTransform>());
         shakeTargets.Add(GameObject.Find("StickerUI").GetComponent<RectTransform>());
@@ -36,9 +37,9 @@ public class GetDamageManager : MonoBehaviour
         if (effectPower >= 2.0f) effectPower = 2.0f;
 
         if (flameCoroutine == null)
-            StartCoroutine(ChangeRenderer());
+            flameCoroutine = StartCoroutine(ChangeRenderer());
         if (shakeCoroutine == null)
-            StartCoroutine(ShakeUI());
+            shakeCoroutine = StartCoroutine(ShakeUI());
         StartCoroutine(PlayEffect());
     }
 
@@ -48,14 +49,12 @@ public class GetDamageManager : MonoBehaviour
         while (effectPower > 0)
         {
             effectPower -= Time.deltaTime;
-
-            Color color = damageRenderer.material.color;
-            color.a = Mathf.Clamp01(effectPower);
-
-            damageRenderer.material.color = color;
+            damageMaterial.SetFloat("_EffectPower", Mathf.Clamp01(effectPower));
 
             yield return null;
         }
+
+        flameCoroutine = null;
     }
 
     //出してるUIを揺らすゾ
@@ -80,6 +79,8 @@ public class GetDamageManager : MonoBehaviour
         {
             shakeTargets[i].localPosition = defaultPositions[i];
         }
+
+        shakeCoroutine = null;
     }
 
     //体からダメージエフェクトを出すゾ
