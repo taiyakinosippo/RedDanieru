@@ -137,7 +137,17 @@ public class StickerInteractor : MonoBehaviour
             }
 
             //マルチでは他の人と取り合いになるのでホストに剥がしてもらう（結果はReceiveStickerで届く）
-            if (NetworkGameState.RequestPeelSticker(target, slot))
+            //if (NetworkGameState.RequestPeelSticker(target, slot))
+            //    return;
+
+            Debug.Log($"剥がす前 currentSticker={target.currentSticker}");
+
+            bool requested =
+                NetworkGameState.RequestPeelSticker(target, slot);
+
+            Debug.Log($"RequestPeelSticker={requested}");
+
+            if (requested)
                 return;
 
             //ステッカーUIの更新
@@ -169,6 +179,8 @@ public class StickerInteractor : MonoBehaviour
     //マルチでホストから届いたステッカーを保持する
     public void ReceiveSticker(int slot, Sticker sticker)
     {
+        Debug.Log($"ReceiveSticker slot={slot} sticker={sticker}");
+
         if (sticker == Sticker.None)
         {
             Debug.Log("先に他の人がステッカーを剥がしました");

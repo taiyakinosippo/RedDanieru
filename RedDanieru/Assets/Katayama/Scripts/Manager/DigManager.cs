@@ -20,7 +20,11 @@ public class DigManager : MonoBehaviour
             int.MinValue
         );
 
-    private Vector3 lastMousePosition;
+    // ドラッグ中の前回のマス
+    private Vector3Int lastDragGridPosition;
+
+    // ドラッグ開始済みか
+    private bool hasLastDragGridPosition = false;
 
     [Header("保存パネル")]
     [SerializeField]
@@ -112,8 +116,9 @@ public class DigManager : MonoBehaviour
         // マウスを押した瞬間
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            lastMousePosition =
-                Mouse.current.position.ReadValue();
+            // ドラッグ開始位置を記録
+            lastDragGridPosition = gridPosition;
+            hasLastDragGridPosition = true;
 
             // クリックした場所を掘る
             Dig(gridPosition);
@@ -122,28 +127,29 @@ public class DigManager : MonoBehaviour
         // マウスを押している間
         if (Mouse.current.leftButton.isPressed)
         {
-            Vector2 currentMousePosition =
-                Mouse.current.position.ReadValue();
-
-            if (
-                Vector2.Distance(
-                    currentMousePosition,
-                    lastMousePosition
-                ) > 5f
-            )
+            if (!hasLastDragGridPosition)
             {
-                lastMousePosition = currentMousePosition;
+                lastDragGridPosition = gridPosition;
+                hasLastDragGridPosition = true;
+            }
 
-                if (gridPosition != lastDigPosition)
-                {
-                    Dig(gridPosition);
-                }
+            // 前回のマスから現在のマスまで掘る
+            if (gridPosition != lastDragGridPosition)
+            {
+                DigLine(
+                    lastDragGridPosition,
+                    gridPosition
+                );
+
+                // 現在のマスを次回の開始位置にする
+                lastDragGridPosition = gridPosition;
             }
         }
 
         // マウスを離した瞬間
         if (Mouse.current.leftButton.wasReleasedThisFrame)
         {
+            hasLastDragGridPosition = false;
             EndEdit();
         }
     }
@@ -171,9 +177,16 @@ public class DigManager : MonoBehaviour
     {
         if (isEditing)
         {
+            // Undo編集を終了
             if (undoManager != null)
             {
                 undoManager.EndEdit();
+            }
+
+            // NavMeshを再構築
+            if (mapManager != null)
+            {
+                mapManager.RebuildNavigation();
             }
 
             isEditing = false;
@@ -185,6 +198,8 @@ public class DigManager : MonoBehaviour
                 int.MinValue,
                 int.MinValue
             );
+
+        hasLastDragGridPosition = false;
 
         ClearHighlight();
     }
@@ -204,6 +219,12 @@ public class DigManager : MonoBehaviour
                 undoManager.EndEdit();
             }
 
+            // NavMeshを再構築
+            if (mapManager != null)
+            {
+                mapManager.RebuildNavigation();
+            }
+
             isEditing = false;
         }
 
@@ -214,11 +235,7 @@ public class DigManager : MonoBehaviour
                 int.MinValue
             );
 
-        if (Mouse.current != null)
-        {
-            lastMousePosition =
-                Mouse.current.position.ReadValue();
-        }
+        hasLastDragGridPosition = false;
     }
 
     //==================================================
@@ -368,6 +385,58 @@ public class DigManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    //==================================================
+    // マスとマスの間を連続して掘削
+    //==================================================
+
+    private void DigLine(
+        Vector3Int start,
+        Vector3Int end
+    )
+    {
+        int x = start.x;
+        int z = start.z;
+
+        int dx = Mathf.Abs(end.x - start.x);
+        int dz = Mathf.Abs(end.z - start.z);
+
+        int sx = start.x < end.x ? 1 : -1;
+        int sz = start.z < end.z ? 1 : -1;
+
+        int error = dx - dz;
+
+        while (true)
+        {
+            // 通過したマスを掘る
+            Dig(
+                new Vector3Int(
+                    x,
+                    start.y,
+                    z
+                )
+            );
+
+            if (x == end.x && z == end.z)
+            {
+                break;
+            }
+
+            int error2 = error * 2;
+
+            if (error2 > -dz)
+            {
+                error -= dz;
+                x += sx;
+            }
+
+            if (error2 < dx)
+            {
+                error += dx;
+                z += sz;
+            }
+        }
     }
 
     //==================================================

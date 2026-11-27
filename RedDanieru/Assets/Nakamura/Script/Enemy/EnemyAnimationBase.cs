@@ -26,6 +26,18 @@ public class EnemyAnimationBase : MonoBehaviour
         await UniTask.Delay(TimeSpan.FromSeconds(duration));
 
         animator.SetTrigger("Attack");
+
+        if (TryGetComponent(out EnemyBase enemy))
+        {
+            NetworkGameState.NotifyEnemyAttack(enemy);
+        }
+    }
+
+    public void PlayAttackFromNetwork()
+    {
+        if (animator == null) return;
+
+        animator.SetTrigger("Attack");
     }
 
     public virtual void PlayerLostAnimation(bool isPlayerLost)

@@ -63,13 +63,13 @@ public class LeglessArcherController : EnemyBase
                     //プレイヤーから逃げる
                     Vector3 escapeDirection = (transform.position - player.position).normalized;  //逃げる方向を計算
                     Vector3 escapePosition = transform.position + escapeDirection * escapeDistance;  //逃げる位置を計算
-                    agent.isStopped = false;
+                    Stopped = false;
                     agent.SetDestination(escapePosition);
                 }
                 else if (distanceToPlayer <= enemyAttackArea * transform.localScale.x)  //攻撃範囲内
                 {
                     //その場で停止
-                    agent.isStopped = true;
+                    Stopped = true;
                     agent.ResetPath();
 
                     //攻撃クールタイムが終了していれば攻撃
@@ -83,7 +83,7 @@ public class LeglessArcherController : EnemyBase
                 {
                     //攻撃範囲外なら追跡
                     currentState = enemyState.Move;
-                    agent.isStopped = false;
+                    Stopped = false;
                     agent.SetDestination(player.position);
                 }
 
