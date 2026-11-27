@@ -140,6 +140,8 @@ MonoBehaviour:
     costChange: -100
   - type: 16
     costChange: -150
+  - type: 16
+    costChange: -150
   dungeonCostManager: {fileID: 0}
   placementCategoryUI: {fileID: 0}
   navMeshSurface: {fileID: 6193073721833458505}

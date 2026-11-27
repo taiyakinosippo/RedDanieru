@@ -10785,6 +10785,14 @@ PrefabInstance:
       propertyPath: placementCategoryUI
       value: 
       objectReference: {fileID: 7615674705698890258}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: objectCosts.Array.data[12].type
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 1735006584476019472, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
+      propertyPath: objectCosts.Array.data[12].costChange
+      value: -25
+      objectReference: {fileID: 0}
     - target: {fileID: 2170924399791435939, guid: 52a9e7358dbcadc44b483e51faeb3af3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
