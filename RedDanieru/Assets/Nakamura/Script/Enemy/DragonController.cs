@@ -108,18 +108,28 @@ public class DragonController : EnemyBase
                 currentState = enemyState.Attack;
                 Stopped = true;
                 attackTimer = enemyAttackStartTime * stompAttackStartTime + enemyAttackEndTime * stompAttackEndTime;
+
+                //当たり判定が出る瞬間に手が地面に着くように再生
+                PlayAttackAnimation(attackType, enemyAttackStartTime * stompAttackStartTime);
                 break;
 
             case AttackType.Biting:
                 currentState = enemyState.Attack;
                 Stopped = true;
                 attackTimer = enemyAttackStartTime * bitingAttackStartTime + enemyAttackEndTime * bitingAttackEndTime;
+
+                //当たり判定が出る瞬間に口が閉じるように再生
+                PlayAttackAnimation(attackType, enemyAttackStartTime * bitingAttackStartTime);
                 break;
 
             case AttackType.Special:
                 currentState = enemyState.Special;
                 Stopped = true;
                 //agent.enabled = false;
+
+                //特殊行動中は歩きモーションを止める（特殊行動のモーションはステッカー側で再生）
+                if (enemyAnimation != null)
+                    enemyAnimation.WalkAnimation(false);
                 break;
 
             case AttackType.Chase:
@@ -184,6 +194,25 @@ public class DragonController : EnemyBase
 
         //どの攻撃範囲にも入っていなければ追跡
         return AttackType.Chase;
+    }
+
+    //攻撃モーションを再生する（hitTime 秒後に当たる）
+    private void PlayAttackAnimation(AttackType type, float hitTime)
+    {
+        if (enemyAnimation == null)
+            return;
+
+        //その場で攻撃するので歩きモーションは止める
+        enemyAnimation.WalkAnimation(false);
+
+        DragonAnimation dragonAnimation = enemyAnimation as DragonAnimation;
+        if (dragonAnimation == null)
+            return;
+
+        if (type == AttackType.Stomp)
+            dragonAnimation.StompAnimation(hitTime);
+        else
+            dragonAnimation.BiteAnimation(hitTime);
     }
 
     private bool HasDragonSticker()

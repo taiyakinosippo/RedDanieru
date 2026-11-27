@@ -136,3 +136,4 @@ MonoBehaviour:
   stunStarHitEffect: {fileID: 3125908671876608230, guid: 2e07e5ba5a6e8b74d8206f9be0e29d37, type: 3}
   stunStarHeight: 0.3
   stunStarScale: 2
+  fireBreathEffect: {fileID: 2386159082878823987, guid: 086463838a9e436aaf32562ab48e84b5, type: 3}

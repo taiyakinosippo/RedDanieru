@@ -1,3 +1,4 @@
+using Hun0FX;
 using Player;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,11 +23,21 @@ public class DragonSticker : StickerBase
     private LayerMask hitLayer;  //ヒットするオブジェクトのレイヤー
     private HashSet<Transform> hitObjects = new HashSet<Transform>();  //同じターゲットへの多重ダメージ防止用のセット
 
+    //見た目（炎のエフェクトとモーション）
+    private const string MouthBoneName = "UpperMouth01";  //ドラゴンのモデルの上あごの骨
+    private const float BreathFadeTime = 1.5f;  //吐き終わってから炎が消えきるまで待つ時間
+    private HunFXController breathEffect;  //出している炎のエフェクト
+    private Transform mouthBone;  //炎を出す口の骨（なければ mouthTransform の位置から出す）
+    private DragonAnimation dragonAnimation;
+    private bool isEnemySticker = false;  //敵に貼られているか
+    private int lastEnemyUpdateFrame = -1;  //最後に OnEnemyUpdate が呼ばれたフレーム（ダメージなどで中断されたかの判定用）
+
     public override void OnEnemyApply()
     {
         hitLayer = LayerMask.GetMask("Player", "Trap", "Wall");
         attackRate = 40;  //ステッカー行動が行われる確率
         stickerState.isSpecialAttack = true;  //特殊行動ON
+        isEnemySticker = true;
 
         //口の位置を取得
         DragonController dragonController = enemyScript as DragonController;
@@ -35,10 +46,16 @@ public class DragonSticker : StickerBase
             mouthTransform = dragonController.headPos;
         else
             mouthTransform = new Vector3(0f, 0.3f, 1f);
+
+        //炎を出す口の骨と、ブレスのモーション
+        mouthBone = FindChildRecursive(transform, MouthBoneName);
+        dragonAnimation = GetComponent<DragonAnimation>();
     }
 
     public override void OnEnemyUpdate()
     {
+        lastEnemyUpdateFrame = Time.frameCount;
+
         //攻撃終了後
         if (isFireFinished)
             return;
@@ -46,6 +63,10 @@ public class DragonSticker : StickerBase
         //予備動作
         if (!isFiring)
         {
+            //溜め始めにブレスのモーションを再生（溜め終わりで炎を吐き始めるように合わせる）
+            if (fireTimer <= 0f && dragonAnimation != null)
+                dragonAnimation.BreathAnimation(fireAttackStartTime);
+
             //プレイヤーの方向を向く
             RotateToPlayer();
 
@@ -56,6 +77,8 @@ public class DragonSticker : StickerBase
                 isFiring = true;
                 fireTimer = 0f;
                 hitObjects.Clear();
+
+                StartBreathEffect();
             }
 
             return;
@@ -72,6 +95,8 @@ public class DragonSticker : StickerBase
             isFiring = false;
             isFireFinished = true;
 
+            StopBreathEffect();
+
             enemyScript.EndSpecial();
 
             //初期化
@@ -83,6 +108,8 @@ public class DragonSticker : StickerBase
     public override void OnEnemyRemove()
     {
         stickerState.isSpecialAttack = false;  //特殊行動OFF
+        isEnemySticker = false;
+        StopBreathEffect();
     }
 
     public override void OnPlayerApply()
@@ -104,7 +131,7 @@ public class DragonSticker : StickerBase
         if (fireAttackEndTimer <= 0f)
         {
             Debug.Log("DragonSticker: 使用時間終了");
-            //強制解除
+            //強制解除（OnPlayerRemove で炎も消える）
             OnPlayerRemove();
             stickerState.currentSticker = Sticker.None;
             Destroy(this);
@@ -124,6 +151,8 @@ public class DragonSticker : StickerBase
             fireTimer = 0f;
             coolTimer = coolTime;
             hitObjects.Clear();
+
+            StartBreathEffect();
         }
 
         //炎ブレス発動中
@@ -139,12 +168,102 @@ public class DragonSticker : StickerBase
         {
             isFiring = false;
             fireTimer = 0f;
+
+            StopBreathEffect();
         }
     }
 
     public override void OnPlayerRemove()
     {
         stickerState.isSpecialAttack = false;  //特殊行動OFF
+        StopBreathEffect();
+    }
+
+    private void LateUpdate()
+    {
+        //敵のブレスが途中で止まった（ダメージ・スタンなどで特殊行動が中断された）
+        if (isEnemySticker && (isFiring || fireTimer > 0f) && lastEnemyUpdateFrame != Time.frameCount)
+        {
+            //次の特殊行動は溜めからやり直す
+            isFiring = false;
+            fireTimer = 0f;
+            StopBreathEffect();
+        }
+
+        //炎を口の位置と向きに合わせる（モーションで口が動いたあとに合わせるので LateUpdate）
+        if (breathEffect != null)
+            breathEffect.transform.SetPositionAndRotation(GetMouthPosition(), GetBreathRotation());
+    }
+
+    private void OnDestroy()
+    {
+        StopBreathEffect();
+    }
+
+    //炎のエフェクトを出す
+    private void StartBreathEffect()
+    {
+        //吐いている途中でもう一度吐いたときは、前の炎を消してから出し直す
+        StopBreathEffect();
+
+        GameObject prefab = StickerEffectManager.Instance != null ? StickerEffectManager.Instance.FireBreathEffect : null;
+        if (prefab == null)
+            return;
+
+        breathEffect = HunFX.Spawn(prefab, GetMouthPosition(), Quaternion.identity, null, autoDestroy: false);
+        breathEffect.transform.SetPositionAndRotation(GetMouthPosition(), GetBreathRotation());
+
+        //炎の広がりを当たり判定の扇（左右 fireBreathAngle 度）に合わせる
+        FireBreathFan fan = breathEffect.GetComponent<FireBreathFan>();
+        if (fan != null)
+            fan.spreadAngle = fireBreathAngle;    }
+
+    //炎のエフェクトを止める（出ている炎は消えきってから片付ける）
+    private void StopBreathEffect()
+    {
+        if (breathEffect == null)
+            return;
+
+        breathEffect.Stop();
+        Destroy(breathEffect.gameObject, BreathFadeTime);
+        breathEffect = null;
+    }
+
+    //炎を出す位置
+    private Vector3 GetMouthPosition()
+    {
+        if (mouthBone != null)
+            return mouthBone.position;
+
+        return transform.TransformPoint(mouthTransform);
+    }
+
+    //炎を出す向き（当たり判定と同じく、体の正面の水平方向）
+    //FX_Fire_06_Fan は +X 向きに炎が出るので、Y 軸で -90 度回して正面に向ける
+    private Quaternion GetBreathRotation()
+    {
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+
+        if (forward.sqrMagnitude < 0.0001f)
+            forward = Vector3.forward;
+
+        return Quaternion.LookRotation(forward.normalized, Vector3.up) * Quaternion.Euler(0f, -90f, 0f);
+    }
+
+    private static Transform FindChildRecursive(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+                return child;
+
+            Transform found = FindChildRecursive(child, childName);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     private void RotateToPlayer()
