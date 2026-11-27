@@ -16,5 +16,6 @@ public enum PlaceObjectType : byte
     Torch,          // 12
     Poison,         // 13
     Cactus,         // 14
+    Wind,           // 15
 
 }

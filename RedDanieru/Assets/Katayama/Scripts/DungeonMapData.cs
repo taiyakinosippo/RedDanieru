@@ -46,7 +46,6 @@ public class DungeonMapData
     public TorchSaveData torchData = new TorchSaveData();
 }
 
-
 [Serializable]
 public class ObjectData
 {
@@ -62,5 +61,7 @@ public class ObjectData
     // オブジェクトが占有するマス数
     public int gridWidth = 1;
     public int gridDepth = 1;
-}
 
+    // オブジェクトのY軸回転角度
+    public float rotationY;
+}

@@ -111,6 +111,8 @@ MonoBehaviour:
     prefab: {fileID: 4245915190017150719, guid: cbc814ca6b730954b8a5e3641bde01c9, type: 3}
   - type: 14
     prefab: {fileID: 5132490353647150370, guid: a8da217fe5c34494b882e92efe4f478a, type: 3}
+  - type: 15
+    prefab: {fileID: 7228196235439861639, guid: b09bbee95b3a5a24e8cac76c446f58ca, type: 3}
   objectCosts:
   - type: 0
     costChange: 0
