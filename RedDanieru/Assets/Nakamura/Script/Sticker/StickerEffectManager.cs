@@ -26,6 +26,10 @@ public class StickerEffectManager : MonoBehaviour
     [SerializeField] private float stunStarScale = 2.0f;    //スタン中に回る星の大きさ（1で元のプレハブのまま。回る輪も一緒に大きくなる）
     public float StunStarScale => stunStarScale;
 
+    //竜化ステッカーの炎ブレス（Hun0FX の FX_Fire_06_Fan）
+    [SerializeField] private GameObject fireBreathEffect;
+    public GameObject FireBreathEffect => fireBreathEffect;
+
     private void Awake()
     {
         Instance = this;
