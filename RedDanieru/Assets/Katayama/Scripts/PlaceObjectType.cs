@@ -17,5 +17,5 @@ public enum PlaceObjectType : byte
     Poison,         // 13
     Cactus,         // 14
     Wind,           // 15
-
+    Dragon,         // 16
 }
