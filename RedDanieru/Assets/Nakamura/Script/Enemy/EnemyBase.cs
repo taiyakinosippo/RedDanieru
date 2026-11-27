@@ -629,19 +629,27 @@ public class EnemyBase : MonoBehaviour
     }
 
     //ホストの画面で倒された
-    public void DieByNetwork(Sticker lastSticker)
+    public async UniTask DieByNetworkAsync(
+     Sticker lastSticker)
     {
         if (networkDead)
             return;
 
         networkDead = true;
 
-        //爆発ステッカーで倒れたときは爆発エフェクトも出す
+        if (enemyAnimation != null)
+        {
+            await enemyAnimation.DeathAnimation();
+        }
+
         if (lastSticker == Sticker.Explosion &&
             StickerEffectManager.Instance != null &&
             StickerEffectManager.Instance.ExplosionEffect != null)
         {
-            Instantiate(StickerEffectManager.Instance.ExplosionEffect, transform.position, Quaternion.identity);
+            Instantiate(
+                StickerEffectManager.Instance.ExplosionEffect,
+                transform.position,
+                Quaternion.identity);
         }
 
         Destroy(gameObject);
