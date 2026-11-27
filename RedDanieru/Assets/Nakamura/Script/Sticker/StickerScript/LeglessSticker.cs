@@ -10,15 +10,15 @@ public class LeglessSticker : StickerBase
     //ステッカーが敵に貼られたときの処理
     public override void OnEnemyApply()
     {
-        //敵の速度を保存
-        saveSpeed = enemyScript.SetEnemyMoveSpeed(0.0f);
+        //ステッカーによる移動停止を解除
+        enemyScript.isStickerStopped = true;
     }
 
     //ステッカーが敵から剥がれたときの処理
     public override void OnEnemyRemove()
     {
-        //敵の速度を元に戻す
-        enemyScript.AddEnemyMoveSpeed(saveSpeed);
+        //ステッカーによる移動停止を解除
+        enemyScript.isStickerStopped = false;
     }
 
     public virtual void OnTrapApply() 

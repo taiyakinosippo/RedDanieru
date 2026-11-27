@@ -1311,6 +1311,7 @@ MonoBehaviour:
   currentHp: 0
   trackingTimer: 0
   respawnPos: {x: 0, y: 0, z: 0}
+  isStickerStopped: 0
   playerLayer:
     serializedVersion: 2
     m_Bits: 0
