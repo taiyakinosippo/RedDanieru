@@ -357,10 +357,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   biteClip: {fileID: 7400000, guid: 9ad2ad510a1fd694392849b8dce337e3, type: 3}
-  stompClip: {fileID: 7400000, guid: 1420a40f7b2cd1341944b103718427f4, type: 3}
+  stompClip: {fileID: 7400000, guid: 158d19ec6fd01424a9a8506ab51bbf97, type: 2}
   breathClip: {fileID: 7400000, guid: f3c4af16992f14c43a050675b9be2f68, type: 3}
   biteHitPoint: 0.45
-  stompHitPoint: 0.4
+  stompHitPoint: 0.63
   breathFirePoint: 0.35
   maxActionSpeed: 3
 --- !u!1001 &2249289013933671473

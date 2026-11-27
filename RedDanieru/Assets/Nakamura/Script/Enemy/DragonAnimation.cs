@@ -9,14 +9,14 @@ public class DragonAnimation : EnemyAnimationBase
 {
     [Header("モーション（Tools/Dragon/アニメーターを作り直す で自動で入る）")]
     [SerializeField] private AnimationClip biteClip;    //噛みつき（attackMouth）
-    [SerializeField] private AnimationClip stompClip;   //踏みつけ（attackHand）
+    [SerializeField] private AnimationClip stompClip;   //踏みつけ（attackHand をその場で跳ぶようにした Dragon_StompInPlace）
     [SerializeField] private AnimationClip breathClip;  //炎ブレス（attackFlame）
 
     [Header("モーションの中で当たる瞬間（0=最初、1=最後）")]
     [Tooltip("噛みつきで口が閉じる瞬間")]
     [Range(0f, 1f)] public float biteHitPoint = 0.45f;
-    [Tooltip("踏みつけで手が地面に着く瞬間")]
-    [Range(0f, 1f)] public float stompHitPoint = 0.4f;
+    [Tooltip("踏みつけで跳んで着地する瞬間")]
+    [Range(0f, 1f)] public float stompHitPoint = 0.63f;
     [Tooltip("炎ブレスで炎を吐き始める瞬間")]
     [Range(0f, 1f)] public float breathFirePoint = 0.35f;
 
