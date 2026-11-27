@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using System.Linq;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 同期する敵1体分の状態
@@ -177,7 +179,8 @@ public partial class NetworkGameState
 
             if (!state.Alive)
             {
-                enemy.DieByNetwork((Sticker)state.Sticker);
+                enemy.DieByNetworkAsync((Sticker)state.Sticker).Forget();
+
                 continue;
             }
 
@@ -332,6 +335,12 @@ public partial class NetworkGameState
         // 敵
         if (id != 0)
         {
+            // ソロ時はローカル処理
+            if (state.Runner.ActivePlayers.Count() <= 1)
+            {
+                return false;
+            }
+
             state.RPC_RequestPeel(id, slot);
             return true;
         }
@@ -389,14 +398,26 @@ public partial class NetworkGameState
     {
         Sticker removed = Sticker.None;
 
-        if (NetworkSyncId.TryGet(id, out NetworkSyncId syncId) &&
-            syncId.TryGetComponent(out StickerState target) &&
-            target.currentSticker != Sticker.None)
+        if (NetworkSyncId.TryGet(id, out NetworkSyncId syncId))
         {
-            removed = target.Remove();
+            StickerState target =
+                syncId.GetComponent<StickerState>();
 
-            RPC_StickerChanged(id, (byte)Sticker.None);
+            if (target == null)
+            {
+                target =
+                    syncId.GetComponentInChildren<StickerState>();
+            }
+
+            if (target != null &&
+                target.currentSticker != Sticker.None)
+            {
+                removed = target.Remove();
+
+                RPC_StickerChanged(id, (byte)Sticker.None);
+            }
         }
+
 
         // 先に他の人が剥がしていたら None が返る
         RPC_StickerResult(GetRequester(info), slot, (byte)removed);
@@ -405,8 +426,18 @@ public partial class NetworkGameState
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     private void RPC_RequestApply(int id, byte sticker, int slot, RpcInfo info = default)
     {
-        if (NetworkSyncId.TryGet(id, out NetworkSyncId syncId) &&
-            syncId.TryGetComponent(out StickerState target) &&
+        if (NetworkSyncId.TryGet(id, out NetworkSyncId syncId))
+    {
+        StickerState target =
+            syncId.GetComponent<StickerState>();
+
+        if (target == null)
+        {
+            target =
+                syncId.GetComponentInChildren<StickerState>();
+        }
+
+        if (target != null &&
             target.currentSticker == Sticker.None)
         {
             target.Apply((Sticker)sticker);
@@ -414,9 +445,13 @@ public partial class NetworkGameState
             RPC_StickerChanged(id, sticker);
             return;
         }
+    }
 
-        // 先に他の人が貼っていたら手元に戻す
-        RPC_StickerResult(GetRequester(info), slot, sticker);
+    RPC_StickerResult(
+        GetRequester(info),
+        slot,
+        sticker);
+
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
@@ -582,5 +617,33 @@ public partial class NetworkGameState
             playerObj.transform.position,
             Quaternion.identity,
             playerObj.transform);
+    }
+
+    //エネミーが攻撃したとき
+    public static void NotifyEnemyAttack(EnemyBase enemy)
+    {
+        int id = NetworkSyncId.Of(enemy);
+
+        if (!IsOnline(out NetworkGameState state) ||
+            !state.HasStateAuthority ||
+            id == 0)
+        {
+            return;
+        }
+
+        state.RPC_EnemyAttack(id);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_EnemyAttack(int id)
+    {
+        if (HasStateAuthority)
+            return;
+
+        if (TryGetEnemy(id, out EnemyBase enemy))
+        {
+            enemy.GetComponent<EnemyAnimationBase>()
+                 ?.PlayAttackFromNetwork();
+        }
     }
 }
